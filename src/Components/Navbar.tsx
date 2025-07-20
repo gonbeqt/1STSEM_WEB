@@ -11,9 +11,6 @@ const Navbar = () => {
         </NavLink>
         <ul className="navbar-links">
           <li className="navbar-item">
-            <NavLink to="/home" className="navbar-link">Home</NavLink>
-          </li>
-          <li className="navbar-item">
             <NavLink to="/login" className="navbar-link">Login</NavLink>
           </li>
           <li className="navbar-item">

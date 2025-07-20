@@ -23,6 +23,7 @@ const Login = () => {
     // Handle login logic here
     console.log('Email:', email);
     console.log('Password:', password);
+    window.location.href = '/home';
   };
 
   return (
