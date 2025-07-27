@@ -19,7 +19,7 @@ const mockTransactions: Transaction[] = [
     date: '2025-07-14',
     from: '0xAbc123...',
   },
-  {
+  { 
     id: 'tx_002',
     type: 'send',
     amount: 0.1,

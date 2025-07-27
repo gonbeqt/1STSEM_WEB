@@ -12,29 +12,29 @@ code {
     monospace;
 }
 
-/* blockchain-theme.css */
 body {
-  background-color: #1a1a2e;
+  background-color: #261F30;
   color: #e0e0e0;
   font-family: 'Roboto', sans-serif;
   margin: 0;
 }
 
 .app-container {
-  display: flex;
-  flex-direction: column;
+  display: flex;             
+  flex-direction: row;        
   min-height: 100vh;
-  background: linear-gradient(to top, #121212, #261F30);
+  background: #261F30;
 }
 
-.dashboard-layout {
-  display: flex;
-  flex-grow: 1;
-}
 
 .main-content {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;     
+  align-items: flex-start;     
+  justify-content: flex-start; 
   padding: 2rem;
+  background:#261F30;
 }
 
 .card {

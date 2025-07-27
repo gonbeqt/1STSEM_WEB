@@ -1,4 +1,7 @@
 import React from 'react';
+import ReportIcon from '../../Components/icons/ReportIcon';
+import PayrollSendIcon from '../../Components/icons/PayrollSendIcon';
+import ContractIcon from '../../Components/icons/ContractIcon';
 import './home.css';
 
 const Home = () => {
@@ -19,13 +22,12 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Greeting */}
       <section className="greeting">
         <h2>Hi, Anna</h2>
         <p>How are you today?</p>
       </section>
 
-      {/* Wallet Summary */}
+     
       <section className="wallet-summary">
         <div className="wallet-card">
           <div>
@@ -43,9 +45,18 @@ const Home = () => {
           </div>
         </div>
         <div className="wallet-buttons">
-          <button>Generate Report</button>
-          <button>Send Payroll</button>
-          <button>View Contract</button>
+          <button>
+            <ReportIcon />
+            <span>Generate Report</span>
+          </button>
+          <button>
+            <PayrollSendIcon />
+            <span>Send Payroll</span>
+          </button>
+          <button>
+            <ContractIcon />
+            <span>View Contract</span>
+          </button>
         </div>
       </section>
 
@@ -112,6 +123,7 @@ const Home = () => {
           ))}
         </div>
       </section>
+      
       <section className="payroll">
         <h3>Payroll</h3>
         <div className="payroll-list">

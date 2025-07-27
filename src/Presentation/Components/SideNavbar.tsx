@@ -14,7 +14,7 @@ const SideNavbar = () => {
   return (
     <div className="side-navbar">
       <div className="logo-container">
-        {/* Add your logo here */}
+        {/* Add logo here */}
         <h2>LOGO</h2>
       </div>
       <ul className="nav-links">

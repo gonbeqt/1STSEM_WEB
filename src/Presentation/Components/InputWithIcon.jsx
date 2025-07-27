@@ -1,19 +1,11 @@
 import React from "react";
 
-interface InputWithIconProps {
-  icon: React.ReactNode;
-  placeholder?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-}
-
-const InputWithIcon: React.FC<InputWithIconProps> = ({
+const InputWithIcon = ({
   icon,
   placeholder = "Enter text...",
   value,
   onChange,
-  type = "text", // Default type to text
+  type = "text", 
 }) => {
   return (
     <div style={styles.container}>

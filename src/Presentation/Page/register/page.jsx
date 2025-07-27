@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import EmailIcon from '../../Components/icons/EmailIcon';
 import PasswordIcon from '../../Components/icons/PasswordIcon';
 import InputWithIcon from '../../Components/InputWithIcon';
-import './login.css';
+import './register.css';
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -18,23 +19,27 @@ const Login = () => {
     setPassword(e.target.value);
   };
 
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here
+    // Handle registration logic here
     console.log('Email:', email);
     console.log('Password:', password);
-    window.location.href = '/home';
+    console.log('Confirm Password:', confirmPassword);
   };
 
   return (
-    <div className="login-container">
-      <div className="login-sidebar">
-        <h1>Welcome Back</h1>
-        <p>Log in to manage your crypto finances smarter and faster.</p>
+    <div className="register-container">
+      <div className="register-sidebar">
+        <h1>Create Your Account</h1>
+        <p>Join us to manage your crypto finances smarter and faster.</p>
       </div>
-      <div className="login-form-container">
-        <div className="login-form">
-          <h2>Login</h2>
+      <div className="register-form-container">
+        <div className="register-form">
+          <h2>Register</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="email">
@@ -60,12 +65,24 @@ const Login = () => {
                 type="password"
               />
             </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="confirm-password">
+                Confirm Password
+              </label>
+              <InputWithIcon
+                icon={<PasswordIcon />}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
+                type="password"
+              />
+            </div>
             <button type="submit" className="btn btn-primary">
-              Log In
+              Register
             </button>
           </form>
           <p className="text-center mt-4">
-            Don't have an account? <Link to="/register" className="text-purple-600 hover:underline">Sign Up</Link>
+            Already have an account? <Link to="/login" className="font-bold hover:underline">Log In</Link>
           </p>
         </div>
       </div>
@@ -73,4 +90,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

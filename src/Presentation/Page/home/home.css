@@ -9,7 +9,6 @@
   padding: 0 0 40px 0;
 }
 
-/* --- Centered main sections --- */
 .dashboard-header,
 .greeting,
 .wallet-summary,
@@ -97,10 +96,13 @@
 /* --- Wallet Summary --- */
 .wallet-summary {
   margin: 18px 0 0 0;
+  display: grid;
+grid-template-columns: 70% 30%; 
+ gap: 18px;
 }
 
 .wallet-card {
-  background: linear-gradient(90deg, #6c47ff 0%, #a259ff 100%);
+  background: linear-gradient(to top, #6B35B0, #9747FF);
   border-radius: 18px;
   padding: 28px 32px;
   display: flex;
@@ -151,9 +153,9 @@
 }
 
 .wallet-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 18px;
-  margin-top: 18px;
 }
 
 .wallet-buttons button {
@@ -166,6 +168,16 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-buttons button svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 5px;
 }
 
 .wallet-buttons button:hover {
