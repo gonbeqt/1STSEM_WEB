@@ -2,6 +2,8 @@ import React from 'react';
 import ReportIcon from '../../Components/icons/ReportIcon';
 import PayrollSendIcon from '../../Components/icons/PayrollSendIcon';
 import ContractIcon from '../../Components/icons/ContractIcon';
+import Charts from '../../Components/Charts';
+import { FaEthereum } from 'react-icons/fa'; 
 import './home.css';
 
 const Home = () => {
@@ -29,10 +31,10 @@ const Home = () => {
 
      
       <section className="wallet-summary">
-        <div className="wallet-card">
-          <div>
+       <div className="wallet-card">
+          <div className="wallet-info">
             <span>Current Wallet</span>
-            <h1>0 ETH</h1>
+            <h1> <FaEthereum /> 0 ETH</h1>
             <span>Converted to</span>
             <h2>₱12,230</h2>
           </div>
@@ -60,25 +62,31 @@ const Home = () => {
         </div>
       </section>
 
+         <section className="greeting">
+            <h2>Transactions Summary</h2>
+            <p>Real-time financial overview</p>
+        </section>
+
       {/* Transactions Summary */}
       <section className="transactions-summary">
         <div className="summary-card">
-          <span>Total Transactions</span>
+          <span>  Total Transactions</span>
           <h3>₱12,230</h3>
-          <div className="summary-graph graph-blue"></div>
-          <a href="#">View full report</a>
+          <Charts />
+          <a href="#!">View full report</a>
+          
         </div>
         <div className="summary-card">
-          <span>Crypto Inflow</span>
+            <span> Crypto Inflow</span>
           <h3>₱12,230</h3>
-          <div className="summary-graph graph-orange"></div>
-          <a href="#">View full report</a>
+          <Charts />
+          <a href="#!">View full report</a>
         </div>
         <div className="summary-card">
-          <span>Crypto Outflow</span>
+      <span> Crypto Outflow</span>
           <h3>₱12,230</h3>
-          <div className="summary-graph graph-purple"></div>
-          <a href="#">View full report</a>
+          <Charts />
+          <a href="#!">View full report</a>
         </div>
       </section>
 
@@ -102,11 +110,9 @@ const Home = () => {
               <span>₱11,000</span>
             </div>
           </div>
-          <a href="#">View full report</a>
+          <a href="#!">View full report</a>
         </div>
-        <div className="tax-chart">
-          <span className="chart-icon">C</span>
-        </div>
+      
       </section>
 
       {/* Invoices */}

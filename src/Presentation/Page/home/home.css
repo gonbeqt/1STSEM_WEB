@@ -97,55 +97,79 @@
 .wallet-summary {
   margin: 18px 0 0 0;
   display: grid;
-grid-template-columns: 70% 30%; 
- gap: 18px;
+  grid-template-columns: 70% 30%; 
+  gap: 18px;
 }
 
 .wallet-card {
-  background: linear-gradient(to top, #6B35B0, #9747FF);
+  background: linear-gradient(to bottom, rgba(74, 31, 138, 0.7), rgba(107, 42, 191, 0.7));
   border-radius: 18px;
-  padding: 28px 32px;
+  padding: 12px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #fff;
-  box-shadow: 0 4px 24px rgba(162,89,255,0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+}
+.wallet-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
 }
 
 .wallet-card h1 {
   font-size: 32px;
   font-weight: 700;
-  margin: 0;
 }
+ .wallet-card span{
+  color: #9F9F9F;
+    font-size: 20px;
+  font-weight: 500;
 
+ }
 .wallet-card h2 {
   font-size: 20px;
   font-weight: 500;
   margin: 0;
+  padding-top: 8px;
+  padding-bottom: 12px;
 }
 
 .wallet-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+
 }
 
 .wallet-actions select {
-  background: #23262f;
-  color: #fff;
+  background: transparent;
   border: none;
+    color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+.wallet-actions option {
+  background: black;
+  border: none;
+  color: white;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 16px;
 }
 
+
 .connect-wallet-btn {
-  background: #a259ff;
+  background: #9747FF;
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 10px 24px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   margin-left: 8px;
   box-shadow: 0 2px 8px rgba(162,89,255,0.18);
