@@ -77,8 +77,14 @@
   text-align: center;
 }
 
-.mt-4 {
-  margin-top: 1rem;
+.white-link {
+  color: white;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.white-link:hover {
+  text-decoration: underline; /* Maintain underline on hover if desired */
 }
 
 .font-bold {

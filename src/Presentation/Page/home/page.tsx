@@ -3,7 +3,9 @@ import ReportIcon from '../../Components/icons/ReportIcon';
 import PayrollSendIcon from '../../Components/icons/PayrollSendIcon';
 import ContractIcon from '../../Components/icons/ContractIcon';
 import Charts from '../../Components/Charts';
-import { FaEthereum } from 'react-icons/fa'; 
+import { FaEthereum } from 'react-icons/fa';
+import InvoiceCard from '../../Components/InvoiceCard';
+import PayrollCard from '../../Components/PayrollCard';
 import './home.css';
 
 const Home = () => {
@@ -29,11 +31,12 @@ const Home = () => {
         <p>How are you today?</p>
       </section>
 
-     
+
       <section className="wallet-summary">
-       <div className="wallet-card">
+        <div className="wallet-card">
           <div className="wallet-info">
             <span>Current Wallet</span>
+            {/* @ts-ignore */}
             <h1> <FaEthereum /> 0 ETH</h1>
             <span>Converted to</span>
             <h2>₱12,230</h2>
@@ -62,10 +65,10 @@ const Home = () => {
         </div>
       </section>
 
-         <section className="greeting">
-            <h2>Transactions Summary</h2>
-            <p>Real-time financial overview</p>
-        </section>
+      <section className="greeting">
+        <h2>Transactions Summary</h2>
+        <p>Real-time financial overview</p>
+      </section>
 
       {/* Transactions Summary */}
       <section className="transactions-summary">
@@ -74,20 +77,25 @@ const Home = () => {
           <h3>₱12,230</h3>
           <Charts />
           <a href="#!">View full report</a>
-          
+
         </div>
         <div className="summary-card">
-            <span> Crypto Inflow</span>
+          <span> Crypto Inflow</span>
           <h3>₱12,230</h3>
           <Charts />
           <a href="#!">View full report</a>
         </div>
         <div className="summary-card">
-      <span> Crypto Outflow</span>
+          <span> Crypto Outflow</span>
           <h3>₱12,230</h3>
           <Charts />
           <a href="#!">View full report</a>
         </div>
+      </section>
+
+      <section className="greeting">
+        <h2>Tax Estimates</h2>
+        <p>Estimated tax liability</p>
       </section>
 
       {/* Tax Estimates */}
@@ -112,42 +120,42 @@ const Home = () => {
           </div>
           <a href="#!">View full report</a>
         </div>
-      
+
       </section>
 
+      <section className="greeting">
+        <h2>Invoices</h2>
+        <p>Auto-generated invoices from recent transactions</p>
+      </section>
       {/* Invoices */}
       <section className="invoices">
-        <h3>Invoices</h3>
         <div className="invoice-list">
-          {[1,2,3,4,5].map((i) => (
-            <div className="invoice-card" key={i}>
-              <span className="invoice-title">Kampico</span>
-              <span className="invoice-date">Created 25 June 2025</span>
-              <span className="invoice-amount">₱12,950</span>
-              <button className="paid-btn">Paid</button>
-            </div>
+          {[
+            { company: "Kampico", date: "Created 25 June 2025", amount: "₱12,950", status: "Paid" },
+            { company: "ZetaCorp", date: "Created 24 June 2025", amount: "₱11,500", status: "Paid" },
+            { company: "BlueWave", date: "Created 23 June 2025", amount: "₱13,200", status: "Paid" },
+            { company: "GreenTech", date: "Created 22 June 2025", amount: "₱10,800", status: "Paid" },
+            { company: "RedLion", date: "Created 21 June 2025", amount: "₱14,300", status: "Paid" },
+          ].map((invoice, index) => (
+            <InvoiceCard key={index} {...invoice} />
           ))}
         </div>
       </section>
-      
+
+      <section className="greeting">
+        <h2>Payroll</h2>
+        <p>Latest processed payroll transactions</p>
+      </section>
+      {/* Payroll */}
       <section className="payroll">
-        <h3>Payroll</h3>
         <div className="payroll-list">
-          <div className="payroll-card">
-            <div className="payroll-left">
-              <div className="payroll-icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Payroll" />
-              </div>
-              <div>
-                <span className="payroll-amount">₱12,950</span>
-                <span className="payroll-employees">Sent to 3 Employees</span>
-                <div className="payroll-total">Total Last Month: ₱123,908</div>
-              </div>
-            </div>
-            <div className="payroll-right">
-              <span className="payroll-next">Next Payroll on <b>20 July 2025</b></span>
-            </div>
-          </div>
+          {[
+            { amount: "$12,950", employees: "Sent to 3 Employees", totalLastMonth: "$123,908", nextPayroll: "20 July 2025" },
+            { amount: "$15,200", employees: "Sent to 4 Employees", totalLastMonth: "$145,600", nextPayroll: "25 July 2025" },
+            { amount: "$10,800", employees: "Sent to 2 Employees", totalLastMonth: "$98,500", nextPayroll: "30 July 2025" },
+          ].map((payroll, index) => (
+            <PayrollCard key={index} {...payroll} />
+          ))}
         </div>
       </section>
     </div>
