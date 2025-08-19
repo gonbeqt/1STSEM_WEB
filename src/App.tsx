@@ -8,7 +8,6 @@ import Register from './Presentation/Page/register/page';
 import Payroll from './Presentation/Page/payroll/page';
 import Invoice from './Presentation/Page/invoice/page';
 import Reports from './Presentation/Page/reports/page';
-import Support from './Presentation/Page/support/page';
 import Settings from './Presentation/Page/settings/page';
 
 const AppContent = () => {
@@ -27,7 +26,6 @@ const AppContent = () => {
             <Route path="/payroll" element={<Payroll />} />
             <Route path="/invoice" element={<Invoice />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/support" element={<Support />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>

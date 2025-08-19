@@ -93,15 +93,16 @@
 }
 
 .payroll-card {
-  background: #23262f;
+  background: linear-gradient(to bottom, rgba(74, 31, 138, 0.7), rgba(107, 42, 191, 0.7));
   border-radius: 18px;
-  border: 1px solid #d4d4d42f;
-  padding: 24px 32px;
+    border: 1px solid #d4d4d42f;
+  padding: 26px 32px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   color: #fff;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .payroll-info span {
@@ -145,7 +146,6 @@
 }
 
 .employees {
-  background-color: #1e1e1e;
   padding: 20px;
   border-radius: 8px;
   margin-top: 32px;
@@ -153,10 +153,15 @@
 
 .employee-row {
   display: flex;
+     background-color: #d4d4d407;
+
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #333;
+  border: 1px solid #d4d4d42f;
+  border-radius: 14px;
+  padding: 18px 24px;
+  box-shadow: 0 2px 8px rgba(35,38,47,0.10);
+  margin-bottom: 16px
 }
 
 .employee-info {

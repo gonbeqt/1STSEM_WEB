@@ -8,7 +8,6 @@ import LogoutIcon from './icons/LogoutIcon';
 import PayrollIcon from './icons/PayrollIcon';
 import ReportsIcon from './icons/ReportsIcon';
 import SettingsIcon from './icons/SettingsIcon';
-import SupportIcon from './icons/SupportIcon';
 
 const SideNavbar = () => {
   return (
@@ -22,7 +21,6 @@ const SideNavbar = () => {
         <li><NavLink to="/payroll" className={({ isActive }) => isActive ? "active" : ""}><PayrollIcon />Payroll</NavLink></li>
         <li><NavLink to="/invoice" className={({ isActive }) => isActive ? "active" : ""}><InvoiceIcon />Invoice</NavLink></li>
         <li><NavLink to="/reports" className={({ isActive }) => isActive ? "active" : ""}><ReportsIcon />Reports</NavLink></li>
-        <li><NavLink to="/support" className={({ isActive }) => isActive ? "active" : ""}><SupportIcon />Support</NavLink></li>
         <li><NavLink to="/settings" className={({ isActive }) => isActive ? "active" : ""}><SettingsIcon />Settings</NavLink></li>
       </ul>
       <div className="logout-container">
