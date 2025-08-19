@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReportIcon from '../../Components/icons/ReportIcon';
 import PayrollSendIcon from '../../Components/icons/PayrollSendIcon';
 import ContractIcon from '../../Components/icons/ContractIcon';
 import Charts from '../../Components/Charts';
 import { FaEthereum } from 'react-icons/fa';
+import PayrollRecipientModal from '../../Components/PayrollRecipientModal'; 
 import InvoiceCard from '../../Components/InvoiceCard';
 import PayrollCard from '../../Components/PayrollCard';
 import './home.css';
 
 const Home = () => {
+  const [showPayrollModal, setShowPayrollModal] = useState(false);
+  const [payrollSelected, setPayrollSelected] = useState<'new' | 'people'>('people');
   return (
     <div className="home-content">
       {/* Header */}
@@ -50,17 +53,17 @@ const Home = () => {
           </div>
         </div>
         <div className="wallet-buttons">
-          <button>
+          <button onClick={() => setShowPayrollModal(true)}>
             <ReportIcon />
-            <span>Generate Report</span>
+            <span>Automate Payroll</span>
           </button>
           <button>
             <PayrollSendIcon />
-            <span>Send Payroll</span>
+            <span>Generate Payroll</span>
           </button>
           <button>
             <ContractIcon />
-            <span>View Contract</span>
+            <span>Audit Contract</span>
           </button>
         </div>
       </section>
@@ -158,6 +161,16 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      <PayrollRecipientModal
+        open={showPayrollModal}
+        onClose={() => setShowPayrollModal(false)}
+        selected={payrollSelected}
+        setSelected={setPayrollSelected}
+        onContinue={() => {
+          setShowPayrollModal(false);
+        }}
+      />
     </div>
   );
 };
