@@ -1,5 +1,5 @@
 import React from 'react';
-import HistoryIcon from '../../Components/icons/HistoryIcon';
+import HistoryIcon from '../../../Components/icons/HistoryIcon';
 import './payroll.css';
 
 interface Employee {

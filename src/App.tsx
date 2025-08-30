@@ -1,42 +1,60 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 
 import SideNavbar from './Presentation/Components/SideNavbar';
-import Home from './Presentation/Page/home/page';
+import SideNavbarEmployee from './Presentation/Components/SideNavbarEmployee';
+import Home from './Presentation/Page/manager/home/page';
 import Login from './Presentation/Page/login/page';
 import Register from './Presentation/Page/register/page';
-import Payroll from './Presentation/Page/payroll/page';
-import Invoice from './Presentation/Page/invoice/page';
-import Reports from './Presentation/Page/reports/page';
-import Settings from './Presentation/Page/settings/page';
+import Payroll from './Presentation/Page/manager/payroll/page';
+import Invoice from './Presentation/Page/manager/invoice/page';
+import Reports from './Presentation/Page/manager/reports/page';
+import Settings from './Presentation/Page/manager/settings/page';
 
-const AppContent = () => {
-  const location = useLocation();
-  const showSideNavbar = ['/home', '/payroll', '/invoice', '/reports', '/support', '/settings'].includes(location.pathname);
+import EmployeeHome from './Presentation/Page/employee/home/page';
+import EmployeePayslip from './Presentation/Page/employee/payslip/page';
+import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
+import EmployeeSettings from './Presentation/Page/employee/settings/page';
 
-  return (
-    <div className="app-container">
-        {showSideNavbar && <SideNavbar />}
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/payroll" element={<Payroll />} />
-            <Route path="/invoice" element={<Invoice />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
-    </div>
-  );
-}
+const ManagerLayout = () => (
+  <div className="app-container">
+    <SideNavbar />
+    <main className="main-content">
+      <Outlet />
+    </main>
+  </div>
+);
+
+const EmployeeLayout = () => (
+  <div className="app-container">
+    <SideNavbarEmployee />
+    <main className="main-content">
+      <Outlet />
+    </main>
+  </div>
+);
 
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route element={<ManagerLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/payroll" element={<Payroll />} />
+          <Route path="/invoice" element={<Invoice />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        <Route element={<EmployeeLayout />}>
+          <Route path="/employee/home" element={<EmployeeHome />} />
+          <Route path="/employee/payslip" element={<EmployeePayslip />} />
+          <Route path="/employee/invoice" element={<EmployeeInvoice />} />
+          <Route path="/employee/settings" element={<EmployeeSettings />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

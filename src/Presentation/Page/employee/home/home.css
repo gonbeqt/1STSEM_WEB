@@ -1,0 +1,97 @@
+/* --- Layout: Stack sections vertically --- */
+.home-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'Inter', Arial, sans-serif;
+  padding: 0 0 40px 0;
+}
+
+.dashboard-header,
+.greeting,
+.wallet-summary,
+.transactions-summary,
+.tax-estimates,
+.invoices {
+  width: 100%;
+ 
+  margin: 0 auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* --- Header --- */
+.dashboard-header {
+    border: 1px solid #d4d4d42f;
+   background-color: #d4d4d407;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px ;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-icon {
+  font-size: 22px;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.header-center .search-bar {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #23262f;
+  color: #fff;
+  font-size: 16px;
+  width: 220px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.notification-icon {
+  font-size: 22px;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #353945;
+}
+
+/* --- Greeting --- */
+.greeting {
+  margin: 18px 0 0 0;
+}
+
+.greeting h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.greeting p {
+  font-size: 15px;
+  color: #b1b5c3;
+}

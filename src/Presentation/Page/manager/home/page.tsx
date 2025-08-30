@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import ReportIcon from '../../Components/icons/ReportIcon';
-import PayrollSendIcon from '../../Components/icons/PayrollSendIcon';
-import ContractIcon from '../../Components/icons/ContractIcon';
-import Charts from '../../Components/Charts';
+import ReportIcon from '../../../Components/icons/ReportIcon';
+import PayrollSendIcon from '../../../Components/icons/PayrollSendIcon';
+import ContractIcon from '../../../Components/icons/ContractIcon';
+import Charts from '../../../Components/Charts';
 import { FaEthereum } from 'react-icons/fa';
-import PayrollRecipientModal from '../../Components/PayrollRecipientModal'; 
-import InvoiceCard from '../../Components/InvoiceCard';
-import PayrollCard from '../../Components/PayrollCard';
+import PayrollRecipientModal from '../../../Components/PayrollRecipientModal'; 
+import InvoiceCard from '../../../Components/InvoiceCard';
+import PayrollCard from '../../../Components/PayrollCard';
 import './home.css';
 
 const Home = () => {

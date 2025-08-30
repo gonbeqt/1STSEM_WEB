@@ -10,14 +10,16 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('employee');
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Add your authentication logic here.
-    // For now, we'll just navigate to the home page.
-    console.log('Email:', email);
-    console.log('Password:', password);
-    navigate('/home');
+    
+    if (role === 'manager') {
+      navigate('/home');
+    } else {
+      navigate('/employee/home');
+    }
   };
 
   return (
@@ -53,6 +55,25 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
               />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Role</label>
+              <div className="role-buttons">
+                <button
+                  type="button"
+                  className={`btn ${role === 'employee' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setRole('employee')}
+                >
+                  Employee
+                </button>
+                <button
+                  type="button"
+                  className={`btn ${role === 'manager' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setRole('manager')}
+                >
+                  Manager
+                </button>
+              </div>
             </div>
             <button type="submit" className="btn btn-primary">
               Log In

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './reports.css';
-import Charts from '../../Components/Charts';
+import Charts from '../../../Components/Charts';
 
 const summaryData = [
   { label: "Total Profit", value: "₱12,340" },
