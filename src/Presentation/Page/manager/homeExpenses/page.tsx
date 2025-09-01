@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PayrollTab from '../Tabs/Payroll/PayrollTabs';
+import ServicesTab from '../Tabs/Service/ServicesTab';
 
 import './expenses.css';
 type TabType = 'payroll' | 'services' | 'investment';
@@ -11,7 +12,7 @@ const ExpensesPage = () => {
       case 'payroll':
         return <PayrollTab />;
       case 'services':
-        return <div className="empty-state">Services expenses coming soon</div>;
+        return <ServicesTab/>;
       case 'investment':
         return <div className="empty-state">Investment expenses coming soon</div>;
     }
