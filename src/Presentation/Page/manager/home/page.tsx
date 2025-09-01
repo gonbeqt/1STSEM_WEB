@@ -4,14 +4,22 @@ import PayrollSendIcon from '../../../Components/icons/PayrollSendIcon';
 import ContractIcon from '../../../Components/icons/ContractIcon';
 import Charts from '../../../Components/Charts';
 import { FaEthereum } from 'react-icons/fa';
-import PayrollRecipientModal from '../../../Components/PayrollRecipientModal'; 
 import InvoiceCard from '../../../Components/InvoiceCard';
 import PayrollCard from '../../../Components/PayrollCard';
+import WalletModal from '../../../Components/WalletModal';
 import './home.css';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const [showPayrollModal, setShowPayrollModal] = useState(false);
-  const [payrollSelected, setPayrollSelected] = useState<'new' | 'people'>('people');
+  const navigate = useNavigate();
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+
+  const handleAutomateExpenses = () => {
+    navigate('/expenses');
+  };
+  const handleWalletConnect = (walletType: string) => {
+    setIsWalletModalOpen(false);
+  };
   return (
     <div className="home-content">
       {/* Header */}
@@ -19,13 +27,6 @@ const Home = () => {
         <div className="header-left">
           <span className="menu-icon">☰</span>
           <span className="page-title">Home</span>
-        </div>
-        <div className="header-center">
-          <input type="text" placeholder="Search..." className="search-bar" />
-        </div>
-        <div className="header-right">
-          <span className="notification-icon">🔔</span>
-          <img src="https://i.pravatar.cc/40?img=3" alt="Profile" className="profile-pic" />
         </div>
       </header>
 
@@ -49,13 +50,14 @@ const Home = () => {
               <option>PHP</option>
               <option>USD</option>
             </select>
-            <button className="connect-wallet-btn">Connect Wallet</button>
+            <button className="connect-wallet-btn" onClick={() => setIsWalletModalOpen(true)}>Connect Wallet</button>
           </div>
         </div>
+
         <div className="wallet-buttons">
-          <button onClick={() => setShowPayrollModal(true)}>
+          <button onClick={handleAutomateExpenses}>
             <ReportIcon />
-            <span>Automate Payroll</span>
+            <span>Automate Expenses</span>
           </button>
           <button>
             <PayrollSendIcon />
@@ -162,14 +164,10 @@ const Home = () => {
         </div>
       </section>
 
-      <PayrollRecipientModal
-        open={showPayrollModal}
-        onClose={() => setShowPayrollModal(false)}
-        selected={payrollSelected}
-        setSelected={setPayrollSelected}
-        onContinue={() => {
-          setShowPayrollModal(false);
-        }}
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+        onConnect={handleWalletConnect}
       />
     </div>
   );

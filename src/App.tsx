@@ -15,6 +15,7 @@ import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
 import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
+import ExpensesPage from './Presentation/Page/manager/homeExpenses/page';
 
 const ManagerLayout = () => (
   <div className="app-container">
@@ -43,6 +44,7 @@ function App() {
         <Route path="/register" element={<div className="register-page-wrapper"><Register /></div>} />
         <Route element={<ManagerLayout />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/payroll" element={<Payroll />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />

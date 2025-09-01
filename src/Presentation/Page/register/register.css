@@ -110,5 +110,6 @@
 
 .login-link a {
   color: #a259ff;
-  text-decoration: none;
+  text-decoration: underline;
+  font-weight: bold;
 }

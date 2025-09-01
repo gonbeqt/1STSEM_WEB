@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(1px);
   display: flex;
   justify-content: center;
@@ -13,7 +13,7 @@
 }
 
 .payroll-modal {
-background-color:rgba(75, 75, 75, 0.808);
+  background-color: #1a1625;
   
   border-radius: 14px;
   padding: 22px 26px;
@@ -30,6 +30,7 @@ background-color:rgba(75, 75, 75, 0.808);
   top: 0.5rem;
   right: 0.5rem;
   border: none;
+  color: white;
   background: transparent;
   font-size: 1.5rem;
   cursor: pointer;
@@ -51,8 +52,11 @@ background-color:rgba(75, 75, 75, 0.808);
 }
 
 .payroll-modal-option.selected {
-  border-color: #007bff;
-  background-color: #f0f8ff;
+  background-color: #2d2841;
+;
+}
+.payroll-modal-option:hover {
+  background-color: #272338;
 }
 
 .payroll-modal-icon {
@@ -67,12 +71,6 @@ background-color:rgba(75, 75, 75, 0.808);
 .payroll-modal-option-desc {
   font-size: 0.9rem;
   color: #666;
-}
-
-.payroll-modal-check {
-  margin-left: auto;
-  color: #007bff;
-  font-size: 1.5rem;
 }
 
 .payroll-modal-continue {

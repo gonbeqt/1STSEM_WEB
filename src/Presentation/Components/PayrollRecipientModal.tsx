@@ -35,7 +35,6 @@ const PayrollRecipientModal: React.FC<Props> = ({ open, onClose, selected, setSe
             <div className="payroll-modal-option-title">People</div>
             <div className="payroll-modal-option-desc">Send crypto directly to one of the contacts saved in your list.</div>
           </div>
-          {selected === 'people' && <span className="payroll-modal-check">✔</span>}
         </div>
         <button className="payroll-modal-continue" onClick={onContinue}>Continue</button>
       </div>

@@ -35,6 +35,8 @@
   justify-content: center;
   align-items: center;
   padding: 3rem;
+  background-color: #1a1a2e;
+  color: #fff;
 }
 
 .login-form {
@@ -63,13 +65,13 @@
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid #ccc;
-  background-color: #fff;
-  color: #000;
+  background-color: #232136;
+  color: #fff;
 }
 
 .btn-primary {
   width: 100%;
-  background: linear-gradient( #6B35B0, #9747FF);
+  background: #a259ff;
   color: white;
   font-weight: 600;
   border-radius: 0.5rem;
@@ -80,8 +82,7 @@
 }
 
 .btn-primary:hover {
-  background: linear-gradient( #6B35B0, #9747FF);
-  opacity: 0.8;
+  background: #8347d9;
 }
 
 .btn-secondary {
@@ -107,13 +108,13 @@
 }
 
 .white-link {
-  color: white;
+  color: #a259ff;
   font-weight: bold;
   text-decoration: underline;
 }
 
 .white-link:hover {
-  text-decoration: underline; 
+  text-decoration: underline;
 }
 
 .font-bold {

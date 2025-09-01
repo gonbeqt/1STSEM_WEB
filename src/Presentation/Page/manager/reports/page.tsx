@@ -29,13 +29,7 @@ const Report = () => {
           <span className="menu-icon">☰</span>
           <span className="page-title">Reports</span>
         </div>
-        <div className="header-center">
-          <input type="text" placeholder="Search..." className="search-bar" />
-        </div>
-        <div className="header-right">
-          <span className="notification-icon">🔔</span>
-          <img src="https://i.pravatar.cc/40?img=3" alt="Profile" className="profile-pic" />
-        </div>
+       
       </header>
 
       <div className="report-tabs">

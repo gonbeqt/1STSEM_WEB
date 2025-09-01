@@ -3,7 +3,7 @@ body {
   font-family: 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #261F30;
+  background-color: #1a1a2e;
   color: #e0e0e0;
 }
 
@@ -16,7 +16,7 @@ code {
   display: flex;             
   flex-direction: row;        
   min-height: 100vh;
-  background: #261F30;
+  background: #1a1a2e;
 }
 
 
@@ -27,7 +27,7 @@ code {
   align-items: flex-start;     
   justify-content: flex-start; 
   padding: 2rem;
-  background:#261F30;
+  background:#1a1a2e;
 }
 
 .card {

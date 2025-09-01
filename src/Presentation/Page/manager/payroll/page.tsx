@@ -1,5 +1,6 @@
 import React from 'react';
 import HistoryIcon from '../../../Components/icons/HistoryIcon';
+import PayrollTabs from '../Tabs/PayrollTabs';
 import './payroll.css';
 
 interface Employee {
@@ -25,13 +26,7 @@ const Payroll: React.FC = () => {
           <span className="menu-icon">☰</span>
           <span className="page-title">Payroll</span>
         </div>
-        <div className="header-center">
-          <input type="text" placeholder="Search..." className="search-bar" />
-        </div>
-        <div className="header-right">
-          <span className="notification-icon">🔔</span>
-          <img src="https://i.pravatar.cc/40?img=3" alt="Profile" className="profile-pic" />
-        </div>
+        
       </header>
       <section className="history">
         <h2>Payroll</h2>
@@ -56,19 +51,7 @@ const Payroll: React.FC = () => {
         <button className="send-payroll-btn">Send Payroll Now</button>
       </section>
       <div className="employees">
-        {employees.map((employee, index) => (
-          <div key={index} className="employee-row">
-            <div className="employee-info">
-              <img src="placeholder.jpg" alt="Employee" />
-              <div>
-                <div>{employee.name}</div>
-                <div>{employee.id}</div>
-              </div>
-            </div>
-            <div className="salary">${employee.salary}</div>
-            <div className="payment-date">{employee.paymentDate}</div>
-          </div>
-        ))}
+        <PayrollTabs />
       </div>
     </div>
   );
