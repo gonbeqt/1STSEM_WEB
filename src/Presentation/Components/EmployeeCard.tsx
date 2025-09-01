@@ -6,6 +6,7 @@ interface EmployeeCardProps {
 }
 
 const EmployeeCard = ({ name, role, salary, avatar }: EmployeeCardProps) => {
+  
   return (
     <div className="employee-card">
       <div className="employee-info">

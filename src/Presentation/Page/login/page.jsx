@@ -61,14 +61,14 @@ const Login = () => {
               <div className="role-buttons">
                 <button
                   type="button"
-                  className={`btn ${role === 'employee' ? 'btn-primary' : 'btn-secondary'}`}
+                  className={`btn role-button ${role === 'employee' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setRole('employee')}
                 >
                   Employee
                 </button>
                 <button
                   type="button"
-                  className={`btn ${role === 'manager' ? 'btn-primary' : 'btn-secondary'}`}
+                  className={`btn role-button ${role === 'manager' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setRole('manager')}
                 >
                   Manager

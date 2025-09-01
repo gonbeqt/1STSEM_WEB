@@ -1,31 +1,42 @@
 import React, { useState } from 'react';
-import InputWithIcon from '../../../Components/InputWithIcon';
-import SearchIcon from '../../../Components/icons/SearchIcon';
+import { useNavigate } from 'react-router-dom';
+import InputWithIcon from '../../../../Components/InputWithIcon';
+import SearchIcon from '../../../../Components/icons/SearchIcon';
 import './PayrollTab.css';
 
-interface Employee {
-  id: number;
-  name: string;
-  role: string;
-  salary: string;
-  avatar: string;
-}
+
 
 const PayrollTab = () => {
+    const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const employees: Employee[] = [
-    { id: 1, name: 'Yuno Cruz', role: 'Designer', salary: 'Ð238,588', avatar: '/avatar-placeholder.png' },
-    { id: 2, name: 'Yuno Cruz', role: 'Designer', salary: 'Ð238,588', avatar: '/avatar-placeholder.png' },
-    { id: 3, name: 'Yuno Cruz', role: 'Designer', salary: 'Ð238,588', avatar: '/avatar-placeholder.png' },
-    { id: 4, name: 'Yuno Cruz', role: 'Designer', salary: 'Ð238,588', avatar: '/avatar-placeholder.png' },
-    { id: 5, name: 'Yuno Cruz', role: 'Designer', salary: 'Ð238,588', avatar: '/avatar-placeholder.png' },
-  ];
+  
+const employees = [
+  {
+    id: 1,
+    name: 'John Doe',
+    role: 'Software Engineer',
+    salary: '$5000',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    role: 'Product Manager',
+    salary: '$6000',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
+  },
+  // Add more employee objects as needed
+];
+
+const handleEmployeeClick = (employeeId: number) => {
+    navigate(`/manager/payroll/employee/${employeeId}`);
+  };
 
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
+    return (
     <div className="payroll-container">
       <div className="payroll-header">
         <InputWithIcon
@@ -39,7 +50,11 @@ const PayrollTab = () => {
       
       <div className="employee-list">
         {filteredEmployees.map(employee => (
-          <div key={employee.id} className="employee-card">
+          <div 
+            key={employee.id} 
+            className="employee-card"
+            onClick={() => handleEmployeeClick(employee.id)}
+          >
             <div className="employee-info">
               <img src={employee.avatar} alt="" className="employee-avatar" />
               <div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import HistoryIcon from '../../../Components/icons/HistoryIcon';
-import PayrollTabs from '../Tabs/PayrollTabs';
+import PayrollTabs from '../Tabs/Payroll/PayrollTabs';
 import './payroll.css';
 
 interface Employee {

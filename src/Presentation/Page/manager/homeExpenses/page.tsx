@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PayrollTab from '../Tabs/PayrollTabs';
+import PayrollTab from '../Tabs/Payroll/PayrollTabs';
 
 import './expenses.css';
 type TabType = 'payroll' | 'services' | 'investment';
