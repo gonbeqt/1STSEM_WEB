@@ -1,7 +1,7 @@
 import React from 'react';
 import HistoryIcon from '../../../Components/icons/HistoryIcon';
 import PayrollTabs from '../Tabs/Payroll/PayrollTabs';
-import './payroll.css';
+import './management.css';
 
 interface Employee {
   name: string;
@@ -10,7 +10,7 @@ interface Employee {
   paymentDate: string;
 }
 
-const Payroll: React.FC = () => {
+const Management: React.FC = () => {
   const employees: Employee[] = [
     { name: 'Yuno Cruz', id: 'du2u3.cru', salary: 123, paymentDate: 'Monthly' },
     { name: 'Yuno Cruz', id: 'du2u3.cru', salary: 123, paymentDate: 'Monthly' },
@@ -57,4 +57,4 @@ const Payroll: React.FC = () => {
   );
 };
 
-export default Payroll;
+export default Management;

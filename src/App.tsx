@@ -6,10 +6,10 @@ import SideNavbarEmployee from './Presentation/Components/SideNavbarEmployee';
 import Home from './Presentation/Page/manager/home/page';
 import Login from './Presentation/Page/login/page';
 import Register from './Presentation/Page/register/page';
-import Payroll from './Presentation/Page/manager/payroll/page';
 import Invoice from './Presentation/Page/manager/invoice/page';
 import Reports from './Presentation/Page/manager/reports/page';
 import Settings from './Presentation/Page/manager/settings/page';
+import Management from './Presentation/Page/manager/management/management';
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
@@ -49,7 +49,7 @@ function App() {
           <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/manager/payroll/employee/:id" element={<EmployeeDetails />} />
           <Route path="/manager/payroll/overview" element={<PayrollOverview />} />
-          <Route path="/payroll" element={<Payroll />} />
+          <Route path="/management" element={<Management />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
