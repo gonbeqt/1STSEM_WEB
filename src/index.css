@@ -139,3 +139,11 @@ code {
 .navbar-link:hover {
   color: #007bff;
 }
+
+.register-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #161625;
+}

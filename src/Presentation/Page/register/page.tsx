@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import './register.css';
+import InputWithIcon from '../../Components/InputWithIcon';
+import EmailIcon from '../../Components/icons/EmailIcon';
+import PasswordIcon from '../../Components/icons/PasswordIcon';
+
 
 const Register = () => {
   const [userType, setUserType] = useState<'manager' | 'employee'>('manager');
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
   };
@@ -39,39 +42,35 @@ const Register = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="Username"
-            value={formData.username}
-            onChange={(e) => setFormData({...formData, username: e.target.value})}
-          />
-        </div>
+        
 
         <div className="input-group">
-          <input
+          <InputWithIcon
+            icon={<EmailIcon />}
             type="email"
             placeholder="Email"
             value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, email: e.target.value})}
           />
         </div>
 
         <div className="input-group">
-          <input
+          <InputWithIcon
+            icon={<PasswordIcon />}
             type="password"
             placeholder="Password"
             value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, password: e.target.value})}
           />
         </div>
 
         <div className="input-group">
-          <input
+          <InputWithIcon
+            icon={<PasswordIcon />}
             type="password"
             placeholder="Confirm Password"
             value={formData.confirmPassword}
-            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, confirmPassword: e.target.value})}
           />
         </div>
 

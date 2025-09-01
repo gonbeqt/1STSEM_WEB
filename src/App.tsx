@@ -40,7 +40,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<div className="register-page-wrapper"><Register /></div>} />
         <Route element={<ManagerLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/payroll" element={<Payroll />} />

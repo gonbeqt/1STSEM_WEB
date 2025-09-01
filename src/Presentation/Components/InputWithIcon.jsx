@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import EyeIcon from "./icons/EyeIcon";
+import EyeOffIcon from "./icons/EyeOffIcon";
 
 const InputWithIcon = ({
   icon,
@@ -7,16 +9,28 @@ const InputWithIcon = ({
   onChange,
   type = "text", 
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    console.log('Toggling password visibility');
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div style={styles.container}>
       <span style={styles.icon}>{icon}</span>
       <input
-        type={type}
+        type={type === "password" && showPassword ? "text" : type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         style={styles.input}
       />
+      {type === "password" && (
+        <button onClick={togglePasswordVisibility} style={styles.eyeButton}>
+          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+        </button>
+      )}
     </div>
   );
 };
@@ -25,14 +39,17 @@ const styles = {
   container: {
     display: "flex",
     alignItems: "center",
-    border: "1px solid white",
     borderRadius: "0.5rem",
     padding: "0.75rem 1rem",
-    width: "100%",
+    width: "90%",
+    height: "25px ",
     backgroundColor: "transparent",
+    position: "relative",
+    border: "1px solid white"
   },
   icon: {
     marginRight: "0.5rem",
+    marginTop: "0.3rem",
     color: "white",
     borderRight: "1px solid #d1d5db",
     paddingRight: "0.5rem",
@@ -43,6 +60,14 @@ const styles = {
     flex: 1,
     backgroundColor: "transparent",
     color: "white",
+    width: "100%",
+  },
+  eyeButton: {
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    color: "white",
+    padding: "0",
   },
 };
 
