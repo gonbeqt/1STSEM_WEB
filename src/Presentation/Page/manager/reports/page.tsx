@@ -29,6 +29,9 @@ const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
   const handleBalanceSheet = () => {
     navigation('/balance_sheet');
   };
+  const handlePayslip = () => {
+    navigation('/payslip');
+  };
   const [activeTimeframe, setActiveTimeframe] = useState<string>('7 Days');
 
   const timeframes = ['7 Days', '28 Days', '90 Days', '365 Days'];
@@ -66,16 +69,14 @@ const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
     <div className="financial-summary-container">
       <div className="financial-summary-card">
         {/* Header */}
-        <div className="header">
-          <button className="back-button" onClick={() => navigation(-1)} type="button">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <div className="header-content">
-            
-            <h1 className="header-title">Financial Summary</h1>
-          </div>
+        <div className="header4">
+        <button className="back-button" onClick={() => navigation(-1)} type="button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1>Financial Summary</h1>
+     
         </div>
 
         {/* Timeframe Selector */}
@@ -149,7 +150,7 @@ const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
           <div className="summary-section">
             <div className="section-header">
               <h3 className="section-title">Salary / Payslip</h3>
-              <button className="view-details-btn">View Details</button>
+              <button className="view-details-btn" onClick={handlePayslip}>View Details</button>
             </div>
 
             <div className="payroll-info">

@@ -17,11 +17,11 @@
 }
 
 /* Header */
-.header {
+.header4 {
   display: flex;
   align-items: flex-start;
   padding: 20px 24px 16px;
-  background: #1a1a2e;
+  background-color: #1f1f2e !important;
   gap: 16px;
 }
 

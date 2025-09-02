@@ -11,10 +11,10 @@ background: #1f1f2e;
   width: 100%;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   overflow: hidden;
-  padding: 8px;
+
 }
 
-.header {
+.header4 {
   display: flex;
   align-items: center;
   gap: 12px;
