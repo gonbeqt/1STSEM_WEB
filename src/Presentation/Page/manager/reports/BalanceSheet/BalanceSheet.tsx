@@ -67,7 +67,7 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
         <div className="header">
           <button className="back-button" onClick={onBack} type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <h1 className="header-title">Balance Sheet</h1>
@@ -97,12 +97,12 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
                 <div className="ratio-period">
                   <span className="period-label">1M</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
               <p className="ratio-change">{balanceData.quickRatioChange}</p>
-              
+
               {/* Line Chart */}
               <div className="line-chart-container">
                 <svg className="line-chart" viewBox="0 0 300 80">
@@ -116,21 +116,21 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
                       <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                     </linearGradient>
                   </defs>
-                  
+
                   {/* Grid lines */}
                   <defs>
                     <pattern id="grid" width="30" height="20" patternUnits="userSpaceOnUse">
-                      <path d="M 30 0 L 0 0 0 20" fill="none" stroke="#333344" strokeWidth="0.5" strokeDasharray="2,2"/>
+                      <path d="M 30 0 L 0 0 0 20" fill="none" stroke="#333344" strokeWidth="0.5" strokeDasharray="2,2" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill="url(#grid)" />
-                  
+
                   {/* Area under curve */}
                   <path
                     d="M0,50 Q75,40 150,35 T300,30 L300,80 L0,80 Z"
                     fill="url(#areaGradient)"
                   />
-                  
+
                   {/* Main line */}
                   <path
                     d="M0,50 Q75,40 150,35 T300,30"
@@ -138,7 +138,7 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
                     stroke="url(#lineGradient)"
                     strokeWidth="2"
                   />
-                  
+
                   {/* Data points */}
                   <circle cx="0" cy="50" r="3" fill="#3b82f6" />
                   <circle cx="150" cy="35" r="3" fill="#3b82f6" />
@@ -157,15 +157,15 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
                   {balanceData.chartData.map((data, index) => (
                     <div key={data.month} className="bar-group">
                       <div className="bars">
-                        <div 
+                        <div
                           className="bar assets-bar"
                           style={{ height: `${(data.assets / maxBarValue) * 100}px` }}
                         />
-                        <div 
+                        <div
                           className="bar liabilities-bar"
                           style={{ height: `${(data.liabilities / maxBarValue) * 100}px` }}
                         />
-                        <div 
+                        <div
                           className="bar equity-bar"
                           style={{ height: `${(data.equity / maxBarValue) * 100}px` }}
                         />
@@ -174,7 +174,7 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Legend */}
                 <div className="chart-legend">
                   <div className="legend-item">
@@ -201,13 +201,13 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
               <p className="card-amount">{balanceData.totalAssets}</p>
               <p className="card-change positive">{balanceData.assetsChange}</p>
             </div>
-            
+
             <div className="summary-card">
               <h4 className="card-title">Total Liabilities</h4>
               <p className="card-amount">{balanceData.totalLiabilities}</p>
               <p className="card-change positive">{balanceData.liabilitiesChange}</p>
             </div>
-            
+
             <div className="summary-card">
               <h4 className="card-title">Total Equity</h4>
               <p className="card-amount">{balanceData.totalEquity}</p>
@@ -220,10 +220,10 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
         <div className="export-section">
           <button className="export-button" onClick={onExportToExcel}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             Export to Excel
           </button>

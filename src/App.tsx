@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
+
 import SideNavbar from './Presentation/Components/SideNavbar';
 import SideNavbarEmployee from './Presentation/Components/SideNavbarEmployee';
 import Home from './Presentation/Page/manager/home/page';
@@ -18,13 +19,11 @@ import AddEmployee from './Presentation/Page/manager/management/AddEmployee/AddE
 import ManagementEmployeeDetails from './Presentation/Page/manager/management/EmployeeDetails/ManagementEmployeeDetails';
 import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
 import Assets from './Presentation/Page/manager/reports/BalanceSheet/Assets/Assets';
+
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
 import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
-
-{/* Manager Pages */}
-{/* Employee Pages */}
 
 
 const ManagerLayout = () => (
