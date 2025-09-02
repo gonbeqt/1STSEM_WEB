@@ -1,0 +1,121 @@
+/* General Layout */
+.dashboard-container {
+  background: #0d0d0d;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-arrow {
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.total-earnings h3 {
+  font-size: 16px;
+  color: #aaa;
+}
+
+.earnings-amount {
+  font-size: 22px;
+  font-weight: bold;
+  color: #00c46a;
+  margin-top: 4px;
+}
+
+/* Card Styling */
+.card {
+  background: #1a1a1a;
+  border-radius: 12px;
+  
+  margin-top: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Breakdown Section */
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+
+.progress-bar {
+  background: #333;
+  border-radius: 6px;
+  height: 6px;
+  margin-bottom: 10px;
+}
+
+.progress-bar div {
+  background: #2d8cff;
+  height: 100%;
+  border-radius: 6px;
+}
+
+/* Assets Growth */
+.assets-growth .growth-value {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.assets-growth .growth-value span {
+  color: #00c46a;
+  font-weight: bold;
+}
+
+.chart-placeholder {
+  background: #222;
+  border-radius: 10px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+/* Insights */
+.insights {
+  margin-top: 16px;
+}
+
+.insight-card {
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.insight-card h5 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.insight-card p {
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* Colors for insights */
+.green {
+  background: rgba(0, 196, 106, 0.1);
+  border-left: 4px solid #00c46a;
+}
+
+.blue {
+  background: rgba(45, 140, 255, 0.1);
+  border-left: 4px solid #2d8cff;
+}
+
+.red {
+  background: rgba(255, 77, 77, 0.1);
+  border-left: 4px solid #ff4d4d;
+}

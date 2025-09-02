@@ -58,7 +58,7 @@ const Home = () => {
           </button>
           <button>
             <PayrollSendIcon />
-            <span>Generate Payroll</span>
+            <span>Generate Report</span>
           </button>
           <button>
             <ContractIcon />
