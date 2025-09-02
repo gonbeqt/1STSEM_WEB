@@ -1,0 +1,111 @@
+.overview-container {
+  width: 100%;
+  min-height: 100%;
+  background: #1a1a2e;
+  color: white;
+}
+
+.overview-header {
+  margin-bottom: 32px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.overview-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.service-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.service-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%; /* Adjust if service icon is not circular */
+  background: rgba(77, 171, 247, 0.1); /* Example background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px; /* Adjust font size for icon */
+}
+
+.service-info h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.service-info p {
+  margin: 4px 0 0;
+  color: #b3a3c7;
+}
+
+.details-list {
+  background: #232136;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  color: #b3a3c7;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: white;
+  font-size: 14px;
+}
+
+.overview-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.cancel-btn,
+.save-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 1px solid #a259ff;
+  color: white;
+}
+
+.save-btn {
+  background: #a259ff;
+  border: none;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #8347d9;
+}

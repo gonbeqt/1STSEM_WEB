@@ -2,7 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ServiceCard from '../../../../Components/ServiceCard';
 import './ServicesTab.css';
-import { services } from './services';
+import { services } from '../../../../Data/serviceData';
+
+interface Service {
+  id: string;
+  name: string;
+  icon: string;
+  category: 'utilities' | 'office';
+  defaultAmount: string;
+  walletId: string;
+  provider: string;
+  accountNumber?: string;
+}
 
 const ServicesTab = () => {
   return (
@@ -18,8 +29,8 @@ const ServicesTab = () => {
           <h3 className="section-title">Utilities</h3>
           <div className="services-list">
             {services
-              .filter(service => service.category === 'utilities')
-              .map(service => (
+              .filter((service: Service) => service.category === 'utilities')
+              .map((service: Service) => (
                 <Link to={`/manager/service/${service.id}`} key={service.id}>
                   <ServiceCard {...service} />
                 </Link>
@@ -31,8 +42,8 @@ const ServicesTab = () => {
           <h3 className="section-title">Office Services</h3>
           <div className="services-list">
             {services
-              .filter(service => service.category === 'office')
-              .map(service => (
+              .filter((service: Service) => service.category === 'office')
+              .map((service: Service) => (
                 <Link to={`/manager/service/${service.id}`} key={service.id}>
                   <ServiceCard {...service} />
                 </Link>

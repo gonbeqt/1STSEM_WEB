@@ -19,6 +19,7 @@ import ExpensesPage from './Presentation/Page/manager/homeExpenses/page';
 import EmployeeDetails from './Presentation/Page/manager/Tabs/Payroll/EmployeeDetails';
 import PayrollOverview from './Presentation/Page/manager/Tabs/Payroll/PayrollOverview';
 import ServiceDetails from './Presentation/Page/manager/Tabs/Service/ServiceDetails';
+import ServiceOverview from './Presentation/Page/manager/Tabs/Service/ServiceOverview';
 
 const ManagerLayout = () => (
   <div className="app-container">
@@ -51,6 +52,7 @@ function App() {
           <Route path="/manager/payroll/employee/:id" element={<EmployeeDetails />} />
           <Route path="/manager/payroll/overview" element={<PayrollOverview />} />
           <Route path="/manager/service/:id" element={<ServiceDetails />} />
+          <Route path="/service/overview" element={<ServiceOverview />} />
           <Route path="/management" element={<Management />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />

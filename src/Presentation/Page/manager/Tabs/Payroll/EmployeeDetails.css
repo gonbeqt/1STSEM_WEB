@@ -65,7 +65,7 @@
 }
 .form-group input{
 
- width: 94%;
+ width: 90%;
   background: #232136;
   border: none;
   border-radius: 8px;
@@ -73,8 +73,7 @@
   color: white;
   font-size: 14px;
 }
-.form-group select,
-.form-group textarea {
+.form-group select,.form-group textarea {
   width: 100%;
   background: #232136;
   border: none;
