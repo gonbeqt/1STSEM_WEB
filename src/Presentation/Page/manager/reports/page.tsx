@@ -32,6 +32,9 @@ const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
   const handlePayslip = () => {
     navigation('/payslip');
   };
+  const handleGeneralReports = () => {
+    navigation('/general_reports');
+  }
   const [activeTimeframe, setActiveTimeframe] = useState<string>('7 Days');
 
   const timeframes = ['7 Days', '28 Days', '90 Days', '365 Days'];
@@ -181,7 +184,7 @@ const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
           <div className="summary-section">
             <div className="section-header">
               <h3 className="section-title">General Reports</h3>
-              <button className="view-details-btn">View Details</button>
+              <button className="view-details-btn" onClick={handleGeneralReports}>View Details</button>
             </div>
 
             <div className="cash-flow-info">
