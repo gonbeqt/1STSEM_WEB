@@ -51,9 +51,14 @@ const ServiceDetails: React.FC = () => {
   return (
     <div className="service-details-container">
       <header className="details-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← Automate Service Payment
+        <button className="back-button" onClick={() => navigate(-1)} type="button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+         
         </button>
+         
+          <span>Automate Service Payment</span> 
       </header>
 
       <div className="service-profile">

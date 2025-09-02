@@ -176,9 +176,10 @@
 .balance-item {
   background: #2a2a3e;
   border-radius: 12px;
+   border: 1px solid #333344;
   padding: 16px;
   text-align: center;
-  border: 1px solid #333344;
+ 
 }
 
 .balance-label {
@@ -253,6 +254,9 @@
 .chart-container {
   height: 60px;
   margin-top: 16px;
+  background-color: #2a2a3e;
+  border-radius: 12px;
+   border: 1px solid #333344;
 }
 
 .line-chart {
@@ -275,6 +279,7 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0;
+  
 }
 
 .cash-flow-amount.positive {
@@ -288,6 +293,10 @@
 /* Bar Chart */
 .bar-chart-container {
   margin-top: 20px;
+    background-color: #2a2a3e;
+  border-radius: 12px;
+   border: 1px solid #333344;
+
 }
 
 .bar-chart {

@@ -19,6 +19,9 @@ import AddEmployee from './Presentation/Page/manager/management/AddEmployee/AddE
 import ManagementEmployeeDetails from './Presentation/Page/manager/management/EmployeeDetails/ManagementEmployeeDetails';
 import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
 import Assets from './Presentation/Page/manager/reports/BalanceSheet/Assets/Assets';
+import Liabilities from './Presentation/Page/manager/reports/BalanceSheet/Liabilities/Liabilities';
+import Equity from './Presentation/Page/manager/reports/BalanceSheet/Equity/Equity';
+
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
@@ -66,7 +69,10 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/balance_sheet" element={<BalanceSheet />} />
           <Route path="/assets" element={<Assets />} />
+          <Route path="/liabilities" element={<Liabilities />} />
+          <Route path="/equity" element={<Equity />} />
         </Route>
+        
         <Route element={<EmployeeLayout />}>
           <Route path="/employee/home" element={<EmployeeHome />} />
           <Route path="/employee/payslip" element={<EmployeePayslip />} />

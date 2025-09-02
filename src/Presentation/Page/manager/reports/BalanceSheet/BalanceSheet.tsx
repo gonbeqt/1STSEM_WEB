@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './BalanceSheet.css';
 import { useNavigate } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface ChartDataPoint {
   month: string;
@@ -27,10 +28,16 @@ interface BalanceSheetProps {
   onExportToExcel?: () => void;
 }
 
-const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) => {
+const BalanceSheet: React.FC<BalanceSheetProps> = ({ onExportToExcel }) => {
   const navigation = useNavigate();
   const handleAssets = () => {
     navigation('/assets');
+  }
+  const handleLiabilities = () => {
+    navigation('/liabilities');
+  }
+  const handleEquity = () => {
+    navigation('/equity');
   }
   const [activeTimeframe, setActiveTimeframe] = useState<string>('Today');
 
@@ -56,16 +63,17 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
     lineChartData: [1.5, 1.6, 1.4, 1.7, 1.6, 1.8, 1.7, 1.9, 1.8, 2.0, 1.9, 1.8]
   };
 
-  const maxBarValue = Math.max(
-    ...balanceData.chartData.flatMap(item => [item.assets, item.liabilities, item.equity])
-  );
+  const lineChartData = balanceData.chartData.map((item, index) => ({
+    month: item.month,
+    quickRatio: balanceData.lineChartData[index]
+  }));
 
   return (
     <div className="balance-sheet-container">
       <div className="balance-sheet-card">
         {/* Header */}
         <div className="header">
-          <button className="back-button" onClick={onBack} type="button">
+         <button className="back-button" onClick={() => navigation(-1)} type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -105,45 +113,14 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
 
               {/* Line Chart */}
               <div className="line-chart-container">
-                <svg className="line-chart" viewBox="0 0 300 80">
-                  <defs>
-                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#8b5cf6" />
-                    </linearGradient>
-                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Grid lines */}
-                  <defs>
-                    <pattern id="grid" width="30" height="20" patternUnits="userSpaceOnUse">
-                      <path d="M 30 0 L 0 0 0 20" fill="none" stroke="#333344" strokeWidth="0.5" strokeDasharray="2,2" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-
-                  {/* Area under curve */}
-                  <path
-                    d="M0,50 Q75,40 150,35 T300,30 L300,80 L0,80 Z"
-                    fill="url(#areaGradient)"
-                  />
-
-                  {/* Main line */}
-                  <path
-                    d="M0,50 Q75,40 150,35 T300,30"
-                    fill="none"
-                    stroke="url(#lineGradient)"
-                    strokeWidth="2"
-                  />
-
-                  {/* Data points */}
-                  <circle cx="0" cy="50" r="3" fill="#3b82f6" />
-                  <circle cx="150" cy="35" r="3" fill="#3b82f6" />
-                  <circle cx="300" cy="30" r="3" fill="#3b82f6" />
-                </svg>
+                <ResponsiveContainer width="100%" height={100}>
+                  <LineChart data={lineChartData}>
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="quickRatio" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </div>
@@ -153,43 +130,18 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
             <h3 className="section-subtitle">Balance Overview</h3>
             <div className="bar-chart-card">
               <div className="bar-chart-container">
-                <div className="bar-chart">
-                  {balanceData.chartData.map((data, index) => (
-                    <div key={data.month} className="bar-group">
-                      <div className="bars">
-                        <div
-                          className="bar assets-bar"
-                          style={{ height: `${(data.assets / maxBarValue) * 100}px` }}
-                        />
-                        <div
-                          className="bar liabilities-bar"
-                          style={{ height: `${(data.liabilities / maxBarValue) * 100}px` }}
-                        />
-                        <div
-                          className="bar equity-bar"
-                          style={{ height: `${(data.equity / maxBarValue) * 100}px` }}
-                        />
-                      </div>
-                      <span className="bar-label">{data.month}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Legend */}
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <div className="legend-color assets-color"></div>
-                    <span className="legend-label">Assets</span>
-                  </div>
-                  <div className="legend-item">
-                    <div className="legend-color liabilities-color"></div>
-                    <span className="legend-label">Liabilities</span>
-                  </div>
-                  <div className="legend-item">
-                    <div className="legend-color equity-color"></div>
-                    <span className="legend-label">Equity</span>
-                  </div>
-                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={balanceData.chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="assets" fill="#82ca9d" name="Assets" />
+                    <Bar dataKey="liabilities" fill="#8884d8" name="Liabilities" />
+                    <Bar dataKey="equity" fill="#ffc658" name="Equity" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </div>
@@ -202,13 +154,13 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ onBack, onExportToExcel }) 
               <p className="card-change positive">{balanceData.assetsChange}</p>
             </div>
 
-            <div className="summary-card">
+            <div className="summary-card" onClick={handleLiabilities}>
               <h4 className="card-title">Total Liabilities</h4>
               <p className="card-amount">{balanceData.totalLiabilities}</p>
               <p className="card-change positive">{balanceData.liabilitiesChange}</p>
             </div>
 
-            <div className="summary-card">
+            <div className="summary-card" onClick={handleEquity}>
               <h4 className="card-title">Total Equity</h4>
               <p className="card-amount">{balanceData.totalEquity}</p>
               <p className="card-change positive">{balanceData.equityChange}</p>

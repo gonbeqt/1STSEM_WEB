@@ -71,9 +71,14 @@ const EmployeeDetails: React.FC = () => {
   return (
     <div className="employee-details-container1">
       <header className="details-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← Automate Payroll
+        <button className="back-button" onClick={() => navigate(-1)} type="button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+         
+           
         </button>
+       <span>Automate Payroll</span> 
       </header>
 
       <div className="employee-profile">

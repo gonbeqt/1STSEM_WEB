@@ -58,7 +58,7 @@
   display: flex;
   gap: 8px;
   padding: 16px 24px 24px;
-  background: #1a1a2e;
+  background: #1f1f2e !important;
 }
 
 .timeframe-button {
@@ -107,6 +107,7 @@
   border: 1px solid #333344;
   border-radius: 16px;
   padding: 20px;
+  height: 200px;
 }
 
 .ratio-header {
@@ -150,7 +151,7 @@
 
 /* Line Chart */
 .line-chart-container {
-  height: 80px;
+  height: 150px;
   position: relative;
   overflow: hidden;
   border-radius: 8px;
@@ -272,7 +273,7 @@
 /* Summary Cards */
 .summary-cards {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
   margin-bottom: 32px;
 }

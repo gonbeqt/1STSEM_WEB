@@ -23,9 +23,15 @@ const ServiceOverview: React.FC = () => {
   return (
     <div className="overview-container">
       <header className="overview-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← Overview
+        <button className="back-button" onClick={() => navigate(-1)} type="button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+         
+          
         </button>
+                <span> Overview</span>
+
       </header>
 
       <div className="overview-content">

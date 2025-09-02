@@ -19,7 +19,7 @@ background: #1f1f2e;
   align-items: center;
   gap: 12px;
   margin-bottom: 32px;
-  background: #1f1f2e;
+  background: #1f1f2e !important;
 
 }
 
@@ -241,7 +241,10 @@ background: #1f1f2e;
   flex-direction: column;
   gap: 16px;
 }
+.timeframe-selector{
+    background: #2a2a3e;
 
+}
 .insight-item {
   background: #2a2a3e;
 

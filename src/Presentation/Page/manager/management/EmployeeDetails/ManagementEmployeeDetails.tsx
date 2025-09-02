@@ -1,5 +1,6 @@
 import React from 'react';
 import './ManagementEmployeDetails.css';
+import { useNavigate } from 'react-router-dom';
 
 interface EmployeeData {
   id: number;
@@ -42,18 +43,19 @@ const defaultEmployee: EmployeeData = {
 
 const ManagementEmployeeDetails: React.FC<EmployeeDetailsProps> = ({ 
   employee = defaultEmployee, 
-  onBack, 
+
   onEdit, 
   onDelete 
 }) => {
+  const navigation = useNavigate();
   return (
     <div className="employee-details-container">
       <div className="employee-details-card">
         {/* Header */}
         <div className="header">
-          <button className="back-button" onClick={onBack} type="button">
+          <button className="back-button" onClick={() => navigation(-1)} type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <h1 className="header-title">Employee Details</h1>

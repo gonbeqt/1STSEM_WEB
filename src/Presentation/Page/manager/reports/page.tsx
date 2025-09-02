@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './reports.css';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface BalanceSheetData {
   assets: string;
@@ -15,7 +16,7 @@ interface PayrollData {
 
 interface GeneralReportsData {
   netCashFlow: string;
-  chartData: number[];
+  chartData: { month: string; value: number ,value2: number}[];
 }
 
 interface FinancialSummaryProps {
@@ -23,7 +24,7 @@ interface FinancialSummaryProps {
   onDownloadPDF?: () => void;
 }
 
-const Reports: React.FC<FinancialSummaryProps> = ({ onBack, onDownloadPDF }) => {
+const Reports: React.FC<FinancialSummaryProps> = ({  onDownloadPDF }) => {
   const navigation = useNavigate();
   const handleBalanceSheet = () => {
     navigation('/balance_sheet');
@@ -45,24 +46,34 @@ const Reports: React.FC<FinancialSummaryProps> = ({ onBack, onDownloadPDF }) => 
 
   const generalReportsData: GeneralReportsData = {
     netCashFlow: '+$2,600',
-    chartData: [20, 45, 30, 60, 40, 70, 35, 55, 25, 50, 40, 65]
+    chartData: [
+      { month: 'Jan', value: 20 ,value2: 20},
+      { month: 'Feb', value: 45,value2: 20 },
+      { month: 'Mar', value: 30,value2: 20 },
+      { month: 'Apr', value: 60 ,value2: 20},
+      { month: 'May', value: 40 ,value2: 20},
+      { month: 'Jun', value: 70 ,value2: 20},
+      { month: 'Jul', value: 35 ,value2: 20},
+      { month: 'Aug', value: 55 ,value2: 20},
+      { month: 'Sep', value: 25 ,value2: 20},
+      { month: 'Oct', value: 50,value2: 20 },
+      { month: 'Nov', value: 40 ,value2: 20},
+      { month: 'Dec', value: 65,value2: 20 },
+    ]
   };
-
-  const chartMaxHeight = 80;
-  const maxValue = Math.max(...generalReportsData.chartData);
 
   return (
     <div className="financial-summary-container">
       <div className="financial-summary-card">
         {/* Header */}
         <div className="header">
-          <button className="back-button" onClick={onBack} type="button">
+          <button className="back-button" onClick={() => navigation(-1)} type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <div className="header-content">
-            <p className="header-subtitle">Reports</p>
+            
             <h1 className="header-title">Financial Summary</h1>
           </div>
         </div>
@@ -179,24 +190,17 @@ const Reports: React.FC<FinancialSummaryProps> = ({ onBack, onDownloadPDF }) => 
 
             {/* Bar Chart */}
             <div className="bar-chart-container">
-              <div className="bar-chart">
-                {generalReportsData.chartData.map((value, index) => (
-                  <div key={index} className="bar-wrapper">
-                    <div
-                      className="bar"
-                      style={{
-                        height: `${(value / maxValue) * chartMaxHeight}px`,
-                        background: index % 2 === 0 ? '#7c3aed' : '#a855f7'
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="chart-labels">
-                {['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((month, index) => (
-                  <span key={index} className="chart-label">{month}</span>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={generalReportsData.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#82ca9d" name="Cash In" />
+                  <Bar dataKey="value2" fill="#8884d8" name="Cash Out" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ArrowLeft, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
-import './Assets.css';
+import '../Assets/Assets.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 
 
 // Types
-interface AssetItem {
+interface LiabilitiesItem {
   name: string;
   amount: string;
   change: string;
@@ -26,12 +26,12 @@ interface InsightItem {
   type: 'positive' | 'negative';
 }
 
-const Assets: React.FC = () => {
+const Liabilities: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('6M');
   const navigation = useNavigate();
   const totalEarnings = '$245,000';
 
-  const assets: AssetItem[] = [
+  const liabilities: LiabilitiesItem[] = [
     {
       name: 'Wallet Balance',
       amount: '$85,000',
@@ -114,7 +114,7 @@ const Assets: React.FC = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <h1 className="header-title">Your Assets</h1>
+          <h1 className="header-title">Your Liabilities</h1>
         </div>
 
         {/* Total Earnings */}
@@ -127,7 +127,7 @@ const Assets: React.FC = () => {
         <div className="section">
           <h3 className="section-title">Assets Breakdown</h3>
           <div className="assets-list">
-            {assets.map((asset, index) => (
+            {liabilities.map((asset, index) => (
               <div key={index} className="asset-item">
                 <div className="asset-info">
                   <div className="asset-name">{asset.name}</div>
@@ -202,4 +202,4 @@ const Assets: React.FC = () => {
   );
 };
 
-export default Assets;
+export default Liabilities;

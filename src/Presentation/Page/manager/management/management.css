@@ -13,7 +13,14 @@
 .search-container {
   width: 10px;
 }
-
+.header2{
+   border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px ;
+  background: #1a1a2e ; 
+}
 .search-icon {
   position: absolute;
   left: 16px;
