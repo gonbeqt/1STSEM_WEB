@@ -1,182 +1,98 @@
-.payroll-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 100vh;
-  color: #fff;
-  font-family: 'Inter', Arial, sans-serif;
-  padding: 0 0 40px 0;
-}
-
-.dashboard-header {
-  border: 1px solid #d4d4d42f;
-  background-color: #d4d4d407;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px ;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.menu-icon {
-  font-size: 22px;
-  color: #fff;
-  opacity: 0.7;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.header-center .search-bar {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  background: #23262f;
-  color: #fff;
-  font-size: 16px;
-  width: 220px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.notification-icon {
-  font-size: 22px;
-  color: #fff;
-  opacity: 0.7;
-}
-
-.profile-pic {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #353945;
-}
-
-.history {
-  width: 99%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 10px ;
-}
-
-.history-icon {
-  display: flex;
-  align-items: center;
-  width: 24px;
-  height: 24px;
-  margin-left: 10px;
-}
-
-.history-icon svg {
+.employee-management{
   width: 100%;
   height: 100%;
 }
-
-.payroll-summary {
-  margin: 18px 0 0 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-
-.payroll-card {
-  background: linear-gradient(to bottom, rgba(74, 31, 138, 0.7), rgba(107, 42, 191, 0.7));
-  border-radius: 18px;
-    border: 1px solid #d4d4d42f;
-  padding: 26px 32px;
+.payroll-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #fff;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
-.payroll-info span {
-  font-size: 15px;
-  color: #b1b5c3;
+.search-container {
+  width: 10px;
 }
 
-.payroll-info h3 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 10px 0 12px 0;
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 20px;
 }
 
-.employee-actions {
-  margin: 18px 0 0 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-
-.employee-actions .add-employee-btn {
-  background-color: transparent;
-  border: 1px solid #9747FF;
-  padding: 16px;
-  color: white;
-    border-radius: 16px;
-   font-size: 16px;
-
-}
-
-.employee-actions .send-payroll-btn {
-  background: #9747FF;
-  color: #fff;
+.search-input {
+  width: 100%;
+  background: #232136;
   border: none;
-  box-shadow: 0 2px 8px rgba(162,89,255,0.18);
-  padding: 16px;
-  border-radius: 16px;
-     font-size: 16px;
-
-
-}
-
-.employees {
-  padding: 20px;
   border-radius: 8px;
-  margin-top: 32px;
+  padding: 12px 16px 12px 48px;
+  color: white;
+  font-size: 14px;
+}
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
 }
 
-.employee-row {
-  display: flex;
-     background-color: #d4d4d407;
+.search-input::placeholder {
+  color: #6b7280;
+}
 
+.search-input:focus {
+  outline: none;
+  background: #2d2841;
+}
+
+.add-employee-button {
+  background: #a259ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 5%;
+}
+
+.add-employee-button:hover {
+  background: #8347d9;
+}
+
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.employee-item{
+   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #d4d4d42f;
-  border-radius: 14px;
-  padding: 18px 24px;
-  box-shadow: 0 2px 8px rgba(35,38,47,0.10);
-  margin-bottom: 16px
+  background: #232136;
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: background 0.2s;
+  width: 95%;
 }
-
+.employee-item:hover {
+  background: #2d2841;
+}
 .employee-info {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: start;
 }
+.employee-info h3 p {
 
-.employee-info img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 15px;
-}
-
-.salary,
-.payment-date {
-  font-size: 14px;
+    justify-content: flex-start
 }

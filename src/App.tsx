@@ -9,7 +9,7 @@ import Register from './Presentation/Page/register/page';
 import Invoice from './Presentation/Page/manager/invoice/page';
 import Reports from './Presentation/Page/manager/reports/page';
 import Settings from './Presentation/Page/manager/settings/page';
-import Management from './Presentation/Page/manager/management/management';
+import Management from './Presentation/Page/manager/management/page';
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';

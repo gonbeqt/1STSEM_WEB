@@ -23,12 +23,9 @@ const Home = () => {
   return (
     <div className="home-content">
       {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-left">
-          <span className="menu-icon">☰</span>
-          <span className="page-title">Home</span>
-        </div>
-      </header>
+     <div className="header">
+        <h1>Home</h1>
+      </div>
 
       <section className="greeting">
         <h2>Hi, Anna</h2>
