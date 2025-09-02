@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ServiceCard from '../../../../Components/ServiceCard';
+import ServiceCard from '../../../../../Components/ServiceCard';
 import './ServicesTab.css';
-import { services } from '../../../../Data/serviceData';
+import { services } from '../../../../../Data/serviceData';
 
 interface Service {
   id: string;

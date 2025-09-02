@@ -13,7 +13,6 @@ interface EmployeeFormData {
   notes: string;
 }
 
-// Dummy employees array for demonstration; replace with actual data source or import as needed
 const employees = [
   {
     id: 1,
@@ -70,7 +69,7 @@ const EmployeeDetails: React.FC = () => {
   };
 
   return (
-    <div className="employee-details-container">
+    <div className="employee-details-container1">
       <header className="details-header">
         <button className="back-button" onClick={() => navigate(-1)}>
           ← Automate Payroll
@@ -176,3 +175,4 @@ const EmployeeDetails: React.FC = () => {
 };
 
 export default EmployeeDetails;
+export {};

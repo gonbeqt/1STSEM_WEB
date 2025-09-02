@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import PayrollTab from '../Tabs/Payroll/PayrollTabs';
-import ServicesTab from '../Tabs/Service/ServicesTab';
+import PayrollTab from './../Tabs/Payroll/PayrollTabs';
+import ServicesTab from './../Tabs/Service/ServicesTab';
 
 import './expenses.css';
 type TabType = 'payroll' | 'services' | 'investment';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { services } from './../../../../Data/serviceData';
+import { services } from '../../../../../Data/serviceData';
 import './ServiceDetails.css';
 
 interface FormData {

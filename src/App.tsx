@@ -15,11 +15,13 @@ import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
 import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
-import ExpensesPage from './Presentation/Page/manager/homeExpenses/page';
-import EmployeeDetails from './Presentation/Page/manager/Tabs/Payroll/EmployeeDetails';
-import PayrollOverview from './Presentation/Page/manager/Tabs/Payroll/PayrollOverview';
-import ServiceDetails from './Presentation/Page/manager/Tabs/Service/ServiceDetails';
-import ServiceOverview from './Presentation/Page/manager/Tabs/Service/ServiceOverview';
+import ExpensesPage from './Presentation/Page/manager/home/homeExpenses/page';
+import EmployeeDetails from './Presentation/Page/manager/home/Tabs/Payroll/EmployeeDetails';
+import PayrollOverview from './Presentation/Page/manager/home/Tabs/Payroll/PayrollOverview';
+import ServiceDetails from './Presentation/Page/manager/home/Tabs/Service/ServiceDetails';
+import ServiceOverview from './Presentation/Page/manager/home/Tabs/Service/ServiceOverview';
+import AddEmployee from './Presentation/Page/manager/management/AddEmployee/AddEmployee';
+import ManagementEmployeeDetails from './Presentation/Page/manager/management/EmployeeDetails/ManagementEmployeeDetails';
 
 const ManagerLayout = () => (
   <div className="app-container">
@@ -54,6 +56,8 @@ function App() {
           <Route path="/manager/service/:id" element={<ServiceDetails />} />
           <Route path="/service/overview" element={<ServiceOverview />} />
           <Route path="/management" element={<Management />} />
+          <Route path="/add_employee" element={<AddEmployee />} />
+          <Route path="/management/employee/:id" element={<ManagementEmployeeDetails />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />

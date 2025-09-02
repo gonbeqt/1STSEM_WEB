@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import InputWithIcon from '../../../../Components/InputWithIcon';
-import SearchIcon from '../../../../Components/icons/SearchIcon';
+import InputWithIcon from '../../../../../Components/InputWithIcon';
+import SearchIcon from '../../../../../Components/icons/SearchIcon';
 import './PayrollTab.css';
 
 
@@ -31,6 +31,9 @@ const employees = [
 const handleEmployeeClick = (employeeId: number) => {
     navigate(`/manager/payroll/employee/${employeeId}`);
   };
+   const handleAddEmployee = () => {
+    navigate('/add_employee');
+  };
 
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,7 +48,7 @@ const handleEmployeeClick = (employeeId: number) => {
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
         />
-        <button className="add-employee-button">Add Employee</button>
+        <button className="add-employee-button" onClick={handleAddEmployee}>Add Employee</button>
       </div>
       
       <div className="employee-list">

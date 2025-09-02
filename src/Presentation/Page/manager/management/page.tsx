@@ -3,6 +3,7 @@ import './management.css';
 import { Plus, Search, MoreVertical, User, Mail, Phone, Calendar, Briefcase } from 'lucide-react';
 import InputWithIcon from '../../../Components/InputWithIcon';
 import SearchIcon from '../../../Components/icons/SearchIcon';
+import { useNavigate } from 'react-router-dom';
 
 interface Employee {
   id: number;
@@ -18,10 +19,16 @@ interface Employee {
 }
 
 const EmployeeManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
   
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-
+   const handleAddEmployee = () => {
+    navigate('/add_employee');
+  };
+   const handleEmployeeDetails = (employee: Employee) => {
+    navigate(`/management/employee/${employee.id}`);
+  };
   const employees: Employee[] = [
     {
       id: 1,
@@ -128,18 +135,14 @@ const EmployeeManagement: React.FC = () => {
                          employee.position.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
-
-
-  const getInitials = (name: string): string => {
-    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
-  };
+  
 
   return (
     <>
     <div className="employee-management">
       {/* Header */}
       <div className="header">
-        <h1>Employee Managemenet</h1>
+        <h1>Employee List</h1>
       </div>
 
      
@@ -153,7 +156,7 @@ const EmployeeManagement: React.FC = () => {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
         />
         
-          <button className="add-employee-button">
+          <button className="add-employee-button" onClick={handleAddEmployee}>
            Add Employee
           </button>
         </div>
@@ -164,7 +167,7 @@ const EmployeeManagement: React.FC = () => {
             <div 
               key={employee.id}
               className="employee-item"
-              onClick={() => setSelectedEmployee(employee)}
+              onClick={() => handleEmployeeDetails(employee)}
             > 
             
               <div className="employee-info">

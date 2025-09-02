@@ -1,0 +1,317 @@
+
+.employee-details-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.employee-details-card {
+  background: #1f1f2e;
+  border-radius: 20px;
+  width: 100%;
+  
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  background: #1a1a2e;
+  position: relative;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  background: #1f1f2e;
+  gap: 16px;
+}
+
+.profile-picture {
+  width: 60px;
+  height: 60px;
+  background: #2a2a3e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b8b9a;
+  border: 2px solid #333344;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.employee-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.employee-designation {
+  color: #8b8b9a;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Details Content */
+.details-content {
+  padding: 0 24px;
+}
+
+.info-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+
+.info-label {
+  color: #8b8b9a;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.info-value {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  background: #1f1f2e;
+}
+
+.delete-button {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #444454;
+  border-radius: 16px;
+  padding: 16px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #666676;
+}
+
+.edit-button {
+  flex: 1;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+}
+
+.edit-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .employee-details-container {
+    padding: 10px;
+  }
+  
+  .employee-details-card {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  
+  .header {
+    padding: 16px 20px;
+  }
+  
+  .header-title {
+    font-size: 18px;
+  }
+  
+  .profile-section {
+    padding: 20px;
+  }
+  
+  .profile-picture {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .employee-name {
+    font-size: 16px;
+  }
+  
+  .details-content {
+    padding: 0 20px;
+  }
+  
+  .action-buttons {
+    padding: 20px;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-value {
+    text-align: left;
+    max-width: 100%;
+  }
+}
+
+/* Focus states for accessibility */
+.back-button:focus-visible,
+.delete-button:focus-visible,
+.edit-button:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* Hover effects */
+.back-button:focus,
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Loading state (optional) */
+.employee-details-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Animation for smooth entry */
+.employee-details-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle hover effect for info items */
+.info-item {
+  transition: background-color 0.2s ease;
+  padding: 8px 0;
+  border-radius: 8px;
+}
+
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 12px;
+  margin: 0 -12px;
+}
+
+/* Custom styling for specific sections */
+.info-section:last-child {
+  margin-bottom: 20px;
+}
+
+/* Wallet ID and Balance special styling for crypto addresses */
+.info-value[title] {
+  cursor: help;
+}
+
+/* Additional button states */
+.delete-button:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
+}
+
+.action-buttons {
+  border-top: 1px solid #333344;
+}
+
+/* Improved text contrast */
+.info-label {
+  opacity: 0.8;
+}
+
+.info-value {
+  opacity: 1;
+}
