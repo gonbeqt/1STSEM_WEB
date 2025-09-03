@@ -141,7 +141,7 @@ const EmployeeManagement: React.FC = () => {
     <>
     <div className="employee-management">
       {/* Header */}
-      <div className="header2">
+      <div className="header5">
         <h1>Employee List</h1>
       </div>
 

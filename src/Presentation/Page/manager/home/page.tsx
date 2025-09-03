@@ -23,7 +23,7 @@ const Home = () => {
   return (
     <div className="home-content">
       {/* Header */}
-     <div className="header1">
+     <div className="header6">
         <h1>Home</h1>
       </div>
 
