@@ -29,6 +29,8 @@ import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
 import Payslip from './Presentation/Page/manager/reports/Payslip/Payslip';
 import GeneralReports from './Presentation/Page/manager/reports/GeneralReports/GeneralReports';
+import InvoiceDetails from './Presentation/Page/manager/invoice/InvoiceDetails/InvoiceDetails';
+import InvoiceReceipt from './Presentation/Page/manager/invoice/InvoiceReceipt/InvoiceReceipt';
 
 
 const ManagerLayout = () => (
@@ -75,6 +77,8 @@ function App() {
           <Route path="/equity" element={<Equity />} />
           <Route path="/payslip" element={<Payslip />} />
           <Route path="/general_reports" element={<GeneralReports />} />
+          <Route path="/invoice_details/:id" element={<InvoiceDetails />} />
+          <Route path="/invoice_receipt" element={<InvoiceReceipt />} />
         </Route>
         
         <Route element={<EmployeeLayout />}>

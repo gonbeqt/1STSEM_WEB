@@ -45,7 +45,8 @@ const styles = {
     height: "25px ",
     backgroundColor: "transparent",
     position: "relative",
-    border: "1px solid white"
+    border: "1px solid  #333",
+
   },
   icon: {
     marginRight: "0.5rem",
