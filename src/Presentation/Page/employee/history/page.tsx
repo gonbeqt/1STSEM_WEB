@@ -15,7 +15,7 @@ interface SalaryTransactionsProps {
   onBack?: () => void;
 }
 
-const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
+const EmployeeHistory: React.FC<SalaryTransactionsProps> = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'confirmed' | 'pending'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -78,9 +78,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
     <div className="salary-transactions-container">
       {/* Header */}
       <div className="transactions-header">
-        <button className="back-btn" onClick={onBack}>
-          <ChevronLeft size={24} />
-        </button>
+  
         <h1 className="page-title">Salary Transactions</h1>
         <div className="header-spacer"></div>
       </div>

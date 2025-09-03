@@ -31,7 +31,6 @@ interface PayslipProps {
 }
 
 const EmployeePayslip: React.FC<PayslipProps> = ({ 
-  onBack, 
   hasPayslip = true, 
   payslipData 
 }) => {
@@ -98,9 +97,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
       <div className="payslip-container">
         {/* Header */}
         <div className="payslip-header">
-          <button className="back-btn" onClick={onBack}>
-            <ChevronLeft size={24} />
-          </button>
+        
           <h1 className="page-title">Payslip</h1>
           <div className="header-spacer"></div>
         </div>
@@ -132,9 +129,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     <div className="payslip-container">
       {/* Header */}
       <div className="payslip-header">
-        <button className="back-btn" onClick={onBack}>
-          <ChevronLeft size={24} />
-        </button>
+    
         <h1 className="page-title">Payslip</h1>
         <div className="header-spacer"></div>
       </div>
