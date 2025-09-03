@@ -1,8 +1,11 @@
 .service-details-container {
   height: 100%;
   width: 100%;
-  background: #1a1a2e;
+  background: #1f1f2e;
   color: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 8px;
 }
 
 .details-header {
