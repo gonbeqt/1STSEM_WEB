@@ -8,6 +8,7 @@
   margin: 0 auto;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
 }
 
 /* Header */
@@ -400,5 +401,15 @@
   
   .invoice-actions {
     gap: 4px;
+  }
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

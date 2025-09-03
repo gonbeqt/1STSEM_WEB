@@ -425,16 +425,7 @@
   animation: slideIn 0.3s ease-out;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+
 
 /* Hover effects for cards */
 .quick-ratio-card,
@@ -453,4 +444,15 @@
 /* Additional styling for ratio period dropdown */
 .ratio-period:hover {
   background: #8b5cf6;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

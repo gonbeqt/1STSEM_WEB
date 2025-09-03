@@ -8,6 +8,7 @@
   box-sizing: border-box;
   background: #1f1f2e;
   border-radius:8px ;
+    animation: slideIn 0.3s ease-out;
 }
 
 /* Header Styles */
@@ -26,7 +27,7 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 30px;
-  padding-top: 20px;
+  
 }
 
 .greeting h2 {
@@ -338,5 +339,15 @@
 
   .action-buttons {
     flex-direction: column;
+  }
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

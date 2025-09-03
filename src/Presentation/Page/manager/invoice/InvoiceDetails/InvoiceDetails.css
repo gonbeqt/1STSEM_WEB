@@ -7,6 +7,7 @@
   padding: 16px;
   margin: 0 auto;
   border-radius: 12px;
+    animation: slideIn 0.3s ease-out;
 }
 
 /* Header */
@@ -479,5 +480,14 @@
   .timeline-icon1 {
     width: 28px;
     height: 28px;
+  }
+}@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

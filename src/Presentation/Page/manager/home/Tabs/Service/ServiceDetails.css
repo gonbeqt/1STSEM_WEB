@@ -6,6 +6,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   padding: 8px;
+    animation: slideIn 0.3s ease-out;
 }
 
 .details-header {
@@ -186,4 +187,14 @@
 
 .continue-btn:hover {
   background: #8347d9;
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
