@@ -25,7 +25,7 @@ import Equity from './Presentation/Page/manager/reports/BalanceSheet/Equity/Equi
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
-import EmployeeInvoice from './Presentation/Page/employee/invoice/page';
+import EmployeeHistory from './Presentation/Page/employee/history/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
 import Payslip from './Presentation/Page/manager/reports/Payslip/Payslip';
 import GeneralReports from './Presentation/Page/manager/reports/GeneralReports/GeneralReports';
@@ -85,7 +85,7 @@ function App() {
         <Route element={<EmployeeLayout />}>
           <Route path="/employee/home" element={<EmployeeHome />} />
           <Route path="/employee/payslip" element={<EmployeePayslip />} />
-          <Route path="/employee/invoice" element={<EmployeeInvoice />} />
+          <Route path="/employee/history" element={<EmployeeHistory />} />
           <Route path="/employee/settings" element={<EmployeeSettings />} />
           <Route path="/transaction_details" element={<TransactionDetails />} />
         </Route>

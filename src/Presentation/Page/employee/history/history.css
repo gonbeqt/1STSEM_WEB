@@ -1,0 +1,240 @@
+/* SalaryTransactions.css */
+
+.salary-transactions-container {
+    width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #1f1f2e;
+  border-radius:8px ;
+}
+
+/* Header Styles */
+.transactions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-top: 20px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: -8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.header-spacer {
+  width: 40px;
+}
+
+/* Search Container */
+.search-container {
+  margin-bottom: 24px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: rgba(148, 163, 184, 0.6);
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  background: #2a2a3e;
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 16px;
+  padding: 16px 16px 16px 50px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(148, 163, 184, 0.6);
+}
+
+.search-input:focus {
+  border-color: #8B5CF6;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.filter-tab {
+  background: #2a2a3e;
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 20px;
+  padding: 10px 20px;
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: white;
+}
+
+.filter-tab.active {
+  background: #8B5CF6;
+  border-color: #8B5CF6;
+  color: white;
+}
+
+/* Transactions List */
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transaction-item {
+  background: #2a2a3e;
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.transaction-item:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+
+.transaction-left {
+  flex: 1;
+}
+
+.transaction-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.transaction-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.status-indicator {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.status-text {
+  font-weight: 500;
+}
+
+.available-text {
+  color: rgba(148, 163, 184, 0.7);
+  font-weight: 400;
+}
+
+.transaction-right {
+  text-align: right;
+}
+
+.transaction-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.transaction-usd {
+  font-size: 14px;
+  color: rgba(148, 163, 184, 0.8);
+  font-weight: 500;
+}
+
+/* No Transactions State */
+.no-transactions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.no-transactions-text {
+  font-size: 16px;
+  color: rgba(148, 163, 184, 0.8);
+  text-align: center;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 16px;
+  padding: 32px 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .salary-transactions-container {
+    padding: 16px;
+  }
+  
+  .search-input {
+    padding: 14px 14px 14px 46px;
+  }
+  
+  .transaction-item {
+    padding: 16px;
+  }
+  
+  .filter-tabs {
+    gap: 6px;
+  }
+  
+  .filter-tab {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .transaction-date {
+    font-size: 15px;
+  }
+  
+  .transaction-amount {
+    font-size: 15px;
+  }
+}

@@ -18,7 +18,7 @@ const SideNavbarEmployee = () => {
       <ul className="nav-links">
         <li><NavLink to="/employee/home" className={({ isActive }) => isActive ? "active" : ""}><HomeIcon />Home</NavLink></li>
         <li><NavLink to="/employee/payslip" className={({ isActive }) => isActive ? "active" : ""}><PayrollIcon />Payslip</NavLink></li>
-        <li><NavLink to="/employee/invoice" className={({ isActive }) => isActive ? "active" : ""}><InvoiceIcon />Invoice</NavLink></li>
+        <li><NavLink to="/employee/history" className={({ isActive }) => isActive ? "active" : ""}><InvoiceIcon />History</NavLink></li>
         <li><NavLink to="/employee/settings" className={({ isActive }) => isActive ? "active" : ""}><SettingsIcon />Settings</NavLink></li>
       </ul>
       <div className="logout-container">
