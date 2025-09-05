@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import './SideNavbar.css';
 import HomeIcon from './icons/HomeIcon';
@@ -10,21 +9,116 @@ import ReportsIcon from './icons/ReportsIcon';
 import SettingsIcon from './icons/SettingsIcon';
 
 const SideNavbar = () => {
+  const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons only)
+  const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false); // Track if user clicked a nav item
+
+  const handleMouseEnter = () => {
+    setIsExpanded(true);//expand when mouse enters
+  };
+
+  const handleMouseLeave = () => {
+    if (!isPermanentlyExpanded) {
+      setIsExpanded(false);// only collapsed when not locked
+    }
+  };
+
+  const handleCloseClick = () => {
+    setIsExpanded(false);
+    setIsPermanentlyExpanded(false);
+  };
+
+  const handleNavClick = () => {
+    console.log('Nav clicked - setting permanently expanded'); // Debug log
+    setIsExpanded(true);//expanded when hover
+    setIsPermanentlyExpanded(true);//stayes expanded when nav is chosen
+  };
+
   return (
-    <div className="side-navbar">
+    <div 
+      className={`side-navbar ${isExpanded ? 'expanded' : 'collapsed'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="logo-container">
-        {/* Add logo here */}
-        <h2>LOGO</h2>
+        {isExpanded && (
+          <>
+            <h2>LOGO</h2>
+            {isPermanentlyExpanded && (
+              <button 
+                className="close-btn" 
+                onClick={handleCloseClick}
+                aria-label="Collapse sidebar"
+              >
+                ×
+              </button>
+            )}
+          </>
+        )}
+        {!isExpanded && (
+          <div className="logo-icon">
+            L
+          </div>
+        )}
       </div>
+      
       <ul className="nav-links">
-        <li><NavLink to="/home" className={({ isActive }) => isActive ? "active" : ""}><HomeIcon />Home</NavLink></li>
-        <li><NavLink to="/management" className={({ isActive }) => isActive ? "active" : ""}><PayrollIcon />Management</NavLink></li>
-        <li><NavLink to="/invoice" className={({ isActive }) => isActive ? "active" : ""}><InvoiceIcon />Invoice</NavLink></li>
-        <li><NavLink to="/reports" className={({ isActive }) => isActive ? "active" : ""}><ReportsIcon />Reports</NavLink></li>
-        <li><NavLink to="/settings" className={({ isActive }) => isActive ? "active" : ""}><SettingsIcon />Settings</NavLink></li>
+        <li>
+          <NavLink 
+            to="/home" 
+            className={({ isActive }) => isActive ? "active" : ""}
+            onClick={handleNavClick}
+          >
+            <HomeIcon />
+            {isExpanded && <span className="nav-text">Home</span>}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink 
+            to="/management" 
+            className={({ isActive }) => isActive ? "active" : ""}
+            onClick={handleNavClick}
+          >
+            <PayrollIcon />
+            {isExpanded && <span className="nav-text">Management</span>}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink 
+            to="/invoice" 
+            className={({ isActive }) => isActive ? "active" : ""}
+            onClick={handleNavClick}
+          >
+            <InvoiceIcon />
+            {isExpanded && <span className="nav-text">Invoice</span>}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink 
+            to="/reports" 
+            className={({ isActive }) => isActive ? "active" : ""}
+            onClick={handleNavClick}
+          >
+            <ReportsIcon />
+            {isExpanded && <span className="nav-text">Reports</span>}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink 
+            to="/settings" 
+            className={({ isActive }) => isActive ? "active" : ""}
+            onClick={handleNavClick}
+          >
+            <SettingsIcon />
+            {isExpanded && <span className="nav-text">Settings</span>}
+          </NavLink>
+        </li>
       </ul>
+      
       <div className="logout-container">
-        <NavLink to="/login"><LogoutIcon/>Log out</NavLink>
+        <NavLink to="/login">
+          <LogoutIcon />
+          {isExpanded && <span className="nav-text">Log out</span>}
+        </NavLink>
       </div>
     </div>
   );
