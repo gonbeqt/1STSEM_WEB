@@ -204,9 +204,9 @@ const Invoice: React.FC = () => {
                 <span>{getInitials(invoice.client)}</span>
               </div>
               <div className="invoice-details">
-                <div className="invoice-amount">
-                    <h3 className="invoice-title">{invoice.title}</h3>
-                <span className="amount">{formatCurrency(invoice.amount)}</span>
+                <div className="invoice-amount2">
+                    <h3 className="invoice-title6">{invoice.title}</h3>
+                <span className="amount7">{formatCurrency(invoice.amount)}</span>
 
               </div>
               

@@ -13,7 +13,7 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ amount, employees, totalLastM
       <div className="payroll-left">
         <div className="payroll-amount-container">
           <span className="payroll-icon">💰</span>
-          <span className="payroll-amount">{amount}</span>
+          <span className="payroll-amount3">{amount}</span>
         </div>
         <span className="payroll-employees">{employees}</span>
       </div>

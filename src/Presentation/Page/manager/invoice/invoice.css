@@ -199,11 +199,11 @@
   min-width: 0;
 }
 
-.invoice-title {
+.invoice-title6 {
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
-  margin: 0 0 4px 0;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -224,7 +224,7 @@
   margin: 0;
 }
 
-.invoice-amount {
+.invoice-amount2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -356,7 +356,7 @@
     font-size: 12px;
   }
   
-  .invoice-title {
+  .invoice-title6 {
     font-size: 14px;
   }
   
