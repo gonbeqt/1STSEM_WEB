@@ -79,7 +79,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
       amount: '0.55 ETH',
       usdValue: '$1,045.00 USD'
     },
-    transactionHash: '0x8D2...458'
+    transactionHash: '0x8D283284FS2458'
   };
 
   const currentData = payslipData || defaultPayslipData;
@@ -146,7 +146,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
               </div>
             </div>
             <div className="period-date">Payment Period - {currentData.period}</div>
-            <div className="period-address">0x234...abc123</div>
+            <div className="period-address">0x2341231hjf671231abc123</div>
           </div>
           <button className="confirm-salary-btn">
             <div className="confirm-icon">✓</div>

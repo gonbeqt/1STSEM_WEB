@@ -65,8 +65,8 @@ const TransactionDetails: React.FC<TransactionDetailProps> = () => {
                         From
                     </div>
                     <div className="detail-value address">
-                        <span>0xABC...123</span>
-                        <button className="copy-btn" onClick={() => handleCopy('0xABC...123')}>
+                        <span>0xABCHAS2HSN123</span>
+                        <button className="copy-btn" onClick={() => handleCopy('0xABCHAS2HSN123')}>
                             <Copy size={14} />
                         </button>
                     </div>
@@ -78,8 +78,8 @@ const TransactionDetails: React.FC<TransactionDetailProps> = () => {
                         To
                     </div>
                     <div className="detail-value address">
-                        <span>0xDEF...456</span>
-                        <button className="copy-btn" onClick={() => handleCopy('0xDEF...456')}>
+                        <span>0xDEFHASN456</span>
+                        <button className="copy-btn" onClick={() => handleCopy('0xDEFHASN456')}>
                             <Copy size={14} />
                         </button>
                     </div>
@@ -100,8 +100,8 @@ const TransactionDetails: React.FC<TransactionDetailProps> = () => {
                 <div className="detail-row">
                     <div className="detail-label-simple">Transaction Hash</div>
                     <div className="detail-value address">
-                        <span>0xDEF...456</span>
-                        <button className="copy-btn" onClick={() => handleCopy('0xDEF...456')}>
+                        <span>0xDEFHASN456</span>
+                        <button className="copy-btn" onClick={() => handleCopy('0xDEFHASN456')}>
                             <Copy size={14} />
                         </button>
                     </div>
