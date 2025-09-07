@@ -34,7 +34,7 @@ const Home = () => {
        <div className="wallet-card">
           <div className="wallet-info">
             <span>Current Wallet</span>
-            <h1> <FaEthereum /> 0 ETH</h1>
+            <h1> {React.createElement(FaEthereum as any)} 0 ETH</h1>
             <span>Converted to</span>
             <h2>₱12,230</h2>
           </div>
