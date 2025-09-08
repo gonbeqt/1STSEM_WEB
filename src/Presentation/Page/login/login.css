@@ -35,13 +35,16 @@
   justify-content: center;
   align-items: center;
   padding: 3rem;
-  background-color: #1a1a2e;
+  background-color: #F9FAFB;
   color: #fff;
 }
 
 .login-form {
   width: 100%;
   max-width: 28rem;
+  background-color: #1e1b2f;
+  padding: 2rem;
+  border-radius: 12px;
 }
 
 .login-form h2 {

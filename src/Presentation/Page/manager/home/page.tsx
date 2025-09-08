@@ -3,12 +3,26 @@ import ReportIcon from '../../../Components/icons/ReportIcon';
 import PayrollSendIcon from '../../../Components/icons/PayrollSendIcon';
 import ContractIcon from '../../../Components/icons/ContractIcon';
 import Charts from '../../../Components/Charts';
-import { FaEthereum } from 'react-icons/fa';
+import EthereumIcon from '../../../Components/icons/EthereumIcon';
 import InvoiceCard from '../../../Components/InvoiceCard';
 import PayrollCard from '../../../Components/PayrollCard';
 import WalletModal from '../../../Components/WalletModal';
 import './home.css';
 import { useNavigate } from 'react-router-dom';
+import { 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  TrendingUp, 
+  TrendingDown, 
+  Bell,
+  User,
+  ChevronRight,
+  TrendingUpIcon,
+  ClipboardList,
+  ChartBarIncreasing,
+  Users,
+} from 'lucide-react';
+import { IconContext } from 'react-icons';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,149 +31,160 @@ const Home = () => {
   const handleAutomateExpenses = () => {
     navigate('/expenses');
   };
+  
   const handleWalletConnect = (walletType: string) => {
     setIsWalletModalOpen(false);
   };
+
+  const transactionData = [
+    { 
+      name: 'Crypto Purchase', 
+      amount: 1250.60, 
+      type: 'outflow', 
+      date: '2 hrs ago', 
+      icon: <Users className="transaction-icon outflow" /> 
+    },
+    { 
+      name: 'Investment Purchase', 
+      amount: 3340.00, 
+      type: 'outflow', 
+      date: '1 day ago', 
+      icon: <ClipboardList className="transaction-icon outflow" /> 
+    },
+    { 
+      name: 'Payroll Processed', 
+      amount: 815.00, 
+      type: 'inflow', 
+      date: '2 days ago', 
+      icon: <ChartBarIncreasing className="transaction-icon inflow" /> 
+    },
+    { 
+      name: 'Crypto Payment', 
+      amount: 13165.00, 
+      type: 'inflow', 
+      date: '3 days ago', 
+      icon: <ChartBarIncreasing className="transaction-icon inflow" /> 
+    },
+    { 
+      name: 'Investment Purchase', 
+      amount: 850.00, 
+      type: 'outflow', 
+      date: '4 days ago', 
+      icon: <TrendingUpIcon className="transaction-icon outflow" /> 
+    }
+  ];
+
+  const quickActions = [
+    { name: 'Send Payroll', icon: <Users  className="action-icon" />, color: 'send' },
+    { name: 'Audit Contract', icon: <ClipboardList className="action-icon" />, color: 'add' },
+    { name: 'Generate Report', icon: <ChartBarIncreasing className="action-icon" />, color: 'withdraw' },
+    { name: 'Invest', icon: <TrendingUpIcon className="action-icon" />, color: 'more' }
+  ];
+
   return (
-    <div className="home-content">
+    <div className="home-content-new">
       {/* Header */}
-     <div className="header6">
-        <h1>Home</h1>
+      <div className="header-new">
+        <div className="header-left">
+          <div className="profile-avatar">
+            <span>J</span>
+          </div>
+          <div className="greeting-text">
+            <p className="greeting-small">Hi Juan</p>
+            <p className="greeting-question">How are you today?</p>
+          </div>
+        </div>
+        <div className="header-right">
+          <Bell className="header-icon" />
+          <User className="header-icon" />
+        </div>
       </div>
 
-      <section className="greeting">
-        <h2>Hi, Anna</h2>
-        <p>How are you today?</p>
-      </section>
-
-
-      <section className="wallet-summary">
-        <div className="wallet-card">
-          <div className="wallet-info">
-            <span>Current Wallet</span>
-            {/* @ts-ignore */}
-            <h1> <FaEthereum /> 0 ETH</h1>
-            <span>Converted to</span>
-            <h2>₱12,230</h2>
-          </div>
-          <div className="wallet-actions">
-            <select>
-              <option>PHP</option>
-              <option>USD</option>
-            </select>
-            <button className="connect-wallet-btn" onClick={() => setIsWalletModalOpen(true)}>Connect Wallet</button>
-          </div>
-        </div>
-
-        <div className="wallet-buttons">
-          <button onClick={handleAutomateExpenses}>
-            <ReportIcon />
-            <span>Automate Expenses</span>
-          </button>
-          <button>
-            <PayrollSendIcon />
-            <span>Generate Report</span>
-          </button>
-          <button>
-            <ContractIcon />
-            <span>Audit Contract</span>
+      {/* Current Wallet Card */}
+      <div className="current-wallet-card">
+        <div className="wallet-header">
+          <span className="wallet-label">Current Wallet</span>
+          <button className="connect-wallet-new" onClick={() => setIsWalletModalOpen(true)}>
+            Connect Wallet
           </button>
         </div>
-      </section>
-
-      <section className="greeting">
-        <h2>Transactions Summary</h2>
-        <p>Real-time financial overview</p>
-      </section>
-
-      {/* Transactions Summary */}
-      <section className="transactions-summary">
-        <div className="summary-card">
-          <span>  Total Transactions</span>
-          <h3>₱12,230</h3>
-          <Charts />
-          <a href="#!">View full report</a>
-
+        <div className="wallet-balance">
+          <div className="balance-main">
+            <EthereumIcon className="eth-icon" />
+            <span className="balance-amount">67,980 ETH</span>
+          </div>
+          <div className="balance-converted">₱ 1 tev</div>
         </div>
-        <div className="summary-card">
-          <span> Crypto Inflow</span>
-          <h3>₱12,230</h3>
-          <Charts />
-          <a href="#!">View full report</a>
-        </div>
-        <div className="summary-card">
-          <span> Crypto Outflow</span>
-          <h3>₱12,230</h3>
-          <Charts />
-          <a href="#!">View full report</a>
-        </div>
-      </section>
+      </div>
 
-      <section className="greeting">
-        <h2>Tax Estimates</h2>
-        <p>Estimated tax liability</p>
-      </section>
-
-      {/* Tax Estimates */}
-      <section className="tax-estimates">
-        <div className="tax-card">
-          <span>Estimated Tax Owed</span>
-          <h3>₱12,230 (1%)</h3>
-          <span className="tax-month">June 2025</span>
-          <div className="tax-details">
-            <div className="tax-row">
-              <span>Income Tax</span>
-              <span>₱12,230</span>
+      {/* Quick Actions */}
+      <div className="quick-actions">
+        {quickActions.map((action, index) => (
+          <div key={index} className={`action-button ${action.color}`}>
+            <div className="action-icon-wrapper">
+              {action.icon}
             </div>
-            <div className="tax-row">
-              <span>Tax Deduction</span>
-              <span className="deduction">-₱1,230</span>
+            <span className="action-name">{action.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent Transactions */}
+      <div className="section-header">
+        <h2>Recent Transactions</h2>
+        <div className="view-all">
+          <span>View all</span>
+          <ChevronRight className="chevron-icon" />
+        </div>
+      </div>
+
+      <div className="transactions-list">
+        {transactionData.map((transaction, index) => (
+          <div key={index} className="transaction-item">
+            <div className="transaction-left">
+              <div className={`transaction-icon-wrapper ${transaction.type}`}>
+                {transaction.icon}
+              </div>
+              <div className="transaction-details">
+                <div className="transaction-name">{transaction.name}</div>
+                <div className="transaction-date">{transaction.date}</div>
+              </div>
             </div>
-            <div className="tax-row">
-              <span>Net Tax Payable</span>
-              <span>₱11,000</span>
+            <div className={`transaction-amount2 ${transaction.type}`}>
+              {transaction.type === 'outflow' ? '-' : '+'}₱{transaction.amount.toLocaleString()}
             </div>
           </div>
-          <a href="#!">View full report</a>
+        ))}
+        
+      </div>
+      
+
+      {/* Revenue vs Expenses */}
+      <div className="revenue-section">
+        <div className="section-header">
+          <h2>Revenue vs Expenses</h2>
+          <select className="period-selector">
+            <option>Last 6 months</option>
+            <option>Last 3 months</option>
+            <option>Last month</option>
+          </select>
         </div>
 
-      </section>
-
-      <section className="greeting">
-        <h2>Invoices</h2>
-        <p>Auto-generated invoices from recent transactions</p>
-      </section>
-      {/* Invoices */}
-      <section className="invoices">
-        <div className="invoice-list">
-          {[
-            { company: "Kampico", date: "Created 25 June 2025", amount: "₱12,950", status: "Paid" },
-            { company: "ZetaCorp", date: "Created 24 June 2025", amount: "₱11,500", status: "Paid" },
-            { company: "BlueWave", date: "Created 23 June 2025", amount: "₱13,200", status: "Paid" },
-            { company: "GreenTech", date: "Created 22 June 2025", amount: "₱10,800", status: "Paid" },
-            { company: "RedLion", date: "Created 21 June 2025", amount: "₱14,300", status: "Paid" },
-          ].map((invoice, index) => (
-            <InvoiceCard key={index} {...invoice} />
-          ))}
+        <div className="revenue-stats">
+          <div className="stat-item">
+            <span className="stat-label">Revenue</span>
+            <span className="stat-value revenue">₱7120</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Expenses</span>
+            <span className="stat-value expenses">₱4200</span>
+          </div>
         </div>
-      </section>
 
-      <section className="greeting">
-        <h2>Payroll</h2>
-        <p>Latest processed payroll transactions</p>
-      </section>
-      {/* Payroll */}
-      <section className="payroll">
-        <div className="payroll-list">
-          {[
-            { amount: "$12,950", employees: "Sent to 3 Employees", totalLastMonth: "$123,908", nextPayroll: "20 July 2025" },
-            { amount: "$15,200", employees: "Sent to 4 Employees", totalLastMonth: "$145,600", nextPayroll: "25 July 2025" },
-            { amount: "$10,800", employees: "Sent to 2 Employees", totalLastMonth: "$98,500", nextPayroll: "30 July 2025" },
-          ].map((payroll, index) => (
-            <PayrollCard key={index} {...payroll} />
-          ))}
+        <div className="chart-container">
+          <Charts />
         </div>
-      </section>
+      </div>
 
       <WalletModal
         isOpen={isWalletModalOpen}

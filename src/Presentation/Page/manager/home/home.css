@@ -1,497 +1,425 @@
-/* --- Layout: Stack sections vertically --- */
-.home-content {
+/* Updated Home Component Styles */
+.home-content-new {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
-  color: #fff;
-  font-family: 'Inter', Arial, sans-serif;
-  padding: 20px !important;
-  border-radius: 12px;
-  background: #1f1f2e;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease-out;
+  min-height: 100vh; /* Changed from height to min-height */
+  background: #f8f9fa;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-y: auto; /* Allow scrolling */
 }
 
-.dashboard-header,
-.greeting,
-.wallet-summary,
-.transactions-summary,
-.tax-estimates,
-.invoices {
-  width: 100%;
-  margin: 0 auto;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* --- Header --- */
-.header6 {
-
-  border-radius: 18px;
+/* Header */
+.header-new {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  background: #1f1f2e; 
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
-.menu-icon {
-  font-size: 22px;
-  color: #fff;
-  opacity: 0.7;
-}
-
-.page-title {
-  font-size: 22px;
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  background: #6366f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-weight: 600;
+  font-size: 16px;
 }
 
-.header-center .search-bar {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  background: #23262f;
-  color: #fff;
+.greeting-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.greeting-small {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.greeting-question {
   font-size: 16px;
-  width: 220px;
+  font-weight: 500;
+  color: #111827;
+  margin: 2px 0 0 0;
+  line-height: 1.2;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
-.notification-icon {
-  font-size: 22px;
-  color: #fff;
-  opacity: 0.7;
-}
-
-.profile-pic {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #353945;
-}
-
-/* --- Greeting --- */
-.greeting {
-  margin: 18px 0 0 0;
-}
-
-.greeting h2 {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.greeting p {
-  font-size: 15px;
-  color: #b1b5c3;
-}
-
-/* --- Wallet Summary --- */
-.wallet-summary {
-  margin: 18px 0 0 0;
-  display: grid;
-  grid-template-columns: 70% 30%; 
-  gap: 18px;
-}
-
-.wallet-card {
-  background: linear-gradient(to bottom, rgba(74, 31, 138, 0.7), rgba(107, 42, 191, 0.7));
-  border-radius: 18px;
-    border: 1px solid #d4d4d42f;
-  padding: 12px 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #fff;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
-.wallet-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-}
-
-.wallet-card h1 {
-  font-size: 32px;
-  font-weight: 700;
-}
- .wallet-card span{
-  color: #9F9F9F;
-    font-size: 20px;
-  font-weight: 500;
-
- }
-.wallet-card h2 {
-  font-size: 20px;
-  font-weight: 500;
-  margin: 0;
-  padding-top: 8px;
-  padding-bottom: 12px;
-}
-
-.wallet-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-}
-
-.wallet-actions select {
-  background: transparent;
-  border: none;
-    color: white;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 16px;
-}
-.wallet-actions option {
-  background: black;
-  border: none;
-  color: white;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 16px;
-}
-
-
-.connect-wallet-btn {
-  background: #9747FF;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-left: 8px;
-  box-shadow: 0 2px 8px rgba(162,89,255,0.18);
-  cursor: pointer;
-}
-
-.wallet-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-}
-
-.wallet-buttons button {
-  background: #23262f;
-  color: #fff;
-  border: none;
-  border-radius: 16px;
-  padding: 10px 18px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.wallet-buttons button svg {
+.header-icon {
   width: 24px;
   height: 24px;
-  margin-bottom: 5px;
-}
-
-.wallet-buttons button:hover {
-  background: #353945;
-}
-
-/* --- Transactions Summary: row layout --- */
-.transactions-summary {
-  display: flex;
-  flex-direction: row;
-  gap: 18px;
-  margin: 32px 0 0 0;
-}
-
-.summary-card {
-   background-color: #d4d4d407;
-  border: 1px solid #d4d4d42f;
-  border-radius: 16px;
-  padding: 24px 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  box-shadow: 0 2px 8px rgba(35,38,47,0.12);
-}
-
-.summary-card span {
-  font-size: 15px;
-  color: #b1b5c3;
-}
-
-.summary-card h3 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 10px 0 12px 0;
-}
-
-.summary-graph {
-  width: 100%;
-  height: 38px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-.graph-blue {
-  background: linear-gradient(90deg, #6c47ff 0%, #a259ff 100%);
-}
-
-.graph-orange {
-  background: linear-gradient(90deg, #ffb86c 0%, #ff7a59 100%);
-}
-
-.graph-purple {
-  background: linear-gradient(90deg, #a259ff 0%, #6c47ff 100%);
-}
-
-.summary-card a {
-  color: #a259ff;
-  font-size: 14px;
-  text-decoration: underline;
-  margin-top: auto;
-}
-
-/* --- Tax Estimates: row layout --- */
-.tax-estimates {
-  display: flex;
-  flex-direction: row;
-  gap: 18px;
-  margin: 32px 0 0 0;
-}
-
-.tax-card {
- background-color: #d4d4d407;
-  border: 1px solid #d4d4d42f;
-    border-radius: 16px;
-  padding: 24px 28px;
-  flex: 2;
-  box-shadow: 0 2px 8px rgba(35,38,47,0.12);
-  display: flex;
-  flex-direction: column;
-}
-
-.tax-card span {
-  font-size: 15px;
-  color: #b1b5c3;
-}
-
-.tax-card h3 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 10px 0 8px 0;
-  color: #fff;
-}
-
-.tax-month {
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 12px;
-}
-
-.tax-details {
-  margin: 12px 0 18px 0;
-}
-
-.tax-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-.deduction {
-  color: #ff7a59;
-  font-weight: 600;
-}
-
-.tax-card a {
-  color: #a259ff;
-  font-size: 14px;
-  text-decoration: underline;
-  margin-top: auto;
-}
-
-.tax-chart {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.chart-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #6c47ff;
-  color: #fff;
-  font-size: 32px;
-  font-weight: 700;
-  border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  box-shadow: 0 2px 8px rgba(162,89,255,0.18);
-}
-
-/* --- Invoices --- */
-.invoices {
-  margin: 32px 0 0 0;
-}
-
-.invoices h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 18px;
-}
-
-.invoice-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.invoice-card {
-   background-color: #d4d4d407;
-  border: 1px solid #d4d4d42f;
-  border-radius: 14px;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(35,38,47,0.10);
-}
-
-.invoice-title {
-  font-size: 17px;
-  font-weight: 600;
-  width: 20%;
-}
-
-.invoice-date {
-  font-size: 14px;
-  color: #b1b5c3;
-  margin-left: 18px;
-}
-
-.invoice-amount {
-  font-size: 18px;
-  font-weight: 700;
-  color: #12c48b;
-  margin-left: 18px;
-}
-
-.paid-btn {
-  background: #12c48b;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 15px;
-  font-weight: 600;
+  color: #6b7280;
   cursor: pointer;
-  margin-left: 18px;
-  box-shadow: 0 2px 8px rgba(18,196,139,0.12);
 }
-.payroll-card {
- background-color: #d4d4d407;
-  border-radius: 14px;
-  padding: 16px 20px;
-  border: 1px solid #d4d4d42f;
+
+/* Current Wallet Card */
+.current-wallet-card {
+  margin: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  position: relative;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.wallet-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
-  border-radius: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.payroll-left {
+.wallet-label {
+  font-size: 18px;
+  opacity: 0.9;
+  font-weight: 500;
+  color: white !important;
+}
+
+.connect-wallet-new {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.balance-main {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.payroll-amount-container {
+.eth-icon {
+  width: 24px; /* Made larger */
+  height: 24px;
+  fill: white;
+  color: white; /* Added color fallback */
+}
+
+.balance-amount {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+}
+
+.balance-converted {
+  font-size: 16px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 30px;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #f0f0f0;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon-wrapper {
+  width: 45px; /* Made larger */
+  height: 45px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  margin-right: 15px;
+  justify-content: center;
 }
 
-.payroll-icon {
-  font-size: 1.2em;
-  margin-right: 5px;
+.action-button.send .action-icon-wrapper {
+  background: #dbeafe;
+  color: #3b82f6;
 }
 
-.payroll-amount3 {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #fff;
-  
+.action-button.add .action-icon-wrapper {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
-.payroll-employees {
-  color: #ccc;
-  font-size: 0.9em;
+.action-button.withdraw .action-icon-wrapper {
+  background: #fce7f3;
+  color: #ec4899;
 }
 
-.payroll-right {
-  text-align: right;
+.action-button.more .action-icon-wrapper {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
-.payroll-total {
-  color: #999;
-  font-size: 0.8em;
-  display: block;
-  margin-bottom: 2px;
+.action-icon {
+  width: 22px; /* Made larger */
+  height: 22px;
 }
 
-.payroll-next {
-  color: #bbb;
-  font-size: 0.8em;
+.action-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
 }
 
-/* --- Responsive: stack sections on mobile --- */
-@media (max-width: 900px) {
-  .dashboard-header,
-  .greeting,
-  .wallet-summary,
-  .transactions-summary,
-  .tax-estimates,
-  .invoices {
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  margin: 24px 0 16px 0; /* Added top margin */
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.view-all {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #6366f1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.view-all:hover {
+  color: #4f46e5;
+}
+
+.chevron-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.period-selector {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* Transactions List */
+.transactions-list {
+  margin: 0 20px 30px 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 200px; /* Ensure minimum height */
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  min-height: 70px; /* Ensure minimum height */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  background-color:#f8f9fa !important;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-left {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Increased gap */
+  flex: 1;
+}
+
+.transaction-icon-wrapper {
+  width: 44px; /* Made larger */
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.transaction-icon-wrapper.inflow {
+  background: #dcfce7;
+}
+
+.transaction-icon-wrapper.outflow {
+  background: #fee2e2;
+}
+
+.transaction-icon {
+  width: 22px; /* Made larger */
+  height: 22px;
+  stroke-width: 2;
+}
+
+.transaction-icon.inflow {
+  color: #16a34a !important;
+}
+
+.transaction-icon.outflow {
+  color: #dc2626 !important;
+}
+
+.transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Increased gap */
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-name {
+  font-size: 15px; /* Increased font size */
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.transaction-date {
+  font-size: 13px; /* Increased font size */
+  color: #111827 !important ;
+  line-height: 1.2;
+  font-weight: normal;
+}
+
+.transaction-amount2 {
+  font-size: 24px; /* Increased font size */
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.transaction-amount2.inflow {
+  color: #16a34a;
+}
+
+.transaction-amount2.outflow {
+  color: #dc2626;
+}
+
+/* Revenue Section */
+.revenue-section {
+  margin-bottom: 30px;
+  flex-shrink: 0;
+}
+
+.revenue-stats {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  margin: 0 20px 20px 20px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-value.revenue {
+  color: #16a34a;
+}
+
+.stat-value.expenses {
+  color: #dc2626;
+}
+
+.chart-container {
+  background: white;
+  margin: 0 20px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .home-content-new {
     max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
   }
-  .transactions-summary,
-  .tax-estimates {
-    flex-direction: column;
-    gap: 18px;
-  }
-}@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+
+@media (min-width: 1024px) {
+  .home-content-new {
+    max-width: 100%;
   }
 }
