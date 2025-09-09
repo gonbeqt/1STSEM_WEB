@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import ReportIcon from '../../../Components/icons/ReportIcon';
-import PayrollSendIcon from '../../../Components/icons/PayrollSendIcon';
-import ContractIcon from '../../../Components/icons/ContractIcon';
 import Charts from '../../../Components/Charts';
 import EthereumIcon from '../../../Components/icons/EthereumIcon';
-import InvoiceCard from '../../../Components/InvoiceCard';
-import PayrollCard from '../../../Components/PayrollCard';
 import WalletModal from '../../../Components/WalletModal';
+import PaymentModal from './PaymentModal/PaymentModal'; // Add this import
 import './home.css';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  TrendingUp, 
-  TrendingDown, 
   Bell,
   User,
   ChevronRight,
@@ -22,18 +14,24 @@ import {
   ChartBarIncreasing,
   Users,
 } from 'lucide-react';
-import { IconContext } from 'react-icons';
 
 const Home = () => {
   const navigate = useNavigate();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false); // Add payment modal state
 
-  const handleAutomateExpenses = () => {
-    navigate('/expenses');
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   
   const handleWalletConnect = (walletType: string) => {
     setIsWalletModalOpen(false);
+  };
+
+  // Add handler for payment modal
+  const handleSendPayment = () => {
+    setIsPaymentModalOpen(true);
   };
 
   const transactionData = [
@@ -75,10 +73,30 @@ const Home = () => {
   ];
 
   const quickActions = [
-    { name: 'Send Payroll', icon: <Users  className="action-icon" />, color: 'send' },
-    { name: 'Audit Contract', icon: <ClipboardList className="action-icon" />, color: 'add' },
-    { name: 'Generate Report', icon: <ChartBarIncreasing className="action-icon" />, color: 'withdraw' },
-    { name: 'Invest', icon: <TrendingUpIcon className="action-icon" />, color: 'more' }
+    { 
+      name: 'Send Payment', 
+      icon: <TrendingUpIcon className="action-icon" />, 
+      color: 'send',
+      onClick: handleSendPayment // Add onClick handler
+    },
+    { 
+      name: 'Send Payroll', 
+      icon: <Users className="action-icon" />, 
+      color: 'payroll',
+      onClick: () => console.log('Send Payroll clicked') // Placeholder for other actions
+    },
+    { 
+      name: 'Audit Contract', 
+      icon: <ClipboardList className="action-icon" />, 
+      color: 'add',
+      onClick: () => console.log('Audit Contract clicked') // Placeholder for other actions
+    },
+    { 
+      name: 'Generate Report', 
+      icon: <ChartBarIncreasing className="action-icon" />, 
+      color: 'withdraw',
+      onClick: () => console.log('Generate Report clicked') // Placeholder for other actions
+    }
   ];
 
   return (
@@ -120,7 +138,12 @@ const Home = () => {
       {/* Quick Actions */}
       <div className="quick-actions">
         {quickActions.map((action, index) => (
-          <div key={index} className={`action-button ${action.color}`}>
+          <div 
+            key={index} 
+            className={`action-button ${action.color}`}
+            onClick={action.onClick} // Add onClick handler to each action
+            style={{ cursor: 'pointer' }} // Add pointer cursor
+          >
             <div className="action-icon-wrapper">
               {action.icon}
             </div>
@@ -140,7 +163,7 @@ const Home = () => {
 
       <div className="transactions-list">
         {transactionData.map((transaction, index) => (
-          <div key={index} className="transaction-item">
+          <div key={index} className="transaction-item2">
             <div className="transaction-left">
               <div className={`transaction-icon-wrapper ${transaction.type}`}>
                 {transaction.icon}
@@ -155,15 +178,13 @@ const Home = () => {
             </div>
           </div>
         ))}
-        
       </div>
-      
 
       {/* Revenue vs Expenses */}
       <div className="revenue-section">
         <div className="section-header">
           <h2>Revenue vs Expenses</h2>
-          <select className="period-selector">
+          <select className="period-selector1">
             <option>Last 6 months</option>
             <option>Last 3 months</option>
             <option>Last month</option>
@@ -186,10 +207,17 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Existing Wallet Modal */}
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
         onConnect={handleWalletConnect}
+      />
+
+      {/* Add Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
       />
     </div>
   );
