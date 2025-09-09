@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Charts from '../../../Components/Charts';
 import EthereumIcon from '../../../Components/icons/EthereumIcon';
 import WalletModal from '../../../Components/WalletModal';
-import PaymentModal from './PaymentModal/PaymentModal'; // Add this import
+import PaymentModal from './Modal/Payment/PaymentModal'; // Add this import
 import './home.css';
 import { useNavigate } from 'react-router-dom';
 import { 
