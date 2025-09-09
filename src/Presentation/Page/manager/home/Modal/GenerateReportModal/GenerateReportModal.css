@@ -1,0 +1,136 @@
+.report-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+  color: black;
+}
+
+.report-modal-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 420px;
+  max-width: 95%;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.report-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.report-description {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.report-section h4 {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.report-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.option-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+.option-btn.active {
+  border-color: #8b5cf6;
+  background: #f3e8ff;
+  color: #8b5cf6;
+}
+
+.report-checkbox {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #8b5cf6;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: #7c3aed; }
+
+.btn-secondary {
+  flex: 1;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-tertiary {
+  width: 100%;
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.success-icon {
+  color: #10b981;
+  margin: 12px auto;
+}
+
+.report-success {
+  text-align: center;
+}
+
+.report-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9fafb;
+}
+
+.report-file-icon {
+  color: #8b5cf6;
+}
+.report-file-title {
+  font-weight: 600;
+}
+.report-file-sub {
+  font-size: 12px;
+  color: #6b7280;
+}

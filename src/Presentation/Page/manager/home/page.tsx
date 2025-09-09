@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import Charts from '../../../Components/Charts';
 import EthereumIcon from '../../../Components/icons/EthereumIcon';
 import WalletModal from '../../../Components/WalletModal';
-import PaymentModal from './Modal/Payment/PaymentModal'; // Add this import
+import PaymentModal from './Modal/Payment/PaymentModal';
+import PayrollModal from './Modal/Payroll/PayrollModal';
 import './home.css';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   Bell,
   User,
   ChevronRight,
@@ -14,90 +15,84 @@ import {
   ChartBarIncreasing,
   Users,
 } from 'lucide-react';
+import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
+import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 
 const Home = () => {
   const navigate = useNavigate();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false); // Add payment modal state
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
+  const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
+  const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-  
   const handleWalletConnect = (walletType: string) => {
     setIsWalletModalOpen(false);
   };
 
-  // Add handler for payment modal
+  // Handler for payment modal
   const handleSendPayment = () => {
     setIsPaymentModalOpen(true);
   };
 
+  // Add handler for payroll modal
+  const handleSendPayroll = () => {
+    console.log("handleSendPayroll called");
+    setIsPayrollModalOpen(true);
+
+  };
+  const handleAuditContract = () => {
+    setIsAuditContractModalOpen(true);
+  }
+  const handleGenerateReport = ()=>{
+    setIsGenerateReportModalOpen(true);
+  }
+
+  // Add handler for processing payroll
+  const handleProcessPayroll = (data: any) => {
+    console.log('Processing payroll:', data);
+
+    alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
+  };
+
   const transactionData = [
-    { 
-      name: 'Crypto Purchase', 
-      amount: 1250.60, 
-      type: 'outflow', 
-      date: '2 hrs ago', 
-      icon: <Users className="transaction-icon outflow" /> 
+    {
+      name: 'Crypto Purchase',
+      amount: 1250.60,
+      type: 'outflow',
+      date: '2 hrs ago',
+      icon: <Users className="transaction-icon outflow" />
     },
-    { 
-      name: 'Investment Purchase', 
-      amount: 3340.00, 
-      type: 'outflow', 
-      date: '1 day ago', 
-      icon: <ClipboardList className="transaction-icon outflow" /> 
+    {
+      name: 'Investment Purchase',
+      amount: 3340.00,
+      type: 'outflow',
+      date: '1 day ago',
+      icon: <ClipboardList className="transaction-icon outflow" />
     },
-    { 
-      name: 'Payroll Processed', 
-      amount: 815.00, 
-      type: 'inflow', 
-      date: '2 days ago', 
-      icon: <ChartBarIncreasing className="transaction-icon inflow" /> 
+    {
+      name: 'Payroll Processed',
+      amount: 815.00,
+      type: 'inflow',
+      date: '2 days ago',
+      icon: <ChartBarIncreasing className="transaction-icon inflow" />
     },
-    { 
-      name: 'Crypto Payment', 
-      amount: 13165.00, 
-      type: 'inflow', 
-      date: '3 days ago', 
-      icon: <ChartBarIncreasing className="transaction-icon inflow" /> 
+    {
+      name: 'Crypto Payment',
+      amount: 13165.00,
+      type: 'inflow',
+      date: '3 days ago',
+      icon: <ChartBarIncreasing className="transaction-icon inflow" />
     },
-    { 
-      name: 'Investment Purchase', 
-      amount: 850.00, 
-      type: 'outflow', 
-      date: '4 days ago', 
-      icon: <TrendingUpIcon className="transaction-icon outflow" /> 
+    {
+      name: 'Investment Purchase',
+      amount: 850.00,
+      type: 'outflow',
+      date: '4 days ago',
+      icon: <TrendingUpIcon className="transaction-icon outflow" />
     }
   ];
 
-  const quickActions = [
-    { 
-      name: 'Send Payment', 
-      icon: <TrendingUpIcon className="action-icon" />, 
-      color: 'send',
-      onClick: handleSendPayment // Add onClick handler
-    },
-    { 
-      name: 'Send Payroll', 
-      icon: <Users className="action-icon" />, 
-      color: 'payroll',
-      onClick: () => console.log('Send Payroll clicked') // Placeholder for other actions
-    },
-    { 
-      name: 'Audit Contract', 
-      icon: <ClipboardList className="action-icon" />, 
-      color: 'add',
-      onClick: () => console.log('Audit Contract clicked') // Placeholder for other actions
-    },
-    { 
-      name: 'Generate Report', 
-      icon: <ChartBarIncreasing className="action-icon" />, 
-      color: 'withdraw',
-      onClick: () => console.log('Generate Report clicked') // Placeholder for other actions
-    }
-  ];
 
   return (
     <div className="home-content-new">
@@ -136,21 +131,53 @@ const Home = () => {
       </div>
 
       {/* Quick Actions */}
+      {/* Quick Actions */}
       <div className="quick-actions">
-        {quickActions.map((action, index) => (
-          <div 
-            key={index} 
-            className={`action-button ${action.color}`}
-            onClick={action.onClick} // Add onClick handler to each action
-            style={{ cursor: 'pointer' }} // Add pointer cursor
-          >
-            <div className="action-icon-wrapper">
-              {action.icon}
-            </div>
-            <span className="action-name">{action.name}</span>
+        {/* Send Payment */}
+        <button
+          className="action-button send"
+          onClick={handleSendPayment}
+        >
+          <div className="action-icon-wrapper">
+            <TrendingUpIcon className="action-icon" />
           </div>
-        ))}
+          <span className="action-name">Send Payment</span>
+        </button>
+
+        {/* Send Payroll */}
+        <button
+          className="action-button payroll"
+          onClick={handleSendPayroll}
+        >
+          <div className="action-icon-wrapper">
+            <Users className="action-icon" />
+          </div>
+          <span className="action-name">Send Payroll</span>
+        </button>
+
+        {/* Audit Contract */}
+        <button
+          className="action-button add"
+          onClick={handleAuditContract}
+        >
+          <div className="action-icon-wrapper">
+            <ClipboardList className="action-icon" />
+          </div>
+          <span className="action-name">Audit Contract</span>
+        </button>
+
+        {/* Generate Report */}
+        <button
+          className="action-button withdraw"
+          onClick={handleGenerateReport}
+        >
+          <div className="action-icon-wrapper">
+            <ChartBarIncreasing className="action-icon" />
+          </div>
+          <span className="action-name">Generate Report</span>
+        </button>
       </div>
+
 
       {/* Recent Transactions */}
       <div className="section-header">
@@ -214,10 +241,27 @@ const Home = () => {
         onConnect={handleWalletConnect}
       />
 
-      {/* Add Payment Modal */}
+      {/* Payment Modal */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+      />
+
+
+      {/* Add Payroll Modal */}
+      <PayrollModal
+        isOpen={isPayrollModalOpen}
+        onClose={() => setIsPayrollModalOpen(false)}
+        onProcess={handleProcessPayroll}
+      />
+
+      <AuditContractModal
+        isOpen={isAuditContractModalOpen}
+        onClose={() => setIsAuditContractModalOpen(false)}
+      />
+      <GenerateReportModal
+        isOpen={isGenerateReportModalOpen}
+        onClose={() => setIsGenerateReportModalOpen(false)}
       />
     </div>
   );
