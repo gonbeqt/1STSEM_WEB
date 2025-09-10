@@ -1,0 +1,93 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: white;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  position: relative;
+}
+
+.profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 15px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-info h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-info span {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 4px;
+  display: block;
+}
+
+.menu {
+  flex: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 15px;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px; /* Assuming icons are from a font like Font Awesome; adjust if using SVG */
+}
+
+.item-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.item-value {
+  font-size: 14px;
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+/* Example icon styles (replace with actual icons like from Font Awesome) */
+.icon.wallet::before { content: "💳"; }
+.icon.document::before { content: "📄"; }
+.icon.currency::before { content: "💱"; }
+.icon.shield::before { content: "🛡️"; }
+.icon.help::before { content: "❓"; }

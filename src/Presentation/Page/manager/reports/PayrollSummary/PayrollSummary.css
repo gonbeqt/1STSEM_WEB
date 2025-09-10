@@ -1,6 +1,6 @@
 /* BalanceSheet.css */
 
-.cash-flow-container {
+.PayrollSummary-container {
 display: flex;
   flex-direction: column;
   width: 100%;
@@ -16,7 +16,7 @@ display: flex;
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.05);
 }
 
-.cash-flow-header {
+.PayrollSummary-header {
   background: #f8f9fa;
   padding: 20px 24px;
   border-bottom: 1px solid #e9ecef;
@@ -29,7 +29,7 @@ display: flex;
 .back-btn {
   background: none;
   border: none;
-  color: black !important;
+  color: #6b7280;
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -39,7 +39,7 @@ display: flex;
 }
 
 .back-btn:hover {
-  color: #0000006c !important;
+  color: #374151;
 }
 
 .header-content h1 {
@@ -102,7 +102,7 @@ display: flex;
   gap: 4px;
 }
 
-.cash-flow-content {
+.PayrollSummary-content {
   padding: 0;
 }
 
@@ -342,12 +342,12 @@ display: flex;
 }
 /* Responsive */
 @media (max-width: 768px) {
-  .cash-flow-container {
+  .PayrollSummary-container {
     margin: 0;
     border-radius: 0;
   }
 
-  .cash-flow-header {
+  .PayrollSummary-header {
     padding: 16px 16px;
   }
 

@@ -341,7 +341,7 @@ const EmployeeManagement: React.FC = () => {
                     <p className='employee-salary1'>${employee.salary.toLocaleString()}</p>
                   </div>
                   <div className="employee-second">
-                    <p className="employee-position1">{employee.position}</p>
+                    <h5 className="employee-position1">{employee.position}</h5>
                     <p className="employee-netpay1">Net pay</p>
                   </div>
                 </div>

@@ -9,19 +9,21 @@ import Register from './Presentation/Page/register/page';
 
 import Invoice from './Presentation/Page/manager/invoice/page';
 import Reports from './Presentation/Page/manager/reports/page';
-import Settings from './Presentation/Page/manager/settings/page';
+import Settings from './Presentation/Page/manager/profile/page';
 import Management from './Presentation/Page/manager/management/page';
 import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
 import InvoiceReceipt from './Presentation/Page/manager/invoice/InvoiceReceipt/InvoiceReceipt';
 import CashFlow from './Presentation/Page/manager/reports/CashFlow/CashFlow';
 import Income from './Presentation/Page/manager/reports/Income/Income';
 import Invest from './Presentation/Page/manager/reports/Invest/Invest';
+import PayrollSummary from './Presentation/Page/manager/reports/PayrollSummary/PayrollSummary';
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
 import EmployeeHistory from './Presentation/Page/employee/history/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
 import TransactionDetails from './Presentation/Page/employee/home/TransactionDetails/TransactionDetails';
+import TaxSummary from './Presentation/Page/manager/reports/TaxSummary/TaxSummary';
 
 
 const ManagerLayout = () => (
@@ -60,6 +62,9 @@ function App() {
           <Route path="/cash_flow" element={<CashFlow />} />
           <Route path="/income" element={<Income />} />
           <Route path="/invest" element={<Invest />} />
+          <Route path="/payroll_summary" element={<PayrollSummary />} />
+          <Route path="/tax_summary" element={<TaxSummary />} />
+
 
 
         </Route>

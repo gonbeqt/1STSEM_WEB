@@ -1,22 +1,40 @@
 // Reports.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import './reports.css';
 import { useNavigate } from 'react-router-dom';
 
 const Reports: React.FC = () => {
-  const navigate = useNavigate()
-  const handleBalanceSheet = ()=>{
-    navigate('/balance_sheet')
-  }
-  const handleCashFlow = ()=>{
-    navigate('/cash_flow')
-  }
-  const handleIncome = ()=>{
-    navigate('/income')
-  }
-   const handleInvest = ()=>{
-    navigate('/invest')
-  }
+  const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState('Financial Statements');
+
+  const reportCategories = [
+    {
+      name: 'Financial Statements',
+      types: [
+        { name: 'Balance Sheet', icon: 'balance-icon', path: '/balance_sheet' },
+        { name: 'Income Statement', icon: 'income-icon', path: '/income' },
+        { name: 'Cash Flow', icon: 'cashflow-icon', path: '/cash_flow' },
+        { name: 'Investment', icon: 'investment-icon', path: '/invest' },
+      ],
+    },
+    {
+      name: 'Payroll Reports',
+      types: [
+        { name: 'Payroll Summary', icon: 'payroll-icon', path: '/payroll_summary' },
+      ],
+    },
+    {
+      name: 'Tax Reports',
+      types: [
+        { name: 'Tax Summary', icon: 'tax-icon', path: '/tax_summary' },
+      
+      ],
+    },
+  ];
+
+  const handleReportTypeClick = (path: string) => {
+    navigate(path);
+  };
   return (
     <div className="reports-container">
       {/* Sidebar */}
@@ -25,15 +43,15 @@ const Reports: React.FC = () => {
         
         {/* Report Categories */}
         <div className="report-categories">
-          <div className="category active">
-            <span className="category-label">Financial Statements</span>
-          </div>
-          <div className="category">
-            <span className="category-label">Payroll Reports</span>
-          </div>
-          <div className="category">
-            <span className="category-label">Tax Reports</span>
-          </div>
+          {reportCategories.map((category) => (
+            <div
+              key={category.name}
+              className={`category ${activeCategory === category.name ? 'active' : ''}`}
+              onClick={() => setActiveCategory(category.name)}
+            >
+              <span className="category-label">{category.name}</span>
+            </div>
+          ))}
         </div>
 
         {/* Periods */}
@@ -46,34 +64,15 @@ const Reports: React.FC = () => {
 
         {/* Report Types */}
         <div className="report-types">
-          <div className="report-type" onClick={handleBalanceSheet}>
-            <div className="icon balance-icon"></div>
-            <div className="report-info">
-              <span className="report-name">Balance Sheet</span>
-              <span className="last-updated">Last updated Today</span>
+          {reportCategories.find(cat => cat.name === activeCategory)?.types.map(type => (
+            <div className="report-type" key={type.name} onClick={() => handleReportTypeClick(type.path)}>
+              <div className={`icon ${type.icon}`}></div>
+              <div className="report-info">
+                <span className="report-name">{type.name}</span>
+                <span className="last-updated">Last updated Today</span>
+              </div>
             </div>
-          </div>
-          <div className="report-type" onClick={handleIncome}>
-            <div className="icon income-icon"></div>
-            <div className="report-info">
-              <span className="report-name">Income Statement</span>
-              <span className="last-updated">Last updated Today</span>
-            </div>
-          </div>
-          <div className="report-type" onClick={handleCashFlow}>
-            <div className="icon cashflow-icon"></div>
-            <div className="report-info">
-              <span className="report-name">Cash Flow</span>
-              <span className="last-updated">Last updated Today</span>
-            </div>
-          </div>
-          <div className="report-type" onClick={handleInvest}>
-            <div className="icon investment-icon"></div>
-            <div className="report-info">
-              <span className="report-name">Investment</span>
-              <span className="last-updated">Last updated Today</span>
-            </div>
-          </div>
+          ))}
         </div>
     
         <div>
