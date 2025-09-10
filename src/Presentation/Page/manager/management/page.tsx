@@ -162,7 +162,7 @@ const EmployeeManagement: React.FC = () => {
       status: employee.status === 'active' ? 'Active' : 'Inactive',
       profileImage: employee.avatar,
     };
-    
+
     setSelectedEmployee(detailed);
     setShowEmployeeDetailModal(true);
   };
@@ -291,11 +291,11 @@ const EmployeeManagement: React.FC = () => {
 
   const filteredEmployees = employees.filter((employee: Employee) => {
     const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+      employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
-  
+
   const handleAddEmployeeSubmit = (employee: any) => {
     console.log('New employee submitted:', employee);
     // Implement your add employee logic here
@@ -318,7 +318,7 @@ const EmployeeManagement: React.FC = () => {
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
-          
+
           <button className="add-employee-button" onClick={handleAddEmployee}>
             Add Employee
           </button>
@@ -327,14 +327,14 @@ const EmployeeManagement: React.FC = () => {
         {/* Employee List */}
         <div className="employee-list">
           {filteredEmployees.map((employee: Employee) => (
-            <div 
+            <div
               key={employee.id}
               className="employee-item"
               onClick={() => handleEmployeeDetails(employee)}
-            > 
+            >
               <div className="employee-info">
                 <img src={employee.avatar} alt={employee.name} className="employee-avatar" />
-              
+
                 <div className="employee-container">
                   <div className="employee-first">
                     <h3 className="employee-name1">{employee.name}</h3>
@@ -354,10 +354,9 @@ const EmployeeManagement: React.FC = () => {
         {filteredEmployees.length === 0 && (
           <div className="empty-state">
             <h3 className="empty-state-title">No employees found</h3>
-            <p className="empty-state-text">Try adjusting your search criteria.</p>
           </div>
         )}
-        
+
         {/* Add Employee Modal */}
         <AddEmployee
           isOpen={isAddEmployeeModal}

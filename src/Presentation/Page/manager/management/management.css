@@ -2,11 +2,13 @@
   width: 100%;
   height: 100%;
   border-radius: 12px;
-padding: 0;
+padding: 20px;
   margin: 0;
     background: #f8f9fa;
   animation: slideIn 0.3s ease-out;
   color: black;
+    border: 1px solid #f0f0f0;
+
 }
 .payroll-header {
   display: flex;
@@ -19,13 +21,17 @@ padding: 0;
 .search-container {
   width: 10px;
 }
-.header56{
-   border-radius: 18px;
+.empty-state{
+  color: black;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px ;
-  background: #f8f9fa ; 
+  
+  margin: 0 auto;
+  flex-direction: column;
+
+}
+.empty-state h3{
+    font-size: 24px;
+    text-align: center;
 }
 .search-icon {
   position: absolute;

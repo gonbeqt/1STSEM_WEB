@@ -1,25 +1,25 @@
-// BalanceSheet.tsx
+// CashFlow.tsx
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import React, { useState } from 'react';
-import './BalanceSheet.css';
+import './CashFlow.css';
 import { useNavigate } from 'react-router-dom';
 
-interface BalanceSheetItem {
+interface CashFlowItem {
   name: string;
   amount: number;
-  subItems?: BalanceSheetItem[];
+  subItems?: CashFlowItem[];
 }
 
-interface BalanceSheetData {
+interface CashFlowData {
   assets: {
-    current: BalanceSheetItem[];
-    nonCurrent: BalanceSheetItem[];
+    current: CashFlowItem[];
+    nonCurrent: CashFlowItem[];
   };
-  liabilities: BalanceSheetItem[];
-  equity: BalanceSheetItem[];
+  liabilities: CashFlowItem[];
+  equity: CashFlowItem[];
 }
 
-const BalanceSheet: React.FC = () => {
+const CashFlow: React.FC = () => {
   const navigate = useNavigate()
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
   const [expandedSections, setExpandedSections] = useState<{
@@ -41,7 +41,7 @@ const BalanceSheet: React.FC = () => {
     { name: 'Jun', assets: 130000, liabilities: 65000, equity: 65000 },
   ];
 
-  const balanceSheetData: BalanceSheetData = {
+  const cashflowData: CashFlowData = {
     assets: {
       current: [
         { name: 'Cash', amount: 125000 },
@@ -85,11 +85,11 @@ const BalanceSheet: React.FC = () => {
   };
 
   const calculateCurrentAssets = (): number => {
-    return balanceSheetData.assets.current.reduce((total, item) => total + item.amount, 0);
+    return cashflowData.assets.current.reduce((total, item) => total + item.amount, 0);
   };
 
   const calculateNonCurrentAssets = (): number => {
-    return balanceSheetData.assets.nonCurrent.reduce((total, item) => total + item.amount, 0);
+    return cashflowData.assets.nonCurrent.reduce((total, item) => total + item.amount, 0);
   };
 
   const calculateTotalAssets = (): number => {
@@ -97,11 +97,11 @@ const BalanceSheet: React.FC = () => {
   };
 
   const calculateTotalLiabilities = (): number => {
-    return balanceSheetData.liabilities.reduce((total, item) => total + item.amount, 0);
+    return cashflowData.liabilities.reduce((total, item) => total + item.amount, 0);
   };
 
   const calculateTotalEquity = (): number => {
-    return balanceSheetData.equity.reduce((total, item) => total + item.amount, 0);
+    return cashflowData.equity.reduce((total, item) => total + item.amount, 0);
   };
 
   const renderChartView = () => (
@@ -165,7 +165,7 @@ const BalanceSheet: React.FC = () => {
                   <span className="subsection-title">Current Assets</span>
                   <span className="subsection-total">${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
                 </div>
-                {balanceSheetData.assets.current.map((item, index) => (
+                {cashflowData.assets.current.map((item, index) => (
                   <div key={index} className="line-item">
                     <span className="item-name">{item.name}</span>
                     <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
@@ -182,7 +182,7 @@ const BalanceSheet: React.FC = () => {
                   <span className="subsection-title">Non-Current Assets</span>
                   <span className="subsection-total">${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
                 </div>
-                {balanceSheetData.assets.nonCurrent.map((item, index) => (
+                {cashflowData.assets.nonCurrent.map((item, index) => (
                   <div key={index} className="line-item">
                     <span className="item-name">{item.name}</span>
                     <span className="item-amount">
@@ -212,7 +212,7 @@ const BalanceSheet: React.FC = () => {
           
           {expandedSections.liabilities && (
             <div className="section-content">
-              {balanceSheetData.liabilities.map((item, index) => (
+              {cashflowData.liabilities.map((item, index) => (
                 <div key={index} className="line-item">
                   <span className="item-name">{item.name}</span>
                   <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
@@ -235,7 +235,7 @@ const BalanceSheet: React.FC = () => {
           
           {expandedSections.equity && (
             <div className="section-content">
-              {balanceSheetData.equity.map((item, index) => (
+              {cashflowData.equity.map((item, index) => (
                 <div key={index} className="line-item">
                   <span className="item-name">{item.name}</span>
                   <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
@@ -264,7 +264,7 @@ const BalanceSheet: React.FC = () => {
             <span>${formatCurrency(calculateTotalLiabilities() + calculateTotalEquity()).slice(1)}</span>
           </div>
           <div className="balance-status">
-            ✓ Balance Sheet is balanced
+            ✓ Cash Flow is balanced
           </div>
         </div>
       </div>
@@ -272,13 +272,13 @@ const BalanceSheet: React.FC = () => {
   );
 
   return (
-    <div className="balance-sheet-container">
-      <div className="balance-sheet-header">
+    <div className="cash-flow-container">
+      <div className="cash-flow-header">
         <div className="header-top">
-          <button className="back-btn" onClick={()=> navigate(-1)}>← Balance Sheet</button>
+          <button className="back-btn" onClick={()=> navigate(-1)}>← Cash Flow</button>
         </div>
         <div className="header-content">
-          <h1>Balance Sheet</h1>
+          <h1>Cash Flow</h1>
           <p>View your company's assets, liabilities, and equity</p>
         </div>
         
@@ -303,11 +303,11 @@ const BalanceSheet: React.FC = () => {
         </div>
       </div>
 
-      <div className="balance-sheet-content">
+      <div className="cash-flow-content">
         {activeView === 'chart' ? renderChartView() : renderTableView()}
       </div>
     </div>
   );
 };
 
-export default BalanceSheet;
+export default CashFlow;

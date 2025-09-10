@@ -6,24 +6,21 @@ import SideNavbarEmployee from './Presentation/Components/SideNavbarEmployee';
 import Home from './Presentation/Page/manager/home/page';
 import Login from './Presentation/Page/login/page';
 import Register from './Presentation/Page/register/page';
+
 import Invoice from './Presentation/Page/manager/invoice/page';
 import Reports from './Presentation/Page/manager/reports/page';
 import Settings from './Presentation/Page/manager/settings/page';
 import Management from './Presentation/Page/manager/management/page';
 import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
-import Assets from './Presentation/Page/manager/reports/BalanceSheet/Assets/Assets';
-import Liabilities from './Presentation/Page/manager/reports/BalanceSheet/Liabilities/Liabilities';
-import Equity from './Presentation/Page/manager/reports/BalanceSheet/Equity/Equity';
-
+import InvoiceReceipt from './Presentation/Page/manager/invoice/InvoiceReceipt/InvoiceReceipt';
+import CashFlow from './Presentation/Page/manager/reports/CashFlow/CashFlow';
+import Income from './Presentation/Page/manager/reports/Income/Income';
+import Invest from './Presentation/Page/manager/reports/Invest/Invest';
 
 import EmployeeHome from './Presentation/Page/employee/home/page';
 import EmployeePayslip from './Presentation/Page/employee/payslip/page';
 import EmployeeHistory from './Presentation/Page/employee/history/page';
 import EmployeeSettings from './Presentation/Page/employee/settings/page';
-import Payslip from './Presentation/Page/manager/reports/Payslip/Payslip';
-import GeneralReports from './Presentation/Page/manager/reports/GeneralReports/GeneralReports';
-import InvoiceDetails from './Presentation/Page/manager/invoice/InvoiceDetails/InvoiceDetails';
-import InvoiceReceipt from './Presentation/Page/manager/invoice/InvoiceReceipt/InvoiceReceipt';
 import TransactionDetails from './Presentation/Page/employee/home/TransactionDetails/TransactionDetails';
 
 
@@ -59,15 +56,14 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/balance_sheet" element={<BalanceSheet />} />
-          <Route path="/assets" element={<Assets />} />
-          <Route path="/liabilities" element={<Liabilities />} />
-          <Route path="/equity" element={<Equity />} />
-          <Route path="/payslip" element={<Payslip />} />
-          <Route path="/general_reports" element={<GeneralReports />} />
-          <Route path="/invoice_details/:id" element={<InvoiceDetails />} />
           <Route path="/invoice_receipt" element={<InvoiceReceipt />} />
+          <Route path="/cash_flow" element={<CashFlow />} />
+          <Route path="/income" element={<Income />} />
+          <Route path="/invest" element={<Invest />} />
+
+
         </Route>
-        
+
         <Route element={<EmployeeLayout />}>
           <Route path="/employee/home" element={<EmployeeHome />} />
           <Route path="/employee/payslip" element={<EmployeePayslip />} />
