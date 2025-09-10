@@ -51,7 +51,7 @@ const styles = {
   icon: {
     marginRight: "0.5rem",
     marginTop: "0.3rem",
-    color: "white",
+    color: "black",
     borderRight: "1px solid #d1d5db",
     paddingRight: "0.5rem",
   },
@@ -60,7 +60,7 @@ const styles = {
     outline: "none",
     flex: 1,
     backgroundColor: "transparent",
-    color: "white",
+    color: "black",
     width: "100%",
   },
   eyeButton: {

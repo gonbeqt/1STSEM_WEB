@@ -10,8 +10,6 @@ import Invoice from './Presentation/Page/manager/invoice/page';
 import Reports from './Presentation/Page/manager/reports/page';
 import Settings from './Presentation/Page/manager/settings/page';
 import Management from './Presentation/Page/manager/management/page';
-import AddEmployee from './Presentation/Page/manager/management/AddEmployee/AddEmployee';
-import ManagementEmployeeDetails from './Presentation/Page/manager/management/EmployeeDetails/ManagementEmployeeDetails';
 import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
 import Assets from './Presentation/Page/manager/reports/BalanceSheet/Assets/Assets';
 import Liabilities from './Presentation/Page/manager/reports/BalanceSheet/Liabilities/Liabilities';
@@ -57,8 +55,6 @@ function App() {
         <Route element={<ManagerLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/management" element={<Management />} />
-          <Route path="/add_employee" element={<AddEmployee />} />
-          <Route path="/management/employee/:id" element={<ManagementEmployeeDetails />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
