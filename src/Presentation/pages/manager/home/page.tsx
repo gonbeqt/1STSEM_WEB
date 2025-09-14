@@ -24,7 +24,7 @@ const Home = () => {
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
 
-  const handleWalletConnect = (walletType: string) => {
+  const handleWalletConnect = (walletAddress: string) => {
     setIsWalletModalOpen(false);
   };
 
@@ -236,7 +236,7 @@ const Home = () => {
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
-        onConnect={handleWalletConnect}
+        onWalletConnected={handleWalletConnect}
       />
 
       {/* Payment Modal */}
