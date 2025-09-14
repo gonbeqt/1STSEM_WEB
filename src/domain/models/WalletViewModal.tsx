@@ -33,7 +33,7 @@ export class WalletViewModel {
   private state: WalletState = {
     privateKey: '',
     walletName: 'My Wallet',
-    walletType: 'Private Key',
+    walletType: 'MetaMask',
     wallets: [],
     selectedWallet: null,
     isConnecting: false,
@@ -108,6 +108,12 @@ export class WalletViewModel {
   // Actions
   connectWallet = async (): Promise<boolean> => {
     if (!this.validateConnectForm()) return false;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.state.connectError = 'You must be logged in to connect a wallet.';
+      return false;
+    }
 
     try {
       this.state.isConnecting = true;

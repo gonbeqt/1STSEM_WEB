@@ -8,6 +8,7 @@ export class WalletRepositoryImpl implements WalletRepository {
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
+    console.log('Token:', token);
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
@@ -15,14 +16,14 @@ export class WalletRepositoryImpl implements WalletRepository {
   }
 
   async connectWallet(request: ConnectWalletRequest): Promise<WalletResponse> {
-    const response = await fetch(`${this.API_URL}/wallet/connect_wallet_with_private_key/`, {
+    const response = await fetch(`${this.API_URL}/wallets/connect_wallet_with_private_key/`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(request),
     });
 
     const data = await response.json();
-
+    console.log('Connect Wallet Response:', data);
     if (!response.ok) {
       throw new Error(data.error || 'Failed to connect wallet');
     }
@@ -31,7 +32,7 @@ export class WalletRepositoryImpl implements WalletRepository {
   }
 
   async getWallets(): Promise<WalletListResponse> {
-    const response = await fetch(`${this.API_URL}/wallet/list/`, {
+    const response = await fetch(`${this.API_URL}/wallets/list/`, {
       method: 'GET',
       headers: this.getAuthHeaders(),
     });
@@ -46,7 +47,7 @@ export class WalletRepositoryImpl implements WalletRepository {
   }
 
   async disconnectWallet(request: DisconnectWalletRequest): Promise<DisconnectWalletResponse> {
-    const response = await fetch(`${this.API_URL}/wallet/disconnect/`, {
+    const response = await fetch(`${this.API_URL}/wallets/disconnect/`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(request),

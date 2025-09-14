@@ -16,7 +16,7 @@ interface WalletOption {
   name: string;
   icon: string;
   description: string;
-  type: 'metamask' | 'walletconnect' | 'privatekey';
+  type: 'metamask' | 'trustwallet' | 'privatekey';
 }
 
 const walletOptions: WalletOption[] = [
@@ -28,11 +28,11 @@ const walletOptions: WalletOption[] = [
     type: 'metamask'
   },
   {
-    id: 'walletconnect',
-    name: 'WalletConnect',
-    icon: '📱',
-    description: 'Connect using WalletConnect protocol',
-    type: 'walletconnect'
+    id: 'trustwallet',
+    name: 'TrustWallet',
+    icon: '🛡️',
+    description: 'Connect using TrustWallet',
+    type: 'trustwallet'
   },
   {
     id: 'privatekey',
@@ -70,17 +70,17 @@ const WalletModal: React.FC<WalletConnectModalProps> = observer(({
       // Set wallet type based on selection
       viewModel.setWalletType(wallet.name);
       
-      if (wallet.type === 'metamask' || wallet.type === 'privatekey') {
+      if (wallet.type === 'privatekey') {
         setStep('input');
       } else {
-        // Handle WalletConnect or other protocols
-        handleWalletConnectProtocol(wallet);
+        // Handle other protocols
+        handleWalletProtocol(wallet);
       }
     }
   };
 
-  const handleWalletConnectProtocol = (wallet: WalletOption) => {
-    // Placeholder for WalletConnect integration
+  const handleWalletProtocol = (wallet: WalletOption) => {
+    // Placeholder for wallet integration
     alert(`${wallet.name} integration coming soon!`);
     setSelectedWallet(null);
     setStep('select');
