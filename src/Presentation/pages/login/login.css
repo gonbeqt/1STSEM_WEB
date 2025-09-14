@@ -1,0 +1,150 @@
+body, html, #root {
+  background-color: #f8f9fa;
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Removed .login-sidebar */
+
+.login-form-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  animation: slideIn 0.4s ease-out;
+  color: #111827; /* Changed text color to dark */
+}
+
+.login-form h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+  color: #111827;
+}
+
+.login-form .form-subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 32px;
+  font-size: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* InputWithIcon is styled within its own component, so we don't need to override it here */
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 14px 1rem;
+  margin-top: 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  width: 100%;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 14px 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.role-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.role-button {
+  flex: 1;
+  margin-top: 0; /* Reset margin */
+}
+
+/* Make the active role button look like the primary button */
+.role-button.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+/* Make the inactive role button look like the secondary button */
+.role-button.btn-secondary {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+.role-button.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+
+.text-center {
+  text-align: center;
+  margin-top: 24px;
+  color: #6b7280;
+}
+
+.white-link {
+  color: #6366f1;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.white-link:hover {
+  text-decoration: underline;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

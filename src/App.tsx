@@ -1,29 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 
-import SideNavbar from './Presentation/Components/SideNavbar';
-import SideNavbarEmployee from './Presentation/Components/SideNavbarEmployee';
-import Home from './Presentation/Page/manager/home/page';
-import Login from './Presentation/Page/login/page';
-import Register from './Presentation/Page/register/page';
+import SideNavbar from './presentation/components/SideNavbar';
+import SideNavbarEmployee from './presentation/components/SideNavbarEmployee';
+import Home from './presentation/pages/manager/home/page';
+import Login from './presentation/pages/login/page';
+import Register from './presentation/pages/register/page';
 
-import Invoice from './Presentation/Page/manager/invoice/page';
-import Reports from './Presentation/Page/manager/reports/page';
-import Settings from './Presentation/Page/manager/profile/page';
-import Management from './Presentation/Page/manager/management/page';
-import BalanceSheet from './Presentation/Page/manager/reports/BalanceSheet/BalanceSheet';
-import InvoiceReceipt from './Presentation/Page/manager/invoice/InvoiceReceipt/InvoiceReceipt';
-import CashFlow from './Presentation/Page/manager/reports/CashFlow/CashFlow';
-import Income from './Presentation/Page/manager/reports/Income/Income';
-import Invest from './Presentation/Page/manager/reports/Invest/Invest';
-import PayrollSummary from './Presentation/Page/manager/reports/PayrollSummary/PayrollSummary';
+import Invoice from './presentation/pages/manager/invoice/page';
+import Reports from './presentation/pages/manager/reports/page';
+import Settings from './presentation/pages/manager/profile/page';
+import Management from './presentation/pages/manager/management/page';
+import BalanceSheet from './presentation/pages/manager/reports/BalanceSheet/BalanceSheet';
+import InvoiceReceipt from './presentation/pages/manager/invoice/InvoiceReceipt/InvoiceReceipt';
+import CashFlow from './presentation/pages/manager/reports/CashFlow/CashFlow';
+import Income from './presentation/pages/manager/reports/Income/Income';
+import Invest from './presentation/pages/manager/reports/Invest/Invest';
+import PayrollSummary from './presentation/pages/manager/reports/PayrollSummary/PayrollSummary';
 
-import EmployeeHome from './Presentation/Page/employee/home/page';
-import EmployeePayslip from './Presentation/Page/employee/payslip/page';
-import EmployeeHistory from './Presentation/Page/employee/history/page';
-import EmployeeSettings from './Presentation/Page/employee/settings/page';
-import TransactionDetails from './Presentation/Page/employee/home/TransactionDetails/TransactionDetails';
-import TaxSummary from './Presentation/Page/manager/reports/TaxSummary/TaxSummary';
+import EmployeeHome from './presentation/pages/employee/home/page';
+import EmployeePayslip from './presentation/pages/employee/payslip/page';
+import EmployeeHistory from './presentation/pages/employee/history/page';
+import EmployeeSettings from './presentation/pages/employee/settings/page';
+import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
+import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
 
 
 const ManagerLayout = () => (
