@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import './SideNavbar.css';
 import HomeIcon from './icons/HomeIcon';
 import InvoiceIcon from './icons/InvoiceIcon';
@@ -7,11 +7,30 @@ import LogoutIcon from './icons/LogoutIcon';
 import PayrollIcon from './icons/PayrollIcon';
 import ReportsIcon from './icons/ReportsIcon';
 import SettingsIcon from './icons/SettingsIcon';
+import { LoginViewModel } from '../../domain/models/LoginViewModel';
+import { container } from '../../di/container';
 
 const SideNavbar = () => {
+    const navigate = useNavigate();
+  const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
   const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons only)
   const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false); // Track if user clicked a nav item
 
+
+ useEffect(() => {
+    if (!loginViewModel.isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+  }, [loginViewModel.isLoggedIn, navigate]);
+
+
+   const handleLogout = async () => {
+    const success = await loginViewModel.logout();
+    if (success) {
+      navigate('/login');
+    }
+  };
   const handleMouseEnter = () => {
     setIsExpanded(true);//expand when mouse enters
   };
@@ -115,10 +134,10 @@ const SideNavbar = () => {
       </ul>
       
       <div className="logout-container">
-        <NavLink to="/login">
+        <button onClick={handleLogout} className="logout-btn">
           <LogoutIcon />
           {isExpanded && <span className="nav-text">Log out</span>}
-        </NavLink>
+        </button>
       </div>
     </div>
   );

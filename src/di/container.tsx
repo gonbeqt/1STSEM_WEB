@@ -8,6 +8,7 @@ import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
 import { GetWalletsUseCase } from '../domain/usecases/GetWalletUseCase';
 import { DisconnectWalletUseCase } from '../domain/usecases/DisconnectWalletUseCase';
 import { WalletViewModel } from '../domain/models/WalletViewModal';
+import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
 
 export interface Container {
   userRepository: UserRepositoryImpl;
@@ -15,6 +16,8 @@ export interface Container {
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
+    logoutUseCase: LogoutUseCase;
+
   connectWalletUseCase: ConnectWalletUseCase;
   getWalletsUseCase: GetWalletsUseCase;
   disconnectWalletUseCase: DisconnectWalletUseCase;
@@ -27,18 +30,22 @@ export interface Container {
 }
 
 export const container: Container = {
+  
   userRepository: new UserRepositoryImpl(),
   walletRepository: new WalletRepositoryImpl(),
 
   registerUseCase: new RegisterUseCase(new UserRepositoryImpl()),
   loginUseCase: new LoginUseCase(new UserRepositoryImpl()),
-   connectWalletUseCase: new ConnectWalletUseCase(new WalletRepositoryImpl()),
+  logoutUseCase: new LogoutUseCase(new UserRepositoryImpl()),
+  connectWalletUseCase: new ConnectWalletUseCase(new WalletRepositoryImpl()),
   getWalletsUseCase: new GetWalletsUseCase(new WalletRepositoryImpl()),
   disconnectWalletUseCase: new DisconnectWalletUseCase(new WalletRepositoryImpl()),
 
   registerViewModel: () => new RegisterViewModel(new RegisterUseCase(new UserRepositoryImpl())),
-  loginViewModel: () => new LoginViewModel(new LoginUseCase(new UserRepositoryImpl())),
-  walletViewModel: () => new WalletViewModel(
+ loginViewModel: () => new LoginViewModel(
+    new LoginUseCase(new UserRepositoryImpl()),
+    new LogoutUseCase(new UserRepositoryImpl())
+  ),  walletViewModel: () => new WalletViewModel(
     new ConnectWalletUseCase(new WalletRepositoryImpl()),
     new GetWalletsUseCase(new WalletRepositoryImpl()),
     new DisconnectWalletUseCase(new WalletRepositoryImpl())

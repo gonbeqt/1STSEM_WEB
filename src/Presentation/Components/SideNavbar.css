@@ -157,13 +157,12 @@
   margin-right: 0;
 }
 
-.logout-container {
-  margin-top: auto;
-  padding-top: 10px;
-}
+
 .logout-container{
     background-color: rgba(255, 255, 255, 0.1);
-
+    margin-top: auto;
+  padding-top: 10px;
+  flex-direction: row;
 }
 .logout-container a {
   color: black;
@@ -188,7 +187,31 @@
   margin-right: 12px;
   flex-shrink: 0;
 }
-
+button.logout-btn {
+  background: none;
+  border: none;
+  color: black;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 12px
+  
+}
+button.logout-btn:hover {
+  background-color: red;
+}
+button.logout-btn:focus {
+  outline: none;
+}
+button.logout-btn svg {
+  width: 25px;
+  height: 25px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
 .side-navbar.collapsed .logout-container a {
   justify-content: center;
   padding: 10px;
