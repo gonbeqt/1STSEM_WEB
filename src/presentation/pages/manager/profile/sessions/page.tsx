@@ -12,6 +12,9 @@ export const ManagerSessionsPage: React.FC = () => {
     const { sessions, loading, error, revokeSession, transferMainDevice } = useSessions();
     const sessionViewModel = useViewModel(SessionViewModel);
 
+    const currentSession = sessions.find(session => session.is_current);
+    const isCurrentSessionMainDevice = currentSession?.is_main_device || false;
+
     const handleRevoke = async (sessionId: string) => {
         await revokeSession(sessionId);
         window.location.reload();
@@ -59,7 +62,9 @@ export const ManagerSessionsPage: React.FC = () => {
         <div className="sessions-page">
             <div className="content">
                 <h1>Manage Sessions</h1>
-                <button onClick={handleRevokeOtherSessions} className="revoke-others-button">Revoke Other Sessions</button>
+                {isCurrentSessionMainDevice && (
+                    <button onClick={handleRevokeOtherSessions} className="revoke-others-button">Revoke Other Sessions</button>
+                )}
                 <div className="sessions-list">
                     {sessions.length === 0 ? (
                         <p>No sessions found.</p>
@@ -74,13 +79,21 @@ export const ManagerSessionsPage: React.FC = () => {
                                 <p><strong>Last Seen:</strong> {session.last_seen ? format(new Date(session.last_seen), 'PPP p') : 'N/A'}</p>
                                 <p><strong>Approved:</strong> {session.approved ? 'Yes' : 'No'}</p>
                                 <p><strong>Current Session:</strong> {session.is_current ? 'Yes' : 'No'}</p>
-                                {!session.approved && (
-                                    <button onClick={() => handleApproveSession(session.sid)}  className="approve-button">Approve</button>
+                                <p><strong>Main Device:</strong> {session.is_main_device ? 'Yes' : 'No'}</p>
+
+                                {isCurrentSessionMainDevice && (
+                                    <>
+                                        {!session.approved && (
+                                            <button onClick={() => handleApproveSession(session.sid)}  className="approve-button">Approve</button>
+                                        )}
+                                        {session.approved && !session.is_current && (
+                                            <button onClick={() => handleTransferMainDevice(session.sid)} className="transfer-main-button">Transfer Main</button>
+                                        )}
+                                    </>
                                 )}
-                                {session.approved && !session.is_current && (
-                                    <button onClick={() => handleTransferMainDevice(session.sid)} className="transfer-main-button">Transfer Main</button>
+                                {(isCurrentSessionMainDevice || session.is_current) && (
+                                    <button onClick={() => handleRevoke(session.sid)} className="revoke-button">Revoke</button>
                                 )}
-                                <button onClick={() => handleRevoke(session.sid)} className="revoke-button">Revoke</button>
                             </div>
                         ))
                     )}
