@@ -169,6 +169,8 @@ export class WalletViewModel {
   
       // Store wallet info in localStorage for persistence
       localStorage.setItem('walletAddress', response.data.wallet_address);
+      localStorage.setItem('privateKey', walletData.privateKey);
+      localStorage.setItem('walletConnected', 'true');
   
       this.clearForm();
       // After successful connection, fetch the balance
@@ -183,8 +185,20 @@ export class WalletViewModel {
     }
   };
 
-  reconnectWallet = async (): Promise<boolean> => {
-    if (!this.validateReconnectForm()) return false;
+  reconnectWallet = async (privateKeyToUse?: string): Promise<boolean> => {
+    const key = privateKeyToUse || this.state.reconnectPrivateKey;
+
+    if (!key.trim()) {
+      this.state.reconnectError = 'Private key is required';
+      return false;
+    }
+
+    // Basic hex validation for private key
+    const hexRegex = /^0x[a-fA-F0-9]{64}$|^[a-fA-F0-9]{64}$/;
+    if (!hexRegex.test(key)) {
+      this.state.reconnectError = 'Invalid private key format';
+      return false;
+    }
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -197,7 +211,7 @@ export class WalletViewModel {
       this.state.reconnectError = null;
 
       const response = await this.reconnectWalletUseCase.execute({
-        private_key: this.state.reconnectPrivateKey
+        private_key: key
       });
 
       this.state.successMessage = response.message;
@@ -205,6 +219,7 @@ export class WalletViewModel {
       
       // Store wallet info in localStorage for persistence
       localStorage.setItem('walletAddress', response.wallet_address);
+      localStorage.setItem('walletConnected', 'true');
 
       // Clear the form for security
       this.state.reconnectPrivateKey = '';
@@ -256,11 +271,16 @@ export class WalletViewModel {
     };
 
     // Check if wallet was previously connected (from localStorage)
-    checkWalletConnection = () => {
+    checkWalletConnection = async (authToken?: string) => {
+    const token = authToken || localStorage.getItem('token');
     const walletAddress = localStorage.getItem('walletAddress');
+    const privateKey = localStorage.getItem('privateKey');
     const walletConnected = localStorage.getItem('walletConnected');
-    if (walletAddress && walletConnected === 'true') {
+
+    if (walletAddress && privateKey && walletConnected === 'true' && token) {
       this.state.reconnectedWalletAddress = walletAddress;
+      // Attempt to auto-reconnect using the stored private key
+      await this.reconnectWallet(privateKey);
     }
   };
 
@@ -338,6 +358,7 @@ export class WalletViewModel {
     this.state.usdBalance = null;
     localStorage.removeItem('walletAddress');
     localStorage.removeItem('walletConnected');
+    localStorage.removeItem('privateKey');
   };
 
   get isWalletConnected() {

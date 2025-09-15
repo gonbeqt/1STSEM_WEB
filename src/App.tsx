@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 
 import SideNavbar from './presentation/components/SideNavbar';
@@ -60,6 +60,10 @@ const EmployeeLayout = () => (
 );
 
 function App() {
+  useEffect(() => {
+    walletViewModel.checkWalletConnection();
+  }, []);
+
   return (
     <WalletViewModelProvider value={walletViewModel}>
     <Router>
