@@ -24,6 +24,7 @@ import EmployeeHistory from './presentation/pages/employee/history/page';
 import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
+import { ManagerSessionsPage } from './presentation/pages/manager/profile/sessions/page';
 
 
 const ManagerLayout = () => (
@@ -64,6 +65,7 @@ function App() {
           <Route path="/invest" element={<Invest />} />
           <Route path="/payroll_summary" element={<PayrollSummary />} />
           <Route path="/tax_summary" element={<TaxSummary />} />
+          <Route path="/manager/sessions" element={<ManagerSessionsPage />} />
 
 
 

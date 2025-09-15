@@ -288,7 +288,7 @@
     max-width: none;
   }
 
-  .report-types {
+    .report-types {
     grid-template-columns: 1fr;
     row-gap: 12px;
   }

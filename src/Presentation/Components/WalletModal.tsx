@@ -10,15 +10,16 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
-  const { connectWallet, setWalletType, setPrivateKey, setWalletName } = useWallet();
+  const { connectWallet } = useWallet();
   const [privateKeyInput, setPrivateKeyInput] = useState<string>('');
 
   const handleWalletConnect = async (walletType: string) => {
-    setWalletType(walletType);
-    setPrivateKey(privateKeyInput);
-    setWalletName(walletType + ' Wallet');
-    
-    const success = await connectWallet();
+    const success = await connectWallet({
+      privateKey: privateKeyInput,
+      walletName: walletType + ' Wallet',
+      walletType: walletType,
+    });
+
     if (success) {
       onClose();
     } else {

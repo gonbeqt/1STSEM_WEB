@@ -90,4 +90,5 @@
 .icon.document::before { content: "📄"; }
 .icon.currency::before { content: "💱"; }
 .icon.shield::before { content: "🛡️"; }
+.icon.session::before { content: "💻"; }
 .icon.help::before { content: "❓"; }

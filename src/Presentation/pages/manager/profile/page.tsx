@@ -1,8 +1,11 @@
 import './profile.css'
+import { useNavigate } from 'react-router-dom';
+
 interface MenuItem {
   icon: string;
   title: string;
   value?: string;
+  path?: string;
 }
 
 const user = {
@@ -16,10 +19,19 @@ const menuItems: MenuItem[] = [
   { icon: "document", title: "Compliance" },
   { icon: "currency", title: "Currency", value: "ETH/USD" },
   { icon: "shield", title: "Security" },
+  { icon: "session", title: "Session Management", path: "/manager/sessions" },
   { icon: "help", title: "Help" }
 ];
 
 const Profile = () => {
+  const navigate = useNavigate();
+
+  const handleMenuItemClick = (path?: string) => {
+    if (path) {
+      navigate(path);
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="user-profile">
@@ -31,7 +43,7 @@ const Profile = () => {
       </div>
       <nav className="menu">
         {menuItems.map((item, index) => (
-          <div key={index} className="menu-item">
+          <div key={index} className="menu-item" onClick={() => handleMenuItemClick(item.path)}>
             <i className={`icon ${item.icon}`}></i>
             <span className="item-title">{item.title}</span>
             {item.value && <span className="item-value">{item.value}</span>}

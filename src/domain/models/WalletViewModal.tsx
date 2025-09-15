@@ -142,34 +142,38 @@ export class WalletViewModel {
   };
 
   // Actions
-  connectWallet = async (): Promise<boolean> => {
+  connectWallet = async (walletData: { privateKey: string; walletName: string; walletType: string }): Promise<boolean> => {
+    this.state.privateKey = walletData.privateKey;
+    this.state.walletName = walletData.walletName;
+    this.state.walletType = walletData.walletType;
+  
     if (!this.validateConnectForm()) return false;
-
+  
     const token = localStorage.getItem('token');
     if (!token) {
       this.state.connectError = 'You must be logged in to connect a wallet.';
       return false;
     }
-
+  
     try {
       this.state.isConnecting = true;
       this.clearErrors();
-
+  
       const response = await this.connectWalletUseCase.execute({
         private_key: this.state.privateKey,
         wallet_name: this.state.walletName,
-        wallet_type: this.state.walletType
+        wallet_type: this.state.walletType,
       });
-
+  
       this.state.successMessage = response.message;
-      
+  
       // Store wallet info in localStorage for persistence
       localStorage.setItem('walletAddress', response.data.wallet_address);
-      localStorage.setItem('walletConnected', 'true');
-
+  
       this.clearForm();
       // After successful connection, fetch the balance
-      await this.fetchWalletBalance();
+      await this.fetchWalletBalance(token);
+      this.state.walletAddress = response.data.wallet_address; // Set walletAddress after successful balance fetch
       return true;
     } catch (error) {
       this.state.connectError = error instanceof Error ? error.message : 'Failed to connect wallet';
@@ -201,13 +205,13 @@ export class WalletViewModel {
       
       // Store wallet info in localStorage for persistence
       localStorage.setItem('walletAddress', response.wallet_address);
-      localStorage.setItem('walletConnected', 'true');
 
       // Clear the form for security
       this.state.reconnectPrivateKey = '';
 
       // After successful reconnection, fetch the balance
-      await this.fetchWalletBalance();
+      await this.fetchWalletBalance(token);
+      this.state.reconnectedWalletAddress = response.wallet_address; // Set reconnectedWalletAddress after successful balance fetch
 
       return true;
     } catch (error) {
@@ -218,8 +222,8 @@ export class WalletViewModel {
     }
   };
 
-  fetchWalletBalance = async (): Promise<void> => {
-    const token = localStorage.getItem('token');
+  fetchWalletBalance = async (authToken?: string): Promise<void> => {
+    const token = authToken || localStorage.getItem('token');
     if (!token) {
       this.state.fetchBalanceError = 'Authentication required to fetch balance.';
       return;
@@ -228,7 +232,7 @@ export class WalletViewModel {
     try {
       this.state.isFetchingBalance = true;
       this.state.fetchBalanceError = null;
-      const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute();
+      const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
       console.log('Fetch Wallet Balance API Response:', response);
       if (response.data.wallets.length > 0) {
         // Assuming we display the first wallet's balance for simplicity
@@ -260,8 +264,6 @@ export class WalletViewModel {
     
     if (walletAddress && walletConnected === 'true') {
       this.state.reconnectedWalletAddress = walletAddress;
-      // If reconnected, also try to fetch balance
-      this.fetchWalletBalance();
     }
   };
 
@@ -332,8 +334,16 @@ export class WalletViewModel {
     return this.state.reconnectPrivateKey.trim() !== '' && !this.state.isReconnecting;
   }
 
+  resetWalletState = () => {
+    this.state.walletAddress = null;
+    this.state.reconnectedWalletAddress = null;
+    this.state.ethBalance = null;
+    this.state.usdBalance = null;
+    localStorage.removeItem('walletAddress');
+    localStorage.removeItem('walletConnected');
+  };
+
   get isWalletConnected() {
-    return !!this.state.walletAddress || !!this.state.reconnectedWalletAddress || 
-           localStorage.getItem('walletConnected') === 'true';
+    return !!this.state.walletAddress || !!this.state.reconnectedWalletAddress;
   }
 }

@@ -29,7 +29,6 @@ const Home =() => {
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
-  const [autoReconnectAttempted, setAutoReconnectAttempted] = useState(false);
   
   // Wallet state
   const {
@@ -49,29 +48,6 @@ const Home =() => {
     setReconnectPrivateKey,
     fetchWalletBalance
   } = useWallet();
-
-  // Auto-reconnect on component mount
-  useEffect(() => {
-    const attemptAutoReconnect = async () => {
-      const storedWalletAddress = localStorage.getItem('walletAddress');
-      const storedPrivateKey = localStorage.getItem('walletPrivateKey'); 
-      const wasConnected = localStorage.getItem('walletConnected') === 'true';
-      
-      if (wasConnected && storedPrivateKey && !autoReconnectAttempted) {
-        setAutoReconnectAttempted(true);
-        console.log('Attempting automatic wallet reconnection...');
-        
-        try {
-          setReconnectPrivateKey(storedPrivateKey);
-          await reconnectWallet();
-        } catch (error) {
-          console.log('Auto-reconnect failed, user will need to manually reconnect');
-        }
-      } 
-    };
-
-    attemptAutoReconnect();
-  }, [reconnectWallet, autoReconnectAttempted]);
 
   // Clear success message after showing it
   useEffect(() => {

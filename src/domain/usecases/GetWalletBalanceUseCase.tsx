@@ -4,7 +4,7 @@ import { GetWalletsResponse, GetWalletsListResponse } from '../entities/WalletEn
 export class GetWalletBalanceUseCase {
   constructor(private walletRepository: WalletRepository) {}
 
-  async execute(): Promise<GetWalletsListResponse> {
-    return this.walletRepository.getWalletBalance();
+  async execute(token: string): Promise<GetWalletsListResponse> {
+    return this.walletRepository.getWalletBalance(token);
   }
 }

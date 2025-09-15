@@ -56,10 +56,17 @@ export class WalletRepositoryImpl implements WalletRepository {
     return data;
   }
 
-  async getWalletBalance(): Promise<GetWalletsListResponse> {
+  async getWalletBalance(token: string): Promise<GetWalletsListResponse> {
+    if (!token) {
+      throw new Error('Authentication token is missing.');
+    }
+
     const response = await fetch(`${this.API_URL}/wallets/get_wallet_balance/`, {
       method: 'GET',
-      headers: this.getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
     });
 
     const data = await response.json();

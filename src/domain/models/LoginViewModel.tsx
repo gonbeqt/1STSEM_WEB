@@ -2,6 +2,7 @@
 import { makeAutoObservable } from 'mobx';
 import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
+import { WalletViewModel } from './WalletViewModal';
 
 interface LoginState {
   username: string;
@@ -26,18 +27,20 @@ export class LoginViewModel {
 
   constructor(
     private loginUseCase: LoginUseCase,
-    private logoutUseCase: LogoutUseCase
+    private logoutUseCase: LogoutUseCase,
+    private walletViewModel: WalletViewModel
   ) {
     makeAutoObservable(this);
     
-    // Check if user is already logged in
-    this.checkLoginStatus();
-  }
-
-  private checkLoginStatus = () => {
+    // Initialize login status based on existing tokens
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     this.state.isLoggedIn = !!(token && user);
+  }
+
+  private checkLoginStatus = () => {
+    // This method is no longer needed as login status is initialized in the constructor
+    // and updated by login/logout actions.
   };
 
   setUsername = (username: string) => {
@@ -67,7 +70,13 @@ export class LoginViewModel {
         device_id: 'web'
       });
 
-      const tokenToStore = Array.isArray(response.data.token) ? response.data.token[0] : response.data.token;
+      const token = response.data.token;
+      const tokenToStore = Array.isArray(token) ? token[0] : token;
+
+      if (!tokenToStore) {
+        throw new Error('No token received from login');
+      }
+
       localStorage.setItem('token', tokenToStore);
       localStorage.setItem('user', JSON.stringify(response.data));
       
@@ -94,6 +103,7 @@ export class LoginViewModel {
       await this.logoutUseCase.execute({});
       
       this.state.isLoggedIn = false;
+      this.walletViewModel.resetWalletState();
       
       // Clear any other application state if needed
       this.state.username = '';

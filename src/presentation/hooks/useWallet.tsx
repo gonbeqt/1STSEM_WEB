@@ -28,9 +28,6 @@ export const useWallet = () => {
     reconnectWallet: viewModel.reconnectWallet,
     setReconnectPrivateKey: viewModel.setReconnectPrivateKey, // Expose setter for private key
     connectWallet: viewModel.connectWallet,
-    setPrivateKey: viewModel.setPrivateKey,
-    setWalletName: viewModel.setWalletName,
-    setWalletType: viewModel.setWalletType,
     fetchWalletBalance: viewModel.fetchWalletBalance,
     
   };

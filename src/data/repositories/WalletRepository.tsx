@@ -5,5 +5,5 @@ import { WalletResponse } from "../../domain/entities/WalletEntities";
 export interface WalletRepository {
     connectWallet(request: ConnectWalletRequest): Promise<WalletResponse>;
     reconnectWallet(request: ReconnectWalletRequest): Promise<ReconnectWalletResponse>;
-    getWalletBalance(): Promise<GetWalletsListResponse>;
+    getWalletBalance(token: string): Promise<GetWalletsListResponse>;
 }
