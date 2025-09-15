@@ -25,8 +25,22 @@ import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
 import { ManagerSessionsPage } from './presentation/pages/manager/profile/sessions/page';
+import { GetWalletBalanceUseCase } from './domain/usecases/GetWalletBalanceUseCase';
+import { ReconnectWalletUseCase } from './domain/usecases/ReconnectWalletUseCase';
+import { ConnectWalletUseCase } from './domain/usecases/ConnectWalletUseCase';
+import { WalletViewModel } from './domain/models/WalletViewModal';
+import { WalletViewModelProvider } from './context/WalletViewModelContext';
 
+import { WalletRepositoryImpl } from './domain/repositoriesImpl/WalletRepositoryImpl';
 
+const walletRepository = new WalletRepositoryImpl();
+
+const walletViewModel = new WalletViewModel(
+  new ConnectWalletUseCase(walletRepository),
+  new ReconnectWalletUseCase(walletRepository),
+  new GetWalletBalanceUseCase(walletRepository)
+);
+  
 const ManagerLayout = () => (
   <div className="app-container">
     <SideNavbar />
@@ -47,12 +61,14 @@ const EmployeeLayout = () => (
 
 function App() {
   return (
+    <WalletViewModelProvider value={walletViewModel}>
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<div className="register-page-wrapper"><Register /></div>} />
         <Route element={<ManagerLayout />}>
+        
           <Route path="/home" element={<Home />} />
           <Route path="/management" element={<Management />} />
           <Route path="/invoice" element={<Invoice />} />
@@ -80,6 +96,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </WalletViewModelProvider>
   );
 }
 

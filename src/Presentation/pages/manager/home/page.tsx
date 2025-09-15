@@ -23,13 +23,13 @@ import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import { useWallet } from '../../../hooks/useWallet';
 
-const Home =() => {
+const Home = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
-  
+
   // Wallet state
   const {
     isWalletConnected,
@@ -39,7 +39,7 @@ const Home =() => {
     usdBalance,
     isFetchingBalance,
     fetchBalanceError,
-  
+
     successMessage,
     clearSuccessMessage,
     isReconnecting,
@@ -213,19 +213,19 @@ const Home =() => {
                 <span className="wallet-status-connecting-text">Connecting...</span>
               </div>
             )}
-            
+
           </div>
-          
+
           {!isWalletConnected && !isReconnecting ? (
-            <button 
-              className="connect-wallet-new" 
+            <button
+              className="connect-wallet-new"
               onClick={() => setIsWalletModalOpen(true)}
             >
               Connect Wallet
             </button>
           ) : null}
         </div>
-        
+
         <div className="wallet-balance">
           <div className="balance-main">
             <EthereumIcon className="eth-icon" />
@@ -235,7 +235,7 @@ const Home =() => {
               ) : ethBalance !== null ? (
                 `${ethBalance.toFixed(4)} ETH`
               ) : (
-                <span className="balance-empty-text">0.00 ETH</span>
+                <span className="balance-empty-text"></span>
               )}
             </span>
           </div>
@@ -251,7 +251,7 @@ const Home =() => {
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
             ) : (
-              '₱ 0.00'
+              <span className="balance-empty-text"></span>
             )}
           </div>
         </div>
@@ -382,7 +382,7 @@ const Home =() => {
         isOpen={isAuditContractModalOpen}
         onClose={() => setIsAuditContractModalOpen(false)}
       />
-      
+
       <GenerateReportModal
         isOpen={isGenerateReportModalOpen}
         onClose={() => setIsGenerateReportModalOpen(false)}

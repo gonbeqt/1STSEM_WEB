@@ -223,45 +223,42 @@ export class WalletViewModel {
   };
 
   fetchWalletBalance = async (authToken?: string): Promise<void> => {
-    const token = authToken || localStorage.getItem('token');
-    if (!token) {
-      this.state.fetchBalanceError = 'Authentication required to fetch balance.';
-      return;
-    }
+  const token = authToken || localStorage.getItem('token');
+  if (!token) {
+    this.state.fetchBalanceError = 'Authentication required to fetch balance.';
+    return;
+  }
 
-    try {
-      this.state.isFetchingBalance = true;
-      this.state.fetchBalanceError = null;
-      const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
-      console.log('Fetch Wallet Balance API Response:', response);
-      if (response.data.wallets.length > 0) {
-        // Assuming we display the first wallet's balance for simplicity
-        const primaryWallet = response.data.wallets[0];
-        this.state.walletAddress = primaryWallet.address;
-        this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
-        this.state.usdBalance = primaryWallet.balances.ETH.usd_value;
-        console.log('Updated Wallet Balance:', this.state.ethBalance, this.state.usdBalance);
-      } else {
-        this.state.walletAddress = null;
-        this.state.ethBalance = null;
-        this.state.usdBalance = null;
-      }
-    } catch (error) {
-      console.error('Error fetching wallet balance:', error);
-      this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to fetch wallet balance';
-      this.state.walletAddress = null;
-      this.state.ethBalance = null;
-      this.state.usdBalance = null;
-    } finally {
-      this.state.isFetchingBalance = false;
+  try {
+    this.state.isFetchingBalance = true;
+    this.state.fetchBalanceError = null;
+    const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
+    console.log('Fetch Wallet Balance API Response:', response);
+    if (response.data.wallets.length > 0) {
+      const primaryWallet = response.data.wallets[0];
+      this.state.walletAddress = primaryWallet.address;
+      this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
+      this.state.usdBalance = primaryWallet.balances.ETH.usd_value;
+      console.log('Updated Wallet Balance:', this.state.ethBalance, this.state.usdBalance);
+    } else {
+      console.log('No wallets found in response'); // Add this to debug
+      this.state.fetchBalanceError = 'No wallets found';
     }
-  };
+  } catch (error) {
+    console.error('Error fetching wallet balance:', error);
+    this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to fetch wallet balance';
+    this.state.walletAddress = null;
+    this.state.ethBalance = null;
+    this.state.usdBalance = null;
+  } finally {
+    this.state.isFetchingBalance = false;
+    }
+    };
 
-  // Check if wallet was previously connected (from localStorage)
-  checkWalletConnection = () => {
+    // Check if wallet was previously connected (from localStorage)
+    checkWalletConnection = () => {
     const walletAddress = localStorage.getItem('walletAddress');
     const walletConnected = localStorage.getItem('walletConnected');
-    
     if (walletAddress && walletConnected === 'true') {
       this.state.reconnectedWalletAddress = walletAddress;
     }
@@ -344,6 +341,6 @@ export class WalletViewModel {
   };
 
   get isWalletConnected() {
-    return !!this.state.walletAddress || !!this.state.reconnectedWalletAddress;
+  return !!this.state.walletAddress || !!this.state.reconnectedWalletAddress;
   }
 }

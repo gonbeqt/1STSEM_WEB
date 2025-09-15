@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './home.css';
-import { Bell, RotateCcw } from 'lucide-react';
+import { Bell, RotateCcw, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useWallet } from '../../../hooks/useWallet';
 
 interface Transaction {
   id: string;
@@ -15,7 +16,13 @@ interface Transaction {
 
 
 const EmployeeHome = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { ethBalance, usdBalance, isFetchingBalance, fetchBalanceError, fetchWalletBalance } = useWallet();
+
+  useEffect(() => {
+    fetchWalletBalance();
+  }, [fetchWalletBalance]);
+
   const transactions: Transaction[] = [
     {
       id: '1',
@@ -71,9 +78,27 @@ const EmployeeHome = () => {
       <div className="wallet-card">
         <div className="wallet-info">
           <span>Current Wallet</span>
-          <h1>67,980 ETH</h1>
+          <h1>
+            {isFetchingBalance ? (
+              <Loader2 className="balance-fetching-icon" />
+            ) : ethBalance !== null ? (
+              `${ethBalance.toFixed(4)} ETH`
+            ) : (
+              <span className="balance-empty-text">0.00 ETH</span>
+            )}
+          </h1>
           <span>Converted to</span>
-          <h2>$12,230</h2>
+          <h2>
+            {isFetchingBalance ? (
+              <span className="balance-fetching-text">Fetching...</span>
+            ) : fetchBalanceError ? (
+              <span className="balance-error-text">Error fetching balance</span>
+            ) : usdBalance !== null ? (
+              `$ ${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            ) : (
+              '$ 0.00'
+            )}
+          </h2>
         </div>
         <div className="wallet-actions">
           <select>
