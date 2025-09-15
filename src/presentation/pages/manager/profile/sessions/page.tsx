@@ -9,17 +9,19 @@ import { useViewModel } from '../../../../hooks/useViewModel';
 import { SessionViewModel } from '../../../../../domain/models/SessionViewModel';
 
 export const ManagerSessionsPage: React.FC = () => {
-    const { sessions, loading, error, revokeSession } = useSessions();
+    const { sessions, loading, error, revokeSession, transferMainDevice } = useSessions();
     const sessionViewModel = useViewModel(SessionViewModel);
 
     const handleRevoke = async (sessionId: string) => {
         await revokeSession(sessionId);
+        window.location.reload();
     };
 
     const handleApproveSession = async (sessionId: string) => {
         try {
             await sessionViewModel.approveSession(sessionId);
             alert('Session approved successfully!');
+           window.location.reload();
         } catch (err: any) {
             alert(`Error approving session: ${err.message}`);
         }
@@ -27,24 +29,9 @@ export const ManagerSessionsPage: React.FC = () => {
 
     const handleTransferMainDevice = async (sessionId: string) => {
         try {
-            // Assuming SessionViewModel will have a transferMainDevice method
-            // For now, we'll use a direct fetch call as the backend is not yet integrated with SessionViewModel
-            // Once integrated, this should be: await sessionViewModel.transferMainDevice(sessionId);
-            const response = await fetch('/api/auth/sessions/transfer-main-device/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify({ session_id: sessionId }),
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                alert('Main device privileges transferred successfully!');
-                sessionViewModel.fetchSessions(); // Refresh sessions after transfer
-            } else {
-                alert(`Failed to transfer main device: ${data.message || response.statusText}`);
-            }
+            await transferMainDevice(sessionId);
+            alert('Main device privileges transferred successfully!');
+            window.location.reload();
         } catch (err: any) {
             alert(`Error transferring main device: ${err.message}`);
         }
@@ -54,6 +41,7 @@ export const ManagerSessionsPage: React.FC = () => {
         try {
             await sessionViewModel.revokeOtherSessions();
             alert('Other sessions revoked successfully!');
+            window.location.reload();
         } catch (err: any) {
             alert(`Error revoking other sessions: ${err.message}`);
         }
@@ -87,7 +75,7 @@ export const ManagerSessionsPage: React.FC = () => {
                                 <p><strong>Approved:</strong> {session.approved ? 'Yes' : 'No'}</p>
                                 <p><strong>Current Session:</strong> {session.is_current ? 'Yes' : 'No'}</p>
                                 {!session.approved && (
-                                    <button onClick={() => handleApproveSession(session.sid)} className="approve-button">Approve</button>
+                                    <button onClick={() => handleApproveSession(session.sid)}  className="approve-button">Approve</button>
                                 )}
                                 {session.approved && !session.is_current && (
                                     <button onClick={() => handleTransferMainDevice(session.sid)} className="transfer-main-button">Transfer Main</button>

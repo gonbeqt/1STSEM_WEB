@@ -9,6 +9,7 @@ import { ListSessionsUseCase } from '../domain/usecases/ListSessionsUseCase';
 import { RevokeSessionUseCase } from '../domain/usecases/RevokeSessionUseCase';
 import { RevokeOtherSessionsUseCase } from '../domain/usecases/RevokeOtherSessionsUseCase';
 import { ApproveSessionUseCase } from '../domain/usecases/ApproveSessionUseCase';
+import { TransferMainDeviceUseCase } from '../domain/usecases/TransferMainDeviceUseCase';
 import { SessionViewModel } from '../domain/models/SessionViewModel';
 import { UserRepositoryImpl } from '../domain/repositoriesImpl/UserRepositoryImpl';
 import { WalletRepositoryImpl } from '../domain/repositoriesImpl/WalletRepositoryImpl';
@@ -34,6 +35,7 @@ export interface Container {
   revokeSessionUseCase: RevokeSessionUseCase;
   revokeOtherSessionsUseCase: RevokeOtherSessionsUseCase;
   approveSessionUseCase: ApproveSessionUseCase;
+  transferMainDeviceUseCase: TransferMainDeviceUseCase;
 
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
@@ -61,6 +63,7 @@ export const container: Container = {
   revokeSessionUseCase: new RevokeSessionUseCase(sessionRepository),
   revokeOtherSessionsUseCase: new RevokeOtherSessionsUseCase(sessionRepository),
   approveSessionUseCase: new ApproveSessionUseCase(sessionRepository),
+  transferMainDeviceUseCase: new TransferMainDeviceUseCase(sessionRepository),
  
   registerViewModel: () => new RegisterViewModel(new RegisterUseCase(userRepository)),
   loginViewModel: () => {
@@ -84,7 +87,8 @@ export const container: Container = {
     new ListSessionsUseCase(sessionRepository),
     new RevokeSessionUseCase(sessionRepository),
     new RevokeOtherSessionsUseCase(sessionRepository),
-    new ApproveSessionUseCase(sessionRepository)
+    new ApproveSessionUseCase(sessionRepository),
+    new TransferMainDeviceUseCase(sessionRepository)
   )
 };
 

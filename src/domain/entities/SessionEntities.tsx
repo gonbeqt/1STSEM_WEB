@@ -10,4 +10,5 @@ export interface Session {
     approved_at: string | null;
     revoked_at: string | null;
     is_current: boolean;
+    is_main_device: boolean;
 }

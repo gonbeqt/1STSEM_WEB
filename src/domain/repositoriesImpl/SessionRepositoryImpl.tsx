@@ -92,4 +92,26 @@ export class SessionRepositoryImpl implements SessionRepository {
             throw new Error(`Failed to approve session: ${response.statusText}`);
         }
     }
+
+    async transferMainDevice(sid: string): Promise<void> {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication token not found');
+        }
+
+        const response = await fetch(`${this.API_URL}/auth/sessions/transfer-main/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ session_id: sid })
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error('Failed to transfer main device privileges:', response.status, response.statusText, errorBody);
+            throw new Error(`Failed to transfer main device privileges: ${response.statusText}`);
+        }
+    }
 }

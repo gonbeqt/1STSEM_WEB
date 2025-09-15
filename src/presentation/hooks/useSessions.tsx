@@ -28,10 +28,15 @@ export const useSessions = () => {
     await viewModel.revokeSession(sid);
   }, [viewModel]);
 
+  const transferMainDevice = useCallback(async (sid: string) => {
+    await viewModel.transferMainDevice(sid);
+  }, [viewModel]);
+
   return {
     sessions,
     loading,
     error,
     revokeSession,
+    transferMainDevice,
   };
 };
