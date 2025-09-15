@@ -67,7 +67,8 @@ export class LoginViewModel {
         device_id: 'web'
       });
 
-      localStorage.setItem('token', response.data.token);
+      const tokenToStore = Array.isArray(response.data.token) ? response.data.token[0] : response.data.token;
+      localStorage.setItem('token', tokenToStore);
       localStorage.setItem('user', JSON.stringify(response.data));
       
       this.state.isLoggedIn = true;

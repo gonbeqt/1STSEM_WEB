@@ -4,11 +4,12 @@ import { LoginUseCase } from '../domain/usecases/LoginUseCase';
 import { RegisterViewModel } from '../domain/models/RegisterViewModel';
 import { LoginViewModel } from '../domain/models/LoginViewModel';
 import { WalletRepositoryImpl } from '../domain/repositoriesImpl/WalletRepositoryImpl';
-import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
-import { GetWalletsUseCase } from '../domain/usecases/GetWalletUseCase';
-import { DisconnectWalletUseCase } from '../domain/usecases/DisconnectWalletUseCase';
 import { WalletViewModel } from '../domain/models/WalletViewModal';
 import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
+import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
+import { ReconnectWalletUseCase } from '../domain/usecases/ReconnectWalletUseCase';
+import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
+
 
 export interface Container {
   userRepository: UserRepositoryImpl;
@@ -16,38 +17,40 @@ export interface Container {
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
-    logoutUseCase: LogoutUseCase;
+  logoutUseCase: LogoutUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
-  getWalletsUseCase: GetWalletsUseCase;
-  disconnectWalletUseCase: DisconnectWalletUseCase;
+  reconnectWalletUseCase: ReconnectWalletUseCase;
+  getWalletBalanceUseCase: GetWalletBalanceUseCase;
 
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
-    walletViewModel: () => WalletViewModel;
-
-  
+  walletViewModel: () => WalletViewModel;
 }
 
+// Create instances
+const userRepository = new UserRepositoryImpl();
+const walletRepository = new WalletRepositoryImpl();
+
 export const container: Container = {
-  
-  userRepository: new UserRepositoryImpl(),
-  walletRepository: new WalletRepositoryImpl(),
+  userRepository,
+  walletRepository,
 
-  registerUseCase: new RegisterUseCase(new UserRepositoryImpl()),
-  loginUseCase: new LoginUseCase(new UserRepositoryImpl()),
-  logoutUseCase: new LogoutUseCase(new UserRepositoryImpl()),
-  connectWalletUseCase: new ConnectWalletUseCase(new WalletRepositoryImpl()),
-  getWalletsUseCase: new GetWalletsUseCase(new WalletRepositoryImpl()),
-  disconnectWalletUseCase: new DisconnectWalletUseCase(new WalletRepositoryImpl()),
-
-  registerViewModel: () => new RegisterViewModel(new RegisterUseCase(new UserRepositoryImpl())),
- loginViewModel: () => new LoginViewModel(
-    new LoginUseCase(new UserRepositoryImpl()),
-    new LogoutUseCase(new UserRepositoryImpl())
-  ),  walletViewModel: () => new WalletViewModel(
-    new ConnectWalletUseCase(new WalletRepositoryImpl()),
-    new GetWalletsUseCase(new WalletRepositoryImpl()),
-    new DisconnectWalletUseCase(new WalletRepositoryImpl())
+  registerUseCase: new RegisterUseCase(userRepository),
+  loginUseCase: new LoginUseCase(userRepository),
+  logoutUseCase: new LogoutUseCase(userRepository),
+  connectWalletUseCase: new ConnectWalletUseCase(walletRepository),
+  reconnectWalletUseCase: new ReconnectWalletUseCase(walletRepository),
+  getWalletBalanceUseCase: new GetWalletBalanceUseCase(walletRepository),
+ 
+  registerViewModel: () => new RegisterViewModel(new RegisterUseCase(userRepository)),
+  loginViewModel: () => new LoginViewModel(
+    new LoginUseCase(userRepository),
+    new LogoutUseCase(userRepository)
+  ),
+  walletViewModel: () => new WalletViewModel(
+    new ConnectWalletUseCase(walletRepository),
+    new ReconnectWalletUseCase(walletRepository),
+    new GetWalletBalanceUseCase(walletRepository)
   )
 };

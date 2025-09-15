@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+// src/Presentation/pages/manager/home/page.tsx (With Auto Reconnect)
+import React, { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import Charts from '../../../components/Charts';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
@@ -13,43 +15,118 @@ import {
   ClipboardList,
   ChartBarIncreasing,
   Users,
+  Loader2,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
+import { useWallet } from '../../../hooks/useWallet';
 
-const Home = () => {
+const Home =() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
+  const [autoReconnectAttempted, setAutoReconnectAttempted] = useState(false);
+  
+  // Wallet state
+  const {
+    isWalletConnected,
+    reconnectedWalletAddress,
+    walletAddress,
+    ethBalance,
+    usdBalance,
+    isFetchingBalance,
+    fetchBalanceError,
+  
+    successMessage,
+    clearSuccessMessage,
+    isReconnecting,
+    reconnectError,
+    reconnectWallet,
+    setReconnectPrivateKey,
+    fetchWalletBalance
+  } = useWallet();
 
-  const handleWalletConnect = (walletAddress: string) => {
+  // Auto-reconnect on component mount
+  useEffect(() => {
+    const attemptAutoReconnect = async () => {
+      const storedWalletAddress = localStorage.getItem('walletAddress');
+      const storedPrivateKey = localStorage.getItem('walletPrivateKey'); 
+      const wasConnected = localStorage.getItem('walletConnected') === 'true';
+      
+      if (wasConnected && storedPrivateKey && !autoReconnectAttempted) {
+        setAutoReconnectAttempted(true);
+        console.log('Attempting automatic wallet reconnection...');
+        
+        try {
+          setReconnectPrivateKey(storedPrivateKey);
+          await reconnectWallet();
+        } catch (error) {
+          console.log('Auto-reconnect failed, user will need to manually reconnect');
+        }
+      } 
+    };
+
+    attemptAutoReconnect();
+  }, [reconnectWallet, autoReconnectAttempted]);
+
+  // Clear success message after showing it
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        clearSuccessMessage();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, clearSuccessMessage]);
+
+  // Fetch wallet balance when connected
+  useEffect(() => {
+    if (isWalletConnected) {
+      fetchWalletBalance();
+    }
+  }, [isWalletConnected, fetchWalletBalance]);
+
+  const handleWalletConnect = (walletType: string) => {
     setIsWalletModalOpen(false);
+    console.log('Wallet connected:', walletType);
   };
 
   // Handler for payment modal
   const handleSendPayment = () => {
+    if (!isWalletConnected) {
+      alert('Please connect a wallet first');
+      setIsWalletModalOpen(true);
+      return;
+    }
     setIsPaymentModalOpen(true);
   };
 
   // Add handler for payroll modal
   const handleSendPayroll = () => {
+    if (!isWalletConnected) {
+      alert('Please connect a wallet first');
+      setIsWalletModalOpen(true);
+      return;
+    }
     console.log("handleSendPayroll called");
     setIsPayrollModalOpen(true);
-
   };
+
   const handleAuditContract = () => {
     setIsAuditContractModalOpen(true);
   }
-  const handleGenerateReport = ()=>{
+
+  const handleGenerateReport = () => {
     setIsGenerateReportModalOpen(true);
   }
 
   // Add handler for processing payroll
   const handleProcessPayroll = (data: any) => {
     console.log('Processing payroll:', data);
-
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
   };
 
@@ -91,9 +168,41 @@ const Home = () => {
     }
   ];
 
-
   return (
     <div className="home-content-new">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="success-message-container">
+          <div className="success-message-content">
+            <div className="success-message-dot"></div>
+            <span className="success-message-text">{successMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Reconnection Error Message */}
+      {reconnectError && (
+        <div className="reconnect-error-message">
+          <div className="reconnect-error-content">
+            <WifiOff className="reconnect-error-icon" />
+            <div>
+              <p className="reconnect-error-title">Auto-reconnect failed</p>
+              <p className="reconnect-error-description">Please connect your wallet manually</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reconnecting Indicator */}
+      {isReconnecting && (
+        <div className="reconnecting-indicator">
+          <div className="reconnecting-content">
+            <Loader2 className="reconnecting-icon" />
+            <span className="reconnecting-text">Reconnecting wallet...</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="header-new">
         <div className="header-left">
@@ -114,21 +223,64 @@ const Home = () => {
       {/* Current Wallet Card */}
       <div className="current-wallet-card">
         <div className="wallet-header">
-          <span className="wallet-label">Current Wallet</span>
-          <button className="connect-wallet-new" onClick={() => setIsWalletModalOpen(true)}>
-            Connect Wallet
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="wallet-label">Current Wallet</span>
+            {isWalletConnected && (
+              <div className="wallet-status-connected">
+                <Wifi className="wallet-status-connected-icon" />
+                <span className="wallet-status-connected-text">Connected</span>
+              </div>
+            )}
+            {isReconnecting && (
+              <div className="wallet-status-connecting">
+                <Loader2 className="wallet-status-connecting-icon" />
+                <span className="wallet-status-connecting-text">Connecting...</span>
+              </div>
+            )}
+            
+          </div>
+          
+          {!isWalletConnected && !isReconnecting ? (
+            <button 
+              className="connect-wallet-new" 
+              onClick={() => setIsWalletModalOpen(true)}
+            >
+              Connect Wallet
+            </button>
+          ) : null}
         </div>
+        
         <div className="wallet-balance">
           <div className="balance-main">
             <EthereumIcon className="eth-icon" />
-            <span className="balance-amount">67,980 ETH</span>
+            <span className="balance-amount">
+              {isFetchingBalance ? (
+                <Loader2 className="balance-fetching-icon" />
+              ) : ethBalance !== null ? (
+                `${ethBalance.toFixed(4)} ETH`
+              ) : (
+                <span className="balance-empty-text">0.00 ETH</span>
+              )}
+            </span>
           </div>
-          <div className="balance-converted">₱ 1 tev</div>
+          <div className="balance-converted">
+            {isFetchingBalance ? (
+              <span className="balance-fetching-text">Fetching...</span>
+            ) : fetchBalanceError ? (
+              <span className="balance-error-text">Error fetching balance</span>
+            ) : usdBalance !== null ? (
+              `₱ ${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            ) : walletAddress ? (
+              <span className="wallet-address-display">
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </span>
+            ) : (
+              '₱ 0.00'
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
       {/* Quick Actions */}
       <div className="quick-actions">
         {/* Send Payment */}
@@ -175,7 +327,6 @@ const Home = () => {
           <span className="action-name">Generate Report</span>
         </button>
       </div>
-
 
       {/* Recent Transactions */}
       <div className="section-header">
@@ -232,11 +383,10 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Existing Wallet Modal */}
+      {/* Wallet Modal (for initial connection only) */}
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
-        onWalletConnected={handleWalletConnect}
       />
 
       {/* Payment Modal */}
@@ -244,7 +394,6 @@ const Home = () => {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
       />
-
 
       {/* Add Payroll Modal */}
       <PayrollModal
@@ -257,6 +406,7 @@ const Home = () => {
         isOpen={isAuditContractModalOpen}
         onClose={() => setIsAuditContractModalOpen(false)}
       />
+      
       <GenerateReportModal
         isOpen={isGenerateReportModalOpen}
         onClose={() => setIsGenerateReportModalOpen(false)}
@@ -266,3 +416,5 @@ const Home = () => {
 };
 
 export default Home;
+
+

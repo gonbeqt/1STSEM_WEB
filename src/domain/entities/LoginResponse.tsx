@@ -6,7 +6,7 @@ export interface LoginResponse {
     username: string;
     email: string;
     role: string;
-    token: string;
+    token: string | string[];
     session_id: string;
     approved: boolean;
     is_active: boolean;

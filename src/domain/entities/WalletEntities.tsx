@@ -1,11 +1,9 @@
-// src/domain/entities/WalletRequest.tsx
 export interface ConnectWalletRequest {
   private_key: string;
   wallet_name?: string;
   wallet_type?: string;
 }
 
-// src/domain/entities/WalletResponse.tsx
 export interface WalletData {
   wallet_id: string;
   user_id: string;
@@ -22,16 +20,35 @@ export interface WalletResponse {
   data: WalletData;
 }
 
-export interface WalletListResponse {
+export interface EthBalanceData {
+  balance: string;
+  name: string;
+  symbol: string;
+  usd_value: number;
+}
+
+export interface WalletBalancesData {
+  ETH: EthBalanceData;
+  // Add other currencies if needed
+}
+
+export interface ApiWalletData {
+  address: string;
+  balances: WalletBalancesData;
+  name: string;
+  wallet_id: string;
+  wallet_type: string;
+}
+
+export interface GetWalletsListResponse {
   success: boolean;
   message: string;
   data: {
-    wallets: WalletData[];
+    wallets: ApiWalletData[];
     total_count: number;
   };
 }
 
-// src/domain/entities/Wallet.tsx
 export interface Wallet {
   id: string;
   userId: string;
@@ -50,4 +67,23 @@ export interface DisconnectWalletRequest {
 export interface DisconnectWalletResponse {
   success: boolean;
   message: string;
+}
+
+export interface ReconnectWalletRequest {
+  private_key: string;
+}
+
+export interface ReconnectWalletResponse {
+  message: string;
+  wallet_address: string;
+}
+
+export interface WalletBalance {
+  wallet_address: string;
+  eth_balance: number;
+  usd_balance: number;
+}
+
+export interface GetWalletsResponse {
+  wallets: WalletBalance[];
 }

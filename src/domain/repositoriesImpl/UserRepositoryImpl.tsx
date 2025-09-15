@@ -12,11 +12,11 @@ export class UserRepositoryImpl implements UserRepository {
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
+    console.log('Token from localStorage for auth headers:', token);
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
     };
-    console.log('Token:', localStorage.getItem('token'));
   }
 
   async register(request: RegisterRequest): Promise<RegisterResponse> {
@@ -56,9 +56,12 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async logout(request: LogoutRequest): Promise<LogoutResponse> {
+    const headers = this.getAuthHeaders();
+    console.log('Logout request headers:', headers);
+    console.log('Logout request body:', request);
     const response = await fetch(`${this.API_URL}/auth/logout/`, {
       method: 'POST',
-      headers: this.getAuthHeaders(),
+      headers: headers,
       body: JSON.stringify(request),
     });
 

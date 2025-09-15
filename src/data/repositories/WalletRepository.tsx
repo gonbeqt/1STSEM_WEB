@@ -1,9 +1,9 @@
 // src/data/repositories/WalletRepository.tsx
-import { ConnectWalletRequest } from '../../domain/entities/WalletEntities';
-import { WalletResponse, WalletListResponse, DisconnectWalletRequest, DisconnectWalletResponse } from '../../domain/entities/WalletEntities';
+import { Wallet, ConnectWalletRequest, GetWalletsResponse, DisconnectWalletRequest, DisconnectWalletResponse, ReconnectWalletRequest, ReconnectWalletResponse, GetWalletsListResponse } from "../../domain/entities/WalletEntities";
+import { WalletResponse } from "../../domain/entities/WalletEntities";
 
 export interface WalletRepository {
-  connectWallet(request: ConnectWalletRequest): Promise<WalletResponse>;
-  getWallets(): Promise<WalletListResponse>;
-  disconnectWallet(request: DisconnectWalletRequest): Promise<DisconnectWalletResponse>;
+    connectWallet(request: ConnectWalletRequest): Promise<WalletResponse>;
+    reconnectWallet(request: ReconnectWalletRequest): Promise<ReconnectWalletResponse>;
+    getWalletBalance(): Promise<GetWalletsListResponse>;
 }
