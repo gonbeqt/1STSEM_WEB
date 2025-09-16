@@ -32,6 +32,8 @@ import { WalletViewModel } from './domain/models/WalletViewModal';
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
 
 import { WalletRepositoryImpl } from './domain/repositoriesImpl/WalletRepositoryImpl';
+import MiddlewareRoute from './middleware/AuthMiddleware';
+import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
 
 const walletRepository = new WalletRepositoryImpl();
 
@@ -71,9 +73,12 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<div className="register-page-wrapper"><Register /></div>} />
+          <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
         <Route element={<ManagerLayout />}>
-        
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={
+            <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">
+          <Home />
+           </MiddlewareRoute>} />
           <Route path="/management" element={<Management />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />
@@ -92,7 +97,10 @@ function App() {
         </Route>
 
         <Route element={<EmployeeLayout />}>
-          <Route path="/employee/home" element={<EmployeeHome />} />
+          <Route path="/employee/home" element={ 
+            <MiddlewareRoute isAuthenticated={true} role="employee" requiredRole="employee">
+            <EmployeeHome />
+          </MiddlewareRoute>} />
           <Route path="/employee/payslip" element={<EmployeePayslip />} />
           <Route path="/employee/history" element={<EmployeeHistory />} />
           <Route path="/employee/settings" element={<EmployeeSettings />} />

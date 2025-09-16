@@ -17,6 +17,7 @@ import { RegisterUseCase } from '../domain/usecases/RegisterUseCase';
 import { LoginUseCase } from '../domain/usecases/LoginUseCase';
 import { RegisterViewModel } from '../domain/models/RegisterViewModel';
 import { LoginViewModel } from '../domain/models/LoginViewModel';
+import { GetSessionApprovalStatusUseCase } from '../domain/usecases/GetSessionApprovalStatusUseCase';
 
 
 export interface Container {
@@ -36,6 +37,7 @@ export interface Container {
   revokeOtherSessionsUseCase: RevokeOtherSessionsUseCase;
   approveSessionUseCase: ApproveSessionUseCase;
   transferMainDeviceUseCase: TransferMainDeviceUseCase;
+  getSessionApprovalStatusUseCase: GetSessionApprovalStatusUseCase;
 
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
@@ -64,6 +66,7 @@ export const container: Container = {
   revokeOtherSessionsUseCase: new RevokeOtherSessionsUseCase(sessionRepository),
   approveSessionUseCase: new ApproveSessionUseCase(sessionRepository),
   transferMainDeviceUseCase: new TransferMainDeviceUseCase(sessionRepository),
+  getSessionApprovalStatusUseCase: new GetSessionApprovalStatusUseCase(sessionRepository),
  
   registerViewModel: () => new RegisterViewModel(new RegisterUseCase(userRepository)),
   loginViewModel: () => {

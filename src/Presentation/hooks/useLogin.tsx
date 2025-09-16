@@ -14,13 +14,16 @@ export const useLogin = () => {
     viewModel.setUsername(username);
     viewModel.setPassword(password);
 
-    const success = await viewModel.login();
+    const loginResult = await viewModel.login();
 
-    if (success) {
+    if (loginResult) {
       const userData = localStorage.getItem('user');
       const user = userData ? JSON.parse(userData) : null;
 
-      if (user?.role === 'Manager') {
+      if (loginResult.data && !loginResult.data.approved) {
+        // If the session is not approved, redirect to the waiting approval page
+        navigate('/waiting-approval', { state: { sessionId: loginResult.data.session_id } });
+      } else if (user?.role === 'Manager') {
         navigate('/home');
       } else {
         navigate('/employee/home');

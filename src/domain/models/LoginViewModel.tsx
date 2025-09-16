@@ -3,6 +3,7 @@ import { makeAutoObservable } from 'mobx';
 import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
 import { WalletViewModel } from './WalletViewModal';
+import { LoginResponse } from '../entities/LoginResponse'; // Added this import
 
 interface LoginState {
   username: string;
@@ -58,7 +59,7 @@ export class LoginViewModel {
     this.state.logoutError = null;
   };
 
-  login = async (): Promise<boolean> => {
+    login = async (): Promise<LoginResponse | null> => {
     try {
       this.state.isLoading = true;
       this.state.error = null;
@@ -86,11 +87,11 @@ export class LoginViewModel {
       this.state.username = '';
       this.state.password = '';
 
-      return true;
+      return response;
     } catch (error) {
       this.state.error = error instanceof Error ? error.message : 'Login failed';
       this.state.isLoggedIn = false;
-      return false;
+      return null;
     } finally {
       this.state.isLoading = false;
     }
