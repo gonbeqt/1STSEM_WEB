@@ -18,10 +18,13 @@ import {
   Loader2,
   Wifi,
   WifiOff,
+  Clock,
+  TrendingDown,
 } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import { useWallet } from '../../../hooks/useWallet';
+import { useTransactions } from '../../../hooks/useTransactions';
 
 const Home = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -48,7 +51,52 @@ const Home = () => {
     setReconnectPrivateKey,
     fetchWalletBalance
   } = useWallet();
+  const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
+const formatTransactionDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
+    if (diffHours < 1) {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return `${diffMinutes} mins ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hrs ago`;
+    } else if (diffDays === 1) {
+      return '1 day ago';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const getTransactionIcon = (transaction: any) => {
+    if (transaction.status === 'pending') {
+      return <Clock className="transaction-icon pending" />;
+    }
+    return <TrendingDown className="transaction-icon outflow" />;
+  };
+
+  const getTransactionName = (transaction: any): string => {
+    if (transaction.from_wallet_name) {
+      return `ETH from ${transaction.from_wallet_name}`;
+    }
+    return 'ETH Transaction';
+  };
+
+  // Convert API transactions to display format (replace mock transactionData)
+  const transactionData = transactions.map(transaction => ({
+    name: getTransactionName(transaction),
+    amount: parseFloat(transaction.amount),
+    type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
+    date: formatTransactionDate(transaction.created_at),
+    icon: getTransactionIcon(transaction),
+    status: transaction.status,
+    hash: transaction.transaction_hash
+  }));
   // Clear success message after showing it
   useEffect(() => {
     if (successMessage) {
@@ -106,43 +154,7 @@ const Home = () => {
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
   };
 
-  const transactionData = [
-    {
-      name: 'Crypto Purchase',
-      amount: 1250.60,
-      type: 'outflow',
-      date: '2 hrs ago',
-      icon: <Users className="transaction-icon outflow" />
-    },
-    {
-      name: 'Investment Purchase',
-      amount: 3340.00,
-      type: 'outflow',
-      date: '1 day ago',
-      icon: <ClipboardList className="transaction-icon outflow" />
-    },
-    {
-      name: 'Payroll Processed',
-      amount: 815.00,
-      type: 'inflow',
-      date: '2 days ago',
-      icon: <ChartBarIncreasing className="transaction-icon inflow" />
-    },
-    {
-      name: 'Crypto Payment',
-      amount: 13165.00,
-      type: 'inflow',
-      date: '3 days ago',
-      icon: <ChartBarIncreasing className="transaction-icon inflow" />
-    },
-    {
-      name: 'Investment Purchase',
-      amount: 850.00,
-      type: 'outflow',
-      date: '4 days ago',
-      icon: <TrendingUpIcon className="transaction-icon outflow" />
-    }
-  ];
+ 
 
   return (
     <div className="home-content-new">
@@ -305,36 +317,73 @@ const Home = () => {
       </div>
 
       {/* Recent Transactions */}
-      <div className="section-header">
+      <div className="section-header3">
         <h2>Recent Transactions</h2>
-        <div className="view-all">
-          <span>View all</span>
+        <div className="view-all" onClick={refreshTransactions}>
+          <span>Refresh</span>
           <ChevronRight className="chevron-icon" />
         </div>
       </div>
 
       <div className="transactions-list">
-        {transactionData.map((transaction, index) => (
-          <div key={index} className="transaction-item2">
+        {isLoadingTransactions ? (
+          <div className="transaction-item2">
             <div className="transaction-left">
-              <div className={`transaction-icon-wrapper ${transaction.type}`}>
-                {transaction.icon}
-              </div>
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
               <div className="transaction-details">
-                <div className="transaction-name">{transaction.name}</div>
-                <div className="transaction-date">{transaction.date}</div>
+                <div className="transaction-name">Loading transactions...</div>
               </div>
-            </div>
-            <div className={`transaction-amount2 ${transaction.type}`}>
-              {transaction.type === 'outflow' ? '-' : '+'}₱{transaction.amount.toLocaleString()}
             </div>
           </div>
-        ))}
+        ) : transactionError ? (
+          <div className="transaction-item2">
+            <div className="transaction-left">
+              <div className="transaction-details">
+                <div className="transaction-name">Error loading transactions</div>
+                <div className="transaction-date">{transactionError}</div>
+              </div>
+            </div>
+          </div>
+        ) : transactionData.length === 0 ? (
+          <div className="transaction-item2">
+            <div className="transaction-left">
+              <div className="transaction-details">
+                <div className="transaction-name">No transactions found</div>
+                <div className="transaction-date">Start making transactions to see them here.</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          transactionData.map((transaction, index) => (
+            <div key={index} className="transaction-item2">
+              <div className="transaction-left">
+                <div className={`transaction-icon-wrapper ${transaction.type}`}>
+                  {transaction.icon}
+                </div>
+                <div className="transaction-details">
+                  <div className="transaction-name">{transaction.name}</div>
+                  <div className="transaction-date">
+                    {transaction.date}
+                    {transaction.status && (
+                      <span className={`ml-2 px-1 py-0.5 text-xs rounded status-badge-${transaction.status}`}>
+                        {transaction.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className={`transaction-amount2 ${transaction.type}`}>
+                {transaction.type === 'outflow' ? '-' : transaction.type === 'pending' ? '' : '+'}
+                {transaction.amount.toFixed(4)} ETH
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Revenue vs Expenses */}
       <div className="revenue-section">
-        <div className="section-header">
+        <div className="section-header3">
           <h2>Revenue vs Expenses</h2>
           <select className="period-selector1">
             <option>Last 6 months</option>

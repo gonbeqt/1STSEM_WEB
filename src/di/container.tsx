@@ -18,6 +18,8 @@ import { LoginUseCase } from '../domain/usecases/LoginUseCase';
 import { RegisterViewModel } from '../domain/models/RegisterViewModel';
 import { LoginViewModel } from '../domain/models/LoginViewModel';
 import { GetSessionApprovalStatusUseCase } from '../domain/usecases/GetSessionApprovalStatusUseCase';
+import { TransactionRepositoryImpl } from '../domain/repositoriesImpl/TransactionRepositoryImpl';
+import { GetTransactionHistoryUseCase } from '../domain/usecases/GetTransactionUseCase';
 
 
 export interface Container {
@@ -38,6 +40,8 @@ export interface Container {
   approveSessionUseCase: ApproveSessionUseCase;
   transferMainDeviceUseCase: TransferMainDeviceUseCase;
   getSessionApprovalStatusUseCase: GetSessionApprovalStatusUseCase;
+  transactionRepository: TransactionRepositoryImpl;
+  getTransactionHistoryUseCase: GetTransactionHistoryUseCase;
 
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
@@ -46,6 +50,8 @@ export interface Container {
 }
 
 // Create instances
+const transactionRepository = new TransactionRepositoryImpl();
+
 const userRepository = new UserRepositoryImpl();
 const walletRepository = new WalletRepositoryImpl();
 const sessionRepository = new SessionRepositoryImpl();
@@ -54,7 +60,8 @@ export const container: Container = {
   userRepository,
   walletRepository,
   sessionRepository,
-
+  transactionRepository,
+  getTransactionHistoryUseCase: new GetTransactionHistoryUseCase(transactionRepository),
   registerUseCase: new RegisterUseCase(userRepository),
   loginUseCase: new LoginUseCase(userRepository),
   logoutUseCase: new LogoutUseCase(userRepository),

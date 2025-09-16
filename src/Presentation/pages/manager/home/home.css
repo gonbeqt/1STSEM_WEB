@@ -220,15 +220,16 @@
 }
 
 /* Section Headers */
-.section-header {
+.section-header3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   margin: 24px 0 16px 0; /* Added top margin */
+  background: transparent;
 }
 
-.section-header h2 {
+.section-header3 h2 {
   font-size: 18px;
   font-weight: 600;
   color: #111827;
@@ -573,7 +574,72 @@
   align-items: center;
   gap: 0.5rem; /* gap-2 */
 }
+.status-badge-confirmed {
+  background-color: #dcfce7 !important;
+  color: #16a34a !important;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
 
+.status-badge-pending {
+  background-color: #fef3c7 !important;
+  color: #d97706 !important;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.status-badge-failed {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.transaction-icon.pending {
+  color: #d97706 !important;
+}
+
+/* Loading animation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments for transaction items */
+@media (max-width: 768px) {
+  .transaction-details {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .transaction-amount2 {
+    font-size: 14px;
+  }
+  
+  .status-badge-confirmed,
+  .status-badge-pending,
+  .status-badge-failed {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+}
 /* Responsive Design */
 @media (min-width: 768px) {
   .home-content-new {
