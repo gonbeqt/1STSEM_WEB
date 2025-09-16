@@ -143,6 +143,7 @@ const Home = () => {
   };
 
   const handleAuditContract = () => {
+    console.log("handleAuditContract called. Setting isAuditContractModalOpen to true.");
     setIsAuditContractModalOpen(true);
   }
 

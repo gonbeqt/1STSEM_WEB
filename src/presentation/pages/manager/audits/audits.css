@@ -1,0 +1,149 @@
+.audits-page {
+    display: flex;
+}
+
+.audits-content {
+    flex-grow: 1;
+    padding: 2rem;
+}
+
+.audits-header {
+    margin-bottom: 2rem;
+}
+
+.statistics-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #6c757d;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.audits-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.audit-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-card-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.audit-card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.audit-card-body {
+    padding: 1rem;
+    flex-grow: 1;
+}
+
+.audit-card-body p {
+    margin: 0 0 0.5rem 0;
+}
+
+.audit-card-footer {
+    padding: 1rem;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.btn-details {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.status-completed {
+    background-color: #28a745;
+}
+
+.status-in_progress {
+    background-color: #ffc107;
+}
+
+.status-failed {
+    background-color: #dc3545;
+}
+
+.risk-level {
+    font-weight: bold;
+}
+
+.risk-critical {
+    color: #dc3545;
+}
+
+.risk-high {
+    color: #fd7e14;
+}
+
+.risk-medium {
+    color: #ffc107;
+}
+
+.risk-low {
+    color: #28a745;
+}
+
+.loader {
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid #3498db; 
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #dc3545;
+    text-align: center;
+}

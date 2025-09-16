@@ -1,0 +1,80 @@
+.audit-details-page {
+    display: flex;
+}
+
+.audit-details-content {
+    flex-grow: 1;
+    padding: 2rem;
+}
+
+.audit-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.audit-details-header h1 {
+    margin: 0;
+}
+
+.summary-section, .report-section, .vulnerabilities-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.audit-report {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.vulnerability-card {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.vulnerability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.vulnerability-header h4 {
+    margin: 0;
+}
+
+.severity-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.severity-critical { background-color: #dc3545; }
+.severity-high { background-color: #fd7e14; }
+.severity-medium { background-color: #ffc107; }
+.severity-low { background-color: #28a745; }
+.severity-info { background-color: #17a2b8; }
+
+.loader-container, .error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}

@@ -9,6 +9,8 @@ import Register from './presentation/pages/register/page';
 
 import Invoice from './presentation/pages/manager/invoice/page';
 import Reports from './presentation/pages/manager/reports/page';
+import AuditsPage from './presentation/pages/manager/audits/page';
+import AuditDetailsPage from './presentation/pages/manager/audits/details/page';
 import Settings from './presentation/pages/manager/profile/page';
 import Management from './presentation/pages/manager/management/page';
 import BalanceSheet from './presentation/pages/manager/reports/BalanceSheet/BalanceSheet';
@@ -84,6 +86,8 @@ function App() {
           <Route path="/management" element={<Management />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/audits" element={<AuditsPage />} />
+          <Route path="/audits/:auditId" element={<AuditDetailsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/balance_sheet" element={<BalanceSheet />} />
           <Route path="/invoice_receipt" element={<InvoiceReceipt />} />
