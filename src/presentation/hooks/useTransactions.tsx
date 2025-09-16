@@ -7,7 +7,7 @@ export interface ApiTransaction {
   from_wallet_name?: string;
   from_wallet_type?: string;
   to_address: string;
-  amount: string;
+  amount_eth: number;
   status: 'confirmed' | 'pending' | 'failed';
   created_at: string;
   transaction_hash?: string;

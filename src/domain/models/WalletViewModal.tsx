@@ -43,8 +43,8 @@ interface WalletState {
 export class WalletViewModel {
   private state: WalletState = {
     privateKey: '',
-    walletName: 'My Wallet',
-    walletType: 'Private Key',
+    walletName: 'MetaMask',
+    walletType: 'MetaMask',
     reconnectPrivateKey: '',
     isConnecting: false,
     isReconnecting: false,

@@ -55,7 +55,7 @@ const Home = () => {
     fetchWalletBalance
   } = useWallet();
   const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
-const formatTransactionDate = (dateString: string): string => {
+  const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -93,7 +93,7 @@ const formatTransactionDate = (dateString: string): string => {
   // Convert API transactions to display format (replace mock transactionData)
   const transactionData = transactions.map(transaction => ({
     name: getTransactionName(transaction),
-    amount: parseFloat(transaction.amount),
+    amount: typeof transaction.amount_eth === 'string' ? parseFloat(transaction.amount_eth) : transaction.amount_eth,
     type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
     date: formatTransactionDate(transaction.created_at),
     icon: getTransactionIcon(transaction),
@@ -156,7 +156,7 @@ const formatTransactionDate = (dateString: string): string => {
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
   };
 
- 
+
 
   return (
     <div className="home-content-new">
@@ -375,7 +375,7 @@ const formatTransactionDate = (dateString: string): string => {
                 </div>
               </div>
               <div className={`transaction-amount2 ${transaction.type}`}>
-                {transaction.type === 'outflow' ? '-' : transaction.type === 'pending' ? '' : '+'}
+                {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
                 {transaction.amount.toFixed(4)} ETH
               </div>
             </div>
