@@ -249,15 +249,21 @@ export class WalletViewModel {
     this.state.fetchBalanceError = null;
     const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
     console.log('Fetch Wallet Balance API Response:', response);
-    if (response.data.wallets.length > 0) {
+    if (response.data && response.data.wallets && response.data.wallets.length > 0) {
       const primaryWallet = response.data.wallets[0];
-      this.state.walletAddress = primaryWallet.address;
-      this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
-      this.state.usdBalance = primaryWallet.balances.ETH.usd_value;
-      console.log('Updated Wallet Balance:', this.state.ethBalance, this.state.usdBalance);
+      console.log('Primary Wallet Data:', primaryWallet);
+      if (primaryWallet.balances && primaryWallet.balances.ETH) {
+        this.state.walletAddress = primaryWallet.address;
+        this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
+        this.state.usdBalance = primaryWallet.balances.ETH.usd_value ?? 0; // Use nullish coalescing to default to 0
+        console.log('Updated Wallet Balance:', this.state.ethBalance, this.state.usdBalance);
+      } else {
+        console.log('Primary wallet does not have ETH balance data.', primaryWallet);
+        this.state.fetchBalanceError = 'ETH balance data not found for primary wallet';
+      }
     } else {
-      console.log('No wallets found in response'); // Add this to debug
-      this.state.fetchBalanceError = 'No wallets found';
+      console.log('No wallets found in response data or response data is malformed.', response);
+      this.state.fetchBalanceError = 'No wallets found or invalid response';
     }
   } catch (error) {
     console.error('Error fetching wallet balance:', error);
