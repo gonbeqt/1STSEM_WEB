@@ -4,6 +4,8 @@ import { ConnectWalletUseCase } from '../usecases/ConnectWalletUseCase';
 import { ReconnectWalletUseCase } from '../usecases/ReconnectWalletUseCase';
 import { Wallet, GetWalletsResponse, GetWalletsListResponse } from '../entities/WalletEntities';
 import { GetWalletBalanceUseCase } from '../usecases/GetWalletBalanceUseCase';
+import { SendEthUseCase } from '../usecases/SendEthUseCase'; // Import SendEthUseCase
+import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
 
 interface WalletState {
   // Connect wallet form
@@ -18,11 +20,13 @@ interface WalletState {
   isConnecting: boolean;
   isReconnecting: boolean;
   isFetchingBalance: boolean;
+  isSendingEth: boolean; // New state for sending ETH
   
   // Error states
   connectError: string | null;
   reconnectError: string | null;
   fetchBalanceError: string | null;
+  sendEthError: string | null; // New state for send ETH error
   
   // Success messages
   successMessage: string | null;
@@ -45,9 +49,11 @@ export class WalletViewModel {
     isConnecting: false,
     isReconnecting: false,
     isFetchingBalance: false,
+    isSendingEth: false, // Initialize new state
     connectError: null,
     reconnectError: null,
     fetchBalanceError: null,
+    sendEthError: null, // Initialize new state
     successMessage: null,
     reconnectedWalletAddress: null,
     walletAddress: null,
@@ -58,7 +64,8 @@ export class WalletViewModel {
   constructor(
     private connectWalletUseCase: ConnectWalletUseCase,
     private reconnectWalletUseCase: ReconnectWalletUseCase,
-    private getWalletBalanceUseCase: GetWalletBalanceUseCase
+    private getWalletBalanceUseCase: GetWalletBalanceUseCase,
+    private sendEthUseCase: SendEthUseCase // Inject SendEthUseCase
   ) {
     makeAutoObservable(this);
   }
@@ -237,6 +244,53 @@ export class WalletViewModel {
     }
   };
 
+  sendEth = async (recipientAddress: string, amount: string): Promise<boolean> => {
+    const privateKey = this.state.privateKey || localStorage.getItem('privateKey');
+
+    if (!privateKey) {
+      this.state.sendEthError = 'Wallet not connected or private key not available.';
+      return false;
+    }
+
+    if (!recipientAddress.trim()) {
+      this.state.sendEthError = 'Recipient address is required.';
+      return false;
+    }
+
+    if (parseFloat(amount) <= 0) {
+      this.state.sendEthError = 'Amount must be greater than zero.';
+      return false;
+    }
+
+    try {
+      this.state.isSendingEth = true;
+      this.state.sendEthError = null;
+
+      const request: SendEthRequest = {
+        private_key: privateKey,
+        recipient_address: recipientAddress,
+        amount: amount,
+        from_address: this.state.walletAddress || undefined,
+      };
+
+      const response: SendEthResponse = await this.sendEthUseCase.execute(request);
+
+      if (response.success) {
+        this.state.successMessage = `Transaction sent: ${response.transaction_hash}`;
+        await this.fetchWalletBalance(); // Refresh balance after sending
+        return true;
+      } else {
+        this.state.sendEthError = response.message || 'Failed to send ETH.';
+        return false;
+      }
+    } catch (error) {
+      this.state.sendEthError = error instanceof Error ? error.message : 'Failed to send ETH.';
+      return false;
+    } finally {
+      this.state.isSendingEth = false;
+    }
+  };
+
   fetchWalletBalance = async (authToken?: string): Promise<void> => {
   const token = authToken || localStorage.getItem('token');
   if (!token) {
@@ -321,6 +375,10 @@ export class WalletViewModel {
     return this.state.isFetchingBalance;
   }
 
+  get isSendingEth() {
+    return this.state.isSendingEth;
+  }
+
   get connectError() {
     return this.state.connectError;
   }
@@ -331,6 +389,10 @@ export class WalletViewModel {
 
   get fetchBalanceError() {
     return this.state.fetchBalanceError;
+  }
+
+  get sendEthError() {
+    return this.state.sendEthError;
   }
 
   get successMessage() {

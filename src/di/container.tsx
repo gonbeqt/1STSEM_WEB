@@ -20,6 +20,7 @@ import { LoginViewModel } from '../domain/models/LoginViewModel';
 import { GetSessionApprovalStatusUseCase } from '../domain/usecases/GetSessionApprovalStatusUseCase';
 import { TransactionRepositoryImpl } from '../domain/repositoriesImpl/TransactionRepositoryImpl';
 import { GetTransactionHistoryUseCase } from '../domain/usecases/GetTransactionUseCase';
+import { SendEthUseCase } from '../domain/usecases/SendEthUseCase'; // Import SendEthUseCase
 
 
 export interface Container {
@@ -34,6 +35,7 @@ export interface Container {
   connectWalletUseCase: ConnectWalletUseCase;
   reconnectWalletUseCase: ReconnectWalletUseCase;
   getWalletBalanceUseCase: GetWalletBalanceUseCase;
+  sendEthUseCase: SendEthUseCase; // Add SendEthUseCase to container interface
   listSessionsUseCase: ListSessionsUseCase;
   revokeSessionUseCase: RevokeSessionUseCase;
   revokeOtherSessionsUseCase: RevokeOtherSessionsUseCase;
@@ -68,6 +70,7 @@ export const container: Container = {
   connectWalletUseCase: new ConnectWalletUseCase(walletRepository),
   reconnectWalletUseCase: new ReconnectWalletUseCase(walletRepository),
   getWalletBalanceUseCase: new GetWalletBalanceUseCase(walletRepository),
+  sendEthUseCase: new SendEthUseCase(walletRepository), // Instantiate SendEthUseCase
   listSessionsUseCase: new ListSessionsUseCase(sessionRepository),
   revokeSessionUseCase: new RevokeSessionUseCase(sessionRepository),
   revokeOtherSessionsUseCase: new RevokeOtherSessionsUseCase(sessionRepository),
@@ -80,7 +83,8 @@ export const container: Container = {
     const walletViewModelInstance = new WalletViewModel(
       new ConnectWalletUseCase(walletRepository),
       new ReconnectWalletUseCase(walletRepository),
-      new GetWalletBalanceUseCase(walletRepository)
+      new GetWalletBalanceUseCase(walletRepository),
+      new SendEthUseCase(walletRepository) // Inject SendEthUseCase
     );
     return new LoginViewModel(
       new LoginUseCase(userRepository),
@@ -91,7 +95,8 @@ export const container: Container = {
   walletViewModel: () => new WalletViewModel(
     new ConnectWalletUseCase(walletRepository),
     new ReconnectWalletUseCase(walletRepository),
-    new GetWalletBalanceUseCase(walletRepository)
+    new GetWalletBalanceUseCase(walletRepository),
+    new SendEthUseCase(walletRepository) // Inject SendEthUseCase
   ),
   sessionViewModel: () => new SessionViewModel(
     new ListSessionsUseCase(sessionRepository),

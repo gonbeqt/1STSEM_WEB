@@ -34,13 +34,15 @@ import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import { WalletRepositoryImpl } from './domain/repositoriesImpl/WalletRepositoryImpl';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
+import { SendEthUseCase } from './domain/usecases/SendEthUseCase'; // Import SendEthUseCase
 
 const walletRepository = new WalletRepositoryImpl();
 
 const walletViewModel = new WalletViewModel(
   new ConnectWalletUseCase(walletRepository),
   new ReconnectWalletUseCase(walletRepository),
-  new GetWalletBalanceUseCase(walletRepository)
+  new GetWalletBalanceUseCase(walletRepository),
+  new SendEthUseCase(walletRepository) // Add SendEthUseCase
 );
   
 const ManagerLayout = () => (

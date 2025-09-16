@@ -1,6 +1,9 @@
 // src/domain/repositoriesImpl/WalletRepositoryImpl.tsx
+import { ConnectWalletRequest, GetWalletsResponse, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
 import { WalletRepository } from '../../data/repositories/WalletRepository';
-import { ConnectWalletRequest, GetWalletsResponse, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse } from '../entities/WalletEntities';
+import { ethers } from 'ethers'; // Import ethers library - forcing re-evaluation 
+import { SendETHRequest, SendETHResponse } from '../entities/SendEthEntities'; 
+
 
 export class WalletRepositoryImpl implements WalletRepository {
 
@@ -76,5 +79,37 @@ export class WalletRepositoryImpl implements WalletRepository {
     }
 
     return data;
+  }
+
+  async sendEth(request: SendEthRequest): Promise<SendEthResponse> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    const backendRequest: SendETHRequest = {
+      to_address: request.recipient_address,
+      amount: request.amount,
+      private_key: request.private_key,
+      from_address: request.from_address,
+    };
+
+    const response = await fetch(`${this.API_URL}/eth/send/`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(backendRequest),
+    });
+
+    const data: SendETHResponse = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send ETH transaction');
+    }
+
+    return {
+        success: data.success,
+        message: data.message,
+        transaction_hash: data.data ? data.data.transaction_hash : undefined,
+    };
   }
 }

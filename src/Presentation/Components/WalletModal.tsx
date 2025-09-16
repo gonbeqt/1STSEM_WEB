@@ -1,17 +1,33 @@
 // src/Presentation/components/WalletModal.tsx (No Tailwind)
-import React, { useState } from 'react';
-import { X, Wallet, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Wallet, ArrowRight, Send } from 'lucide-react';
 import './WalletModal.css';
 import { useWallet } from '../hooks/useWallet';
+import { observer } from 'mobx-react-lite';
+
+type ModalView = 'connect' | 'send';
 
 interface WalletModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialView?: ModalView; // New prop
 }
 
-const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
-  const { connectWallet } = useWallet();
+const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, initialView = 'connect' }) => {
+  const { connectWallet, isWalletConnected, walletAddress, ethBalance, sendEth, isSendingEth, sendEthError, successMessage, fetchWalletBalance } = useWallet();
   const [privateKeyInput, setPrivateKeyInput] = useState<string>('');
+  const [currentView, setCurrentView] = useState<ModalView>(initialView);
+  const [recipientAddress, setRecipientAddress] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentView(initialView);
+      if (isWalletConnected) {
+        fetchWalletBalance();
+      }
+    }
+  }, [isOpen, initialView, isWalletConnected, fetchWalletBalance]);
 
   const handleWalletConnect = async (walletType: string) => {
     const success = await connectWallet({
@@ -21,10 +37,20 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
     });
 
     if (success) {
-      onClose();
+      // If connected, switch to send view or close modal
+      setCurrentView('send');
     } else {
-      // Handle connection error, maybe display a message in the modal
       console.error('Failed to connect wallet');
+    }
+  };
+
+  const handleSendEth = async () => {
+    const success = await sendEth(recipientAddress, amount);
+    if (success) {
+      setRecipientAddress('');
+      setAmount('');
+    } else {
+      console.error('Failed to send ETH');
     }
   };
 
@@ -50,10 +76,10 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="wallet-modal-title">
-                Connect Wallet
+                {currentView === 'connect' ? 'Connect Wallet' : 'Send ETH'}
               </h2>
               <p className="wallet-modal-subtitle">
-                Choose your preferred wallet
+                {currentView === 'connect' ? 'Choose your preferred wallet' : 'Transfer Ethereum'}
               </p>
             </div>
           </div>
@@ -65,33 +91,96 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="wallet-modal-content">
-          <div className="wallet-options">
-            <div className="private-key-input-container">
-              <input
-                type="password"
-                placeholder="Enter Private Key"
-                className="private-key-input"
-                value={privateKeyInput}
-                onChange={(e) => setPrivateKeyInput(e.target.value)}
-              />
-            </div>
-            <button
-              onClick={() => handleWalletConnect('Private Key')}
-              className="wallet-option-btn connect-private-key"
+        {/* View Tabs */}
+        {isWalletConnected && (
+          <div className="wallet-modal-tabs">
+            <button 
+              className={`wallet-modal-tab ${currentView === 'connect' ? 'active' : ''}`}
+              onClick={() => setCurrentView('connect')}
             >
-              <div className="wallet-option-content">
-                <div className="wallet-icon">
-                  <Wallet className="wallet-modal-icon" />
-                </div>
-                <div className="wallet-info">
-                  <h3 className="wallet-name">Connect with Private Key</h3>
-                </div>
-              </div>
-              <ArrowRight className="wallet-arrow" />
+              Connect
+            </button>
+            <button 
+              className={`wallet-modal-tab ${currentView === 'send' ? 'active' : ''}`}
+              onClick={() => setCurrentView('send')}
+            >
+              Send
             </button>
           </div>
+        )}
+
+        {/* Content */}
+        <div className="wallet-modal-content">
+          {currentView === 'connect' && (
+            <div className="wallet-options">
+              <div className="private-key-input-container">
+                <input
+                  type="password"
+                  placeholder="Enter Private Key"
+                  className="private-key-input"
+                  value={privateKeyInput}
+                  onChange={(e) => setPrivateKeyInput(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={() => handleWalletConnect('Private Key')}
+                className="wallet-option-btn connect-private-key"
+              >
+                <div className="wallet-option-content">
+                  <div className="wallet-icon">
+                    <Wallet className="wallet-modal-icon" />
+                  </div>
+                  <div className="wallet-info">
+                    <h3 className="wallet-name">Connect with Private Key</h3>
+                  </div>
+                </div>
+                <ArrowRight className="wallet-arrow" />
+              </button>
+            </div>
+          )}
+
+          {currentView === 'send' && isWalletConnected && (
+            <div className="send-eth-form">
+              <p className="wallet-balance-display">Wallet Address: {walletAddress}</p>
+              <p className="wallet-balance-display">Balance: {ethBalance !== null ? ethBalance.toFixed(4) : 'Loading...'} ETH</p>
+              
+              <div className="input-group">
+                <label htmlFor="recipient">Recipient Address:</label>
+                <input
+                  id="recipient"
+                  type="text"
+                  placeholder="0x..."
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  className="send-input"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="amount">Amount (ETH):</label>
+                <input
+                  id="amount"
+                  type="number"
+                  step="0.0001"
+                  placeholder="0.0"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="send-input"
+                />
+              </div>
+
+              {sendEthError && <p className="error-message">{sendEthError}</p>}
+              {successMessage && <p className="success-message">{successMessage}</p>}
+
+              <button
+                onClick={handleSendEth}
+                className="send-eth-btn"
+                disabled={isSendingEth}
+              >
+                {isSendingEth ? 'Sending...' : 'Send ETH'}
+                <Send className="send-icon" />
+              </button>
+            </div>
+          )}
 
           {/* Security Notice */}
           <div className="security-notice">
@@ -104,6 +193,6 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
 export default WalletModal;

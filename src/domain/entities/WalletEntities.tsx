@@ -87,3 +87,16 @@ export interface WalletBalance {
 export interface GetWalletsResponse {
   wallets: WalletBalance[];
 }
+
+export interface SendEthRequest {
+  private_key: string;
+  recipient_address: string;
+  amount: string; // Amount in ETH
+  from_address?: string;
+}
+
+export interface SendEthResponse {
+  success: boolean;
+  message: string;
+  transaction_hash?: string;
+}

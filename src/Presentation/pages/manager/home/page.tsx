@@ -26,8 +26,11 @@ import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal
 import { useWallet } from '../../../hooks/useWallet';
 import { useTransactions } from '../../../hooks/useTransactions';
 
+type WalletModalInitialView = 'connect' | 'send';
+
 const Home = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
@@ -114,26 +117,25 @@ const formatTransactionDate = (dateString: string): string => {
     }
   }, [isWalletConnected, fetchWalletBalance]);
 
-  const handleWalletConnect = (walletType: string) => {
-    setIsWalletModalOpen(false);
-    console.log('Wallet connected:', walletType);
+  const handleOpenWalletModal = (view: WalletModalInitialView) => {
+    setWalletModalInitialView(view);
+    setIsWalletModalOpen(true);
   };
 
-  // Handler for payment modal
   const handleSendPayment = () => {
     if (!isWalletConnected) {
       alert('Please connect a wallet first');
-      setIsWalletModalOpen(true);
+      handleOpenWalletModal('connect');
       return;
     }
-    setIsPaymentModalOpen(true);
+    handleOpenWalletModal('send');
   };
 
   // Add handler for payroll modal
   const handleSendPayroll = () => {
     if (!isWalletConnected) {
       alert('Please connect a wallet first');
-      setIsWalletModalOpen(true);
+      handleOpenWalletModal('connect');
       return;
     }
     console.log("handleSendPayroll called");
@@ -231,7 +233,7 @@ const formatTransactionDate = (dateString: string): string => {
           {!isWalletConnected && !isReconnecting ? (
             <button
               className="connect-wallet-new"
-              onClick={() => setIsWalletModalOpen(true)}
+              onClick={() => handleOpenWalletModal('connect')}
             >
               Connect Wallet
             </button>
@@ -412,6 +414,7 @@ const formatTransactionDate = (dateString: string): string => {
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
+        initialView={walletModalInitialView}
       />
 
       {/* Payment Modal */}
