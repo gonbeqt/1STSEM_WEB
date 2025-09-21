@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useViewModel } from './useViewModel';
-import { SessionViewModel } from '../../domain/models/SessionViewModel';
+import { SessionViewModel } from '../../domain/viewmodel/SessionViewModel';
 import { Session } from '../../domain/entities/SessionEntities';
 import { autorun } from 'mobx';
 

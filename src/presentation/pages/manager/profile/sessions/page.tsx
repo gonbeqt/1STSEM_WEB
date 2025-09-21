@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import '../../../../components/SideNavbar.css';
 import './sessions.css';
 import { useViewModel } from '../../../../hooks/useViewModel';
-import { SessionViewModel } from '../../../../../domain/models/SessionViewModel';
+import { SessionViewModel } from '../../../../../domain/viewmodel/SessionViewModel';
 
 export const ManagerSessionsPage: React.FC = () => {
     const { sessions, loading, error, revokeSession, transferMainDevice } = useSessions();

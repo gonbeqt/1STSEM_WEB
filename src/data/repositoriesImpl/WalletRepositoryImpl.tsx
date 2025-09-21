@@ -1,14 +1,14 @@
 // src/domain/repositoriesImpl/WalletRepositoryImpl.tsx
-import { ConnectWalletRequest, GetWalletsResponse, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
-import { WalletRepository } from '../../data/repositories/WalletRepository';
+import { ConnectWalletRequest, GetWalletsResponse, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../../domain/entities/WalletEntities';
+import { WalletRepository } from '../../domain/repositories/WalletRepository';
 import { ethers } from 'ethers'; // Import ethers library - forcing re-evaluation 
-import { SendETHRequest, SendETHResponse } from '../entities/SendEthEntities'; 
+import { SendETHRequest, SendETHResponse } from '../../domain/entities/SendEthEntities'; 
 
 
 export class WalletRepositoryImpl implements WalletRepository {
 
 
-  private readonly API_URL = 'http://localhost:8000/api';
+  private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');

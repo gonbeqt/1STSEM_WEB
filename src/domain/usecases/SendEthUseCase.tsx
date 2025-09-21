@@ -1,4 +1,4 @@
-import { WalletRepository } from '../../data/repositories/WalletRepository';
+import { WalletRepository } from '../repositories/WalletRepository';
 import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
 
 export class SendEthUseCase {

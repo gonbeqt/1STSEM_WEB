@@ -1,7 +1,7 @@
-import { ContractRepository } from '../../data/repositories/ContractRepository';
+import { ContractRepository } from '../../domain/repositories/ContractRepository';
 import { Audit, AuditContractResponse, AuditDetailsResponse, AuditRequestData, AuditStatisticsResponse, UploadContractResponse } from '../../domain/entities/ContractEntities';
 import axios from 'axios';
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.REACT_APP_API_BASE_URL;
 
 export class ContractRepositoryImpl implements ContractRepository {
     async uploadContract(file: File): Promise<UploadContractResponse> {

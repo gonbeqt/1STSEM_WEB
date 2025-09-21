@@ -1,5 +1,5 @@
 // src/domain/usecases/ReconnectWalletUseCase.tsx
-import { WalletRepository } from '../../data/repositories/WalletRepository';
+import { WalletRepository } from '../repositories/WalletRepository';
 import { ReconnectWalletRequest } from '../entities/WalletEntities';
 import { ReconnectWalletResponse } from '../entities/WalletEntities';
 

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { GetTransactionHistoryUseCase } from '../../domain/usecases/GetTransactionUseCase';
-import { TransactionRepositoryImpl } from '../../domain/repositoriesImpl/TransactionRepositoryImpl';
+import { TransactionRepositoryImpl } from '../../data/repositoriesImpl/TransactionRepositoryImpl';
 import { Transaction, TransactionHistoryRequest } from '../../domain/entities/TransactionEntities';
 
 export const useTransactionHistory = () => {

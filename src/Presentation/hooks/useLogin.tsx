@@ -1,5 +1,5 @@
 import { useViewModel } from './useViewModel';
-import { LoginViewModel } from '../../domain/models/LoginViewModel';
+import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { useNavigate } from 'react-router-dom';
 
 export const useLogin = () => {

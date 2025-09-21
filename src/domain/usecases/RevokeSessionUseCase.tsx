@@ -1,4 +1,4 @@
-import { SessionRepository } from "../../data/repositories/SessionRepository";
+import { SessionRepository } from "../repositories/SessionRepository";
 
 export class RevokeSessionUseCase {
     constructor(private sessionRepository: SessionRepository) {}

@@ -1,4 +1,4 @@
-import { UserRepository } from '../../data/repositories/UserRepository';
+import { UserRepository } from '../repositories/UserRepository';
 import { LoginRequest } from '../entities/LoginRequest';
 import { LoginResponse } from '../entities/LoginResponse';
 

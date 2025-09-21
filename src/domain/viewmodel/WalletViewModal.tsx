@@ -6,6 +6,7 @@ import { Wallet, GetWalletsResponse, GetWalletsListResponse } from '../entities/
 import { GetWalletBalanceUseCase } from '../usecases/GetWalletBalanceUseCase';
 import { SendEthUseCase } from '../usecases/SendEthUseCase'; // Import SendEthUseCase
 import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
+import { GetExchangeRatesUseCase } from '../usecases/GetExchangeRatesUseCase';
 
 interface WalletState {
   // Connect wallet form
@@ -37,7 +38,8 @@ interface WalletState {
   // Wallet Balance Data
   walletAddress: string | null;
   ethBalance: number | null;
-  usdBalance: number | null;
+  exchangeRates: { [key: string]: number } | null;
+  fiatCurrency: string | null;
 }
 
 export class WalletViewModel {
@@ -49,23 +51,26 @@ export class WalletViewModel {
     isConnecting: false,
     isReconnecting: false,
     isFetchingBalance: false,
-    isSendingEth: false, // Initialize new state
+    isSendingEth: false, 
     connectError: null,
     reconnectError: null,
     fetchBalanceError: null,
-    sendEthError: null, // Initialize new state
+    sendEthError: null, 
     successMessage: null,
     reconnectedWalletAddress: null,
     walletAddress: null,
     ethBalance: null,
-    usdBalance: null,
+    exchangeRates: null,
+    fiatCurrency: null,
+   
   };
 
   constructor(
     private connectWalletUseCase: ConnectWalletUseCase,
     private reconnectWalletUseCase: ReconnectWalletUseCase,
     private getWalletBalanceUseCase: GetWalletBalanceUseCase,
-    private sendEthUseCase: SendEthUseCase // Inject SendEthUseCase
+    private sendEthUseCase: SendEthUseCase, // Inject SendEthUseCase
+    private getExchangeRatesUseCase: GetExchangeRatesUseCase 
   ) {
     makeAutoObservable(this);
   }
@@ -291,6 +296,23 @@ export class WalletViewModel {
     }
   };
 
+
+  fetchExchangeRates = async (): Promise<void> => {
+    try {
+      const response = await this.getExchangeRatesUseCase.execute(['ETH'], ['USD'], 'USD');
+      if (response.success && response.rates) {
+        this.state.exchangeRates = response.rates;
+        this.state.fiatCurrency = response.currency;
+      } else {
+        console.error('Failed to fetch exchange rates:', response.error);
+        this.state.fetchBalanceError = response.error || 'Failed to fetch exchange rates';
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+      this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to fetch exchange rates';
+    }
+  };
+
   fetchWalletBalance = async (authToken?: string): Promise<void> => {
   const token = authToken || localStorage.getItem('token');
   if (!token) {
@@ -301,6 +323,10 @@ export class WalletViewModel {
   try {
     this.state.isFetchingBalance = true;
     this.state.fetchBalanceError = null;
+    
+    // Fetch exchange rates first
+    await this.fetchExchangeRates();
+
     const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
     console.log('Fetch Wallet Balance API Response:', response);
     if (response.data && response.data.wallets && response.data.wallets.length > 0) {
@@ -309,8 +335,14 @@ export class WalletViewModel {
       if (primaryWallet.balances && primaryWallet.balances.ETH) {
         this.state.walletAddress = primaryWallet.address;
         this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
-        this.state.usdBalance = primaryWallet.balances.ETH.usd_value ?? 0; // Use nullish coalescing to default to 0
-        console.log('Updated Wallet Balance:', this.state.ethBalance, this.state.usdBalance);
+        this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
+        // Calculate usdValue based on fetched exchange rates
+        if ( this.state.ethBalance !== null) {
+          // No direct assignment to usdBalance, it's now a getter
+        } else {
+          // No direct assignment to usdBalance
+        }
+        console.log('Updated Wallet Balance:', this.state.ethBalance);
       } else {
         console.log('Primary wallet does not have ETH balance data.', primaryWallet);
         this.state.fetchBalanceError = 'ETH balance data not found for primary wallet';
@@ -324,7 +356,7 @@ export class WalletViewModel {
     this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to fetch wallet balance';
     this.state.walletAddress = null;
     this.state.ethBalance = null;
-    this.state.usdBalance = null;
+  
   } finally {
     this.state.isFetchingBalance = false;
     }
@@ -411,8 +443,21 @@ export class WalletViewModel {
     return this.state.ethBalance;
   }
 
+
+
   get usdBalance() {
-    return this.state.usdBalance;
+    if (this.state.ethBalance !== null && this.state.exchangeRates && this.state.exchangeRates.ETH) {
+      return this.state.ethBalance * this.state.exchangeRates.ETH;
+    }
+    return null;
+  }
+
+  get exchangeRates() {
+    return this.state.exchangeRates;
+  }
+
+  get fiatCurrency() {
+    return this.state.fiatCurrency;
   }
 
   get isReconnectFormValid() {
@@ -423,7 +468,6 @@ export class WalletViewModel {
     this.state.walletAddress = null;
     this.state.reconnectedWalletAddress = null;
     this.state.ethBalance = null;
-    this.state.usdBalance = null;
     localStorage.removeItem('walletAddress');
     localStorage.removeItem('walletConnected');
     localStorage.removeItem('privateKey');

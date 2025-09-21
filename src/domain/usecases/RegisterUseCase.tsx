@@ -1,4 +1,4 @@
-import { UserRepository } from '../../data/repositories/UserRepository';
+import { UserRepository } from '../repositories/UserRepository';
 import { RegisterRequest } from '../entities/RegisterRequest';
 import { RegisterResponse } from '../entities/RegisterReponse';
 

@@ -1,14 +1,14 @@
 // src/domain/repositoriesImpl/UserRepositoryImpl.tsx
-import { UserRepository } from '../../data/repositories/UserRepository';
-import { RegisterRequest } from '../entities/RegisterRequest';
-import { RegisterResponse } from '../entities/RegisterReponse';
-import { LoginRequest } from '../entities/LoginRequest';
-import { LoginResponse } from '../entities/LoginResponse';
-import { LogoutRequest, LogoutResponse } from '../entities/LogoutEntities';
+import { UserRepository } from '../../domain/repositories/UserRepository';
+import { RegisterRequest } from '../../domain/entities/RegisterRequest';
+import { RegisterResponse } from '../../domain/entities/RegisterReponse';
+import { LoginRequest } from '../../domain/entities/LoginRequest';
+import { LoginResponse } from '../../domain/entities/LoginResponse';
+import { LogoutRequest, LogoutResponse } from '../../domain/entities/LogoutEntities';
 
 
 export class UserRepositoryImpl implements UserRepository {
-  private readonly API_URL = 'http://localhost:8000/api';
+  private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');

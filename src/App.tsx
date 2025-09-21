@@ -30,21 +30,26 @@ import { ManagerSessionsPage } from './presentation/pages/manager/profile/sessio
 import { GetWalletBalanceUseCase } from './domain/usecases/GetWalletBalanceUseCase';
 import { ReconnectWalletUseCase } from './domain/usecases/ReconnectWalletUseCase';
 import { ConnectWalletUseCase } from './domain/usecases/ConnectWalletUseCase';
-import { WalletViewModel } from './domain/models/WalletViewModal';
+import { WalletViewModel } from './domain/viewmodel/WalletViewModal';
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
 
-import { WalletRepositoryImpl } from './domain/repositoriesImpl/WalletRepositoryImpl';
+import { WalletRepositoryImpl } from './data/repositoriesImpl/WalletRepositoryImpl';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
 import { SendEthUseCase } from './domain/usecases/SendEthUseCase'; // Import SendEthUseCase
+import { ExchangeRateRepositoryImpl } from './data/repositoriesImpl/ExchangeRateRepositoryImpl';
+import { GetExchangeRatesUseCase } from './domain/usecases/GetExchangeRatesUseCase';
 
 const walletRepository = new WalletRepositoryImpl();
+const exchangeRateRepository = new ExchangeRateRepositoryImpl();
+const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
 
 const walletViewModel = new WalletViewModel(
   new ConnectWalletUseCase(walletRepository),
   new ReconnectWalletUseCase(walletRepository),
   new GetWalletBalanceUseCase(walletRepository),
-  new SendEthUseCase(walletRepository) // Add SendEthUseCase
+  new SendEthUseCase(walletRepository), // Add SendEthUseCase
+  getExchangeRatesUseCase // Add GetExchangeRatesUseCase
 );
   
 const ManagerLayout = () => (

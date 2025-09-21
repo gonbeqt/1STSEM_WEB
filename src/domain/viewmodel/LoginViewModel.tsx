@@ -29,7 +29,7 @@ export class LoginViewModel {
   constructor(
     private loginUseCase: LoginUseCase,
     private logoutUseCase: LogoutUseCase,
-    private walletViewModel: WalletViewModel
+    private getWalletViewModel: () => WalletViewModel
   ) {
     makeAutoObservable(this);
     
@@ -104,7 +104,7 @@ export class LoginViewModel {
       await this.logoutUseCase.execute({});
       
       this.state.isLoggedIn = false;
-      this.walletViewModel.resetWalletState();
+      this.getWalletViewModel().resetWalletState();
       
       // Clear any other application state if needed
       this.state.username = '';

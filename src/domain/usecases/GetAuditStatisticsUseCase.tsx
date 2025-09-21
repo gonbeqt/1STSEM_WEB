@@ -1,6 +1,6 @@
-import { ContractRepositoryImpl } from "../repositoriesImpl/ContractRepositoryImpl";
+import { ContractRepositoryImpl } from "../../data/repositoriesImpl/ContractRepositoryImpl";
 import { AuditStatisticsResponse } from "../entities/ContractEntities";
-import { ContractRepository } from "../../data/repositories/ContractRepository";
+import { ContractRepository } from "../repositories/ContractRepository";
 
 export class GetAuditStatisticsUseCase {
     private contractRepository: ContractRepository;

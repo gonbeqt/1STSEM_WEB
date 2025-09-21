@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { container } from '../../di/container';
-import { RegisterViewModel } from '../../domain/models/RegisterViewModel';
-import { LoginViewModel } from '../../domain/models/LoginViewModel';
-import { SessionViewModel } from '../../domain/models/SessionViewModel';
+import { RegisterViewModel } from '../../domain/viewmodel/RegisterViewModel';
+import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
+import { SessionViewModel } from '../../domain/viewmodel/SessionViewModel';
 
 export function useViewModel<T>(ViewModelClass: new (...args: any[]) => T): T {
   const viewModelRef = useRef<T>();

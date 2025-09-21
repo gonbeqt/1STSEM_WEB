@@ -1,4 +1,4 @@
-import { SessionRepository } from "../../data/repositories/SessionRepository";
+import { SessionRepository } from "../repositories/SessionRepository";
 import { Session } from "../entities/SessionEntities";
 
 export class ListSessionsUseCase {

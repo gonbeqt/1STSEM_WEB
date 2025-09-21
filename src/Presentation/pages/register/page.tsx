@@ -4,7 +4,7 @@ import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';
 import PasswordIcon from '../../components/icons/PasswordIcon';
 import { useNavigate } from 'react-router-dom';
-import { RegisterViewModel } from '../../../domain/models/RegisterViewModel';
+import { RegisterViewModel } from '../../../domain/viewmodel/RegisterViewModel';
 import { useViewModel } from '../../hooks/useViewModel';
 import { observer } from 'mobx-react-lite';
 

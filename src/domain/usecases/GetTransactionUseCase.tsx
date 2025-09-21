@@ -1,5 +1,5 @@
 import { TransactionHistoryRequest, TransactionHistoryResponse } from '../entities/TransactionEntities';
-import { TransactionRepository } from '../../data/repositories/TransactionRepository';
+import { TransactionRepository } from '../repositories/TransactionRepository';
 
 export class GetTransactionHistoryUseCase {
   constructor(private transactionRepository: TransactionRepository) {}

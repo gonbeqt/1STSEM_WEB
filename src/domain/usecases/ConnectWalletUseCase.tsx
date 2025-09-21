@@ -1,4 +1,4 @@
-import { WalletRepository } from '../../data/repositories/WalletRepository';
+import { WalletRepository } from '../repositories/WalletRepository';
 import { ConnectWalletRequest } from '../entities/WalletEntities';
 import { WalletResponse } from '../entities/WalletEntities';
 

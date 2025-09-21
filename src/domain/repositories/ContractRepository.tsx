@@ -1,4 +1,4 @@
-import { Audit, AuditContractResponse, AuditDetailsResponse, AuditRequestData, AuditStatisticsResponse, UploadContractResponse } from "../../domain/entities/ContractEntities";
+import { Audit, AuditContractResponse, AuditDetailsResponse, AuditRequestData, AuditStatisticsResponse, UploadContractResponse } from "../entities/ContractEntities";
 
 export interface ContractRepository {
     uploadContract(file: File): Promise<UploadContractResponse>;

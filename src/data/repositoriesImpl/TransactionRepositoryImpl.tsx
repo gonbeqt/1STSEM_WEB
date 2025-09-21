@@ -1,8 +1,8 @@
-import { TransactionRepository } from '../../data/repositories/TransactionRepository';
-import { TransactionHistoryRequest, TransactionHistoryResponse } from '../entities/TransactionEntities';
+import { TransactionRepository } from '../../domain/repositories/TransactionRepository';
+import { TransactionHistoryRequest, TransactionHistoryResponse } from '../../domain/entities/TransactionEntities';
 
 export class TransactionRepositoryImpl implements TransactionRepository {
-  private readonly API_URL = 'http://localhost:8000/api';
+  private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');

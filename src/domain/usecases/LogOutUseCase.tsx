@@ -1,4 +1,4 @@
-import { UserRepository } from "../../data/repositories/UserRepository";
+import { UserRepository } from "../repositories/UserRepository";
 import { LogoutRequest, LogoutResponse } from "../entities/LogoutEntities";
 
 export class LogoutUseCase {

@@ -42,7 +42,6 @@ const Home = () => {
     reconnectedWalletAddress,
     walletAddress,
     ethBalance,
-    usdBalance,
     isFetchingBalance,
     fetchBalanceError,
 
@@ -259,8 +258,7 @@ const Home = () => {
               <span className="balance-fetching-text">Fetching...</span>
             ) : fetchBalanceError ? (
               <span className="balance-error-text">Error fetching balance</span>
-            ) : usdBalance !== null ? (
-              `₱ ${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            
             ) : walletAddress ? (
               <span className="wallet-address-display">
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}

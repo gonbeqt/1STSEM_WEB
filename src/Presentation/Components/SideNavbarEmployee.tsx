@@ -8,7 +8,7 @@ import LogoutIcon from './icons/LogoutIcon';
 import PayrollIcon from './icons/PayrollIcon';
 import SettingsIcon from './icons/SettingsIcon';
 import { container } from '../../di/container';
-import { LoginViewModel } from '../../domain/models/LoginViewModel';
+import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 
 const SideNavbarEmployee = () => {
   const navigate = useNavigate();

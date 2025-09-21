@@ -1,4 +1,4 @@
-import { Session } from "../../domain/entities/SessionEntities";
+import { Session } from "../entities/SessionEntities";
 
 export interface SessionRepository {
   listSessions(): Promise<Session[]>;

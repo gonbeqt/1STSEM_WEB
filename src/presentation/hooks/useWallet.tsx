@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { container } from '../../di/container';
-import { WalletViewModel } from '../../domain/models/WalletViewModal';
+import { WalletViewModel } from '../../domain/viewmodel/WalletViewModal';
 import { WalletViewModelContext } from '../../context/WalletViewModelContext';
 
 export const useWallet = (): WalletViewModel => {

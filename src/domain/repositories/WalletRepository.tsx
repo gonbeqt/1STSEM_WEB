@@ -1,6 +1,6 @@
 // src/data/repositories/WalletRepository.tsx
-import { Wallet, ConnectWalletRequest, ReconnectWalletRequest, ReconnectWalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from "../../domain/entities/WalletEntities";
-import { WalletResponse } from "../../domain/entities/WalletEntities";
+import { Wallet, ConnectWalletRequest, ReconnectWalletRequest, ReconnectWalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from "../entities/WalletEntities";
+import { WalletResponse } from "../entities/WalletEntities";
 
 export interface WalletRepository {
     connectWallet(request: ConnectWalletRequest): Promise<WalletResponse>;

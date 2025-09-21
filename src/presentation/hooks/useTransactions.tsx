@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 
 export interface ApiTransaction {
+
+  id: string;
   _id: string;
   user_id: string;
   from_wallet_id: string;
@@ -26,7 +28,7 @@ export const useTransactions = (isWalletConnected: boolean) => {
       setIsLoadingTransactions(true);
       setTransactionError(null);
 
-      const response = await fetch('http://localhost:8000/api/eth/history/?limit=5', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/eth/history/?limit=5`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

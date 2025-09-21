@@ -1,9 +1,9 @@
 import { request } from "http";
-import { SessionRepository } from "../../data/repositories/SessionRepository";
-import { Session } from "../entities/SessionEntities";
+import { SessionRepository } from "../../domain/repositories/SessionRepository";
+import { Session } from "../../domain/entities/SessionEntities";
 
 export class SessionRepositoryImpl implements SessionRepository {
-      private readonly API_URL = 'http://localhost:8000/api';
+      private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
     async listSessions(): Promise<Session[]> {
         const token = localStorage.getItem('token');

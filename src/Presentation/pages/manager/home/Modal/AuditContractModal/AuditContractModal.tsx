@@ -1,7 +1,7 @@
 import React, { useState, useCallback, ChangeEvent } from 'react';
 import ReactDOM from 'react-dom';
 import './AuditContractModal.css';
-import { useAuditContractViewModel } from '../../../../../../domain/models/AuditContractViewModel';
+import { useAuditContractViewModel } from '../../../../../../domain/viewmodel/AuditContractViewModel';
 import { FileText, UploadCloud, X, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface AuditContractModalProps {

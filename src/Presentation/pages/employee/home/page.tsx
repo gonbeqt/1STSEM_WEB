@@ -1,57 +1,126 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './home.css';
-import { Bell, RotateCcw, Loader2 } from 'lucide-react';
+import { Bell, RotateCcw, Loader2, Wifi, Clock, TrendingDown, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../../../hooks/useWallet';
+import WalletModal from '../../../components/WalletModal';
+import EthereumIcon from '../../../components/icons/EthereumIcon';
+import { useTransactions, ApiTransaction } from '../../../hooks/useTransactions';
 
-interface Transaction {
-  id: string;
-  date: string;
-  amount: string;
-  type: 'paid' | 'pending';
-  description: string;
-  usdValue: string;
-}
+
+type WalletModalInitialView = 'connect' | 'send';
+
 
 
 
 const EmployeeHome = () => {
   const navigate = useNavigate();
-  const { ethBalance, usdBalance, isFetchingBalance, fetchBalanceError, fetchWalletBalance } = useWallet();
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
+  // Wallet state
+  const usd = 4469.44;
+    const {
+      isWalletConnected,
+      reconnectedWalletAddress,
+      walletAddress,
+      ethBalance,
+    
+      isFetchingBalance,
+      fetchBalanceError,
+  
+      successMessage,
+      clearSuccessMessage,
+      isReconnecting,
+      reconnectError,
+      reconnectWallet,
+      setReconnectPrivateKey,
+            fetchWalletBalance,
+            exchangeRates,
+            fiatCurrency    } = useWallet();
+  const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
 
-  useEffect(() => {
-    fetchWalletBalance();
-  }, [fetchWalletBalance]);
+  const transactionData = transactions.map(apiTransaction => {
+    const ethToFiatRate = exchangeRates?.ETH || 0;
+    const fiatAmount = apiTransaction.amount_eth * ethToFiatRate;
 
-  const transactions: Transaction[] = [
-    {
-      id: '1',
-      date: 'May 31, 2023',
-      amount: '0.45 ETH',
-      type: 'paid',
-      description: 'Send 300',
-      usdValue: '$160.00 USD'
-    },
-    {
-      id: '2',
-      date: 'April 30, 2023',
-      amount: '0.45 ETH',
-      type: 'paid',
-      description: 'On Daily 4G',
-      usdValue: '$160.00 USD'
-    },
-    {
-      id: '3',
-      date: 'June 30, 2023',
-      amount: '0.45 ETH',
-      type: 'pending',
-      description: 'Send 350',
-      usdValue: '$160.00 USD'
-    }
-  ];
-  const handleTransactionDetails = () => {
-    navigate('/transaction_details')
+    return {
+      name: getTransactionName(apiTransaction),
+      amount: typeof apiTransaction.amount_eth === 'string' ? parseFloat(apiTransaction.amount_eth) : apiTransaction.amount_eth,
+      fiatAmount: fiatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      type: apiTransaction.status === 'pending' ? 'pending' : 'paid',
+      date: formatTransactionDate(apiTransaction.created_at),
+      icon: getTransactionIcon(apiTransaction),
+      status: apiTransaction.status,
+      hash: apiTransaction.transaction_hash
+    };
+  });
+    const formatTransactionDate = (dateString: string): string => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+      if (diffHours < 1) {
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        return `${diffMinutes} mins ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours} hrs ago`;
+      } else if (diffDays === 1) {
+        return '1 day ago';
+      } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+      } else {
+        return date.toLocaleDateString();
+      }
+    };
+  
+    const getTransactionIcon = (transaction: ApiTransaction) => {
+      if (transaction.status === 'pending') {
+        return <Clock className="transaction-icon pending" />;
+      }
+      return <TrendingDown className="transaction-icon outflow" />;
+    };
+  
+    const getTransactionName = (transaction: ApiTransaction): string => {
+      if (transaction.from_wallet_name) {
+        return `ETH from ${transaction.from_wallet_name}`;
+      }
+      return 'ETH Transaction';
+    };
+  
+
+    // Clear success message after showing it
+    useEffect(() => {
+      if (successMessage) {
+        const timer = setTimeout(() => {
+          clearSuccessMessage();
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [successMessage, clearSuccessMessage]);
+  
+    // Fetch wallet balance when connected
+    useEffect(() => {
+      if (isWalletConnected) {
+        fetchWalletBalance();
+      }
+    }, [isWalletConnected, fetchWalletBalance]);
+  
+  const handleTransactionDetails = (transactionId: string) => {
+    navigate(`/transaction_details/${transactionId}`)
   }
+
+  const getNextMonthFirstDay = () => {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    return nextMonth.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+ const handleOpenWalletModal = (view: WalletModalInitialView) => {
+    setWalletModalInitialView(view);
+    setIsWalletModalOpen(true);
+  };
 
   return (
     <div className="wallet-container">
@@ -75,37 +144,63 @@ const EmployeeHome = () => {
       </div>
 
       {/* Wallet Balance Card */}
-      <div className="wallet-card">
-        <div className="wallet-info">
-          <span>Current Wallet</span>
-          <h1>
-            {isFetchingBalance ? (
-              <Loader2 className="balance-fetching-icon" />
-            ) : ethBalance !== null ? (
-              `${ethBalance.toFixed(4)} ETH`
-            ) : (
-              <span className="balance-empty-text">0.00 ETH</span>
+      <div className="current-wallet-card">
+        <div className="wallet-header">
+          <div className="flex items-center gap-2">
+            <span className="wallet-label">Current Wallet</span>
+            {isWalletConnected && (
+              <div className="wallet-status-connected">
+                <Wifi className="wallet-status-connected-icon" />
+                <span className="wallet-status-connected-text">Connected</span>
+              </div>
             )}
-          </h1>
-          <span>Converted to</span>
-          <h2>
+            {isReconnecting && (
+              <div className="wallet-status-connecting">
+                <Loader2 className="wallet-status-connecting-icon" />
+                <span className="wallet-status-connecting-text">Connecting...</span>
+              </div>
+            )}
+
+          </div>
+
+          {!isWalletConnected && !isReconnecting ? (
+            <button
+              className="connect-wallet-new"
+              onClick={() => handleOpenWalletModal('connect')}
+            >
+              Connect Wallet
+            </button>
+          ) : null}
+        </div>
+
+        <div className="wallet-balance">
+          <div className="balance-main">
+            <EthereumIcon className="eth-icon" />
+            <span className="balance-amount">
+              {isFetchingBalance ? (
+                <Loader2 className="balance-fetching-icon" />
+              ) : ethBalance !== null ? (
+                `${ethBalance.toFixed(4)} ETH`
+              ) : (
+                <span className="balance-empty-text"></span>
+              )}
+            </span>
+          </div>
+          <div className="balance-converted">
             {isFetchingBalance ? (
               <span className="balance-fetching-text">Fetching...</span>
             ) : fetchBalanceError ? (
               <span className="balance-error-text">Error fetching balance</span>
-            ) : usdBalance !== null ? (
-              `$ ${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            ) : exchangeRates && exchangeRates.ETH !== undefined ? (
+              `${fiatCurrency} ${(ethBalance !== null ? (ethBalance * usd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00')}`
+            ) : walletAddress ? (
+              <span className="wallet-address-display">
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </span>
             ) : (
-              '$ 0.00'
+              <span className="balance-empty-text"></span>
             )}
-          </h2>
-        </div>
-        <div className="wallet-actions">
-          <select>
-            <option>PHP</option>
-            <option>USD</option>
-          </select>
-          <button className="connect-wallet-btn">Withdraw</button>
+          </div>
         </div>
       </div>
       <div className="action-buttons">
@@ -113,7 +208,7 @@ const EmployeeHome = () => {
           <div className="action-icon purple">📤</div>
           <div className="action-text">
             <div>Next Payout</div>
-            <div className="action-date">June 15, 2023</div>
+            <div className="action-date">{getNextMonthFirstDay()}</div>
           </div>
         </div>
 
@@ -121,46 +216,86 @@ const EmployeeHome = () => {
           <div className="action-icon pink">📊</div>
           <div className="action-text">
             <div>Frequency</div>
+            <div className="action-date">Monthly</div>
           </div>
         </div>
       </div>
 
       {/* Recent Transactions */}
-      <div className="transactions-section">
-        <div className="transactions-header">
-          <h3>Recent Transactions</h3>
-          <button className="view-all-btn">
-            View All <span className="arrow">→</span>
-          </button>
-        </div>
-
-        <div className="transactions-list">
-          {transactions.map((transaction) => (
-            <div key={transaction.id} className="transaction-item">
-              <div className="transaction-left">
-                <div className="transaction-date">{transaction.date}</div>
-                <div className="transaction-description">{transaction.description}</div>
-                <div className={`transaction-status ${transaction.type}`}>
-                  <div className={`status-icon ${transaction.type}`}></div>
-                  {transaction.type === 'paid' ? 'Paid' : 'Pending'}
-                </div>
-              </div>
-
-              <div className="transaction-right">
-                <div className="transaction-amount1">{transaction.amount}</div>
-                <div className="transaction-usd">{transaction.usdValue}</div>
-                <button className="view-btn" onClick={handleTransactionDetails}>
-                  View
-                </button>
-              </div>
-            </div>
-          ))}
+      <div className="section-header3">
+        <h2>Recent Transactions</h2>
+        <div className="view-all" onClick={refreshTransactions}>
+          <span>Refresh</span>
+          <ChevronRight className="chevron-icon" />
         </div>
       </div>
+
+      <div className="transactions-list">
+        {isLoadingTransactions ? (
+          <div className="transaction-item2">
+            <div className="transaction-left">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <div className="transaction-details">
+                <div className="transaction-name">Loading transactions...</div>
+              </div>
+            </div>
+          </div>
+        ) : transactionError ? (
+          <div className="transaction-item2">
+            <div className="transaction-left">
+              <div className="transaction-details">
+                <div className="transaction-name">Error loading transactions</div>
+                <div className="transaction-date">{transactionError}</div>
+              </div>
+            </div>
+          </div>
+        ) : transactionData.length === 0 ? (
+          <div className="transaction-item2">
+            <div className="transaction-left">
+              <div className="transaction-details">
+                <div className="transaction-name">No transactions found</div>
+                <div className="transaction-date">Start making transactions to see them here.</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          transactionData.map((transaction, index) => (
+            <div key={index} className="transaction-item2">
+              <div className="transaction-left">
+                <div className={`transaction-icon-wrapper ${transaction.type}`}>
+                  {transaction.icon}
+                </div>
+                <div className="transaction-details">
+                  <div className="transaction-name">{transaction.name}</div>
+                  <div className="transaction-date">
+                    {transaction.date}
+                    {transaction.status && (
+                      <span className={`ml-2 px-1 py-0.5 text-xs rounded status-badge-${transaction.status}`}>
+                        {transaction.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className={`transaction-amount2 ${transaction.type}`}>
+                <span>{transaction.type === 'paid' ? '-' : transaction.type === 'pending' ? '' : '+'}{transaction.amount.toFixed(4)} ETH</span>
+                {fiatCurrency && <span className="fiat-amount">{fiatCurrency} {transaction.fiatAmount}</span>}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+       <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+        initialView={walletModalInitialView}
+      />
+
     </div>
 
 
   );
 };
+
 
 export default EmployeeHome;
