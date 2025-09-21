@@ -1,6 +1,5 @@
 // src/Presentation/pages/manager/home/page.tsx (With Auto Reconnect)
-import React, { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import  { useState, useEffect } from 'react';
 import Charts from '../../../components/Charts';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
@@ -39,7 +38,7 @@ const Home = () => {
   // Wallet state
   const {
     isWalletConnected,
-    reconnectedWalletAddress,
+    
     walletAddress,
     ethBalance,
     isFetchingBalance,
@@ -49,8 +48,6 @@ const Home = () => {
     clearSuccessMessage,
     isReconnecting,
     reconnectError,
-    reconnectWallet,
-    setReconnectPrivateKey,
     fetchWalletBalance
   } = useWallet();
   const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);

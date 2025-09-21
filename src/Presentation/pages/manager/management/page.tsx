@@ -4,21 +4,10 @@ import './management.css';
 import InputWithIcon from '../../../components/InputWithIcon';
 import SearchIcon from '../../../components/icons/SearchIcon';
 
-import AddEmployee from './AddEmployee/AddEmployeeModal';
+import AddEmployee from './AddEmployee/page';
 import EmployeeDetailModal from './EmployeeDetailModal/EmployeeDetailModal';
-
-interface Employee {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  department: string;
-  hireDate: string;
-  avatar: string;
-  status: 'active' | 'inactive' | 'on-leave';
-  salary: number;
-}
+import { useEmployees } from '../../../hooks/useEmployees';
+import { AddEmployeeResponse, Employee as ApiEmployee } from '../../../../domain/repositories/EmployeeRepository';
 
 // Extended interface for detail view (matching the modal component)
 interface DetailedEmployee {
@@ -71,11 +60,12 @@ interface Document {
 }
 
 const EmployeeManagement: React.FC = () => {
-  
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddEmployeeModal, setIsAddEmployeeModal] = useState(false);
   const [showEmployeeDetailModal, setShowEmployeeDetailModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<DetailedEmployee | null>(null);
+
+  const { employees, isLoading: isLoadingEmployees, error: employeesError, fetchEmployees } = useEmployees();
 
   const handleAddEmployee = () => {
     setIsAddEmployeeModal(true);
@@ -141,26 +131,26 @@ const EmployeeManagement: React.FC = () => {
     },
   ];
 
-  const handleEmployeeDetails = (employee: Employee) => {
+  const handleEmployeeDetails = (employee: ApiEmployee) => {
     // Convert employee data to detailed format
     const detailed: DetailedEmployee = {
-      id: employee.id.toString(),
-      fullName: employee.name,
-      employeeId: `EMP-${employee.id.toString().padStart(3, '0')}`,
+      id: employee.user_id,
+      fullName: employee.full_name || employee.username,
+      employeeId: employee.employee_id || employee.user_id,
       emailAddress: employee.email,
-      phoneNumber: employee.phone,
-      position: employee.position,
-      department: employee.department,
-      baseSalary: employee.salary,
+      phoneNumber: employee.phone || 'N/A',
+      position: employee.position || 'N/A',
+      department: employee.department || 'N/A',
+      baseSalary: 0, // Assuming salary is not part of this API response
       paymentSchedule: 'Weekly',
       employmentType: 'Full-time',
-      startDate: employee.hireDate,
-      dateOfBirth: '1990-01-01',
-      address: '123 Main Street, New York, NY 10001',
-      gender: 'Female',
-      nationality: 'American',
-      status: employee.status === 'active' ? 'Active' : 'Inactive',
-      profileImage: employee.avatar,
+      startDate: employee.hired_date || employee.created_at,
+      dateOfBirth: 'N/A',
+      address: 'N/A',
+      gender: 'N/A',
+      nationality: 'N/A',
+      status: employee.is_active ? 'Active' : 'Inactive',
+      profileImage: 'https://randomuser.me/api/portraits/men/avatar.jpg', // Placeholder
     };
 
     setSelectedEmployee(detailed);
@@ -190,116 +180,17 @@ const EmployeeManagement: React.FC = () => {
     }
   };
 
-  const employees: Employee[] = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@company.com',
-      phone: '+1 (555) 123-4567',
-      position: 'Senior Software Engineer',
-      department: 'Engineering',
-      hireDate: '2022-03-15',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      status: 'active',
-      salary: 95000
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      email: 'michael.chen@company.com',
-      phone: '+1 (555) 234-5678',
-      position: 'Product Manager',
-      department: 'Product',
-      hireDate: '2021-08-10',
-      avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
-      status: 'active',
-      salary: 110000
-    },
-    {
-      id: 3,
-      name: 'Emily Rodriguez',
-      email: 'emily.rodriguez@company.com',
-      phone: '+1 (555) 345-6789',
-      position: 'UX Designer',
-      department: 'Design',
-      hireDate: '2023-01-20',
-      avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-      status: 'active',
-      salary: 75000
-    },
-    {
-      id: 4,
-      name: 'David Thompson',
-      email: 'david.thompson@company.com',
-      phone: '+1 (555) 456-7890',
-      position: 'Marketing Specialist',
-      department: 'Marketing',
-      hireDate: '2022-11-05',
-      avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-      status: 'on-leave',
-      salary: 65000
-    },
-    {
-      id: 5,
-      name: 'Lisa Wang',
-      email: 'lisa.wang@company.com',
-      phone: '+1 (555) 567-8901',
-      position: 'Data Analyst',
-      department: 'Analytics',
-      hireDate: '2023-06-12',
-      avatar: 'https://randomuser.me/api/portraits/women/5.jpg',
-      status: 'active',
-      salary: 70000
-    },
-    {
-      id: 6,
-      name: 'James Miller',
-      email: 'james.miller@company.com',
-      phone: '+1 (555) 678-9012',
-      position: 'HR Manager',
-      department: 'Human Resources',
-      hireDate: '2020-02-28',
-      avatar: 'https://randomuser.me/api/portraits/men/6.jpg',
-      status: 'active',
-      salary: 85000
-    },
-    {
-      id: 7,
-      name: 'Rachel Green',
-      email: 'rachel.green@company.com',
-      phone: '+1 (555) 789-0123',
-      position: 'Sales Representative',
-      department: 'Sales',
-      hireDate: '2022-09-14',
-      avatar: 'https://randomuser.me/api/portraits/women/7.jpg',
-      status: 'inactive',
-      salary: 55000
-    },
-    {
-      id: 8,
-      name: 'Alex Kumar',
-      email: 'alex.kumar@company.com',
-      phone: '+1 (555) 890-1234',
-      position: 'DevOps Engineer',
-      department: 'Engineering',
-      hireDate: '2021-12-03',
-      avatar: 'https://randomuser.me/api/portraits/men/8.jpg',
-      status: 'active',
-      salary: 90000
-    }
-  ];
-
-  const filteredEmployees = employees.filter((employee: Employee) => {
-    const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredEmployees = employees.filter((employee: ApiEmployee) => {
+    const matchesSearch = employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+      employee.position?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const handleAddEmployeeSubmit = (employee: any) => {
-    console.log('New employee submitted:', employee);
-    // Implement your add employee logic here
-    setIsAddEmployeeModal(false);
+  const handleAddEmployeeSubmit = (newEmployee: AddEmployeeResponse['employee']) => {
+    console.log('New employee added successfully:', newEmployee);
+    fetchEmployees(); // Refresh the list after adding a new employee
+    // Optionally, show a success toast or message on the management page
   };
 
   return (
@@ -326,36 +217,39 @@ const EmployeeManagement: React.FC = () => {
 
         {/* Employee List */}
         <div className="employee-list">
-          {filteredEmployees.map((employee: Employee) => (
-            <div
-              key={employee.id}
-              className="employee-item"
-              onClick={() => handleEmployeeDetails(employee)}
-            >
-              <div className="employee-info">
-                <img src={employee.avatar} alt={employee.name} className="employee-avatar" />
+          {isLoadingEmployees ? (
+            <p>Loading employees...</p>
+          ) : employeesError ? (
+            <p className="error-message">Error: {employeesError}</p>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="empty-state">
+              <h3 className="empty-state-title">No employees found</h3>
+            </div>
+          ) : (
+            filteredEmployees.map((employee: ApiEmployee) => (
+              <div
+                key={employee.user_id}
+                className="employee-item"
+                onClick={() => handleEmployeeDetails(employee)}
+              >
+                <div className="employee-info">
+                  <img src={'https://randomuser.me/api/portraits/men/avatar.jpg'} alt={employee.full_name || employee.username} className="employee-avatar" />
 
-                <div className="employee-container">
-                  <div className="employee-first">
-                    <h3 className="employee-name1">{employee.name}</h3>
-                    <p className='employee-salary1'>${employee.salary.toLocaleString()}</p>
-                  </div>
-                  <div className="employee-second">
-                    <h5 className="employee-position1">{employee.position}</h5>
-                    <p className="employee-netpay1">Net pay</p>
+                  <div className="employee-container">
+                    <div className="employee-first">
+                      <h3 className="employee-name1">{employee.full_name || employee.username}</h3>
+                      <p className='employee-salary1'>Position: {employee.position || 'N/A'}</p>
+                    </div>
+                    <div className="employee-second">
+                      <h5 className="employee-position1">{employee.department || 'N/A'}</h5>
+                      <p className="employee-netpay1">Status: {employee.is_active ? 'Active' : 'Inactive'}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
-
-        {/* Empty State */}
-        {filteredEmployees.length === 0 && (
-          <div className="empty-state">
-            <h3 className="empty-state-title">No employees found</h3>
-          </div>
-        )}
 
         {/* Add Employee Modal */}
         <AddEmployee

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useSessions } from '../../../../hooks/useSessions';
 import { Session } from '../../../../../domain/entities/SessionEntities'; // Corrected import

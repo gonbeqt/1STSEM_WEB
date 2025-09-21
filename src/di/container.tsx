@@ -22,6 +22,10 @@ import { GetTransactionHistoryUseCase } from '../domain/usecases/GetTransactionU
 import { SendEthUseCase } from '../domain/usecases/SendEthUseCase';
 import { ExchangeRateRepositoryImpl } from '../data/repositoriesImpl/ExchangeRateRepositoryImpl';
 import { GetExchangeRatesUseCase } from '../domain/usecases/GetExchangeRatesUseCase';
+import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
+import { EmployeeRepositoryImpl } from '../data/repositoriesImpl/EmployeeRepositoryImpl';
+import { AddEmployeeUseCase } from '../domain/usecases/AddEmployeeUseCase';
+import { GetEmployeesByManagerUseCase } from '../domain/usecases/GetEmployeesByManagerUseCase';
 
 export interface Container {
   userRepository: UserRepositoryImpl;
@@ -29,6 +33,7 @@ export interface Container {
   sessionRepository: SessionRepositoryImpl;
   transactionRepository: TransactionRepositoryImpl;
   exchangeRateRepository: ExchangeRateRepositoryImpl;
+  employeeRepository: EmployeeRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -39,6 +44,8 @@ export interface Container {
   getWalletBalanceUseCase: GetWalletBalanceUseCase;
   sendEthUseCase: SendEthUseCase;
   getExchangeRatesUseCase: GetExchangeRatesUseCase;
+  addEmployeeUseCase: AddEmployeeUseCase;
+  getEmployeesByManagerUseCase: GetEmployeesByManagerUseCase;
 
   listSessionsUseCase: ListSessionsUseCase;
   revokeSessionUseCase: RevokeSessionUseCase;
@@ -60,6 +67,7 @@ const walletRepository = new WalletRepositoryImpl();
 const sessionRepository = new SessionRepositoryImpl();
 const transactionRepository = new TransactionRepositoryImpl();
 const exchangeRateRepository = new ExchangeRateRepositoryImpl();
+const employeeRepository = new EmployeeRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -71,6 +79,8 @@ const reconnectWalletUseCase = new ReconnectWalletUseCase(walletRepository);
 const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository);
 const sendEthUseCase = new SendEthUseCase(walletRepository);
 const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
+const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
+const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
 
 const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
 const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
@@ -88,6 +98,7 @@ export const container: Container = {
   sessionRepository,
   transactionRepository,
   exchangeRateRepository,
+  employeeRepository,
 
   registerUseCase,
   loginUseCase,
@@ -98,6 +109,8 @@ export const container: Container = {
   getWalletBalanceUseCase,
   sendEthUseCase,
   getExchangeRatesUseCase,
+  addEmployeeUseCase,
+  getEmployeesByManagerUseCase,
 
   listSessionsUseCase,
   revokeSessionUseCase,

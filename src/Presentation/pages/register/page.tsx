@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './register.css';
 import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';

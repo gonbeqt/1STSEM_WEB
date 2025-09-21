@@ -122,17 +122,7 @@ const SideNavbar = () => {
             {isExpanded && <span className="nav-text">Reports</span>}
           </NavLink>
         </li>
-        <li>
-          <NavLink 
-            to="/audits" 
-            className={({ isActive }) => isActive ? "active" : ""}
-            onClick={handleNavClick}
-          >
-            <HistoryIcon />
-            {isExpanded && <span className="nav-text">Audits</span>}
-          </NavLink>
-        </li>
-        
+      
         <li>
           <NavLink 
             to="/settings" 

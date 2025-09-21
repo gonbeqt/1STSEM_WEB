@@ -21,7 +21,6 @@ const EmployeeHome = () => {
   // Wallet state
     const {
       isWalletConnected,
-      reconnectedWalletAddress,
       walletAddress,
       ethBalance,
     
@@ -31,9 +30,6 @@ const EmployeeHome = () => {
       successMessage,
       clearSuccessMessage,
       isReconnecting,
-      reconnectError,
-      reconnectWallet,
-      setReconnectPrivateKey,
             fetchWalletBalance,
             rates,
             fiatCurrency    } = useWallet();
@@ -107,10 +103,7 @@ const EmployeeHome = () => {
       }
     }, [isWalletConnected, fetchWalletBalance]);
   
-  const handleTransactionDetails = (transactionId: string) => {
-    navigate(`/transaction_details/${transactionId}`)
-  }
-
+ 
   const getNextMonthFirstDay = () => {
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
@@ -144,7 +137,7 @@ const EmployeeHome = () => {
       </div>
       <div className="wallet-header">
         <div className="greeting">
-          <h2>Hi Anne</h2>
+          <h2>Hi {localStorage.getItem('employee_id') || 'Employee'}</h2>
           <p>How are you today?</p>
         </div>
         <div className="header-icons">
