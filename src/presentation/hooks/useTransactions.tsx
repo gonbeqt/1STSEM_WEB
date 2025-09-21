@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface ApiTransaction {
 
@@ -20,7 +20,7 @@ export const useTransactions = (isWalletConnected: boolean) => {
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token || !isWalletConnected) return;
 
@@ -49,11 +49,11 @@ export const useTransactions = (isWalletConnected: boolean) => {
     } finally {
       setIsLoadingTransactions(false);
     }
-  };
+  }, [isWalletConnected]);
 
   useEffect(() => {
     fetchTransactions();
-  }, [isWalletConnected]);
+  }, [isWalletConnected, fetchTransactions]);
 
   return {
     transactions,

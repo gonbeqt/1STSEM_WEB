@@ -1,74 +1,161 @@
-// Income.tsx
+// Income.tsx - Backend Connected
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Income.css';
 import { useNavigate } from 'react-router-dom';
 
 interface IncomeItem {
   name: string;
   amount: number;
-  subItems?: IncomeItem[];
 }
 
-interface IncomeData {
-  assets: {
-    current: IncomeItem[];
-    nonCurrent: IncomeItem[];
-  };
-  liabilities: IncomeItem[];
-  equity: IncomeItem[];
+interface IncomeStatementData {
+  revenue: IncomeItem[];
+  expenses: IncomeItem[];
+  net_income: number;
+  total_revenue: number;
+  total_expenses: number;
 }
 
 const Income: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  
+  // State for income statement data and UI
+  const [incomeStatement, setIncomeStatement] = useState<IncomeStatementData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
   const [expandedSections, setExpandedSections] = useState<{
-    assets: boolean;
-    liabilities: boolean;
-    equity: boolean;
+    revenue: boolean;
+    expenses: boolean;
+    summary: boolean;
   }>({
-    assets: true,
-    liabilities: false,
-    equity: false,
+    revenue: true,
+    expenses: false,
+    summary: false,
   });
 
-  const chartData = [
-    { name: 'Jan', assets: 100000, liabilities: 50000, equity: 50000 },
-    { name: 'Feb', assets: 110000, liabilities: 55000, equity: 55000 },
-    { name: 'Mar', assets: 120000, liabilities: 60000, equity: 60000 },
-    { name: 'Apr', assets: 115000, liabilities: 58000, equity: 57000 },
-    { name: 'May', assets: 125000, liabilities: 62000, equity: 63000 },
-    { name: 'Jun', assets: 130000, liabilities: 65000, equity: 65000 },
-  ];
+  // Load income statement on component mount
+  useEffect(() => {
+    generateIncomeStatement();
+  }, []);
 
-  const cashflowData: IncomeData = {
-    assets: {
-      current: [
-        { name: 'Cash', amount: 125000 },
-        { name: 'Accounts Receivable', amount: 85000 },
-        { name: 'Inventory', amount: 95000 },
-        { name: 'Prepaid Expenses', amount: 12000 },
-      ],
-      nonCurrent: [
-        { name: 'Land', amount: 250000 },
-        { name: 'Buildings', amount: 450000 },
-        { name: 'Equipment', amount: 180000 },
-        { name: 'Accumulated Depreciation', amount: -120000 },
-      ]
-    },
-    liabilities: [
-      { name: 'Accounts Payable', amount: 45000 },
-      { name: 'Short-term Loans', amount: 25000 },
-      { name: 'Accrued Expenses', amount: 15000 },
-      { name: 'Long-term Debt', amount: 320000 },
-    ],
-    equity: [
-      { name: 'Common Stock', amount: 200000 },
-      { name: 'Retained Earnings', amount: 467000 },
-    ]
+  const generateIncomeStatement = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      const token = localStorage.getItem('token');
+      
+      // Use portfolio value endpoint to get basic financial data
+      const response = await fetch(`${API_URL}/portfolio/value/?currency=USD`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      // Check if response is HTML (error page) instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        throw new Error(`Server returned HTML error page (${response.status}). Portfolio endpoint may not be available.`);
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: Failed to fetch portfolio data`);
+      }
+
+      // Create a basic income statement from portfolio value data
+      // Since we don't have transaction data, show portfolio value as revenue
+      const portfolioValue = data.total_value || 0;
+      
+      const incomeStatementData: IncomeStatementData = {
+        revenue: portfolioValue > 0 ? [
+          { name: 'Portfolio Value', amount: portfolioValue }
+        ] : [
+          { name: 'No revenue data available', amount: 0 }
+        ],
+        expenses: [
+          { name: 'No expense data available', amount: 0 }
+        ],
+        total_revenue: portfolioValue,
+        total_expenses: 0,
+        net_income: portfolioValue
+      };
+      
+      setIncomeStatement(incomeStatementData);
+    } catch (err: any) {
+      console.error('Income statement generation error:', err);
+      setError(err.message || 'Failed to generate income statement');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleSection = (section: 'assets' | 'liabilities' | 'equity') => {
+  const exportToExcel = async () => {
+    try {
+      setLoading(true);
+      
+      // Create CSV export using the calculated income statement data
+      if (!incomeStatement) {
+        setError('No income statement data to export');
+        return;
+      }
+
+      const csvContent = [
+        ['Category', 'Item', 'Amount'],
+        ['Revenue', '', ''],
+        ...incomeStatement.revenue.map(item => ['', item.name, item.amount.toString()]),
+        ['', 'Total Revenue', incomeStatement.total_revenue.toString()],
+        ['', '', ''],
+        ['Expenses', '', ''],
+        ...incomeStatement.expenses.map(item => ['', item.name, item.amount.toString()]),
+        ['', 'Total Expenses', incomeStatement.total_expenses.toString()],
+        ['', '', ''],
+        ['Summary', '', ''],
+        ['', 'Net Income', incomeStatement.net_income.toString()]
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `income_statement_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('CSV export error:', error);
+      setError('Failed to export income statement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Chart data from real income statement data
+  const chartData = incomeStatement ? [
+    { 
+      name: 'Revenue', 
+      value: incomeStatement.total_revenue
+    },
+    { 
+      name: 'Expenses', 
+      value: incomeStatement.total_expenses
+    },
+    { 
+      name: 'Net Income', 
+      value: incomeStatement.net_income
+    }
+  ] : [];
+
+
+  const toggleSection = (section: 'revenue' | 'expenses' | 'summary') => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section],
@@ -84,202 +171,197 @@ const Income: React.FC = () => {
     }).format(Math.abs(amount));
   };
 
-  const calculateCurrentAssets = (): number => {
-    return cashflowData.assets.current.reduce((total, item) => total + item.amount, 0);
-  };
+  const renderChartView = () => {
+    if (loading) {
+      return <div className="loading">Loading income statement data...</div>;
+    }
 
-  const calculateNonCurrentAssets = (): number => {
-    return cashflowData.assets.nonCurrent.reduce((total, item) => total + item.amount, 0);
-  };
+    if (error) {
+      return <div className="error">Error: {error}</div>;
+    }
 
-  const calculateTotalAssets = (): number => {
-    return calculateCurrentAssets() + calculateNonCurrentAssets();
-  };
+    if (!incomeStatement || chartData.length === 0) {
+      return <div className="no-data">No income statement data available for chart view</div>;
+    }
 
-  const calculateTotalLiabilities = (): number => {
-    return cashflowData.liabilities.reduce((total, item) => total + item.amount, 0);
-  };
-
-  const calculateTotalEquity = (): number => {
-    return cashflowData.equity.reduce((total, item) => total + item.amount, 0);
-  };
-
-  const renderChartView = () => (
-    <div className="chart-view">
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={chartData}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="assets" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="liabilities" stroke="#82ca9d" />
-          <Line type="monotone" dataKey="equity" stroke="#ffc658" />
-        </LineChart>
-      </ResponsiveContainer>
-      <div className="chart-summary">
-        <div className="summary-box">
-          <h4>Summary</h4>
-          <p>Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.</p>
-          <div className="btn-container"> 
-        <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
-          <button className="download-btn1">Download Report</button>
+    return (
+      <div className="chart-view">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart
+            data={chartData}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+          </LineChart>
+        </ResponsiveContainer>
+        <div className="chart-summary">
+          <div className="summary-box">
+            <h4>Income Statement Summary</h4>
+            <p>Your income statement shows revenue, expenses, and net income for the current period.</p>
+            <div className="btn-container"> 
+              <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
+              <button className="download-btn1" onClick={exportToExcel}>Download Report</button>
+            </div>
           </div>
-         
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  const renderTableView = () => (
-    <div className="table-view">
-      <div className="export-actions">
-        <button className="export-excel">📊 Export To Excel</button>
-      </div>
+  const renderTableView = () => {
+    if (loading) {
+      return <div className="loading">Loading income statement...</div>;
+    }
 
-      <div className="balance-sections">
-        {/* Assets Section */}
-        <div className="section-group">
-          <div 
-            className="section-header"
-            onClick={() => toggleSection('assets')}
-          >
-            <span className={`expand-arrow ${expandedSections.assets ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Assets</span>
-            <span className="section-amount">${formatCurrency(calculateTotalAssets()).slice(1)}</span>
-          </div>
-          
-          {expandedSections.assets && (
-            <div className="section-content">
-              <div className="subsection">
-                <div className="subsection-header">
-                  <span className="subsection-title">Current Assets</span>
-                  <span className="subsection-total">${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
-                </div>
-                {cashflowData.assets.current.map((item, index) => (
+    if (error) {
+      return <div className="error">Error: {error}</div>;
+    }
+
+    if (!incomeStatement) {
+      return <div className="no-data">No income statement data available</div>;
+    }
+
+    return (
+      <div className="table-view">
+        <div className="export-actions">
+          <button className="export-excel" onClick={exportToExcel}>📊 Export To Excel</button>
+        </div>
+
+        <div className="income-sections">
+          {/* Revenue Section */}
+          <div className="section-group">
+            <div 
+              className="section-header"
+              onClick={() => toggleSection('revenue')}
+            >
+              <span className={`expand-arrow ${expandedSections.revenue ? 'expanded' : ''}`}>▼</span>
+              <span className="section-title">Revenue</span>
+              <span className="section-amount">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
+            </div>
+            
+            {expandedSections.revenue && (
+              <div className="section-content">
+                {incomeStatement.revenue.map((item: IncomeItem, index: number) => (
                   <div key={index} className="line-item">
                     <span className="item-name">{item.name}</span>
                     <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
                   </div>
                 ))}
                 <div className="subsection-total-line">
-                  <span>Total Current Assets</span>
-                  <span>${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
+                  <span>Total Revenue</span>
+                  <span>${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
                 </div>
               </div>
+            )}
+          </div>
 
-              <div className="subsection">
-                <div className="subsection-header">
-                  <span className="subsection-title">Non-Current Assets</span>
-                  <span className="subsection-total">${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
-                </div>
-                {cashflowData.assets.nonCurrent.map((item, index) => (
+          {/* Expenses Section */}
+          <div className="section-group">
+            <div 
+              className="section-header"
+              onClick={() => toggleSection('expenses')}
+            >
+              <span className={`expand-arrow ${expandedSections.expenses ? 'expanded' : ''}`}>▼</span>
+              <span className="section-title">Expenses</span>
+              <span className="section-amount">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
+            </div>
+            
+            {expandedSections.expenses && (
+              <div className="section-content">
+                {incomeStatement.expenses.map((item: IncomeItem, index: number) => (
                   <div key={index} className="line-item">
                     <span className="item-name">{item.name}</span>
-                    <span className="item-amount">
-                      {item.amount < 0 ? '-' : ''}${formatCurrency(item.amount).slice(1)}
-                    </span>
+                    <span className="item-amount">-${formatCurrency(item.amount).slice(1)}</span>
                   </div>
                 ))}
                 <div className="subsection-total-line">
-                  <span>Total Non-Current Assets</span>
-                  <span>${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
+                  <span>Total Expenses</span>
+                  <span>-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Liabilities Section */}
-        <div className="section-group">
-          <div 
-            className="section-header"
-            onClick={() => toggleSection('liabilities')}
-          >
-            <span className={`expand-arrow ${expandedSections.liabilities ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Liabilities</span>
-            <span className="section-amount">${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
+            )}
           </div>
-          
-          {expandedSections.liabilities && (
-            <div className="section-content">
-              {cashflowData.liabilities.map((item, index) => (
-                <div key={index} className="line-item">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+
+          {/* Summary Section */}
+          <div className="section-group">
+            <div 
+              className="section-header"
+              onClick={() => toggleSection('summary')}
+            >
+              <span className={`expand-arrow ${expandedSections.summary ? 'expanded' : ''}`}>▼</span>
+              <span className="section-title">Income Summary</span>
+              <span className="section-amount">
+                {incomeStatement.net_income >= 0 ? '' : '-'}
+                ${formatCurrency(incomeStatement.net_income).slice(1)}
+              </span>
+            </div>
+            
+            {expandedSections.summary && (
+              <div className="section-content">
+                <div className="line-item">
+                  <span className="item-name">Total Revenue</span>
+                  <span className="item-amount">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Equity Section */}
-        <div className="section-group">
-          <div 
-            className="section-header"
-            onClick={() => toggleSection('equity')}
-          >
-            <span className={`expand-arrow ${expandedSections.equity ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Equity</span>
-            <span className="section-amount">${formatCurrency(calculateTotalEquity()).slice(1)}</span>
-          </div>
-          
-          {expandedSections.equity && (
-            <div className="section-content">
-              {cashflowData.equity.map((item, index) => (
-                <div key={index} className="line-item">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+                <div className="line-item">
+                  <span className="item-name">Total Expenses</span>
+                  <span className="item-amount">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <div className="subsection-total-line">
+                  <span>Net Income</span>
+                  <span>
+                    {incomeStatement.net_income >= 0 ? '' : '-'}
+                    ${formatCurrency(incomeStatement.net_income).slice(1)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Totals */}
-        <div className="totals-section">
-          <div className="total-line">
-            <span>Total Assets</span>
-            <span>${formatCurrency(calculateTotalAssets()).slice(1)}</span>
-          </div>
-          <div className="total-line">
-            <span>Total Liabilities</span>
-            <span>${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
-          </div>
-          <div className="total-line">
-            <span>Total Equity</span>
-            <span>${formatCurrency(calculateTotalEquity()).slice(1)}</span>
-          </div>
-          <div className="total-line balance-check">
-            <span>Liabilities + Equity</span>
-            <span>${formatCurrency(calculateTotalLiabilities() + calculateTotalEquity()).slice(1)}</span>
-          </div>
-          <div className="balance-status">
-            ✓ Income is balanced
+          {/* Totals */}
+          <div className="totals-section">
+            <div className="total-line">
+              <span>Total Revenue</span>
+              <span>${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
+            </div>
+            <div className="total-line">
+              <span>Total Expenses</span>
+              <span>-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
+            </div>
+            <div className="total-line balance-check">
+              <span>Net Income</span>
+              <span>
+                {incomeStatement.net_income >= 0 ? '' : '-'}
+                ${formatCurrency(incomeStatement.net_income).slice(1)}
+              </span>
+            </div>
+            <div className="balance-status">
+              ✓ Income statement generated successfully
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="Income-container">
-      <div className="Income-header">
+    <div className="income-container">
+      <div className="income-header">
         <div className="header-top">
-          <button className="back-btn" onClick={()=> navigate(-1)}>← Income</button>
+          <button className="back-btn" onClick={()=> navigate(-1)}>← Income Statement</button>
         </div>
         <div className="header-content">
-          <h1>Income</h1>
-          <p>View your company's assets, liabilities, and equity</p>
+          <h1>Income Statement</h1>
+          <p>View your company's revenue, expenses, and net income</p>
         </div>
         
         <div className="view-tabs">
@@ -298,12 +380,12 @@ const Income: React.FC = () => {
         </div>
         
         <div className="report-period">
-          <span>Daily Report</span>
+          <span>Monthly Report</span>
           <button className="filter-btn">🔽 Filter</button>
         </div>
       </div>
 
-      <div className="Income-content">
+      <div className="income-content">
         {activeView === 'chart' ? renderChartView() : renderTableView()}
       </div>
     </div>

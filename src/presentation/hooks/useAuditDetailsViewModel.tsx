@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import { GetAuditDetailsUseCase } from "./../../domain/usecases/GetAuditDetailsUseCase";
-import { Audit, Vulnerability } from "./../../domain/entities/ContractEntities";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { GetAuditDetailsUseCase } from "../../domain/usecases/GetAuditDetailsUseCase";
+import { Audit, Vulnerability } from "../../domain/entities/ContractEntities";
 
 export const useAuditDetailsViewModel = (auditId: string) => {
     const [audit, setAudit] = useState<Audit | null>(null);
     const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const getAuditDetailsUseCase = new GetAuditDetailsUseCase();
+    
+    const getAuditDetailsUseCase = useMemo(() => new GetAuditDetailsUseCase(), []);
 
     const fetchAuditDetails = useCallback(async () => {
         setIsLoading(true);
@@ -20,7 +21,7 @@ export const useAuditDetailsViewModel = (auditId: string) => {
             setError(result.error || "Failed to fetch audit details.");
         }
         setIsLoading(false);
-    }, [auditId]);
+    }, [auditId, getAuditDetailsUseCase]);
 
     useEffect(() => {
         if(auditId) {

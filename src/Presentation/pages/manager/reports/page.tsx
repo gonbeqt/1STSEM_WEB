@@ -7,6 +7,8 @@ const Reports: React.FC = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('Financial Statements');
 
+
+
   const reportCategories = [
     {
       name: 'Financial Statements',
@@ -35,6 +37,8 @@ const Reports: React.FC = () => {
   const handleReportTypeClick = (path: string) => {
     navigate(path);
   };
+
+
   return (
     <div className="reports-container">
       {/* Sidebar */}

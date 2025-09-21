@@ -1,5 +1,5 @@
 // src/contexts/WalletViewModelContext.ts
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import { WalletViewModel } from '../domain/viewmodel/WalletViewModal';
 
 // Create the context with a default value of null

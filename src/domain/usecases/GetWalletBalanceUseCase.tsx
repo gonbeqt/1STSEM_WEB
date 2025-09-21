@@ -1,5 +1,5 @@
 import { WalletRepository } from '../repositories/WalletRepository';
-import { GetWalletsResponse, GetWalletsListResponse } from '../entities/WalletEntities';
+import { GetWalletsListResponse } from '../entities/WalletEntities';
 
 export class GetWalletBalanceUseCase {
   constructor(private walletRepository: WalletRepository) {}

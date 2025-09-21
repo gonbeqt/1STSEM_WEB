@@ -7,7 +7,6 @@ import LogoutIcon from './icons/LogoutIcon';
 import PayrollIcon from './icons/PayrollIcon';
 import ReportsIcon from './icons/ReportsIcon';
 import SettingsIcon from './icons/SettingsIcon';
-import HistoryIcon from './icons/HistoryIcon';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
 

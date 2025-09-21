@@ -2,7 +2,7 @@
 import { makeAutoObservable } from 'mobx';
 import { ConnectWalletUseCase } from '../usecases/ConnectWalletUseCase';
 import { ReconnectWalletUseCase } from '../usecases/ReconnectWalletUseCase';
-import { Wallet, GetWalletsResponse, GetWalletsListResponse } from '../entities/WalletEntities';
+import { GetWalletsListResponse } from '../entities/WalletEntities';
 import { GetWalletBalanceUseCase } from '../usecases/GetWalletBalanceUseCase';
 import { SendEthUseCase } from '../usecases/SendEthUseCase'; // Import SendEthUseCase
 import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
@@ -129,10 +129,6 @@ export class WalletViewModel {
       this.state.connectError = 'Private key is required';
       return false;
     }
-
-    const cleanPrivateKey = this.state.privateKey.startsWith('0x')
-      ? this.state.privateKey.slice(2)
-      : this.state.privateKey;
 
     return true;
   };

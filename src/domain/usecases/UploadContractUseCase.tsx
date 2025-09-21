@@ -1,7 +1,7 @@
 import { ContractRepositoryImpl } from "../../data/repositoriesImpl/ContractRepositoryImpl";
 import { UploadContractResponse } from "../entities/ContractEntities";
 import { ContractRepository } from "../repositories/ContractRepository";
-import axios, { isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 
 export class UploadContractUseCase {
     private contractRepository: ContractRepository;

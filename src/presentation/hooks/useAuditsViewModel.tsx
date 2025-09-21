@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import { ListAuditsUseCase } from "./../../domain/usecases/ListAuditsUseCase";
-import { GetAuditStatisticsUseCase } from "./../../domain/usecases/GetAuditStatisticsUseCase";
-import { Audit, AuditStatistics } from "./../../domain/entities/ContractEntities";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { ListAuditsUseCase } from "../../domain/usecases/ListAuditsUseCase";
+import { GetAuditStatisticsUseCase } from "../../domain/usecases/GetAuditStatisticsUseCase";
+import { Audit, AuditStatistics } from "../../domain/entities/ContractEntities";
 
 export const useAuditsViewModel = () => {
     const [audits, setAudits] = useState<Audit[]>([]);
     const [statistics, setStatistics] = useState<AuditStatistics | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const listAuditsUseCase = new ListAuditsUseCase();
-    const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase();
+    
+    const listAuditsUseCase = useMemo(() => new ListAuditsUseCase(), []);
+    const getAuditStatisticsUseCase = useMemo(() => new GetAuditStatisticsUseCase(), []);
 
     const fetchAudits = useCallback(async () => {
         setIsLoading(true);
@@ -25,7 +26,7 @@ export const useAuditsViewModel = () => {
             setError("Failed to fetch audit data.");
         }
         setIsLoading(false);
-    }, []);
+    }, [getAuditStatisticsUseCase, listAuditsUseCase]);
 
     useEffect(() => {
         fetchAudits();

@@ -1,6 +1,6 @@
 // BalanceSheet.tsx
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './BalanceSheet.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +20,13 @@ interface BalanceSheetData {
 }
 
 const BalanceSheet: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  
+  // State for balance sheet data and UI
+  const [balanceSheet, setBalanceSheet] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
   const [expandedSections, setExpandedSections] = useState<{
     assets: boolean;
@@ -32,40 +38,144 @@ const BalanceSheet: React.FC = () => {
     equity: false,
   });
 
-  const chartData = [
-    { name: 'Jan', assets: 100000, liabilities: 50000, equity: 50000 },
-    { name: 'Feb', assets: 110000, liabilities: 55000, equity: 55000 },
-    { name: 'Mar', assets: 120000, liabilities: 60000, equity: 60000 },
-    { name: 'Apr', assets: 115000, liabilities: 58000, equity: 57000 },
-    { name: 'May', assets: 125000, liabilities: 62000, equity: 63000 },
-    { name: 'Jun', assets: 130000, liabilities: 65000, equity: 65000 },
-  ];
+  // Load balance sheet on component mount
+  useEffect(() => {
+    generateBalanceSheet();
+  }, []);
 
-  const balanceSheetData: BalanceSheetData = {
+  const generateBalanceSheet = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_URL}/balance-sheet/generate/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify({
+          as_of_date: new Date().toISOString().split('T')[0],
+          include_all_assets: true,
+          format: 'detailed'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setBalanceSheet(data.balance_sheet);
+      } else {
+        setError(data.error || 'Failed to generate balance sheet');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load balance sheet');
+      console.error('Balance sheet error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportToExcel = async () => {
+    setLoading(true);
+    try {
+      const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      const token = localStorage.getItem('token');
+      
+      const queryParams = balanceSheet?.balance_sheet_id ? `?balance_sheet_id=${balanceSheet.balance_sheet_id}` : '';
+      const response = await fetch(`${API_URL}/balance-sheet/export-excel/${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.success && data.excel_data) {
+        // Download the Excel file
+        const byteCharacters = atob(data.excel_data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: data.content_type });
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = data.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        setError(data.error || 'Failed to export to Excel');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to export to Excel');
+      console.error('Excel export error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportToPdf = async () => {
+    console.log('PDF export - implementation needed');
+  };
+
+  const clearError = () => {
+    setError(null);
+  };
+
+  // Handle error display
+  useEffect(() => {
+    if (error) {
+      console.error('Balance Sheet Error:', error);
+      // You could show a toast notification here
+    }
+  }, [error]);
+
+  const chartData = balanceSheet ? [
+    { 
+      name: 'Current', 
+      assets: balanceSheet.assets?.total || 0, 
+      liabilities: balanceSheet.liabilities?.total || 0, 
+      equity: balanceSheet.equity?.total || 0
+    }
+  ] : [];
+
+  // Use real balance sheet data only
+  const balanceSheetData = balanceSheet ? {
     assets: {
-      current: [
-        { name: 'Cash', amount: 125000 },
-        { name: 'Accounts Receivable', amount: 85000 },
-        { name: 'Inventory', amount: 95000 },
-        { name: 'Prepaid Expenses', amount: 12000 },
-      ],
+      current: balanceSheet?.assets?.current_assets?.crypto_holdings ? 
+        Object.entries(balanceSheet.assets.current_assets.crypto_holdings).map(([symbol, holding]: [string, any]) => ({
+          name: `${symbol} Holdings`,
+          amount: holding.current_value || 0
+        })) : [],
       nonCurrent: [
-        { name: 'Land', amount: 250000 },
-        { name: 'Buildings', amount: 450000 },
-        { name: 'Equipment', amount: 180000 },
-        { name: 'Accumulated Depreciation', amount: -120000 },
+        { name: 'Other Assets', amount: balanceSheet.assets.total - balanceSheet.assets.current_assets.total }
       ]
     },
-    liabilities: [
-      { name: 'Accounts Payable', amount: 45000 },
-      { name: 'Short-term Loans', amount: 25000 },
-      { name: 'Accrued Expenses', amount: 15000 },
-      { name: 'Long-term Debt', amount: 320000 },
-    ],
+    liabilities: Object.entries(balanceSheet.liabilities.current_liabilities || {}).map(([name, amount]) => ({
+      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      amount: typeof amount === 'number' ? amount : 0
+    })),
     equity: [
-      { name: 'Common Stock', amount: 200000 },
-      { name: 'Retained Earnings', amount: 467000 },
+      { name: 'Retained Earnings', amount: balanceSheet.equity.retained_earnings }
     ]
+  } : {
+    assets: {
+      current: [],
+      nonCurrent: []
+    },
+    liabilities: [],
+    equity: []
   };
 
   const toggleSection = (section: 'assets' | 'liabilities' | 'equity') => {
@@ -85,23 +195,42 @@ const BalanceSheet: React.FC = () => {
   };
 
   const calculateCurrentAssets = (): number => {
-    return balanceSheetData.assets.current.reduce((total, item) => total + item.amount, 0);
+    return balanceSheet?.assets?.current_assets?.total || 0;
   };
 
   const calculateNonCurrentAssets = (): number => {
-    return balanceSheetData.assets.nonCurrent.reduce((total, item) => total + item.amount, 0);
+    if (balanceSheet) {
+      return balanceSheet.assets.total - balanceSheet.assets.current_assets.total;
+    }
+    return 0;
   };
 
   const calculateTotalAssets = (): number => {
-    return calculateCurrentAssets() + calculateNonCurrentAssets();
+    return balanceSheet?.totals?.total_assets || 0;
   };
 
   const calculateTotalLiabilities = (): number => {
-    return balanceSheetData.liabilities.reduce((total, item) => total + item.amount, 0);
+    return balanceSheet?.totals?.total_liabilities || 0;
   };
 
   const calculateTotalEquity = (): number => {
-    return balanceSheetData.equity.reduce((total, item) => total + item.amount, 0);
+    return balanceSheet?.totals?.total_equity || 0;
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportToExcel();
+    } catch (error) {
+      console.error('Failed to export to Excel:', error);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    console.log('PDF export - implementation needed');
+  };
+
+  const handleRefresh = async () => {
+    await generateBalanceSheet();
   };
 
   const renderChartView = () => (
@@ -129,12 +258,18 @@ const BalanceSheet: React.FC = () => {
       <div className="chart-summary">
         <div className="summary-box">
           <h4>Summary</h4>
-          <p>Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.</p>
+          {balanceSheet ? (
+            <p>
+              Your balance sheet shows total assets of ${formatCurrency(balanceSheet.totals.total_assets).slice(1)} 
+              with a net worth of ${formatCurrency(balanceSheet.totals.total_equity).slice(1)}.
+            </p>
+          ) : (
+            <p>Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.</p>
+          )}
           <div className="btn-container"> 
-        <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
-          <button className="download-btn1">Download Report</button>
+            <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
+            <button className="download-btn1" onClick={handleExportPdf}>Download Report</button>
           </div>
-         
         </div>
       </div>
     </div>
@@ -143,8 +278,21 @@ const BalanceSheet: React.FC = () => {
   const renderTableView = () => (
     <div className="table-view">
       <div className="export-actions">
-        <button className="export-excel">📊 Export To Excel</button>
+        <button className="export-excel" onClick={handleExportExcel} disabled={loading}>
+          📊 Export To Excel
+        </button>
+        <button onClick={handleRefresh} disabled={loading} style={{marginLeft: '10px'}}>
+          🔄 Refresh
+        </button>
       </div>
+
+      {loading && <div className="loading">Loading balance sheet...</div>}
+      {error && (
+        <div className="error" style={{color: 'red', margin: '10px 0'}}>
+          Error: {error}
+          <button onClick={clearError} style={{marginLeft: '10px'}}>Dismiss</button>
+        </div>
+      )}
 
       <div className="balance-sections">
         {/* Assets Section */}
@@ -280,6 +428,9 @@ const BalanceSheet: React.FC = () => {
         <div className="header-content">
           <h1>Balance Sheet</h1>
           <p>View your company's assets, liabilities, and equity</p>
+          {balanceSheet && (
+            <small>As of: {new Date(balanceSheet.as_of_date).toLocaleDateString()}</small>
+          )}
         </div>
         
         <div className="view-tabs">

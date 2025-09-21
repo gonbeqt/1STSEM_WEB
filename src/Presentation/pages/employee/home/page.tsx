@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './home.css';
 import { Bell, RotateCcw, Loader2, Wifi, Clock, TrendingDown, ChevronRight, Clipboard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../../../hooks/useWallet';
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
@@ -14,7 +13,6 @@ type WalletModalInitialView = 'connect' | 'send';
 
 
 const EmployeeHome = () => {
-  const navigate = useNavigate();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);

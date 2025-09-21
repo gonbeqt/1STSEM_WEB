@@ -26,6 +26,25 @@ import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
 import { EmployeeRepositoryImpl } from '../data/repositoriesImpl/EmployeeRepositoryImpl';
 import { AddEmployeeUseCase } from '../domain/usecases/AddEmployeeUseCase';
 import { GetEmployeesByManagerUseCase } from '../domain/usecases/GetEmployeesByManagerUseCase';
+import { ReportRepository } from '../domain/repositories/ReportRepository';
+import { ReportRepositoryImpl } from '../data/repositoriesImpl/ReportRepositoryImpl';
+import {
+  GenerateBalanceSheetUseCase,
+  ExportBalanceSheetExcelUseCase,
+  ExportBalanceSheetPdfUseCase,
+  ListBalanceSheetsUseCase,
+  GenerateCashFlowUseCase,
+  ExportCashFlowExcelUseCase,
+  ExportCashFlowPdfUseCase,
+  ListCashFlowStatementsUseCase,
+  GenerateTaxReportUseCase,
+  ListTaxReportsUseCase,
+  GenerateTaxAnalysisDailyUseCase,
+  GenerateTaxAnalysisWeeklyUseCase,
+  GenerateTaxAnalysisMonthlyUseCase,
+  GenerateTaxAnalysisYearlyUseCase,
+  GenerateTaxAnalysisCustomUseCase
+} from '../domain/usecases/ReportUseCases';
 
 export interface Container {
   userRepository: UserRepositoryImpl;
@@ -34,6 +53,7 @@ export interface Container {
   transactionRepository: TransactionRepositoryImpl;
   exchangeRateRepository: ExchangeRateRepositoryImpl;
   employeeRepository: EmployeeRepository;
+  reportRepository: ReportRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -46,6 +66,23 @@ export interface Container {
   getExchangeRatesUseCase: GetExchangeRatesUseCase;
   addEmployeeUseCase: AddEmployeeUseCase;
   getEmployeesByManagerUseCase: GetEmployeesByManagerUseCase;
+
+  // Report Use Cases
+  generateBalanceSheetUseCase: GenerateBalanceSheetUseCase;
+  exportBalanceSheetExcelUseCase: ExportBalanceSheetExcelUseCase;
+  exportBalanceSheetPdfUseCase: ExportBalanceSheetPdfUseCase;
+  listBalanceSheetsUseCase: ListBalanceSheetsUseCase;
+  generateCashFlowUseCase: GenerateCashFlowUseCase;
+  exportCashFlowExcelUseCase: ExportCashFlowExcelUseCase;
+  exportCashFlowPdfUseCase: ExportCashFlowPdfUseCase;
+  listCashFlowStatementsUseCase: ListCashFlowStatementsUseCase;
+  generateTaxReportUseCase: GenerateTaxReportUseCase;
+  listTaxReportsUseCase: ListTaxReportsUseCase;
+  generateTaxAnalysisDailyUseCase: GenerateTaxAnalysisDailyUseCase;
+  generateTaxAnalysisWeeklyUseCase: GenerateTaxAnalysisWeeklyUseCase;
+  generateTaxAnalysisMonthlyUseCase: GenerateTaxAnalysisMonthlyUseCase;
+  generateTaxAnalysisYearlyUseCase: GenerateTaxAnalysisYearlyUseCase;
+  generateTaxAnalysisCustomUseCase: GenerateTaxAnalysisCustomUseCase;
 
   listSessionsUseCase: ListSessionsUseCase;
   revokeSessionUseCase: RevokeSessionUseCase;
@@ -68,6 +105,7 @@ const sessionRepository = new SessionRepositoryImpl();
 const transactionRepository = new TransactionRepositoryImpl();
 const exchangeRateRepository = new ExchangeRateRepositoryImpl();
 const employeeRepository = new EmployeeRepositoryImpl();
+const reportRepository = new ReportRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -81,6 +119,23 @@ const sendEthUseCase = new SendEthUseCase(walletRepository);
 const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
 const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
 const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
+
+// ======= Create report use case instances =======
+const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportRepository);
+const exportBalanceSheetExcelUseCase = new ExportBalanceSheetExcelUseCase(reportRepository);
+const exportBalanceSheetPdfUseCase = new ExportBalanceSheetPdfUseCase(reportRepository);
+const listBalanceSheetsUseCase = new ListBalanceSheetsUseCase(reportRepository);
+const generateCashFlowUseCase = new GenerateCashFlowUseCase(reportRepository);
+const exportCashFlowExcelUseCase = new ExportCashFlowExcelUseCase(reportRepository);
+const exportCashFlowPdfUseCase = new ExportCashFlowPdfUseCase(reportRepository);
+const listCashFlowStatementsUseCase = new ListCashFlowStatementsUseCase(reportRepository);
+const generateTaxReportUseCase = new GenerateTaxReportUseCase(reportRepository);
+const listTaxReportsUseCase = new ListTaxReportsUseCase(reportRepository);
+const generateTaxAnalysisDailyUseCase = new GenerateTaxAnalysisDailyUseCase(reportRepository);
+const generateTaxAnalysisWeeklyUseCase = new GenerateTaxAnalysisWeeklyUseCase(reportRepository);
+const generateTaxAnalysisMonthlyUseCase = new GenerateTaxAnalysisMonthlyUseCase(reportRepository);
+const generateTaxAnalysisYearlyUseCase = new GenerateTaxAnalysisYearlyUseCase(reportRepository);
+const generateTaxAnalysisCustomUseCase = new GenerateTaxAnalysisCustomUseCase(reportRepository);
 
 const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
 const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
@@ -99,6 +154,7 @@ export const container: Container = {
   transactionRepository,
   exchangeRateRepository,
   employeeRepository,
+  reportRepository,
 
   registerUseCase,
   loginUseCase,
@@ -111,6 +167,23 @@ export const container: Container = {
   getExchangeRatesUseCase,
   addEmployeeUseCase,
   getEmployeesByManagerUseCase,
+
+  // Report Use Cases
+  generateBalanceSheetUseCase,
+  exportBalanceSheetExcelUseCase,
+  exportBalanceSheetPdfUseCase,
+  listBalanceSheetsUseCase,
+  generateCashFlowUseCase,
+  exportCashFlowExcelUseCase,
+  exportCashFlowPdfUseCase,
+  listCashFlowStatementsUseCase,
+  generateTaxReportUseCase,
+  listTaxReportsUseCase,
+  generateTaxAnalysisDailyUseCase,
+  generateTaxAnalysisWeeklyUseCase,
+  generateTaxAnalysisMonthlyUseCase,
+  generateTaxAnalysisYearlyUseCase,
+  generateTaxAnalysisCustomUseCase,
 
   listSessionsUseCase,
   revokeSessionUseCase,

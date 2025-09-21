@@ -1,7 +1,7 @@
 // src/domain/repositoriesImpl/WalletRepositoryImpl.tsx
-import { ConnectWalletRequest, GetWalletsResponse, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../../domain/entities/WalletEntities';
+import { ConnectWalletRequest, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../../domain/entities/WalletEntities';
 import { WalletRepository } from '../../domain/repositories/WalletRepository';
-import { ethers } from 'ethers'; // Import ethers library - forcing re-evaluation 
+ 
 import { SendETHRequest, SendETHResponse } from '../../domain/entities/SendEthEntities'; 
 
 
