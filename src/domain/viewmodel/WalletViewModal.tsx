@@ -38,7 +38,7 @@ interface WalletState {
   // Wallet Balance Data
   walletAddress: string | null;
   ethBalance: number | null;
-  exchangeRates: { [key: string]: number } | null;
+  rates: { [key: string]: number } | null;
   fiatCurrency: string | null;
 }
 
@@ -60,7 +60,7 @@ export class WalletViewModel {
     reconnectedWalletAddress: null,
     walletAddress: null,
     ethBalance: null,
-    exchangeRates: null,
+    rates: null,
     fiatCurrency: null,
    
   };
@@ -301,7 +301,7 @@ export class WalletViewModel {
     try {
       const response = await this.getExchangeRatesUseCase.execute(['ETH'], ['USD'], 'USD');
       if (response.success && response.rates) {
-        this.state.exchangeRates = response.rates;
+        this.state.rates = response.rates;
         this.state.fiatCurrency = response.currency;
       } else {
         console.error('Failed to fetch exchange rates:', response.error);
@@ -446,14 +446,14 @@ export class WalletViewModel {
 
 
   get usdBalance() {
-    if (this.state.ethBalance !== null && this.state.exchangeRates && this.state.exchangeRates.ETH) {
-      return this.state.ethBalance * this.state.exchangeRates.ETH;
+    if (this.state.ethBalance !== null && this.state.rates && this.state.rates.ETH) {
+      return this.state.ethBalance * this.state.rates.ETH;
     }
     return null;
   }
 
-  get exchangeRates() {
-    return this.state.exchangeRates;
+  get rates() {
+    return this.state.rates;
   }
 
   get fiatCurrency() {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './home.css';
-import { Bell, RotateCcw, Loader2, Wifi, Clock, TrendingDown, ChevronRight } from 'lucide-react';
+import { Bell, RotateCcw, Loader2, Wifi, Clock, TrendingDown, ChevronRight, Clipboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../../../hooks/useWallet';
 import WalletModal from '../../../components/WalletModal';
@@ -17,8 +17,8 @@ const EmployeeHome = () => {
   const navigate = useNavigate();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
+  const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   // Wallet state
-  const usd = 4469.44;
     const {
       isWalletConnected,
       reconnectedWalletAddress,
@@ -35,12 +35,12 @@ const EmployeeHome = () => {
       reconnectWallet,
       setReconnectPrivateKey,
             fetchWalletBalance,
-            exchangeRates,
+            rates,
             fiatCurrency    } = useWallet();
   const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
-
+      const usd = 4469.44
   const transactionData = transactions.map(apiTransaction => {
-    const ethToFiatRate = exchangeRates?.ETH || 0;
+    const ethToFiatRate = rates?.ETH || 0;
     const fiatAmount = apiTransaction.amount_eth * ethToFiatRate;
 
     return {
@@ -117,6 +117,20 @@ const EmployeeHome = () => {
     return nextMonth.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const handleCopyAddress = async () => {
+    if (walletAddress) {
+      try {
+        await navigator.clipboard.writeText(walletAddress);
+        setCopiedMessage('Copied!');
+        setTimeout(() => setCopiedMessage(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        setCopiedMessage('Failed to copy');
+        setTimeout(() => setCopiedMessage(null), 2000);
+      }
+    }
+  };
+
  const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
     setIsWalletModalOpen(true);
@@ -186,13 +200,22 @@ const EmployeeHome = () => {
               )}
             </span>
           </div>
+          {walletAddress && (
+            <div className="wallet-address-full">
+              <span>Wallet: {walletAddress}</span>
+              <button onClick={handleCopyAddress} className="copy-icon-btn">
+                <Clipboard size={16} />
+              </button>
+              {copiedMessage && <span className="copied-message">{copiedMessage}</span>}
+            </div>
+          )}
           <div className="balance-converted">
             {isFetchingBalance ? (
               <span className="balance-fetching-text">Fetching...</span>
             ) : fetchBalanceError ? (
               <span className="balance-error-text">Error fetching balance</span>
-            ) : exchangeRates && exchangeRates.ETH !== undefined ? (
-              `${fiatCurrency} ${(ethBalance !== null ? (ethBalance * usd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00')}`
+            ) : ethBalance !== null ? (
+              `${(ethBalance * usd).toFixed(2)} USD`
             ) : walletAddress ? (
               <span className="wallet-address-display">
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}

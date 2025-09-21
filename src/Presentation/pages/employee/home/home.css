@@ -298,7 +298,14 @@
   align-items: flex-end;
   gap: 4px;
 }
-
+.copy-icon-btn{
+  background-color: transparent;
+  border: none;
+  color: white;
+}
+.copy-icon-btn:hover {
+  color: #8B5CF6;
+}
 .transaction-amount {
   font-size: 14px;
   font-weight: 600;
