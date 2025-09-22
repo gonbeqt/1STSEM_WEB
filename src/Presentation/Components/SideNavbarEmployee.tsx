@@ -2,11 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './SideNavbar.css';
-import HomeIcon from './icons/HomeIcon';
-import InvoiceIcon from './icons/InvoiceIcon';
-import LogoutIcon from './icons/LogoutIcon';
-import PayrollIcon from './icons/PayrollIcon';
-import SettingsIcon from './icons/SettingsIcon';
+import { Home, Receipt, History, Settings, LogOut } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 
@@ -77,14 +73,14 @@ const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons o
       <ul className="nav-links">
         <li>
           <NavLink to="/employee/home" className={({ isActive }) => isActive ? "active" : "" } onClick={handleNavClick}>
-          <HomeIcon /> {isExpanded && <span className="nav-text">Home</span>}</NavLink></li>
+          <Home /> {isExpanded && <span className="nav-text">Home</span>}</NavLink></li>
         <li><NavLink to="/employee/payslip" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}>
-        <PayrollIcon /> {isExpanded && <span className="nav-text">Payslip</span>}</NavLink></li>
-        <li><NavLink to="/employee/history" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><InvoiceIcon /> {isExpanded && <span className="nav-text">History</span>}</NavLink></li>
-        <li><NavLink to="/employee/settings" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><SettingsIcon /> {isExpanded && <span className="nav-text">Settings</span>}</NavLink></li>
+        <Receipt /> {isExpanded && <span className="nav-text">Payslip</span>}</NavLink></li>
+        <li><NavLink to="/employee/history" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><History /> {isExpanded && <span className="nav-text">History</span>}</NavLink></li>
+        <li><NavLink to="/employee/settings" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><Settings /> {isExpanded && <span className="nav-text">Settings</span>}</NavLink></li>
       </ul>
       <button onClick={handleLogout} className="logout-btn">
-          <LogoutIcon />
+          <LogOut />
           {isExpanded && <span className="nav-text">Log out</span>}
         </button>
     </div>

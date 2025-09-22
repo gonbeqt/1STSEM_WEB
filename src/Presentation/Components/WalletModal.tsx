@@ -19,6 +19,9 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
   const [currentView, setCurrentView] = useState<ModalView>(initialView);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
+  const [company, setCompany] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
@@ -32,7 +35,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
   const handleWalletConnect = async (walletType: string) => {
     const success = await connectWallet({
       privateKey: privateKeyInput,
-      walletName: walletType + ' Wallet',
+      walletName: walletType === 'Private Key' ? 'MetaMask' : walletType + ' Wallet',
       walletType: walletType,
     });
 
@@ -45,10 +48,13 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
   };
 
   const handleSendEth = async () => {
-    const success = await sendEth(recipientAddress, amount);
+    const success = await sendEth(recipientAddress, amount, company, category, description);
     if (success) {
       setRecipientAddress('');
       setAmount('');
+      setCompany('');
+      setCategory('');
+      setDescription('');
     } else {
       console.error('Failed to send ETH');
     }
@@ -123,7 +129,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                 />
               </div>
               <button
-                onClick={() => handleWalletConnect('Private Key')}
+                onClick={() => handleWalletConnect('MetaMask')}
                 className="wallet-option-btn connect-private-key"
               >
                 <div className="wallet-option-content">
@@ -164,6 +170,42 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                   placeholder="0.0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  className="send-input"
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="company">Company:</label>
+                <input
+                  id="company"
+                  type="text"
+                  placeholder="Company Name"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="send-input"
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="category">Category:</label>
+                <input
+                  id="category"
+                  type="text"
+                  placeholder="Transaction Category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="send-input"
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="description">Description:</label>
+                <input
+                  id="description"
+                  type="text"
+                  placeholder="Transaction Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   className="send-input"
                 />
               </div>

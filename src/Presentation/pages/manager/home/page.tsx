@@ -1,5 +1,6 @@
 // src/Presentation/pages/manager/home/page.tsx (With Auto Reconnect)
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import Charts from '../../../components/Charts';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
@@ -28,7 +29,7 @@ import { useTransactions } from '../../../hooks/useTransactions';
 
 type WalletModalInitialView = 'connect' | 'send';
 
-const Home = () => {
+const Home = observer(() => {                                                   
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -440,7 +441,7 @@ const Home = () => {
       />
     </div>
   );
-};
+ })
 
 export default Home;
 

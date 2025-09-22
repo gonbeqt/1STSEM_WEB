@@ -111,8 +111,8 @@ export class WalletViewModel {
 
   clearForm = () => {
     this.state.privateKey = '';
-    this.state.walletName = 'My Wallet';
-    this.state.walletType = 'Private Key';
+    this.state.walletName = 'MetaMask';
+    this.state.walletType = 'MetaMask';
     this.clearErrors();
     this.clearSuccessMessage();
   };
@@ -245,7 +245,7 @@ export class WalletViewModel {
     }
   };
 
-  sendEth = async (recipientAddress: string, amount: string): Promise<boolean> => {
+  sendEth = async (recipientAddress: string, amount: string, company: string, category: string, description: string): Promise<boolean> => {
     const privateKey = this.state.privateKey || localStorage.getItem('privateKey');
 
     if (!privateKey) {
@@ -272,6 +272,9 @@ export class WalletViewModel {
         recipient_address: recipientAddress,
         amount: amount,
         from_address: this.state.walletAddress || undefined,
+        company: company,
+        category: category,
+        description: description,
       };
 
       const response: SendEthResponse = await this.sendEthUseCase.execute(request);
@@ -310,11 +313,17 @@ export class WalletViewModel {
   };
 
   fetchWalletBalance = async (authToken?: string): Promise<void> => {
-  const token = authToken || localStorage.getItem('token');
-  if (!token) {
-    this.state.fetchBalanceError = 'Authentication required to fetch balance.';
-    return;
-  }
+    const token = authToken || localStorage.getItem('token');
+    if (!token) {
+      this.state.fetchBalanceError = 'Authentication required to fetch balance.';
+      return;
+    }
+  
+    // Ensure that a wallet is connected before fetching the balance
+    if (!this.isWalletConnected) {
+      this.state.fetchBalanceError = 'No wallet connected.';
+      return;
+    }
 
   try {
     this.state.isFetchingBalance = true;
@@ -330,7 +339,6 @@ export class WalletViewModel {
       console.log('Primary Wallet Data:', primaryWallet);
       if (primaryWallet.balances && primaryWallet.balances.ETH) {
         this.state.walletAddress = primaryWallet.address;
-        this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
         this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
         // Calculate usdValue based on fetched exchange rates
         if ( this.state.ethBalance !== null) {
@@ -365,10 +373,8 @@ export class WalletViewModel {
     const privateKey = localStorage.getItem('privateKey');
     const walletConnected = localStorage.getItem('walletConnected');
 
-    if (walletAddress && privateKey && walletConnected === 'true' && token) {
+    if (walletAddress && walletConnected === 'true' && token) {
       this.state.reconnectedWalletAddress = walletAddress;
-      // Attempt to auto-reconnect using the stored private key
-      await this.reconnectWallet(privateKey);
     }
   };
 

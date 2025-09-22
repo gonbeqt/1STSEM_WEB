@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import './home.css';
 import { Bell, RotateCcw, Loader2, Wifi, Clock, TrendingDown, ChevronRight, Clipboard } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
@@ -11,26 +13,12 @@ type WalletModalInitialView = 'connect' | 'send';
 
 
 
-
-const EmployeeHome = () => {
+const EmployeeHome = observer(() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   // Wallet state
-    const {
-      isWalletConnected,
-      walletAddress,
-      ethBalance,
-    
-      isFetchingBalance,
-      fetchBalanceError,
-  
-      successMessage,
-      clearSuccessMessage,
-      isReconnecting,
-            fetchWalletBalance,
-            rates,
-            fiatCurrency    } = useWallet();
+    const { isWalletConnected, walletAddress, ethBalance, isFetchingBalance, fetchBalanceError, successMessage, clearSuccessMessage, isReconnecting, fetchWalletBalance, rates, fiatCurrency } = useWallet();
   const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
       const usd = 4469.44
   const transactionData = transactions.map(apiTransaction => {
@@ -187,7 +175,7 @@ const EmployeeHome = () => {
               ) : ethBalance !== null ? (
                 `${ethBalance.toFixed(4)} ETH`
               ) : (
-                <span className="balance-empty-text"></span>
+                <span className="balance-empty-text">0 ETH</span>
               )}
             </span>
           </div>
@@ -212,7 +200,7 @@ const EmployeeHome = () => {
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
             ) : (
-              <span className="balance-empty-text"></span>
+              <span className="balance-empty-text">Wallet Not Connected</span>
             )}
           </div>
         </div>
@@ -309,7 +297,7 @@ const EmployeeHome = () => {
 
 
   );
-};
+});
 
 
 export default EmployeeHome;

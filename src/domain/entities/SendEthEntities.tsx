@@ -8,6 +8,9 @@ export interface SendETHRequest {
   private_key: string;
   gas_price?: string;
   gas_limit?: string;
+  company?: string;
+  category?: string;
+  description?: string;
 }
 
 export interface SendETHResponse {

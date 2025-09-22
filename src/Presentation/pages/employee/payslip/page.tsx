@@ -76,8 +76,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
       }
     ],
     netSalary: {
-      amount: '0.55 ETH',
-      usdValue: '$1,045.00 USD'
+      amount: '0.285 ETH',
+      usdValue: '$541.75 USD'
     },
     transactionHash: '0x8D283284FS2458'
   };
@@ -97,7 +97,6 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
       <div className="payslip-container">
         {/* Header */}
         <div className="payslip-header">
-        
           <h1 className="page-title">Payslip</h1>
           <div className="header-spacer"></div>
         </div>
@@ -129,14 +128,13 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     <div className="payslip-container">
       {/* Header */}
       <div className="payslip-header">
-    
         <h1 className="page-title">Payslip</h1>
         <div className="header-spacer"></div>
       </div>
 
       {/* Payslip Content */}
       <div className="payslip-content">
-        {/* Period Info */}
+        {/* Period Card */}
         <div className="period-card">
           <div className="period-info">
             <div className="period-header">

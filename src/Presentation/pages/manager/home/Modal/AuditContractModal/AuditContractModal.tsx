@@ -1,8 +1,11 @@
 import React, { useState, useCallback, ChangeEvent } from 'react';
+import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
 import './AuditContractModal.css';
 import { useAuditContractViewModel } from '../../../../../../domain/viewmodel/AuditContractViewModel';
-import { FileText, UploadCloud, X, AlertCircle, Loader2 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { FileText, UploadCloud, X, AlertCircle, Loader2, Download } from 'lucide-react';
 
 interface AuditContractModalProps {
     isOpen: boolean;
@@ -88,7 +91,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             setCurrentStep(currentStep - 1);
         }
     };
-    
+
     const handleClose = () => {
         setSelectedFile(null);
         setContractName('');
@@ -97,6 +100,100 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         setCurrentStep(1);
         onClose();
     }
+
+    const renderPdfContent = () => (
+        <div>
+            <div className="results-step">
+                <div className="step-header">
+                    <h3>Audit Results</h3>
+                    <span className={`status-badge ${auditResponse?.audit?.status === 'COMPLETED' ? 'success' : ''}`}>
+                        {auditResponse?.audit?.status}
+                    </span>
+                </div>
+                <div className="results-grid">
+                    <div className="result-card">
+                        <h4>Overview</h4>
+                        <div className="info-item"><span className="label">Contract Name:</span> <span className="value">{auditResponse?.audit?.contract_name}</span></div>
+                        <div className="info-item"><span className="label">Risk Level:</span> <span className={`value risk-${auditResponse?.audit?.risk_level?.toLowerCase()}`}>{auditResponse?.audit?.risk_level}</span></div>
+                        <div className="info-item"><span className="label">Vulnerabilities Found:</span> <span className="value">{auditResponse?.audit?.vulnerabilities_found}</span></div>
+                        <div className="info-item"><span className="label">Completed On:</span> <span className="value">{auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}</span></div>
+                    </div>
+                    <div className="result-card">
+                        <h4>Vulnerabilities Summary</h4>
+                        {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
+                            auditResponse.vulnerabilities.map((vuln, index) => (
+                                <div key={index} className="info-item">
+                                    <span className="label">{vuln.title}</span>
+                                    <span className={`value severity-${vuln.severity.toLowerCase()}`}>{vuln.severity}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No major vulnerabilities found.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+            <div className="assessment-step">
+                <div className="step-header">
+                    <h3>Detailed Assessment</h3>
+                </div>
+                <div className="result-card">
+                    <h4>AI Analysis Overview</h4>
+                    <p>{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
+                </div>
+                <div className="result-card">
+                    <h4>Gas Optimization Insights</h4>
+                    <p>{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
+                </div>
+                <div className="result-card">
+                    <h4>Recommendations</h4>
+                    <pre>{auditResponse?.audit?.recommendations || 'No specific recommendations.'}</pre>
+                </div>
+            </div>
+        </div>
+    );
+
+    const handleDownloadPdf = () => {
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        document.body.appendChild(tempDiv);
+
+        const root = createRoot(tempDiv);
+        root.render(renderPdfContent());
+
+        // Add a small delay to ensure the component is fully rendered
+        setTimeout(() => {
+            html2canvas(tempDiv, {
+                scale: 2, // Increase scale for better quality
+                useCORS: true, // Enable CORS if you have external images
+                logging: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                console.log(imgData);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save('audit-report.pdf');
+                root.unmount();
+                document.body.removeChild(tempDiv);
+            });
+        }, 100); // 100ms delay
+    };
 
     if (!isOpen) {
         return null;
@@ -304,6 +401,12 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                                 currentStep === 1 ? 'Start Analysis' : 'Next'
                             )}
                         </button>}
+                        {currentStep === 4 && (
+                            <button onClick={handleDownloadPdf} className="btn btn-secondary download-btn">
+                                <Download size={16} />
+                                Download PDF
+                            </button>
+                        )}
                         {currentStep === 4 && <button onClick={handleClose} className="btn btn-primary">Finish</button>}
                     </div>
                 </div>
@@ -313,5 +416,4 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         modalRoot
     );
 };
-
 export default AuditContractModal;

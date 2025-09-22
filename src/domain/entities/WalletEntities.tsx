@@ -93,6 +93,9 @@ export interface SendEthRequest {
   recipient_address: string;
   amount: string; // Amount in ETH
   from_address?: string;
+  company?: string;
+  category?: string;
+  description?: string;
 }
 
 export interface SendEthResponse {

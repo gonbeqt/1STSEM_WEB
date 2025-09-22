@@ -50,6 +50,24 @@ export const ManagerSessionsPage: React.FC = () => {
         }
     };
 
+    const formatDeviceName = (deviceName: string) => {
+        // Extract browser and OS info for cleaner display
+        const parts = deviceName.split(' ');
+        if (parts.length > 1) {
+            return parts.slice(0, 3).join(' ');
+        }
+        return deviceName;
+    };
+
+    const formatUserAgent = (userAgent: string) => {
+        // Extract key browser info
+        const match = userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/);
+        if (match) {
+            return match[0];
+        }
+        return userAgent.length > 30 ? userAgent.substring(0, 30) + '...' : userAgent;
+    };
+
     if (loading) {
         return <div>Loading sessions...</div>;
     }
@@ -63,37 +81,120 @@ export const ManagerSessionsPage: React.FC = () => {
             <div className="content">
                 <h1>Manage Sessions</h1>
                 {isCurrentSessionMainDevice && (
-                    <button onClick={handleRevokeOtherSessions} className="revoke-others-button">Revoke Other Sessions</button>
+                    <button onClick={handleRevokeOtherSessions} className="revoke-others-button">
+                        Revoke Other Sessions
+                    </button>
                 )}
                 <div className="sessions-list">
                     {sessions.length === 0 ? (
                         <p>No sessions found.</p>
                     ) : (
                         sessions.map((session: Session) => (
-                            <div key={session.sid} className="session-card">
-                                <p><strong>Session ID:</strong> {session.sid}</p>
-                                <p><strong>Device Name:</strong> {session.device_name}</p>
-                                <p><strong>IP Address:</strong> {session.ip}</p>
-                                <p><strong>User Agent:</strong> {session.user_agent}</p>
-                                <p><strong>Created At:</strong> {format(new Date(session.created_at), 'PPP p')}</p>
-                                <p><strong>Last Seen:</strong> {session.last_seen ? format(new Date(session.last_seen), 'PPP p') : 'N/A'}</p>
-                                <p><strong>Approved:</strong> {session.approved ? 'Yes' : 'No'}</p>
-                                <p><strong>Current Session:</strong> {session.is_current ? 'Yes' : 'No'}</p>
-                                <p><strong>Main Device:</strong> {session.is_main_device ? 'Yes' : 'No'}</p>
-
-                                {isCurrentSessionMainDevice && (
-                                    <>
-                                        {!session.approved && (
-                                            <button onClick={() => handleApproveSession(session.sid)}  className="approve-button">Approve</button>
+                            <div 
+                                key={session.sid} 
+                                className={`session-card ${session.is_current ? 'current-session' : ''}`}
+                            >
+                                <div className="session-header">
+                                    <div className="session-field session-id">
+                                        <div className="label">Session ID:</div>
+                                        <div className="value">{session.sid.substring(0, 8)}...</div>
+                                    </div>
+                                    
+                                    <div className="session-field device-name">
+                                        <div className="label">Device Name:</div>
+                                        <div className="value">{formatDeviceName(session.device_name)}</div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">IP Address:</div>
+                                        <div className="value">{session.ip}</div>
+                                    </div>
+                                    
+                                    <div className="session-field user-agent">
+                                        <div className="label">User Agent:</div>
+                                        <div className="value">{formatUserAgent(session.user_agent)}</div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">Created At:</div>
+                                        <div className="value">
+                                            {format(new Date(session.created_at), 'MMM dd, yyyy')}<br/>
+                                            <small>{format(new Date(session.created_at), 'h:mm a')}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">Last Seen:</div>
+                                        <div className="value">
+                                            {session.last_seen ? (
+                                                <>
+                                                    {format(new Date(session.last_seen), 'MMM dd, yyyy')}<br/>
+                                                    <small>{format(new Date(session.last_seen), 'h:mm a')}</small>
+                                                </>
+                                            ) : 'N/A'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">Approved:</div>
+                                        <div className="value">
+                                            <span className={`status-badge ${session.approved ? 'approved' : 'not-approved'}`}>
+                                                {session.approved ? 'Yes' : 'No'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">Current Session:</div>
+                                        <div className="value">
+                                            {session.is_current && (
+                                                <span className="status-badge current">Yes</span>
+                                            )}
+                                            {!session.is_current && 'No'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="session-field">
+                                        <div className="label">Main Device:</div>
+                                        <div className="value">
+                                            {session.is_main_device && (
+                                                <span className="status-badge main">Yes</span>
+                                            )}
+                                            {!session.is_main_device && 'No'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="session-buttons">
+                                        {isCurrentSessionMainDevice && (
+                                            <>
+                                                {!session.approved && (
+                                                    <button 
+                                                        onClick={() => handleApproveSession(session.sid)}  
+                                                        className="approve-button"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                )}
+                                                {session.approved && !session.is_current && (
+                                                    <button 
+                                                        onClick={() => handleTransferMainDevice(session.sid)} 
+                                                        className="transfer-main-button"
+                                                    >
+                                                        Transfer Main
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
-                                        {session.approved && !session.is_current && (
-                                            <button onClick={() => handleTransferMainDevice(session.sid)} className="transfer-main-button">Transfer Main</button>
+                                        {(isCurrentSessionMainDevice || session.is_current) && (
+                                            <button 
+                                                onClick={() => handleRevoke(session.sid)} 
+                                                className="revoke-button"
+                                            >
+                                                Revoke
+                                            </button>
                                         )}
-                                    </>
-                                )}
-                                {(isCurrentSessionMainDevice || session.is_current) && (
-                                    <button onClick={() => handleRevoke(session.sid)} className="revoke-button">Revoke</button>
-                                )}
+                                    </div>
+                                </div>
                             </div>
                         ))
                     )}

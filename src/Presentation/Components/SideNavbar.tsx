@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './SideNavbar.css';
-import HomeIcon from './icons/HomeIcon';
-import InvoiceIcon from './icons/InvoiceIcon';
-import LogoutIcon from './icons/LogoutIcon';
-import PayrollIcon from './icons/PayrollIcon';
-import ReportsIcon from './icons/ReportsIcon';
-import SettingsIcon from './icons/SettingsIcon';
+
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Home } from 'lucide-react';
+import { Home, Users, FileText, BarChart2, Settings, LogOut } from 'lucide-react';
 
 const SideNavbar = () => {
     const navigate = useNavigate();
@@ -98,7 +93,7 @@ const SideNavbar = () => {
             className={({ isActive }) => isActive ? "active" : ""}
             onClick={handleNavClick}
           >
-            <PayrollIcon />
+            <Users />
             {isExpanded && <span className="nav-text">Management</span>}
           </NavLink>
         </li>
@@ -108,7 +103,7 @@ const SideNavbar = () => {
             className={({ isActive }) => isActive ? "active" : ""}
             onClick={handleNavClick}
           >
-            <InvoiceIcon />
+            <FileText />
             {isExpanded && <span className="nav-text">Invoice</span>}
           </NavLink>
         </li>
@@ -118,7 +113,7 @@ const SideNavbar = () => {
             className={({ isActive }) => isActive ? "active" : ""}
             onClick={handleNavClick}
           >
-            <ReportsIcon />
+            <BarChart2 />
             {isExpanded && <span className="nav-text">Reports</span>}
           </NavLink>
         </li>
@@ -129,7 +124,7 @@ const SideNavbar = () => {
             className={({ isActive }) => isActive ? "active" : ""}
             onClick={handleNavClick}
           >
-            <SettingsIcon />
+            <Settings />
             {isExpanded && <span className="nav-text">Settings</span>}
           </NavLink>
         </li>
@@ -137,7 +132,7 @@ const SideNavbar = () => {
       
       <div className="logout-container">
         <button onClick={handleLogout} className="logout-btn">
-          <LogoutIcon />
+          <LogOut />
           {isExpanded && <span className="nav-text">Log out</span>}
         </button>
       </div>
