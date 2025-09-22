@@ -19,6 +19,7 @@ import {
   WifiOff,
   Clock,
   TrendingDown,
+  RotateCcw,
 } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
@@ -191,19 +192,21 @@ const Home = () => {
       )}
 
       {/* Header */}
-      <div className="header-new">
-        <div className="header-left">
-          <div className="profile-avatar">
-            <span>J</span>
-          </div>
-          <div className="greeting-text">
-            <p className="greeting-small">Hi Juan</p>
-            <p className="greeting-question">How are you today?</p>
-          </div>
+      <div className="header6">
+        <h1>Home</h1>
+      </div>
+      <div className="wallet-header">
+        <div className="greeting">
+          <h2>Hi Manager</h2>
+          <p>How are you today?</p>
         </div>
-        <div className="header-right">
-          <Bell className="header-icon" />
-          <User className="header-icon" />
+        <div className="header-icons">
+          <button className="icon-btn">
+            <Bell size={20} />
+          </button>
+          <button className="icon-btn">
+            <RotateCcw size={20} />
+          </button>
         </div>
       </div>
 
@@ -246,7 +249,7 @@ const Home = () => {
               ) : ethBalance !== null ? (
                 `${ethBalance.toFixed(4)} ETH`
               ) : (
-                <span className="balance-empty-text"></span>
+                <span className="balance-empty-text"> 0 ETH</span>
               )}
             </span>
           </div>
@@ -261,7 +264,7 @@ const Home = () => {
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
             ) : (
-              <span className="balance-empty-text"></span>
+              <span className="balance-empty-text">Wallet Not Connected</span>
             )}
           </div>
         </div>

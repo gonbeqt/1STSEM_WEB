@@ -1,38 +1,88 @@
-import { useState, useEffect } from 'react';
+// src/Presentation/hooks/useEmployees.tsx
+import { useState, useEffect, useCallback } from 'react';
 import { container } from '../../di/container';
-import { Employee, GetEmployeesByManagerRequest } from '../../domain/repositories/EmployeeRepository';
+import { useEmployeeViewModel } from '../../domain/viewmodel/EmployeeViewModel';
+import { Employee as ApiEmployee, AddEmployeeRequest, AddEmployeeResponse } from '../../domain/repositories/EmployeeRepository';
 
-export const useEmployees = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface UseEmployeesReturn {
+  employees: ApiEmployee[];
+  isLoading: boolean;
+  error: string | null;
+  success: string | null;
+  
+  // Actions
+  fetchEmployees: () => Promise<void>;
+  addEmployee: (request: AddEmployeeRequest) => Promise<AddEmployeeResponse>;
+  refreshEmployees: () => void;
+  clearMessages: () => void;
+}
 
-  const fetchEmployees = async () => {
-    setIsLoading(true);
-    setError(null);
+export const useEmployees = (): UseEmployeesReturn => {
+  const [employees, setEmployees] = useState<ApiEmployee[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Use the Employee ViewModel
+  const { 
+    addEmployee: addEmployeeAction,
+    getEmployeesByManager, 
+    isLoading, 
+    error,
+    success,
+    clearMessages
+  } = useEmployeeViewModel(
+    container.addEmployeeUseCase, 
+    container.getEmployeesByManagerUseCase
+  );
+
+  // Fetch employees function
+  const fetchEmployees = useCallback(async () => {
     try {
-      const request: GetEmployeesByManagerRequest = {}; // No specific request params for now
-      const response = await container.getEmployeesByManagerUseCase.execute(request);
-      if (response.success && response.employees) {
+      console.log('Fetching employees...');
+      const response = await getEmployeesByManager({});
+      
+      if (response.success) {
+        console.log('Employees fetched successfully:', response.employees);
         setEmployees(response.employees);
       } else {
-        setError(response.error || 'Failed to fetch employees');
+        console.error('Failed to fetch employees:', response.error);
+        setEmployees([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch employees');
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      setEmployees([]);
     }
-  };
+  }, [getEmployeesByManager]);
 
+  // Fetch employees on component mount and when refreshTrigger changes
   useEffect(() => {
     fetchEmployees();
-  }, []); // Fetch employees on component mount
+  }, [fetchEmployees, refreshTrigger]);
+
+  // Add employee with automatic refresh
+  const addEmployee = async (request: AddEmployeeRequest): Promise<AddEmployeeResponse> => {
+    const response = await addEmployeeAction(request);
+    
+    // If successful, refresh the employee list
+    if (response.success) {
+      setRefreshTrigger(prev => prev + 1);
+    }
+    
+    return response;
+  };
+
+  // Manual refresh function
+  const refreshEmployees = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   return {
     employees,
     isLoading,
     error,
-    fetchEmployees, // Allow refreshing the list
+    success,
+    fetchEmployees,
+    addEmployee,
+    refreshEmployees,
+    clearMessages
   };
 };

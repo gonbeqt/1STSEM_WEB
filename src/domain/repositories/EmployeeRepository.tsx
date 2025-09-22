@@ -1,10 +1,8 @@
 export interface AddEmployeeRequest {
-  username: string;
   email: string;
-  password: string;
-  full_name?: string;
-  department?: string;
   position?: string;
+  department?: string;
+  full_name?: string;
   phone?: string;
 }
 
@@ -13,6 +11,7 @@ export interface AddEmployeeResponse {
   message: string;
   employee?: {
     user_id: string;
+    employee_id: string;
     username: string;
     email: string;
     full_name: string;
@@ -20,10 +19,10 @@ export interface AddEmployeeResponse {
     position: string;
     phone: string;
     role: string;
-    created_by: string;
-    created_at: string;
+    managed_by: string;
+    original_registration_date: string;
+    added_to_team_date: string;
     is_active: boolean;
-    employee_id: string;
   };
   error?: string;
   details?: any;
@@ -48,6 +47,7 @@ export interface Employee {
   onboarding_status: string;
   hired_date: string | null;
   access_granted: boolean;
+  profileImage?: string;
 }
 
 export interface GetEmployeesByManagerResponse {

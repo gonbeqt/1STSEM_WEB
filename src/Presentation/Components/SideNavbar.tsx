@@ -9,6 +9,7 @@ import ReportsIcon from './icons/ReportsIcon';
 import SettingsIcon from './icons/SettingsIcon';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
+import { Home } from 'lucide-react';
 
 const SideNavbar = () => {
     const navigate = useNavigate();
@@ -87,7 +88,7 @@ const SideNavbar = () => {
             className={({ isActive }) => isActive ? "active" : ""}
             onClick={handleNavClick}
           >
-            <HomeIcon />
+            <Home/>
             {isExpanded && <span className="nav-text">Home</span>}
           </NavLink>
         </li>

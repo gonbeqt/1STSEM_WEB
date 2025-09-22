@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './management.css';
-
 import InputWithIcon from '../../../components/InputWithIcon';
 import SearchIcon from '../../../components/icons/SearchIcon';
-
 import AddEmployee from './AddEmployee/page';
 import EmployeeDetailModal from './EmployeeDetailModal/EmployeeDetailModal';
-import { useEmployees } from '../../../hooks/useEmployees';
-import { AddEmployeeResponse, Employee as ApiEmployee } from '../../../../domain/repositories/EmployeeRepository';
+import { container } from '../../../../di/container';
+import { useEmployeeViewModel } from '../../../../domain/viewmodel/EmployeeViewModel';
+import { Employee as ApiEmployee, AddEmployeeResponse } from '../../../../domain/repositories/EmployeeRepository';
 
 // Extended interface for detail view (matching the modal component)
 interface DetailedEmployee {
@@ -64,8 +63,41 @@ const EmployeeManagement: React.FC = () => {
   const [isAddEmployeeModal, setIsAddEmployeeModal] = useState(false);
   const [showEmployeeDetailModal, setShowEmployeeDetailModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<DetailedEmployee | null>(null);
+  const [employees, setEmployees] = useState<ApiEmployee[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const { employees, isLoading: isLoadingEmployees, error: employeesError, fetchEmployees } = useEmployees();
+  // Use the Employee ViewModel
+  const { 
+    getEmployeesByManager, 
+    isLoading: isLoadingEmployees, 
+    error: employeesError 
+  } = useEmployeeViewModel(
+    container.addEmployeeUseCase, 
+    container.getEmployeesByManagerUseCase
+  );
+
+  // Fetch employees on component mount and when refreshTrigger changes
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        console.log('Fetching employees...');
+        const response = await getEmployeesByManager({});
+        
+        if (response.success) {
+          console.log('Employees fetched successfully:', response.employees);
+          setEmployees(response.employees);
+        } else {
+          console.error('Failed to fetch employees:', response.error);
+          setEmployees([]);
+        }
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        setEmployees([]);
+      }
+    };
+
+    fetchEmployees();
+  }, [refreshTrigger, getEmployeesByManager]);
 
   const handleAddEmployee = () => {
     setIsAddEmployeeModal(true);
@@ -150,7 +182,7 @@ const EmployeeManagement: React.FC = () => {
       gender: 'N/A',
       nationality: 'N/A',
       status: employee.is_active ? 'Active' : 'Inactive',
-      profileImage: 'https://randomuser.me/api/portraits/men/avatar.jpg', // Placeholder
+      profileImage: employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User', // Use employee's image or a grey placeholder
     };
 
     setSelectedEmployee(detailed);
@@ -183,14 +215,38 @@ const EmployeeManagement: React.FC = () => {
   const filteredEmployees = employees.filter((employee: ApiEmployee) => {
     const matchesSearch = employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position?.toLowerCase().includes(searchTerm.toLowerCase());
+      employee.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
   const handleAddEmployeeSubmit = (newEmployee: AddEmployeeResponse['employee']) => {
     console.log('New employee added successfully:', newEmployee);
-    fetchEmployees(); // Refresh the list after adding a new employee
-    // Optionally, show a success toast or message on the management page
+    
+    // Trigger a refresh of the employee list
+    setRefreshTrigger(prev => prev + 1);
+    
+    // Optionally, you could also add the new employee to the current list immediately
+    // to avoid waiting for the API call:
+    // if (newEmployee) {
+    //   const apiEmployee: ApiEmployee = {
+    //     employee_id: newEmployee.employee_id,
+    //     user_id: newEmployee.user_id,
+    //     username: newEmployee.username,
+    //     email: newEmployee.email,
+    //     full_name: newEmployee.full_name,
+    //     department: newEmployee.department,
+    //     position: newEmployee.position,
+    //     phone: newEmployee.phone,
+    //     is_active: newEmployee.is_active,
+    //     created_at: newEmployee.created_at,
+    //     last_login: null,
+    //     onboarding_status: 'pending',
+    //     hired_date: newEmployee.created_at,
+    //     access_granted: true,
+    //   };
+    //   setEmployees(prev => [apiEmployee, ...prev]);
+    // }
   };
 
   return (
@@ -205,7 +261,7 @@ const EmployeeManagement: React.FC = () => {
         <div className="payroll-header">
           <InputWithIcon
             icon={<SearchIcon />}
-            placeholder="Search"
+            placeholder="Search employees..."
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
@@ -218,12 +274,38 @@ const EmployeeManagement: React.FC = () => {
         {/* Employee List */}
         <div className="employee-list">
           {isLoadingEmployees ? (
-            <p>Loading employees...</p>
+            <div className="loading-state">
+              <p>Loading employees...</p>
+            </div>
           ) : employeesError ? (
-            <p className="error-message">Error: {employeesError}</p>
+            <div className="error-state">
+              <p className="error-message">Error: {employeesError}</p>
+              <button 
+                onClick={() => setRefreshTrigger(prev => prev + 1)}
+                className="retry-button"
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  background: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Retry
+              </button>
+            </div>
           ) : filteredEmployees.length === 0 ? (
             <div className="empty-state">
-              <h3 className="empty-state-title">No employees found</h3>
+              <h3 className="empty-state-title">
+                {searchTerm ? 'No employees found matching your search' : 'No employees found'}
+              </h3>
+              {!searchTerm && (
+                <p style={{ textAlign: 'center', color: '#666', marginTop: '8px' }}>
+                  Click "Add Employee" to get started
+                </p>
+              )}
             </div>
           ) : (
             filteredEmployees.map((employee: ApiEmployee) => (
@@ -231,18 +313,31 @@ const EmployeeManagement: React.FC = () => {
                 key={employee.user_id}
                 className="employee-item"
                 onClick={() => handleEmployeeDetails(employee)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="employee-info">
-                  <img src={'https://randomuser.me/api/portraits/men/avatar.jpg'} alt={employee.full_name || employee.username} className="employee-avatar" />
+                  <img 
+                    src={employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User'} 
+                    alt={employee.full_name || employee.username} 
+                    className="employee-avatar" 
+                  />
 
                   <div className="employee-container">
                     <div className="employee-first">
-                      <h3 className="employee-name1">{employee.full_name || employee.username}</h3>
-                      <p className='employee-salary1'>Position: {employee.position || 'N/A'}</p>
+                      <h3 className="employee-name1">
+                        {employee.full_name || employee.username}
+                      </h3>
+                      <p className='employee-salary1'>
+                        Position: {employee.position || 'N/A'}
+                      </p>
                     </div>
                     <div className="employee-second">
-                      <h5 className="employee-position1">{employee.department || 'N/A'}</h5>
-                      <p className="employee-netpay1">Status: {employee.is_active ? 'Active' : 'Inactive'}</p>
+                      <h5 className="employee-position1">
+                        {employee.department || 'N/A'}
+                      </h5>
+                      <p className="employee-netpay1">
+                        Status: {employee.is_active ? 'Active' : 'Inactive'}
+                      </p>
                     </div>
                   </div>
                 </div>

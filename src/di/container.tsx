@@ -26,6 +26,7 @@ import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
 import { EmployeeRepositoryImpl } from '../data/repositoriesImpl/EmployeeRepositoryImpl';
 import { AddEmployeeUseCase } from '../domain/usecases/AddEmployeeUseCase';
 import { GetEmployeesByManagerUseCase } from '../domain/usecases/GetEmployeesByManagerUseCase';
+import { EmployeeViewModel } from '../domain/viewmodel/EmployeeViewModel';
 import { ReportRepository } from '../domain/repositories/ReportRepository';
 import { ReportRepositoryImpl } from '../data/repositoriesImpl/ReportRepositoryImpl';
 import {
@@ -96,6 +97,7 @@ export interface Container {
   loginViewModel: () => LoginViewModel;
   walletViewModel: () => WalletViewModel;
   sessionViewModel: () => SessionViewModel;
+  employeeViewModel: () => EmployeeViewModel;
 };
 
 // ======= Create repository instances =======
@@ -210,5 +212,9 @@ export const container: Container = {
     revokeOtherSessionsUseCase,
     approveSessionUseCase,
     transferMainDeviceUseCase
+  ),
+  employeeViewModel: () => new EmployeeViewModel(
+    addEmployeeUseCase,
+    getEmployeesByManagerUseCase
   )
 };
