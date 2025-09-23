@@ -2,117 +2,59 @@ import React, { useState } from 'react';
 import { SearchIcon, ArrowLeft, Calendar, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import './history.css';
 import InputWithIcon from '../../../components/InputWithIcon';
-
-interface Transaction {
-  id: string;
-  date: string;
-  amount: string;
-  usdValue: string;
-  status: 'confirmed' | 'pending';
-  transactionHash?: string;
-  paymentPeriod?: string;
-}
+import { usePayslips } from '../../../../presentation/hooks/usePayslips';
+import { Payslip } from '../../../../domain/entities/PayslipEntities';
 
 interface SalaryTransactionsProps {
   onBack?: () => void;
 }
 
 const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
-  const [activeFilter, setActiveFilter] = useState<'all' | 'confirmed' | 'pending'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'paid' | 'pending' | 'failed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const transactions: Transaction[] = [
-    {
-      id: '1',
-      date: 'May 31, 2024',
-      amount: '0.45 ETH',
-      usdValue: '$850.00 USD',
-      status: 'confirmed',
-      transactionHash: '0x8d283284fs2458a9b7c1d2e3',
-      paymentPeriod: 'May 2024'
-    },
-    {
-      id: '2',
-      date: 'April 30, 2024',
-      amount: '0.42 ETH',
-      usdValue: '$795.00 USD',
-      status: 'confirmed',
-      transactionHash: '0x7a193175ef1349b8c6d0f1a2',
-      paymentPeriod: 'April 2024'
-    },
-    {
-      id: '3',
-      date: 'March 31, 2024',
-      amount: '0.48 ETH',
-      usdValue: '$912.00 USD',
-      status: 'pending',
-      transactionHash: '0x9b284395gf3569c9d8e2f3b4',
-      paymentPeriod: 'March 2024'
-    },
-    {
-      id: '4',
-      date: 'February 29, 2024',
-      amount: '0.46 ETH',
-      usdValue: '$873.00 USD',
-      status: 'pending',
-      transactionHash: '0xa5395486hg4670d0e9f4c5d6',
-      paymentPeriod: 'February 2024'
-    },
-    {
-      id: '5',
-      date: 'January 31, 2024',
-      amount: '0.44 ETH',
-      usdValue: '$834.00 USD',
-      status: 'confirmed',
-      transactionHash: '0xb6406597ih5781e1f0g5d6e7',
-      paymentPeriod: 'January 2024'
-    },
-    {
-      id: '6',
-      date: 'December 31, 2023',
-      amount: '0.41 ETH',
-      usdValue: '$778.00 USD',
-      status: 'confirmed',
-      transactionHash: '0xc7517608ji6892f2g1h6e7f8',
-      paymentPeriod: 'December 2023'
-    }
-  ];
+  const { payslips, loading, error } = usePayslips();
 
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesFilter = activeFilter === 'all' || transaction.status === activeFilter;
+  const filteredPayslips = payslips.filter(payslip => {
+    const matchesFilter = activeFilter === 'all' || payslip.status === activeFilter;
     const matchesSearch = searchQuery === '' || 
-      transaction.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.amount.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.paymentPeriod?.toLowerCase().includes(searchQuery.toLowerCase());
+      payslip.pay_period_start.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      payslip.pay_period_end.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      payslip.gross_salary.toString().includes(searchQuery.toLowerCase()) ||
+      payslip.net_salary.toString().includes(searchQuery.toLowerCase());
     
     return matchesFilter && matchesSearch;
   });
 
   const getStatusIcon = (status: string) => {
-    return status === 'confirmed' ? <CheckCircle size={16} /> : <Clock size={16} />;
+    switch (status) {
+      case 'paid':
+        return <CheckCircle size={16} />;
+      case 'pending':
+        return <Clock size={16} />;
+      case 'failed':
+        return <Clock size={16} />; // Or a different icon for failed
+      default:
+        return <Clock size={16} />;
+    }
   };
 
-  const getFilterCount = (filter: 'all' | 'confirmed' | 'pending') => {
-    if (filter === 'all') return transactions.length;
-    return transactions.filter(t => t.status === filter).length;
+  const getFilterCount = (filter: 'all' | 'paid' | 'pending' | 'failed') => {
+    if (filter === 'all') return payslips.length;
+    return payslips.filter(p => p.status === filter).length;
   };
 
-  const handleTransactionClick = (transaction: Transaction) => {
-    console.log('Transaction clicked:', transaction);
-    // Handle transaction details view
+  const handlePayslipClick = (payslip: Payslip) => {
+    console.log('Payslip clicked:', payslip);
+    // Handle payslip details view, e.g., navigate to payslip detail page
   };
 
   const getTotalEarnings = () => {
-    const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
-    const totalEth = confirmedTransactions.reduce((sum, t) => {
-      const ethValue = parseFloat(t.amount.replace(' ETH', ''));
-      return sum + ethValue;
-    }, 0);
+    const paidPayslips = payslips.filter(p => p.status === 'paid');
+    const totalEth = paidPayslips.reduce((sum, p) => sum + p.net_salary, 0);
     
-    const totalUsd = confirmedTransactions.reduce((sum, t) => {
-      const usdValue = parseFloat(t.usdValue.replace('$', '').replace(' USD', '').replace(',', ''));
-      return sum + usdValue;
-    }, 0);
+    // Assuming 1 ETH = 1900 USD for conversion
+    const totalUsd = totalEth * 1900;
 
     return {
       eth: totalEth.toFixed(3),
@@ -121,6 +63,40 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   };
 
   const totalEarnings = getTotalEarnings();
+
+  if (loading) {
+    return (
+      <div className="salary-transactions-container">
+        <div className="transactions-header">
+          {onBack && (
+            <button className="back-btn" onClick={onBack} aria-label="Go back">
+              <ArrowLeft size={20} />
+            </button>
+          )}
+          <h1 className="page-title">Salary History</h1>
+          <div className="header-spacer"></div>
+        </div>
+        <div className="loading-message">Loading payslips...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="salary-transactions-container">
+        <div className="transactions-header">
+          {onBack && (
+            <button className="back-btn" onClick={onBack} aria-label="Go back">
+              <ArrowLeft size={20} />
+            </button>
+          )}
+          <h1 className="page-title">Salary History</h1>
+          <div className="header-spacer"></div>
+        </div>
+        <div className="error-message">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="salary-transactions-container">
@@ -142,7 +118,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
             <TrendingUp size={24} />
           </div>
           <div className="summary-content">
-            <div className="summary-label">Total Earnings</div>
+            <div className="summary-label">Total Net Earnings</div>
             <div className="summary-amount">{totalEarnings.eth} ETH</div>
             <div className="summary-usd">{totalEarnings.usd}</div>
           </div>
@@ -153,10 +129,10 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
             <Calendar size={24} />
           </div>
           <div className="summary-content">
-            <div className="summary-label">Total Payments</div>
-            <div className="summary-count">{transactions.length}</div>
+            <div className="summary-label">Total Payslips</div>
+            <div className="summary-count">{payslips.length}</div>
             <div className="summary-detail">
-              {transactions.filter(t => t.status === 'confirmed').length} confirmed
+              {payslips.filter(p => p.status === 'paid').length} paid
             </div>
           </div>
         </div>
@@ -166,7 +142,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
       <div className="search-container">
         <InputWithIcon
           icon={<SearchIcon />}
-          placeholder="Search by date, amount, or payment period..."
+          placeholder="Search by period or amount..."
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
         />
@@ -181,10 +157,10 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
           All ({getFilterCount('all')})
         </button>
         <button
-          className={`filter-tab ${activeFilter === 'confirmed' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('confirmed')}
+          className={`filter-tab ${activeFilter === 'paid' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('paid')}
         >
-          Confirmed ({getFilterCount('confirmed')})
+          Paid ({getFilterCount('paid')})
         </button>
         <button
           className={`filter-tab ${activeFilter === 'pending' ? 'active' : ''}`}
@@ -192,62 +168,64 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
         >
           Pending ({getFilterCount('pending')})
         </button>
+        <button
+          className={`filter-tab ${activeFilter === 'failed' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('failed')}
+        >
+          Failed ({getFilterCount('failed')})
+        </button>
       </div>
 
-      {/* Transactions List */}
+      {/* Payslips List */}
       <div className="transactions-list">
-        {filteredTransactions.map((transaction) => (
+        {filteredPayslips.map((payslip) => (
           <div 
-            key={transaction.id} 
+            key={payslip.id} 
             className="transaction-item"
-            onClick={() => handleTransactionClick(transaction)}
+            onClick={() => handlePayslipClick(payslip)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                handleTransactionClick(transaction);
+                handlePayslipClick(payslip);
               }
             }}
           >
             <div className="transaction-left">
               <div className="transaction-header">
-                <div className="transaction-date">{transaction.date}</div>
-                <div className={`transaction-status ${transaction.status}`}>
+                <div className="transaction-date">{payslip.pay_period_start} - {payslip.pay_period_end}</div>
+                <div className={`transaction-status ${payslip.status}`}>
                   <span className="status-icon">
-                    {getStatusIcon(transaction.status)}
+                    {getStatusIcon(payslip.status)}
                   </span>
                   <span className="status-text">
-                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                    {payslip.status.charAt(0).toUpperCase() + payslip.status.slice(1)}
                   </span>
                 </div>
               </div>
-              {transaction.paymentPeriod && (
-                <div className="payment-period">
-                  Payment Period: {transaction.paymentPeriod}
-                </div>
-              )}
-              {transaction.transactionHash && (
-                <div className="transaction-hash">
-                  Hash: {transaction.transactionHash.slice(0, 10)}...
-                </div>
-              )}
+              <div className="payment-period">
+                Employee ID: {payslip.employee_id}
+              </div>
+              <div className="transaction-hash">
+                Created At: {payslip.created_at}
+              </div>
             </div>
             <div className="transaction-right">
-              <div className="transaction-amount4">{transaction.amount}</div>
-              <div className="transaction-usd">{transaction.usdValue}</div>
+              <div className="transaction-amount4">{payslip.net_salary} ETH</div>
+              <div className="transaction-usd">${(payslip.net_salary * 1900).toFixed(2)} USD</div>
             </div>
           </div>
         ))}
       </div>
 
-      {filteredTransactions.length === 0 && (
+      {filteredPayslips.length === 0 && (
         <div className="no-transactions">
           <div className="no-transactions-icon">📄</div>
-          <div className="no-transactions-title">No Transactions Found</div>
+          <div className="no-transactions-title">No Payslips Found</div>
           <div className="no-transactions-text">
             {searchQuery 
-              ? `No transactions match your search for "${searchQuery}"`
-              : `No ${activeFilter === 'all' ? '' : activeFilter} transactions available`
+              ? `No payslips match your search for "${searchQuery}"`
+              : `No ${activeFilter === 'all' ? '' : activeFilter} payslips available`
             }
           </div>
         </div>

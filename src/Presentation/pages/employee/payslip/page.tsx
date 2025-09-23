@@ -1,96 +1,21 @@
 import React, { useState } from 'react';
 import { Download, Copy, Check, ArrowLeft } from 'lucide-react';
 import './payslip.css';
-
-interface PayslipItem {
-  label: string;
-  amount: string;
-  usdValue: string;
-  type?: 'deduction' | 'earning';
-}
-
-interface PayslipData {
-  period: string;
-  status: 'complete' | 'pending';
-  grossSalary: {
-    amount: string;
-    usdValue: string;
-  };
-  deductions: PayslipItem[];
-  netSalary: {
-    amount: string;
-    usdValue: string;
-  };
-  transactionHash: string;
-  employerName: string;
-  employerAddress: string;
-}
+import { usePayslips } from '../../../hooks/usePayslips';
+import { Payslip } from '../../../../domain/entities/PayslipEntities';
 
 interface PayslipProps {
   onBack?: () => void;
-  hasPayslip?: boolean;
-  payslipData?: PayslipData;
 }
 
-const EmployeePayslip: React.FC<PayslipProps> = ({ 
-  onBack,
-  hasPayslip = true, 
-  payslipData 
+const EmployeePayslip: React.FC<PayslipProps> = ({
+  onBack
 }) => {
-  const [showNoPayslip, setShowNoPayslip] = useState(!hasPayslip);
+  const { payslips, loading, error } = usePayslips();
   const [copied, setCopied] = useState(false);
   const [salaryConfirmed, setSalaryConfirmed] = useState(false);
 
-  const defaultPayslipData: PayslipData = {
-    period: 'May 01 - May 31, 2024',
-    status: 'complete',
-    employerName: 'Crypto Tech Solutions',
-    employerAddress: '0x2341231hjf671231abc123def456',
-    grossSalary: {
-      amount: '0.55 ETH',
-      usdValue: '$1,045.00 USD'
-    },
-    deductions: [
-      {
-        label: 'Income Tax',
-        amount: '0.11 ETH',
-        usdValue: '$209.00 USD',
-        type: 'deduction'
-      },
-      {
-        label: 'Health Insurance',
-        amount: '0.0275 ETH',
-        usdValue: '$52.25 USD',
-        type: 'deduction'
-      },
-      {
-        label: 'Retirement Fund',
-        amount: '0.0385 ETH',
-        usdValue: '$73.15 USD',
-        type: 'deduction'
-      },
-      {
-        label: 'Social Security',
-        amount: '0.0385 ETH',
-        usdValue: '$73.15 USD',
-        type: 'deduction'
-      },
-      {
-        label: 'Medicare',
-        amount: '0.0275 ETH',
-        usdValue: '$52.25 USD',
-        type: 'deduction'
-      }
-    ],
-    netSalary: {
-      amount: '0.285 ETH',
-      usdValue: '$541.75 USD'
-    },
-    transactionHash: '0x8D283284FS2458A9B7C1D2E3F4567890ABCDEF12'
-  };
-
-  const currentData = payslipData || defaultPayslipData;
-
+  const currentPayslip: Payslip | undefined = payslips[0]; // Display the first payslip for now
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -113,16 +38,46 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     console.log('Salary receipt confirmed');
   };
 
-  const togglePayslipView = () => {
-    setShowNoPayslip(!showNoPayslip);
-  };
-
   const formatAddress = (address: string) => {
     if (address.length <= 10) return address;
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  if (showNoPayslip) {
+  if (loading) {
+    return (
+      <div className="payslip-container">
+        <div className="payslip-header">
+          {onBack && (
+            <button className="back-btn" onClick={onBack} aria-label="Go back">
+              <ArrowLeft size={20} />
+            </button>
+          )}
+          <h1 className="page-title">Payslip</h1>
+          <div className="header-spacer"></div>
+        </div>
+        <div className="loading-message">Loading payslips...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="payslip-container">
+        <div className="payslip-header">
+          {onBack && (
+            <button className="back-btn" onClick={onBack} aria-label="Go back">
+              <ArrowLeft size={20} />
+            </button>
+          )}
+          <h1 className="page-title">Payslip</h1>
+          <div className="header-spacer"></div>
+        </div>
+        <div className="error-message">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!currentPayslip) {
     return (
       <div className="payslip-container">
         {/* Header */}
@@ -144,8 +99,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             </div>
             <h2 className="no-payslip-title">No Payslip Available</h2>
             <p className="no-payslip-message">
-              There is currently no payslip available to claim. 
-              Please wait for your scheduled payment period.
+              There is currently no payslip available.
             </p>
             <div className="no-payslip-note">
               <div className="note-icon">ℹ️</div>
@@ -153,11 +107,6 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Toggle button for demo */}
-        <button className="demo-toggle" onClick={togglePayslipView}>
-          Show Payslip Demo
-        </button>
       </div>
     );
   }
@@ -182,16 +131,16 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
           <div className="period-background-decoration"></div>
           <div className="period-info">
             <div className="period-header">
-              <div className="period-label">{currentData.employerName}</div>
-              <div className={`status-badge ${currentData.status}`}>
-                <div className={`status-dot ${currentData.status}`}></div>
-                {currentData.status === 'complete' ? 'Complete' : 'Pending'}
+              <div className="period-label">Employer Name (Placeholder)</div> {/* Employer name is not in Payslip entity */}
+              <div className={`status-badge ${currentPayslip.status}`}>
+                <div className={`status-dot ${currentPayslip.status}`}></div>
+                {currentPayslip.status === 'paid' ? 'Complete' : 'Pending'}
               </div>
             </div>
-            <div className="period-date">Payment Period - {currentData.period}</div>
+            <div className="period-date">Payment Period - {currentPayslip.pay_period_start} - {currentPayslip.pay_period_end}</div>
             <div className="period-address">
-              <span className="address-label">Employer Address:</span>
-              <span className="address-value">{formatAddress(currentData.employerAddress)}</span>
+              <span className="address-label">Employee ID:</span>
+              <span className="address-value">{currentPayslip.employee_id}</span>
             </div>
           </div>
           <button 
@@ -213,8 +162,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             <div className="section-title">Gross Salary</div>
           </div>
           <div className="amount-display">
-            <div className="amount">{currentData.grossSalary.amount}</div>
-            <div className="usd-value">{currentData.grossSalary.usdValue}</div>
+            <div className="amount">{currentPayslip.gross_salary} ETH</div>
+            <div className="usd-value">${(currentPayslip.gross_salary * 1900).toFixed(2)} USD</div> {/* Assuming 1 ETH = 1900 USD for now */}
           </div>
         </div>
 
@@ -225,17 +174,16 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             <div className="section-title">Deductions</div>
           </div>
           <div className="deductions-list">
-            {currentData.deductions.map((deduction, index) => (
-              <div key={index} className="deduction-item">
-                <div className="deduction-info">
-                  <div className="deduction-label">{deduction.label}</div>
-                </div>
-                <div className="deduction-amounts">
-                  <div className="deduction-amount">-{deduction.amount}</div>
-                  <div className="deduction-usd">-{deduction.usdValue}</div>
-                </div>
+            {/* For now, we'll show a generic deduction as the Payslip entity doesn't have a detailed deductions array */}
+            <div className="deduction-item">
+              <div className="deduction-info">
+                <div className="deduction-label">Total Deductions</div>
               </div>
-            ))}
+              <div className="deduction-amounts">
+                <div className="deduction-amount">-{currentPayslip.deductions} ETH</div>
+                <div className="deduction-usd">-${(currentPayslip.deductions * 1900).toFixed(2)} USD</div>
+              </div>
+            </div>
           </div>
           
           {/* Total Deductions */}
@@ -243,16 +191,10 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             <div className="total-label">Total Deductions</div>
             <div className="total-amounts">
               <div className="total-amount">
-                -{currentData.deductions.reduce((sum, item) => {
-                  const ethValue = parseFloat(item.amount.replace(' ETH', ''));
-                  return sum + ethValue;
-                }, 0).toFixed(4)} ETH
+                -{currentPayslip.deductions} ETH
               </div>
               <div className="total-usd">
-                -${currentData.deductions.reduce((sum, item) => {
-                  const usdValue = parseFloat(item.usdValue.replace('$', '').replace(' USD', ''));
-                  return sum + usdValue;
-                }, 0).toFixed(2)} USD
+                -${(currentPayslip.deductions * 1900).toFixed(2)} USD
               </div>
             </div>
           </div>
@@ -265,8 +207,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             <div className="section-title">Net Salary</div>
           </div>
           <div className="amount-display">
-            <div className="amount">{currentData.netSalary.amount}</div>
-            <div className="usd-value">{currentData.netSalary.usdValue}</div>
+            <div className="amount">{currentPayslip.net_salary} ETH</div>
+            <div className="usd-value">${(currentPayslip.net_salary * 1900).toFixed(2)} USD</div>
           </div>
           <div className="net-salary-note">
             This is the amount you will receive after all deductions.
@@ -280,10 +222,10 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             <div className="transaction-label">Transaction Hash</div>
           </div>
           <div className="transaction-hash">
-            <span className="hash-value">{currentData.transactionHash}</span>
+            <span className="hash-value">N/A</span> {/* Transaction hash is not in Payslip entity */}
             <button 
               className={`copy-btn ${copied ? 'copied' : ''}`}
-              onClick={() => handleCopy(currentData.transactionHash)}
+              onClick={() => handleCopy('N/A')}
               aria-label="Copy transaction hash"
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -301,11 +243,6 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
             Download PDF
           </button>
         </div>
-
-        {/* Toggle button for demo */}
-        <button className="demo-toggle" onClick={togglePayslipView}>
-          Show No Payslip State
-        </button>
       </div>
     </div>
   );

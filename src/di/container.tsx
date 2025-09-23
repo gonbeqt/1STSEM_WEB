@@ -1,14 +1,3 @@
-import { WalletViewModel } from '../domain/viewmodel/WalletViewModal';
-import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
-import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
-import { ReconnectWalletUseCase } from '../domain/usecases/ReconnectWalletUseCase';
-import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
-import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
-import { ListSessionsUseCase } from '../domain/usecases/ListSessionsUseCase';
-import { RevokeSessionUseCase } from '../domain/usecases/RevokeSessionUseCase';
-import { RevokeOtherSessionsUseCase } from '../domain/usecases/RevokeOtherSessionsUseCase';
-import { ApproveSessionUseCase } from '../domain/usecases/ApproveSessionUseCase';
-import { TransferMainDeviceUseCase } from '../domain/usecases/TransferMainDeviceUseCase';
 import { SessionViewModel } from '../domain/viewmodel/SessionViewModel';
 import { UserRepositoryImpl } from '../data/repositoriesImpl/UserRepositoryImpl';
 import { WalletRepositoryImpl } from '../data/repositoriesImpl/WalletRepositoryImpl';
@@ -46,6 +35,22 @@ import {
   GenerateTaxAnalysisYearlyUseCase,
   GenerateTaxAnalysisCustomUseCase
 } from '../domain/usecases/ReportUseCases';
+import { Container } from 'lucide-react';
+import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
+import { PayslipRepository } from '../domain/repositories/PayslipRepository';
+import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
+import { ReconnectWalletUseCase } from '../domain/usecases/ReconnectWalletUseCase';
+import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
+import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
+import { ListSessionsUseCase } from '../domain/usecases/ListSessionsUseCase';
+import { RevokeOtherSessionsUseCase } from '../domain/usecases/RevokeOtherSessionsUseCase';
+import { RevokeSessionUseCase } from '../domain/usecases/RevokeSessionUseCase';
+import { TransferMainDeviceUseCase } from '../domain/usecases/TransferMainDeviceUseCase';
+import { ApproveSessionUseCase } from '../domain/usecases/ApproveSessionUseCase';
+import { GetUserPayslipsUseCase } from '../domain/usecases/GetUserPayslipsUseCase';
+import { WalletViewModel } from '../domain/viewmodel/WalletViewModal';
+import { PayslipRepositoryImpl } from '../data/repositoriesImpl/PayslipRepositoryImpl';
+
 
 export interface Container {
   userRepository: UserRepositoryImpl;
@@ -55,6 +60,7 @@ export interface Container {
   exchangeRateRepository: ExchangeRateRepositoryImpl;
   employeeRepository: EmployeeRepository;
   reportRepository: ReportRepository;
+  payslipRepository: PayslipRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -92,6 +98,7 @@ export interface Container {
   transferMainDeviceUseCase: TransferMainDeviceUseCase;
   getSessionApprovalStatusUseCase: GetSessionApprovalStatusUseCase;
   getTransactionHistoryUseCase: GetTransactionHistoryUseCase;
+  getUserPayslipsUseCase: GetUserPayslipsUseCase;
 
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
@@ -108,6 +115,7 @@ const transactionRepository = new TransactionRepositoryImpl();
 const exchangeRateRepository = new ExchangeRateRepositoryImpl();
 const employeeRepository = new EmployeeRepositoryImpl();
 const reportRepository = new ReportRepositoryImpl();
+const payslipRepository = new PayslipRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -147,6 +155,7 @@ const transferMainDeviceUseCase = new TransferMainDeviceUseCase(sessionRepositor
 const getSessionApprovalStatusUseCase = new GetSessionApprovalStatusUseCase(sessionRepository);
 
 const getTransactionHistoryUseCase = new GetTransactionHistoryUseCase(transactionRepository);
+const getUserPayslipsUseCase = new GetUserPayslipsUseCase(payslipRepository);
 
 // ======= Container =======
 export const container: Container = {
@@ -157,6 +166,7 @@ export const container: Container = {
   exchangeRateRepository,
   employeeRepository,
   reportRepository,
+  payslipRepository,
 
   registerUseCase,
   loginUseCase,
@@ -194,6 +204,7 @@ export const container: Container = {
   transferMainDeviceUseCase,
   getSessionApprovalStatusUseCase,
   getTransactionHistoryUseCase,
+  getUserPayslipsUseCase,
 
   registerViewModel: () => new RegisterViewModel(registerUseCase),
   loginViewModel: () => {
