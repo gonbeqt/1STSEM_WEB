@@ -196,19 +196,15 @@ const EmployeeManagement: React.FC = () => {
 
   const handleEditEmployee = () => {
     console.log('Edit employee:', selectedEmployee?.fullName);
-    // Close the detail modal and open the add employee modal for editing
     setShowEmployeeDetailModal(false);
     setIsAddEmployeeModal(true);
   };
 
   const handleDeleteEmployee = () => {
     console.log('Delete employee:', selectedEmployee?.fullName);
-    // Implement delete functionality
     if (window.confirm(`Are you sure you want to delete ${selectedEmployee?.fullName}?`)) {
-      // Here you would typically call an API to delete the employee
-      // For now, just close the modal
+      
       handleCloseModal();
-      // You could also remove the employee from the local state/refetch data
     }
   };
 
@@ -223,30 +219,8 @@ const EmployeeManagement: React.FC = () => {
   const handleAddEmployeeSubmit = (newEmployee: AddEmployeeResponse['employee']) => {
     console.log('New employee added successfully:', newEmployee);
     
-    // Trigger a refresh of the employee list
     setRefreshTrigger(prev => prev + 1);
     
-    // Optionally, you could also add the new employee to the current list immediately
-    // to avoid waiting for the API call:
-    // if (newEmployee) {
-    //   const apiEmployee: ApiEmployee = {
-    //     employee_id: newEmployee.employee_id,
-    //     user_id: newEmployee.user_id,
-    //     username: newEmployee.username,
-    //     email: newEmployee.email,
-    //     full_name: newEmployee.full_name,
-    //     department: newEmployee.department,
-    //     position: newEmployee.position,
-    //     phone: newEmployee.phone,
-    //     is_active: newEmployee.is_active,
-    //     created_at: newEmployee.created_at,
-    //     last_login: null,
-    //     onboarding_status: 'pending',
-    //     hired_date: newEmployee.created_at,
-    //     access_granted: true,
-    //   };
-    //   setEmployees(prev => [apiEmployee, ...prev]);
-    // }
   };
 
   return (

@@ -228,7 +228,9 @@
   margin: 24px 0 16px 0; /* Added top margin */
   background: transparent;
 }
-
+.header6{
+  color: black;
+}
 .section-header3 h2 {
   font-size: 18px;
   font-weight: 600;

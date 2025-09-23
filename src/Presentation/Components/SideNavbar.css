@@ -105,7 +105,7 @@
 }
 
 .nav-links a:hover {
-  background-color: grey;
+  background-color: rgba(146, 51, 234, 0.226); /* Purple background for active state */
   transform: translateX(5px);
 }
 
