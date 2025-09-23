@@ -164,6 +164,26 @@
     background-color: #fff3cd;
     color: #856404;
 }
+.sessions-header{
+    display:flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+.sessions-header button{
+    height: 40px;
+    border-radius: 10px;
+
+}
+.sessions-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Adjust as needed */
+    width: 100%;
+    font-size: 1.6em;
+    color: #666; /* Adjust color as needed */
+}
 
 /* Responsive design */
 @media (max-width: 1200px) {

@@ -7,9 +7,10 @@ import '../../../../components/SideNavbar.css';
 import './sessions.css';
 import { useViewModel } from '../../../../hooks/useViewModel';
 import { SessionViewModel } from '../../../../../domain/viewmodel/SessionViewModel';
+import { RefreshCcw, RotateCcw } from 'lucide-react'; // Import RefreshCcw icon
 
 export const ManagerSessionsPage: React.FC = () => {
-    const { sessions, loading, error, revokeSession, transferMainDevice } = useSessions();
+    const { sessions, loading, error, revokeSession, transferMainDevice, refreshSessions } = useSessions(); // Destructure refreshSessions
     const sessionViewModel = useViewModel(SessionViewModel);
 
     const currentSession = sessions.find(session => session.is_current);
@@ -69,7 +70,11 @@ export const ManagerSessionsPage: React.FC = () => {
     };
 
     if (loading) {
-        return <div>Loading sessions...</div>;
+        return (
+            <div className="sessions-loading-container">
+                <p>Loading sessions...</p>
+            </div>
+        );
     }
 
     if (error) {
@@ -79,7 +84,12 @@ export const ManagerSessionsPage: React.FC = () => {
     return (
         <div className="sessions-page">
             <div className="content">
-                <h1>Manage Sessions</h1>
+                <div className="sessions-header">
+                    <h1>Manage Sessions</h1>
+                    <button onClick={refreshSessions} className="refresh-button" title="Refresh Sessions">
+                          <RotateCcw size={20} />
+                    </button>
+                </div>
                 {isCurrentSessionMainDevice && (
                     <button onClick={handleRevokeOtherSessions} className="revoke-others-button">
                         Revoke Other Sessions

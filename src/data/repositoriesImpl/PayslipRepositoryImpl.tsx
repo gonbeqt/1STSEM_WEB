@@ -12,10 +12,9 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         };
     }
 
-    async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
+    async getUserPayslips(employee_id?: string): Promise<Payslip[]> {
         const queryParams = new URLSearchParams();
         if (employee_id) queryParams.append('employee_id', employee_id);
-        if (status) queryParams.append('status', status);
 
         const url = `${this.API_URL}/payslips/list/?${queryParams.toString()}`;
 

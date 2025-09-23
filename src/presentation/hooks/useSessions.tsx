@@ -38,5 +38,6 @@ export const useSessions = () => {
     error,
     revokeSession,
     transferMainDevice,
+    refreshSessions: viewModel.fetchSessions.bind(viewModel), // Bind fetchSessions to viewModel
   };
 };

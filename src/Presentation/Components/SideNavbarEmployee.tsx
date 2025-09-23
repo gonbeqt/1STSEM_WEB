@@ -74,8 +74,6 @@ const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons o
         <li>
           <NavLink to="/employee/home" className={({ isActive }) => isActive ? "active" : "" } onClick={handleNavClick}>
           <Home /> {isExpanded && <span className="nav-text">Home</span>}</NavLink></li>
-        <li><NavLink to="/employee/payslip" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}>
-        <Receipt /> {isExpanded && <span className="nav-text">Payslip</span>}</NavLink></li>
         <li><NavLink to="/employee/history" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><History /> {isExpanded && <span className="nav-text">History</span>}</NavLink></li>
         <li><NavLink to="/employee/settings" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><Settings /> {isExpanded && <span className="nav-text">Settings</span>}</NavLink></li>
       </ul>

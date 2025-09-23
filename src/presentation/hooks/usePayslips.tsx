@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Payslip } from '../../domain/entities/PayslipEntities';
 import { container } from '../../di/container';
 
-export const usePayslips = (employee_id?: string, status?: string) => {
+export const usePayslips = (employee_id?: string) => {
     const [payslips, setPayslips] = useState<Payslip[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ export const usePayslips = (employee_id?: string, status?: string) => {
         const fetchPayslips = async () => {
             try {
                 setLoading(true);
-                const fetchedPayslips = await container.getUserPayslipsUseCase.execute(employee_id, status);
+                const fetchedPayslips = await container.getUserPayslipsUseCase.execute(employee_id);
                 setPayslips(fetchedPayslips);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -21,7 +21,7 @@ export const usePayslips = (employee_id?: string, status?: string) => {
         };
 
         fetchPayslips();
-    }, [employee_id, status]);
+    }, [employee_id]);
 
     return { payslips, loading, error };
 };

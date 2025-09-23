@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { Download, Copy, Check, ArrowLeft } from 'lucide-react';
 import './payslip.css';
-import { usePayslips } from '../../../hooks/usePayslips';
+import { usePayslips } from '../../../hooks/usePayslips'; // Keep for potential future use or if payslipData is not provided
 import { Payslip } from '../../../../domain/entities/PayslipEntities';
 
 interface PayslipProps {
   onBack?: () => void;
+  payslipData?: Payslip; // New prop to receive payslip data
 }
 
 const EmployeePayslip: React.FC<PayslipProps> = ({
-  onBack
+  onBack,
+  payslipData // Destructure payslipData prop
 }) => {
-  const { payslips, loading, error } = usePayslips();
+  // If payslipData is provided, use it. Otherwise, fetch from hook (or handle no data)
+  const { payslips, loading, error } = usePayslips(payslipData ? payslipData.employee_id : undefined); // Fetch if payslipData not provided
   const [copied, setCopied] = useState(false);
   const [salaryConfirmed, setSalaryConfirmed] = useState(false);
 
-  const currentPayslip: Payslip | undefined = payslips[0]; // Display the first payslip for now
+  const currentPayslip: Payslip | undefined = payslipData || payslips[0]; // Use prop data first, then fetched data
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -32,10 +35,36 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     // You would typically generate and download the PDF here
   };
 
-  const handleConfirmSalary = () => {
-    setSalaryConfirmed(true);
-    // Implement confirmation logic here
-    console.log('Salary receipt confirmed');
+  const handleConfirmSalary = async () => {
+    if (!currentPayslip) return;
+
+    try {
+      // Assuming a backend API endpoint for updating payslip status
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/payslips/${currentPayslip.id}/status/`, {
+        method: 'PUT', // Or POST, depending on your API design
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
+        },
+        body: JSON.stringify({ status: 'paid' }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update payslip status');
+      }
+
+      // Update the local state to reflect the new status
+      // This is a simplified update. In a real app, you might re-fetch the payslip
+      // or update the payslip object in a global state management solution.
+      setSalaryConfirmed(true);
+      currentPayslip.status = 'paid'; // Directly modify the object for immediate UI update
+
+      console.log('Payslip status updated to paid:', currentPayslip.id);
+    } catch (error) {
+      console.error('Error confirming salary receipt:', error);
+      alert(`Failed to confirm salary receipt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const formatAddress = (address: string) => {
@@ -43,7 +72,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  if (loading) {
+  // If payslipData is provided, we don't need to show loading/error from hook
+  if (!payslipData && loading) {
     return (
       <div className="payslip-container">
         <div className="payslip-header">
@@ -60,7 +90,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
     );
   }
 
-  if (error) {
+  if (!payslipData && error) {
     return (
       <div className="payslip-container">
         <div className="payslip-header">
@@ -143,16 +173,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({
               <span className="address-value">{currentPayslip.employee_id}</span>
             </div>
           </div>
-          <button 
-            className={`confirm-salary-btn ${salaryConfirmed ? 'confirmed' : ''}`}
-            onClick={handleConfirmSalary}
-            disabled={salaryConfirmed}
-          >
-            <div className="confirm-icon">
-              {salaryConfirmed ? <Check size={16} /> : '✓'}
-            </div>
-            {salaryConfirmed ? 'Salary Confirmed' : 'Confirm Salary Receipt'}
-          </button>
+
         </div>
 
         {/* Gross Salary */}

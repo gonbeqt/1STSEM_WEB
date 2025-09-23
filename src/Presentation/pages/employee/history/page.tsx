@@ -4,6 +4,7 @@ import './history.css';
 import InputWithIcon from '../../../components/InputWithIcon';
 import { usePayslips } from '../../../../presentation/hooks/usePayslips';
 import { Payslip } from '../../../../domain/entities/PayslipEntities';
+import EmployeePayslip from '../payslip/page'; // Import the payslip detail page
 
 interface SalaryTransactionsProps {
   onBack?: () => void;
@@ -12,6 +13,7 @@ interface SalaryTransactionsProps {
 const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'paid' | 'pending' | 'failed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null); // New state for selected payslip
 
   const { payslips, loading, error } = usePayslips();
 
@@ -33,7 +35,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
       case 'pending':
         return <Clock size={16} />;
       case 'failed':
-        return <Clock size={16} />; // Or a different icon for failed
+        return <Clock size={16} />; 
       default:
         return <Clock size={16} />;
     }
@@ -45,8 +47,11 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   };
 
   const handlePayslipClick = (payslip: Payslip) => {
-    console.log('Payslip clicked:', payslip);
-    // Handle payslip details view, e.g., navigate to payslip detail page
+    setSelectedPayslip(payslip); // Set the selected payslip
+  };
+
+  const handleBackToHistory = () => {
+    setSelectedPayslip(null); // Clear selected payslip to go back to list
   };
 
   const getTotalEarnings = () => {
@@ -63,6 +68,10 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   };
 
   const totalEarnings = getTotalEarnings();
+
+  if (selectedPayslip) {
+    return <EmployeePayslip payslipData={selectedPayslip} onBack={handleBackToHistory} />;
+  }
 
   if (loading) {
     return (
