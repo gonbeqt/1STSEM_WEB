@@ -66,9 +66,22 @@
   background: #fafbfc;
 }
 
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #9ca3af;
+  z-index: 1;
+}
+
 .search-input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 16px 14px 48px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 15px;
@@ -197,6 +210,14 @@
   gap: 6px;
 }
 
+.invoice-id {
+  font-size: 13px;
+  color: #9747ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .date {
   font-size: 13px;
   color: #6b7280;
@@ -208,6 +229,7 @@
   color: #9ca3af;
   font-weight: 400;
   line-height: 1.4;
+  margin: 4px 0 0 0;
 }
 
 .invoice-details {
@@ -250,6 +272,18 @@
   border: 1px solid #f59e0b;
 }
 
+.status-badge.overdue {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+
+.status-badge.overdue {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+
 .status-icon {
   display: flex;
   align-items: center;
@@ -262,6 +296,14 @@
 
 .status-badge.pending .status-icon {
   color: #f59e0b;
+}
+
+.status-badge.overdue .status-icon {
+  color: #ef4444;
+}
+
+.status-badge.overdue .status-icon {
+  color: #ef4444;
 }
 
 /* View Details Button */
@@ -297,19 +339,125 @@
   min-height: 300px;
 }
 
+.empty-state-icon {
+  margin-bottom: 24px;
+  color: #d1d5db;
+}
+
 .empty-state-title {
   font-size: 20px;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .empty-state-description {
   font-size: 14px;
   color: #9ca3af;
-  margin: 0;
+  margin: 0 0 24px 0;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.create-invoice-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #9747ff, #667eea);
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.create-invoice-btn:hover {
+  background: linear-gradient(135deg, #8b3eff, #5b67d8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(151, 71, 255, 0.3);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #9747ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 24px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: #6b7280;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.error-icon {
+  color: #ef4444;
+  margin-bottom: 24px;
+}
+
+.error-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.error-state p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 24px;
   max-width: 400px;
-  line-height: 1.5;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #9747ff, #667eea);
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(135deg, #8b3eff, #5b67d8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(151, 71, 255, 0.3);
 }
 
 /* Responsive Design */
@@ -360,6 +508,7 @@
   .tab-container1 {
     margin: 0 20px;
     width: calc(100% - 40px);
+    overflow-x: auto;
   }
   
   .tab1 {
@@ -436,7 +585,9 @@
 /* Focus and accessibility */
 .tab1:focus,
 .search-input:focus,
-.view-details-btn:focus {
+.view-details-btn:focus,
+.create-invoice-btn:focus,
+.retry-btn:focus {
   outline: 2px solid #9747ff;
   outline-offset: 2px;
 }

@@ -54,7 +54,7 @@ import { BusinessDocumentRepository } from '../domain/repositories/BusinessDocum
 import { BusinessDocumentRepositoryImpl } from '../data/repositoriesImpl/BusinessDocumentRepositoryImpl';
 import { UploadBusinessDocumentsUseCase } from '../domain/usecases/UploadBusinessDocumentsUseCase';
 import { BusinessDocumentViewModel } from '../domain/viewmodel/BusinessDocumentViewModel';
-import { ApiService } from '../data/api/ApiService';
+
 import { InvoiceRepository } from '../domain/repositories/InvoiceRepository';
 import { InvoiceRepositoryImpl } from '../data/repositoriesImpl/InvoiceRepositoryImpl';
 import { GetInvoicesUseCase } from '../domain/usecases/GetInvoicesUseCase';
@@ -133,8 +133,7 @@ const employeeRepository = new EmployeeRepositoryImpl();
 const reportRepository = new ReportRepositoryImpl();
 const payslipRepository = new PayslipRepositoryImpl();
 const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
-const apiService = new ApiService("http://localhost:8000/api"); // Assuming your API base URL
-const invoiceRepository = new InvoiceRepositoryImpl(apiService);
+const invoiceRepository = new InvoiceRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);

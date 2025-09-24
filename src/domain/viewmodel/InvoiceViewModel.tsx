@@ -11,11 +11,11 @@ export class InvoiceViewModel {
         makeAutoObservable(this);
     }
 
-    async loadUserInvoices(userId: string, statusFilter?: string) {
+    async loadUserInvoices(userId: string) {
         this.loading = true;
         this.error = null;
         try {
-            this.invoices = await this.getInvoicesUseCase.execute(userId, statusFilter);
+            this.invoices = await this.getInvoicesUseCase.execute(userId);
         } catch (error: any) {
             this.error = error.message || "Failed to fetch invoices";
         } finally {

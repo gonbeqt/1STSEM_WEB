@@ -20,7 +20,6 @@ import Income from './presentation/pages/manager/reports/Income/Income';
 import Invest from './presentation/pages/manager/reports/Invest/Invest';
 import PayrollSummary from './presentation/pages/manager/reports/PayrollSummary/PayrollSummary';
 import CompliancePage from './presentation/pages/manager/profile/compliance/page';
-
 import EmployeeHome from './presentation/pages/employee/home/page';
 import EmployeePayslip from './presentation/pages/employee/payslip/page';
 import EmployeeHistory from './presentation/pages/employee/history/page';
@@ -28,10 +27,7 @@ import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
 import { ManagerSessionsPage } from './presentation/pages/manager/profile/sessions/page';
-import { GetWalletBalanceUseCase } from './domain/usecases/GetWalletBalanceUseCase';
-import { ReconnectWalletUseCase } from './domain/usecases/ReconnectWalletUseCase';
-import { ConnectWalletUseCase } from './domain/usecases/ConnectWalletUseCase';
-import { WalletViewModel } from './domain/viewmodel/WalletViewModal';
+
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';

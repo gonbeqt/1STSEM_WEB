@@ -3,7 +3,7 @@ import { container } from '../../di/container';
 import { InvoiceViewModel } from '../../domain/viewmodel/InvoiceViewModel';
 import { Invoice } from '../../domain/entities/InvoiceEntities';
 
-export const useInvoices = (userId: string, statusFilter?: string) => {
+export const useInvoices = (userId: string) => {
     const [invoiceViewModel] = useState<InvoiceViewModel>(() => container.invoiceViewModel());
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -14,7 +14,7 @@ export const useInvoices = (userId: string, statusFilter?: string) => {
             setLoading(true);
             setError(null);
             try {
-                await invoiceViewModel.loadUserInvoices(userId, statusFilter);
+                await invoiceViewModel.loadUserInvoices(userId);
                 setInvoices(invoiceViewModel.invoices);
             } catch (err: any) {
                 setError(err.message || "Failed to load invoices");
@@ -31,10 +31,10 @@ export const useInvoices = (userId: string, statusFilter?: string) => {
             setLoading(invoiceViewModel.loading);
             setError(invoiceViewModel.error);
         };
-        // This is a simplified observation. In a real MobX setup, you'd use autorun or reaction.
+        // This is a simplified observation. In a real MobX setup, you\'d use autorun or reaction.
         // For now, we rely on the useEffect re-running if dependencies change.
         return disposer;
-    }, [userId, statusFilter, invoiceViewModel]);
+    }, [userId, invoiceViewModel]);
 
-    return { invoices, loading, error, reloadInvoices: () => invoiceViewModel.loadUserInvoices(userId, statusFilter) };
+    return { invoices, loading, error, reloadInvoices: () => invoiceViewModel.loadUserInvoices(userId) };
 };

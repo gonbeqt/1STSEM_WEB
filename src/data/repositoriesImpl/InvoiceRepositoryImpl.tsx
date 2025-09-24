@@ -1,16 +1,28 @@
 import { Invoice } from "../../domain/entities/InvoiceEntities";
 import { InvoiceRepository } from "../../domain/repositories/InvoiceRepository";
-import { ApiService } from "../api/ApiService"; // Corrected import path
 
 export class InvoiceRepositoryImpl implements InvoiceRepository {
-    constructor(private readonly apiService: ApiService) {}
+    constructor() {}
+    private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
-    async getUserInvoices(userId: string, statusFilter?: string): Promise<Invoice[]> {
+    async getUserInvoices(userId: string): Promise<Invoice[]> {
         try {
-            const response = await this.apiService.get<{ success: boolean; invoices: Invoice[] }>(
-                `/invoices/list/?userId=${userId}${statusFilter ? `&status=${statusFilter}` : ''}`
-            );
-            return response.invoices;
+            const url = `${this.API_URL}/invoices/list`;
+            const token = localStorage.getItem('token'); 
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' // Assuming JSON content type
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.invoices;
         } catch (error) {
             console.error("Error fetching user invoices:", error);
             throw error;
