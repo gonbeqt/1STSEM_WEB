@@ -19,6 +19,7 @@ import CashFlow from './presentation/pages/manager/reports/CashFlow/CashFlow';
 import Income from './presentation/pages/manager/reports/Income/Income';
 import Invest from './presentation/pages/manager/reports/Invest/Invest';
 import PayrollSummary from './presentation/pages/manager/reports/PayrollSummary/PayrollSummary';
+import CompliancePage from './presentation/pages/manager/profile/compliance/page';
 
 import EmployeeHome from './presentation/pages/employee/home/page';
 import EmployeePayslip from './presentation/pages/employee/payslip/page';
@@ -102,6 +103,7 @@ function App() {
           <Route path="/payroll_summary" element={<PayrollSummary />} />
           <Route path="/tax_summary" element={<TaxSummary />} />
           <Route path="/manager/sessions" element={<ManagerSessionsPage />} />
+          <Route path="/compliance" element={<CompliancePage/>} />
 
 
 

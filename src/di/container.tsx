@@ -50,6 +50,11 @@ import { ApproveSessionUseCase } from '../domain/usecases/ApproveSessionUseCase'
 import { GetUserPayslipsUseCase } from '../domain/usecases/GetUserPayslipsUseCase';
 import { WalletViewModel } from '../domain/viewmodel/WalletViewModal';
 import { PayslipRepositoryImpl } from '../data/repositoriesImpl/PayslipRepositoryImpl';
+import { BusinessDocumentRepository } from '../domain/repositories/BusinessDocumentRepository';
+import { BusinessDocumentRepositoryImpl } from '../data/repositoriesImpl/BusinessDocumentRepositoryImpl';
+import { UploadBusinessDocumentsUseCase } from '../domain/usecases/UploadBusinessDocumentsUseCase';
+import { BusinessDocumentViewModel } from '../domain/viewmodel/BusinessDocumentViewModel';
+
 
 
 export interface Container {
@@ -61,10 +66,12 @@ export interface Container {
   employeeRepository: EmployeeRepository;
   reportRepository: ReportRepository;
   payslipRepository: PayslipRepository;
+  businessDocumentRepository: BusinessDocumentRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
   logoutUseCase: LogoutUseCase;
+  uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
   reconnectWalletUseCase: ReconnectWalletUseCase;
@@ -105,6 +112,7 @@ export interface Container {
   walletViewModel: () => WalletViewModel;
   sessionViewModel: () => SessionViewModel;
   employeeViewModel: () => EmployeeViewModel;
+  businessDocumentViewModel: () => BusinessDocumentViewModel;
 };
 
 // ======= Create repository instances =======
@@ -116,11 +124,13 @@ const exchangeRateRepository = new ExchangeRateRepositoryImpl();
 const employeeRepository = new EmployeeRepositoryImpl();
 const reportRepository = new ReportRepositoryImpl();
 const payslipRepository = new PayslipRepositoryImpl();
+const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
 const loginUseCase = new LoginUseCase(userRepository);
 const logoutUseCase = new LogoutUseCase(userRepository);
+const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(businessDocumentRepository);
 
 const connectWalletUseCase = new ConnectWalletUseCase(walletRepository);
 const reconnectWalletUseCase = new ReconnectWalletUseCase(walletRepository);
@@ -167,10 +177,12 @@ export const container: Container = {
   employeeRepository,
   reportRepository,
   payslipRepository,
+  businessDocumentRepository,
 
   registerUseCase,
   loginUseCase,
   logoutUseCase,
+  uploadBusinessDocumentsUseCase,
 
   connectWalletUseCase,
   reconnectWalletUseCase,
@@ -227,5 +239,8 @@ export const container: Container = {
   employeeViewModel: () => new EmployeeViewModel(
     addEmployeeUseCase,
     getEmployeesByManagerUseCase
+  ),
+  businessDocumentViewModel: () => new BusinessDocumentViewModel(
+    uploadBusinessDocumentsUseCase
   )
 };
