@@ -37,7 +37,7 @@ const ManagerInvoicePage: React.FC = () => {
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(invoice =>
-        (invoice.clientName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.client_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (invoice._id?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (invoice.description?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
@@ -207,7 +207,7 @@ const ManagerInvoicePage: React.FC = () => {
                 <div className="invoice-main">
                   <div className="client-info">
                     <h3 className="client-name">
-                      {invoice.clientName || `Client for Invoice ${invoice.clientName}`}
+                      {invoice.client_name || `Client for Invoice ${invoice.client_name}`}
                     </h3>
                     <div className="invoice-meta">
                       <span className="invoice-id">{invoice.invoice_id}</span>

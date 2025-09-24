@@ -3,6 +3,7 @@ import { Invoice, InvoiceItem } from "../../../../../domain/entities/InvoiceEnti
 import { container } from "../../../../../di/container";
 import { X, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import './InvoiceDetails.css'
+import jsPDF from "jspdf";
 interface InvoiceDetailsProps {
   invoiceId: string;
   onClose: () => void; // allow modal close
@@ -34,30 +35,83 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
     fetchInvoiceDetails();
   }, [invoiceId]);
 
-  // Status badge class
+  const handleDownloadPDF = () => {
+    if (!invoice) return;
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(`Invoice #${invoice.invoice_number || invoice._id}`, 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Issued: ${new Date(invoice.createdAt).toLocaleDateString()}`, 14, 30);
+    doc.text(`Status: ${invoice.status}`, 14, 40);
+
+    doc.text("Bill To:", 14, 55);
+    doc.text(`${invoice.client_name}`, 14, 62);
+    if (invoice.client_address) doc.text(invoice.client_address, 14, 68);
+    if (invoice.client_email) doc.text(invoice.client_email, 14, 74);
+
+    doc.text("From:", 105, 55);
+    doc.text("Your Company", 105, 62);
+    doc.text("123 Business St, City, Country", 105, 68);
+    doc.text("support@yourcompany.com", 105, 74);
+
+    // Table Header
+    let yPos = 95;
+    doc.setFontSize(12);
+    doc.text("Description", 14, yPos);
+    doc.text("Qty", 90, yPos);
+    doc.text("Rate", 120, yPos);
+    doc.text("Amount", 160, yPos);
+
+    // Table Rows
+    yPos += 8;
+    invoice.items?.forEach((item: InvoiceItem) => {
+      doc.text(item.description, 14, yPos);
+      doc.text(String(item.quantity), 90, yPos);
+      doc.text(`${item.unit_price} ${invoice.currency}`, 120, yPos);
+      doc.text(`${item.total_price} ${invoice.currency}`, 160, yPos);
+      yPos += 8;
+    });
+
+    // Summary
+    yPos += 10;
+    if (invoice.tax_rate !== undefined) {
+      doc.text(`Tax (${invoice.tax_rate * 100}%): ${(invoice.total_amount * invoice.tax_rate).toFixed(2)} ${invoice.currency}`, 120, yPos);
+      yPos += 8;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total: ${invoice.total_amount} ${invoice.currency}`, 120, yPos);
+    doc.setFont("helvetica", "normal");
+
+    // Notes
+    if (invoice.notes) {
+      yPos += 15;
+      doc.text("Notes:", 14, yPos);
+      doc.text(invoice.notes, 14, yPos + 8, { maxWidth: 180 });
+    }
+
+    // ✅ Save PDF
+    doc.save(`invoice-${invoice.invoice_number || invoice._id}.pdf`);
+  };
+
+  // --- existing status class/icon helpers ---
   const getStatusClass = (status: string) => {
     switch (status) {
-      case "paid":
-        return "status-badge status-paid";
-      case "pending":
-        return "status-badge status-pending";
-      case "overdue":
-        return "status-badge status-overdue";
-      default:
-        return "status-badge";
+      case "paid": return "status-badge status-paid";
+      case "pending": return "status-badge status-pending";
+      case "overdue": return "status-badge status-overdue";
+      default: return "status-badge";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "paid":
-        return <CheckCircle size={16} />;
-      case "pending":
-        return <Clock size={16} />;
-      case "overdue":
-        return <AlertCircle size={16} />;
-      default:
-        return null;
+      case "paid": return <CheckCircle size={16} />;
+      case "pending": return <Clock size={16} />;
+      case "overdue": return <AlertCircle size={16} />;
+      default: return null;
     }
   };
 
@@ -91,6 +145,8 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
     );
   }
 
+ 
+
   if (!invoice) {
     return (
       <div className="invoice-modal-backdrop">
@@ -119,7 +175,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
           </div>
           <div className="header-right">
             <div className={getStatusClass(invoice.status)}>
-              {getStatusIcon(invoice.status)}
+      
               {invoice.status}
             </div>
           
@@ -132,7 +188,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
           <div className="invoice-parties">
             <div className="party-section">
               <h3>Bill To</h3>
-              <p className="company-name">{invoice.clientName}</p>
+              <p className="company-name">{invoice.client_name}</p>
               {invoice.client_address && <p className="company-address">{invoice.client_address}</p>}
               {invoice.client_email && <p className="contact-info">{invoice.client_email}</p>}
             </div>
@@ -202,7 +258,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
           <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
-          <button className="btn btn-primary">Download PDF</button>
+          <button className="btn btn-primary" onClick={handleDownloadPDF}>Download PDF</button>
         </div>
       </div>
     </div>

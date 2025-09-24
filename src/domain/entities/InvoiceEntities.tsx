@@ -15,7 +15,7 @@ export interface Invoice {
     updatedAt: string;
     invoice_id:string;
     invoice_number:string;
-    clientName?: string;
+    client_name?: string;
     description?: string;
     client_email?: string;
     client_address?: string;
