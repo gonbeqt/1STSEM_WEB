@@ -33,25 +33,9 @@ import { ReconnectWalletUseCase } from './domain/usecases/ReconnectWalletUseCase
 import { ConnectWalletUseCase } from './domain/usecases/ConnectWalletUseCase';
 import { WalletViewModel } from './domain/viewmodel/WalletViewModal';
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
-
-import { WalletRepositoryImpl } from './data/repositoriesImpl/WalletRepositoryImpl';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
-import { SendEthUseCase } from './domain/usecases/SendEthUseCase'; // Import SendEthUseCase
-import { ExchangeRateRepositoryImpl } from './data/repositoriesImpl/ExchangeRateRepositoryImpl';
-import { GetExchangeRatesUseCase } from './domain/usecases/GetExchangeRatesUseCase';
-
-const walletRepository = new WalletRepositoryImpl();
-const exchangeRateRepository = new ExchangeRateRepositoryImpl();
-const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
-
-const walletViewModel = new WalletViewModel(
-  new ConnectWalletUseCase(walletRepository),
-  new ReconnectWalletUseCase(walletRepository),
-  new GetWalletBalanceUseCase(walletRepository),
-  new SendEthUseCase(walletRepository), // Add SendEthUseCase
-  getExchangeRatesUseCase // Add GetExchangeRatesUseCase
-);
+import { container } from './di/container'; // Import the container
   
 const ManagerLayout = () => (
   <div className="app-container">
@@ -72,9 +56,7 @@ const EmployeeLayout = () => (
 );
 
 function App() {
-  useEffect(() => {
-    walletViewModel.checkWalletConnection();
-  }, []);
+  const walletViewModel = container.walletViewModel();
 
   return (
     <WalletViewModelProvider value={walletViewModel}>

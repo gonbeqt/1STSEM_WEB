@@ -147,7 +147,6 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
 
           {currentView === 'send' && isWalletConnected && (
             <div className="send-eth-form">
-              <p className="wallet-balance-display">Wallet Address: {walletAddress}</p>
               <p className="wallet-balance-display">Balance: {ethBalance !== null ? ethBalance.toFixed(4) : 'Loading...'} ETH</p>
               
               <div className="input-group">

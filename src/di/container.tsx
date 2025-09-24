@@ -54,6 +54,11 @@ import { BusinessDocumentRepository } from '../domain/repositories/BusinessDocum
 import { BusinessDocumentRepositoryImpl } from '../data/repositoriesImpl/BusinessDocumentRepositoryImpl';
 import { UploadBusinessDocumentsUseCase } from '../domain/usecases/UploadBusinessDocumentsUseCase';
 import { BusinessDocumentViewModel } from '../domain/viewmodel/BusinessDocumentViewModel';
+import { ApiService } from '../data/api/ApiService';
+import { InvoiceRepository } from '../domain/repositories/InvoiceRepository';
+import { InvoiceRepositoryImpl } from '../data/repositoriesImpl/InvoiceRepositoryImpl';
+import { GetInvoicesUseCase } from '../domain/usecases/GetInvoicesUseCase';
+import { InvoiceViewModel } from '../domain/viewmodel/InvoiceViewModel';
 
 
 
@@ -67,11 +72,13 @@ export interface Container {
   reportRepository: ReportRepository;
   payslipRepository: PayslipRepository;
   businessDocumentRepository: BusinessDocumentRepository;
+  invoiceRepository: InvoiceRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
   logoutUseCase: LogoutUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
+  getInvoicesUseCase: GetInvoicesUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
   reconnectWalletUseCase: ReconnectWalletUseCase;
@@ -113,8 +120,9 @@ export interface Container {
   sessionViewModel: () => SessionViewModel;
   employeeViewModel: () => EmployeeViewModel;
   businessDocumentViewModel: () => BusinessDocumentViewModel;
-};
+  invoiceViewModel: () => InvoiceViewModel;
 
+}
 // ======= Create repository instances =======
 const userRepository = new UserRepositoryImpl();
 const walletRepository = new WalletRepositoryImpl();
@@ -125,12 +133,15 @@ const employeeRepository = new EmployeeRepositoryImpl();
 const reportRepository = new ReportRepositoryImpl();
 const payslipRepository = new PayslipRepositoryImpl();
 const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
+const apiService = new ApiService("http://localhost:8000/api"); // Assuming your API base URL
+const invoiceRepository = new InvoiceRepositoryImpl(apiService);
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
 const loginUseCase = new LoginUseCase(userRepository);
 const logoutUseCase = new LogoutUseCase(userRepository);
 const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(businessDocumentRepository);
+const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
 
 const connectWalletUseCase = new ConnectWalletUseCase(walletRepository);
 const reconnectWalletUseCase = new ReconnectWalletUseCase(walletRepository);
@@ -178,11 +189,13 @@ export const container: Container = {
   reportRepository,
   payslipRepository,
   businessDocumentRepository,
+  invoiceRepository,
 
   registerUseCase,
   loginUseCase,
   logoutUseCase,
   uploadBusinessDocumentsUseCase,
+  getInvoicesUseCase,
 
   connectWalletUseCase,
   reconnectWalletUseCase,
@@ -242,5 +255,6 @@ export const container: Container = {
   ),
   businessDocumentViewModel: () => new BusinessDocumentViewModel(
     uploadBusinessDocumentsUseCase
-  )
+  ),
+  invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase)
 };
