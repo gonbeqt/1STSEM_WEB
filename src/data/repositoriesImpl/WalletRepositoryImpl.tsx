@@ -91,10 +91,10 @@ export class WalletRepositoryImpl implements WalletRepository {
       to_address: request.recipient_address,
       amount: request.amount,
       private_key: request.private_key,
-      from_address: request.from_address,
-      company: request.company,
-      category: request.category,
-      description: request.description,
+      from_address: request.from_address || undefined,
+      company: request.company || undefined,
+      category: request.category || undefined,
+      description: request.description || undefined,
     };
 
     const response = await fetch(`${this.API_URL}/eth/send/`, {

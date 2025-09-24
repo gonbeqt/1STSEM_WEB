@@ -95,7 +95,6 @@ const Home = observer(() => {
     type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
     date: formatTransactionDate(transaction.created_at),
     icon: getTransactionIcon(transaction),
-    status: transaction.status,
     hash: transaction.transaction_hash
   }));
   // Clear success message after showing it
@@ -364,14 +363,6 @@ const Home = observer(() => {
                 </div>
                 <div className="transaction-details">
                   <div className="transaction-name">{transaction.name}</div>
-                  <div className="transaction-date">
-                    {transaction.date}
-                    {transaction.status && (
-                      <span className={`ml-2 px-1 py-0.5 text-xs rounded status-badge-${transaction.status}`}>
-                        {transaction.status}
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
               <div className={`transaction-amount2 ${transaction.type}`}>
