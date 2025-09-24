@@ -442,7 +442,7 @@ export class WalletViewModel {
   }
 
   get ethBalance() {
-    return this.state.ethBalance;
+    return this.state.ethBalance || 0;
   }
 
 
@@ -451,7 +451,7 @@ export class WalletViewModel {
     if (this.state.ethBalance !== null && this.state.rates && this.state.rates.ETH) {
       return this.state.ethBalance * this.state.rates.ETH;
     }
-    return null;
+    return 0; // Return 0 instead of null
   }
 
   get rates() {

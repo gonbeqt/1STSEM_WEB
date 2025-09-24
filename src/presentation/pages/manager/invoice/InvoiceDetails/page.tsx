@@ -78,7 +78,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
     // Summary
     yPos += 10;
     if (invoice.tax_rate !== undefined) {
-      doc.text(`Tax (${invoice.tax_rate * 100}%): ${(invoice.total_amount * invoice.tax_rate).toFixed(2)} ${invoice.currency}`, 120, yPos);
+      doc.text(`Tax (${(invoice.tax_rate || 0) * 100}%): ${((invoice.total_amount || 0) * (invoice.tax_rate || 0)).toFixed(2)} ${invoice.currency}`, 120, yPos);
       yPos += 8;
     }
     doc.setFont("helvetica", "bold");
@@ -114,6 +114,13 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
       default: return null;
     }
   };
+   const formatAmount = (total_amount: number, currency: string = 'USD'): string => {                                                                                     
+      if (!total_amount || isNaN(total_amount)) return '$0.00';                                                                                                                  
+        return new Intl.NumberFormat('en-US', {                                                                                                                        
+        style: 'currency',                                                                                                                                           
+       currency: currency                                                                                                                                          
+       }).format(total_amount);                                                                                                                                             
+     };
 
   if (loading) {
     return (
@@ -217,10 +224,10 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
                     </div>
                     <div className="col-quantity">{item.quantity}</div>
                     <div className="col-rate">
-                      {item.unit_price} {invoice.currency}
+                      {formatAmount(item.unit_price || 0, invoice.currency)}
                     </div>
                     <div className="col-amount">
-                      {item.total_price} {invoice.currency}
+                      {formatAmount(item.total_price || 0, invoice.currency)}
                     </div>
                   </div>
                 ))}
@@ -234,7 +241,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
               {invoice.tax_rate !== undefined && (
                 <div className="summary-row">
                   <span>Tax ({invoice.tax_rate * 100}%)</span>
-                  <span>{(invoice.total_amount * invoice.tax_rate).toFixed(2)} {invoice.currency}</span>
+                  <span>{((invoice.total_amount || 0) * (invoice.tax_rate || 0)).toFixed(2)} {invoice.currency}</span>
                 </div>
               )}
               <div className="summary-row summary-total">

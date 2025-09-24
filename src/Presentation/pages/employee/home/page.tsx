@@ -280,7 +280,7 @@ const EmployeeHome = observer(() => {
                 </div>
               </div>
               <div className={`transaction-amount2 ${transaction.type}`}>
-                <span>{transaction.type === 'paid' ? '-' : transaction.type === 'pending' ? '' : '+'}{transaction.amount.toFixed(4)} ETH</span>
+                <span>{transaction.type === 'paid' ? '-' : transaction.type === 'pending' ? '' : '+'}{(transaction.amount || 0).toFixed(4)} ETH</span>
                 {fiatCurrency && <span className="fiat-amount">{fiatCurrency} {transaction.fiatAmount}</span>}
               </div>
             </div>

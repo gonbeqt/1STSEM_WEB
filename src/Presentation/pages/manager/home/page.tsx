@@ -376,7 +376,7 @@ const Home = observer(() => {
               </div>
               <div className={`transaction-amount2 ${transaction.type}`}>
                 {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
-                {transaction.amount.toFixed(4)} ETH
+                {(transaction.amount || 0).toFixed(4)} ETH
               </div>
             </div>
           ))
