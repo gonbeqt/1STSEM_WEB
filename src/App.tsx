@@ -14,7 +14,6 @@ import AuditDetailsPage from './presentation/pages/manager/audits/details/page';
 import Settings from './presentation/pages/manager/profile/page';
 import Management from './presentation/pages/manager/management/page';
 import BalanceSheet from './presentation/pages/manager/reports/BalanceSheet/BalanceSheet';
-import InvoiceReceipt from './presentation/pages/manager/invoice/InvoiceReceipt/InvoiceReceipt';
 import CashFlow from './presentation/pages/manager/reports/CashFlow/CashFlow';
 import Income from './presentation/pages/manager/reports/Income/Income';
 import Invest from './presentation/pages/manager/reports/Invest/Invest';
@@ -74,7 +73,6 @@ function App() {
           <Route path="/audits/:auditId" element={<AuditDetailsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/balance_sheet" element={<BalanceSheet />} />
-          <Route path="/invoice_receipt" element={<InvoiceReceipt />} />
           <Route path="/cash_flow" element={<CashFlow />} />
           <Route path="/income" element={<Income />} />
           <Route path="/invest" element={<Invest />} />

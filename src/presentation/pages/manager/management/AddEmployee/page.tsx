@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './AddEmployee.css';
 import { container } from '../../../../../di/container';
 import { useEmployeeViewModel } from '../../../../../domain/viewmodel/EmployeeViewModel';
 import { AddEmployeeRequest, AddEmployeeResponse } from '../../../../../domain/repositories/EmployeeRepository';
@@ -23,7 +22,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
   onClose,
   onSubmit,
 }) => {
-  // Use the Employee ViewModel
   const { 
     addEmployee, 
     isLoading, 
@@ -52,7 +50,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
       [name]: value
     }));
     
-    // Clear validation error when user starts typing
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -75,7 +72,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Clear previous messages
     clearMessages();
 
     if (!validateForm()) {
@@ -83,7 +79,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
     }
 
     try {
-      // Prepare the request according to the backend API
       const request: AddEmployeeRequest = {
         email: formData.email,
         position: formData.position || undefined,
@@ -99,7 +94,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
       if (response.success && response.employee) {
         console.log('Employee added to team successfully:', response.employee);
         
-        // Reset form
         setFormData({
           email: '',
           position: '',
@@ -109,16 +103,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
         });
         setValidationErrors({});
         
-        // Call the onSubmit callback with the response data
         onSubmit(response.employee);
-        
-        // Close the modal
         onClose();
         
-        // Show success message
         alert(`Employee ${response.employee.full_name || response.employee.username} has been added to your team successfully!`);
       } else {
-        // Error is already handled by the ViewModel hook
         console.error('Failed to add employee to team:', response.message);
       }
     } catch (err: any) {
@@ -143,80 +132,80 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
 
   return (
     <>
-      <div className="modal-overlay">
-        <div className="modal-container">
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+        <div className="bg-white rounded-xl w-[90%] max-w-[500px] max-h-[90vh] overflow-hidden shadow-2xl">
           {/* Header */}
-          <div className="modal-header">
+          <div className="flex items-center p-6 pb-4 border-b border-gray-200 relative">
             <button 
-              className="close-button" 
+              className="bg-transparent border-none text-2xl text-gray-500 p-0 mr-4 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
               onClick={handleClose}
               disabled={isLoading}
             >
               ←
             </button>
-            <h2>Add Employee to Team</h2>
+            <h2 className="text-lg font-semibold text-gray-900 m-0">Add Employee to Team</h2>
           </div>
 
           {/* Body */}
-          <div className="modal-body">
-            <div className="step-content">
+          <div className="p-6 max-h-[400px] overflow-y-auto">
+            <div className="flex flex-col gap-5">
               {/* Email Field */}
-              <div className="input-group">
-                <label htmlFor="email">Employee Email *</label>
+              <div className="flex flex-col gap-1.5 text-black bg-white">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700">Employee Email *</label>
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`form-input ${validationErrors.email ? 'error' : ''}`}
+                  className={`w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${validationErrors.email ? 'border-red-600' : ''}`}
                   placeholder="Enter existing employee's email"
                   disabled={isLoading}
                 />
                 {validationErrors.email && (
-                  <span className="error-message">{validationErrors.email}</span>
+                  <span className="text-red-600 text-xs mt-1">{validationErrors.email}</span>
                 )}
               </div>
 
               {/* Full Name Field */}
-              <div className="input-group">
-                <label htmlFor="full_name">Full Name</label>
+              <div className="flex flex-col gap-1.5 text-black bg-white">
+                <label htmlFor="full_name" className="text-sm font-medium text-gray-700">Full Name</label>
                 <input
                   type="text"
                   id="full_name"
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  className="form-input"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                   placeholder="Optional: Update employee's full name"
                   disabled={isLoading}
                 />
               </div>
 
               {/* Position Field */}
-              <div className="input-group">
-                <label htmlFor="position">Position</label>
+              <div className="flex flex-col gap-1.5 text-black bg-white">
+                <label htmlFor="position" className="text-sm font-medium text-gray-700">Position</label>
                 <input
                   type="text"
                   id="position"
                   name="position"
                   value={formData.position}
                   onChange={handleInputChange}
-                  className="form-input"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                   placeholder="Optional: Specify position"
                   disabled={isLoading}
                 />
               </div>
 
               {/* Department Field */}
-              <div className="input-group">
-                <label htmlFor="department">Department</label>
+              <div className="flex flex-col gap-1.5 text-black bg-white">
+                <label htmlFor="department" className="text-sm font-medium text-gray-700">Department</label>
                 <select
                   id="department"
                   name="department"
                   value={formData.department}
                   onChange={handleInputChange}
-                  className="form-select"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276,9 12,15 18,9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_12px_center] bg-[length:16px] pr-10 appearance-none cursor-pointer"
                   disabled={isLoading}
                 >
                   <option value="">Select Department</option>
@@ -231,22 +220,22 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
               </div>
 
               {/* Phone Field */}
-              <div className="input-group">
-                <label htmlFor="phone">Phone Number</label>
+              <div className="flex flex-col gap-1.5 text-black bg-white">
+                <label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</label>
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="form-input"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                   placeholder="Optional: Add phone number"
                   disabled={isLoading}
                 />
               </div>
 
               {/* Info Box */}
-              <div className="info-box">
+              <div className="bg-gray-100 p-3 rounded-lg text-sm text-gray-700 border-l-4 border-purple-500 mt-4">
                 <strong>Note:</strong> This will add an existing employee to your team. 
                 The employee must already be registered in the system.
               </div>
@@ -254,16 +243,16 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="modal-footer">
+          <div className="flex justify-between items-center p-4 pt-4 border-t border-gray-200 bg-gray-50">
             <button 
-              className="back-button" 
+              className="bg-white text-gray-500 border border-gray-300 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleClose}
               disabled={isLoading}
             >
               Cancel
             </button>
             <button 
-              className={`submit-button ${isLoading ? 'loading' : ''}`}
+              className={`bg-purple-500 text-white border-none px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed relative min-w-[100px] ${isLoading ? 'after:content-[\'\'] after:absolute after:w-4 after:h-4 after:border-2 after:border-t-white after:border-transparent after:rounded-full after:animate-spin after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2' : ''}`}
               onClick={handleSubmit}
               disabled={isLoading}
             >
@@ -275,9 +264,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
       
       {/* Error Display */}
       {error && (
-        <div className="error-notification">
+        <div className="fixed top-5 right-5 p-3 rounded-md bg-red-100 border border-red-200 text-red-800 max-w-[400px] flex items-center justify-between z-[10000]">
           <strong>Error:</strong> {error}
-          <button onClick={clearMessages} className="notification-close">
+          <button onClick={clearMessages} className="bg-transparent border-none text-red-800 font-bold ml-2.5 text-base cursor-pointer">
             ×
           </button>
         </div>
@@ -285,9 +274,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
 
       {/* Success Display */}
       {success && (
-        <div className="success-notification">
+        <div className="fixed top-5 right-5 p-3 rounded-md bg-green-100 border border-green-200 text-green-800 max-w-[400px] flex items-center justify-between z-[10000]">
           <strong>Success:</strong> {success}
-          <button onClick={clearMessages} className="notification-close">
+          <button onClick={clearMessages} className="bg-transparent border-none text-green-800 font-bold ml-2.5 text-base cursor-pointer">
             ×
           </button>
         </div>

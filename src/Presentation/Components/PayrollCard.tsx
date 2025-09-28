@@ -1,3 +1,4 @@
+// src/Presentation/Components/PayrollCard.tsx
 import React from 'react';
 
 interface PayrollCardProps {
@@ -9,17 +10,17 @@ interface PayrollCardProps {
 
 const PayrollCard: React.FC<PayrollCardProps> = ({ amount, employees, totalLastMonth, nextPayroll }) => {
   return (
-    <div className="payroll-card">
-      <div className="payroll-left">
-        <div className="payroll-amount-container">
-          <span className="payroll-icon">💰</span>
-          <span className="payroll-amount3">{amount}</span>
+    <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-2xl">💰</span>
+          <span className="text-xl font-bold text-gray-900">{amount}</span>
         </div>
-        <span className="payroll-employees">{employees}</span>
+        <span className="text-gray-600">{employees}</span>
       </div>
-      <div className="payroll-right">
-        <span className="payroll-total">Total Last Month: {totalLastMonth}</span>
-        <span className="payroll-next">Next Payroll on {nextPayroll}</span>
+      <div className="text-right">
+        <div className="text-sm text-gray-600 mb-1">Total Last Month: {totalLastMonth}</div>
+        <div className="text-sm text-gray-600">Next Payroll on {nextPayroll}</div>
       </div>
     </div>
   );

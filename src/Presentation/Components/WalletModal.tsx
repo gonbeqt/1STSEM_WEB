@@ -1,7 +1,6 @@
-// src/Presentation/components/WalletModal.tsx (No Tailwind)
+// src/Presentation/Components/WalletModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X, Wallet, ArrowRight, Send } from 'lucide-react';
-import './WalletModal.css';
 import { useWallet } from '../hooks/useWallet';
 import { observer } from 'mobx-react-lite';
 
@@ -10,7 +9,7 @@ type ModalView = 'connect' | 'send';
 interface WalletModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialView?: ModalView; // New prop
+  initialView?: ModalView;
 }
 
 const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, initialView = 'connect' }) => {
@@ -40,7 +39,6 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
     });
 
     if (success) {
-      // If connected, switch to send view or close modal
       setCurrentView('send');
     } else {
       console.error('Failed to connect wallet');
@@ -70,44 +68,48 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
 
   return (
     <div 
-      className="wallet-modal-overlay"
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-5"
       onClick={handleBackdropClick}
     >
-      <div className="wallet-modal">
+      <div className="bg-white rounded-2xl w-full max-w-md relative shadow-2xl max-h-screen overflow-y-auto text-black">
         {/* Header */}
-        <div className="wallet-modal-header">
-          <div className="wallet-modal-header-content">
-            <div className="wallet-modal-icon-container">
-              <Wallet className="wallet-modal-icon" />
+        <div className="flex justify-between items-start p-6 pb-0 mb-4">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Wallet className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <h2 className="wallet-modal-title">
+              <h2 className="text-black text-xl font-semibold m-0 leading-tight">
                 {currentView === 'connect' ? 'Connect Wallet' : 'Send ETH'}
               </h2>
-              <p className="wallet-modal-subtitle">
+              <p className="text-gray-500 text-sm mt-1 m-0 leading-tight">
                 {currentView === 'connect' ? 'Choose your preferred wallet' : 'Transfer Ethereum'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="close-button"
+            className="bg-transparent border-none text-gray-500 cursor-pointer p-2 rounded-lg transition-all hover:text-black flex items-center justify-center flex-shrink-0"
           >
-            <X className="close-button-icon" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* View Tabs */}
         {isWalletConnected && (
-          <div className="wallet-modal-tabs">
+          <div className="flex mx-6 mb-6 bg-gray-100 border border-gray-300 rounded-xl p-1">
             <button 
-              className={`wallet-modal-tab ${currentView === 'connect' ? 'active' : ''}`}
+              className={`flex-1 bg-transparent border-none text-sm font-medium py-3 px-4 rounded-lg cursor-pointer transition-all ${
+                currentView === 'connect' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-black hover:bg-purple-100'
+              }`}
               onClick={() => setCurrentView('connect')}
             >
               Connect
             </button>
             <button 
-              className={`wallet-modal-tab ${currentView === 'send' ? 'active' : ''}`}
+              className={`flex-1 bg-transparent border-none text-sm font-medium py-3 px-4 rounded-lg cursor-pointer transition-all ${
+                currentView === 'send' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-black hover:bg-purple-100'
+              }`}
               onClick={() => setCurrentView('send')}
             >
               Send
@@ -116,52 +118,19 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
         )}
 
         {/* Content */}
-        <div className="wallet-modal-content">
+        <div className="px-6 pb-6">
           {currentView === 'connect' && (
-            <div className="wallet-options">
-              <div className="private-key-input-container">
+            <div className="flex flex-col gap-3">
+              <div className="mb-4">
                 <input
                   type="password"
                   placeholder="Enter Private Key"
-                  className="private-key-input"
-                  value={privateKeyInput}
-                  onChange={(e) => setPrivateKeyInput(e.target.value)}
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
-              <button
-                onClick={() => handleWalletConnect('MetaMask')}
-                className="wallet-option-btn connect-private-key"
-              >
-                <div className="wallet-option-content">
-                  <div className="wallet-icon">
-                    <Wallet className="wallet-modal-icon" />
-                  </div>
-                  <div className="wallet-info">
-                    <h3 className="wallet-name">Connect with Private Key</h3>
-                  </div>
-                </div>
-                <ArrowRight className="wallet-arrow" />
-              </button>
-            </div>
-          )}
-
-          {currentView === 'send' && isWalletConnected && (
-            <div className="send-eth-form">
-              <p className="wallet-balance-display">Balance: {ethBalance !== null ? ethBalance.toFixed(4) : 'Loading...'} ETH</p>
               
-              <div className="input-group">
-                <label htmlFor="recipient">Recipient Address:</label>
-                <input
-                  id="recipient"
-                  type="text"
-                  placeholder="0x..."
-                  value={recipientAddress}
-                  onChange={(e) => setRecipientAddress(e.target.value)}
-                  className="send-input"
-                />
-              </div>
-              <div className="input-group">
-                <label htmlFor="amount">Amount (ETH):</label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="amount" className="text-white text-sm font-medium">Amount (ETH):</label>
                 <input
                   id="amount"
                   type="number"
@@ -169,63 +138,74 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                   placeholder="0.0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="send-input"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
 
-              <div className="input-group">
-                <label htmlFor="company">Company:</label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="company" className="text-white text-sm font-medium">Company:</label>
                 <input
                   id="company"
                   type="text"
                   placeholder="Company Name"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="send-input"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
 
-              <div className="input-group">
-                <label htmlFor="category">Category:</label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="category" className="text-white text-sm font-medium">Category:</label>
                 <input
                   id="category"
                   type="text"
                   placeholder="Transaction Category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="send-input"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
 
-              <div className="input-group">
-                <label htmlFor="description">Description:</label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="description" className="text-white text-sm font-medium">Description:</label>
                 <input
                   id="description"
                   type="text"
                   placeholder="Transaction Description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="send-input"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
 
-              {sendEthError && <p className="error-message">{sendEthError}</p>}
-              {successMessage && <p className="success-message">{successMessage}</p>}
+              {sendEthError && (
+                <p className="text-red-500 text-sm m-0 p-3 bg-red-100 rounded-lg border border-red-200">
+                  {sendEthError}
+                </p>
+              )}
+              
+              {successMessage && (
+                <p className="text-green-500 text-sm m-0 p-3 bg-green-100 rounded-lg border border-green-200">
+                  {successMessage}
+                </p>
+              )}
 
               <button
                 onClick={handleSendEth}
-                className="send-eth-btn"
+                className={`flex items-center justify-center gap-2 w-full bg-purple-600 text-white border-none rounded-xl p-4 text-base font-semibold cursor-pointer transition-all mt-2 ${
+                  isSendingEth ? 'opacity-60 cursor-not-allowed' : 'hover:bg-purple-700 hover:-translate-y-px'
+                }`}
                 disabled={isSendingEth}
               >
                 {isSendingEth ? 'Sending...' : 'Send ETH'}
-                <Send className="send-icon" />
+                <Send className="w-5 h-5" />
               </button>
             </div>
           )}
 
           {/* Security Notice */}
-          <div className="security-notice">
-            <p className="security-notice-text">
+          <div className="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
+            <p className="text-gray-500 text-xs m-0 leading-relaxed">
               By connecting a wallet, you agree to our Terms of Service and Privacy Policy.
               Your wallet information is secure and encrypted.
             </p>

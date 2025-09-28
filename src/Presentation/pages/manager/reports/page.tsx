@@ -1,6 +1,4 @@
-// Reports.tsx
 import React, { useState, useEffect } from 'react';
-import './reports.css';
 import { useNavigate } from 'react-router-dom';
 
 interface Period {
@@ -205,28 +203,34 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="reports-container">
-      <h1 className="sidebar-title">Reports</h1>
+    <div className="flex flex-col w-full h-screen bg-white font-sans p-6 border border-gray-200 rounded-xl shadow-md overflow-y-auto space-y-8 md:p-4 sm:p-3">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight md:text-2xl sm:text-xl">Reports</h1>
       
       {/* Report Categories */}
-      <div className="report-categories">
+      <div className="flex flex-wrap gap-3 mb-6 md:flex-col">
         {reportCategories.map((category) => (
           <div
             key={category.name}
-            className={`category ${activeCategory === category.name ? 'active' : ''}`}
+            className={`px-5 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:border-gray-400 ${
+              activeCategory === category.name ? 'bg-purple-600 border-purple-600 text-white' : ''
+            } md:text-center`}
             onClick={() => handleCategoryChange(category.name)}
           >
-            <span className="category-label">{category.name}</span>
+            <span>{category.name}</span>
           </div>
         ))}
       </div>
 
       {/* Periods */}
-      <div className="periods">
+      <div className="flex flex-wrap gap-2 mb-8 p-1 bg-gray-100 rounded-lg w-fit md:w-full md:justify-center sm:flex-col">
         {periods.map((period) => (
           <button
             key={period.id}
-            className={`period-btn ${activePeriod === period.name ? 'active' : ''}`}
+            className={`px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
+              activePeriod === period.name
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'bg-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+            } sm:w-full sm:text-center`}
             onClick={() => handlePeriodChange(period.name)}
           >
             {period.name}
@@ -235,21 +239,28 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Report Types */}
-      <div className="report-types">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-8 lg:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-1">
         {reportCategories
           .find(cat => cat.name === activeCategory)?.types
           .map(type => (
             <div 
-              className="report-type" 
+              className="flex flex-col items-center p-6 rounded-xl bg-white border border-gray-200 cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md min-h-[120px] justify-center text-center md:p-5 md:min-h-[100px]"
               key={type.name} 
               onClick={() => handleReportTypeClick(type.path)}
             >
-              <div className={`icon ${type.icon}`}>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold text-base md:w-8 md:h-8 md:text-sm ${
+                type.icon === 'balance-icon' ? 'bg-gradient-to-br from-indigo-400 to-purple-600' :
+                type.icon === 'income-icon' ? 'bg-gradient-to-br from-pink-400 to-red-400' :
+                type.icon === 'cashflow-icon' ? 'bg-gradient-to-br from-blue-400 to-cyan-400' :
+                type.icon === 'investment-icon' ? 'bg-gradient-to-br from-green-400 to-teal-400' :
+                type.icon === 'payroll-icon' ? 'bg-gradient-to-br from-rose-400 to-yellow-400' :
+                'bg-gradient-to-br from-teal-200 to-pink-200'
+              }`}>
                 {getIconContent(type.icon)}
               </div>
-              <div className="report-info">
-                <span className="report-name">{type.name}</span>
-                <span className="last-updated">{getLastUpdatedText(activePeriod)}</span>
+              <div className="flex flex-col gap-1 items-center mt-3">
+                <span className="text-base font-semibold text-gray-900 md:text-sm">{type.name}</span>
+                <span className="text-xs text-gray-500">{getLastUpdatedText(activePeriod)}</span>
               </div>
             </div>
           ))
@@ -258,38 +269,57 @@ const Reports: React.FC = () => {
 
       {/* Risk Assessment Section */}
       <div>
-        <h1 className="sidebar-title">Risk Assessment - {activePeriod}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight md:text-2xl sm:text-xl">
+          Risk Assessment - {activePeriod}
+        </h1>
       </div>
       
-      <div className="alerts-section">
+      <div className="flex flex-col gap-4 w-full">
         {alerts.length > 0 ? (
           alerts.map((alert) => (
-            <div key={alert.id} className={`alert ${alert.severity}`}>
-              <div className="alert-header">
-                <span className={`alert-icon ${alert.severity}-icon`}>
+            <div 
+              key={alert.id} 
+              className={`p-5 rounded-xl bg-white border border-gray-200 shadow-sm border-l-4 transition-all duration-200 hover:shadow-md ${
+                alert.severity === 'high' ? 'border-l-red-500 bg-gradient-to-br from-white to-red-50' :
+                alert.severity === 'medium' ? 'border-l-amber-500 bg-gradient-to-br from-white to-amber-50' :
+                'border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs ${
+                  alert.severity === 'high' ? 'bg-red-500' :
+                  alert.severity === 'medium' ? 'bg-amber-500' :
+                  'bg-emerald-500'
+                }`}>
                   {getSeverityIcon(alert.severity)}
                 </span>
-                <span className="alert-title">{alert.title}</span>
-                <span className={`severity ${alert.severity}`}>{alert.severity}</span>
+                <span className="text-lg font-semibold text-gray-900 flex-1">{alert.title}</span>
+                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide border ${
+                  alert.severity === 'high' ? 'bg-red-100 text-red-600 border-red-200' :
+                  alert.severity === 'medium' ? 'bg-amber-100 text-amber-600 border-amber-200' :
+                  'bg-emerald-100 text-emerald-600 border-emerald-200'
+                }`}>
+                  {alert.severity}
+                </span>
               </div>
-              <p className="alert-description">{alert.description}</p>
-              <div className="recommendation">
-                <strong>Recommendation:</strong> {alert.recommendation}
+              <p className="text-sm text-gray-500 mb-4 leading-relaxed">{alert.description}</p>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700">
+                <strong className="text-gray-900 font-semibold">Recommendation:</strong> {alert.recommendation}
               </div>
             </div>
           ))
         ) : (
-          <div className="alert low">
-            <div className="alert-header">
-              <span className="alert-icon low-icon">✓</span>
-              <span className="alert-title">No Major Issues</span>
-              <span className="severity low">Good</span>
+          <div className="p-5 rounded-xl bg-white border border-gray-200 shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50 transition-all duration-200 hover:shadow-md">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs bg-emerald-500">✓</span>
+              <span className="text-lg font-semibold text-gray-900 flex-1">No Major Issues</span>
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide bg-emerald-100 text-emerald-600 border border-emerald-200">Good</span>
             </div>
-            <p className="alert-description">
+            <p className="text-sm text-gray-500 mb-4 leading-relaxed">
               No significant risks detected for the {activePeriod.toLowerCase()} period.
             </p>
-            <div className="recommendation">
-              <strong>Recommendation:</strong> Continue monitoring key financial metrics and maintain current operational practices.
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700">
+              <strong className="text-gray-900 font-semibold">Recommendation:</strong> Continue monitoring key financial metrics and maintain current operational practices.
             </div>
           </div>
         )}

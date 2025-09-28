@@ -1,7 +1,5 @@
-// BalanceSheet.tsx
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
-import './BalanceSheet.css';
 import { useNavigate } from 'react-router-dom';
 
 interface BalanceSheetItem {
@@ -22,7 +20,6 @@ interface BalanceSheetData {
 const BalanceSheet: React.FC = () => {
   const navigate = useNavigate();
   
-  // State for balance sheet data and UI
   const [balanceSheet, setBalanceSheet] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +35,6 @@ const BalanceSheet: React.FC = () => {
     equity: false,
   });
 
-  // Load balance sheet on component mount
   useEffect(() => {
     generateBalanceSheet();
   }, []);
@@ -97,7 +93,6 @@ const BalanceSheet: React.FC = () => {
       const data = await response.json();
       
       if (response.ok && data.success && data.excel_data) {
-        // Download the Excel file
         const byteCharacters = atob(data.excel_data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -133,11 +128,9 @@ const BalanceSheet: React.FC = () => {
     setError(null);
   };
 
-  // Handle error display
   useEffect(() => {
     if (error) {
       console.error('Balance Sheet Error:', error);
-      // You could show a toast notification here
     }
   }, [error]);
 
@@ -150,7 +143,6 @@ const BalanceSheet: React.FC = () => {
     }
   ] : [];
 
-  // Use real balance sheet data only
   const balanceSheetData = balanceSheet ? {
     assets: {
       current: balanceSheet?.assets?.current_assets?.crypto_holdings ? 
@@ -234,7 +226,7 @@ const BalanceSheet: React.FC = () => {
   };
 
   const renderChartView = () => (
-    <div className="chart-view">
+    <div className="chart-view p-6 h-full overflow-y-auto">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
           data={chartData}
@@ -255,90 +247,89 @@ const BalanceSheet: React.FC = () => {
           <Line type="monotone" dataKey="equity" stroke="#ffc658" />
         </LineChart>
       </ResponsiveContainer>
-      <div className="chart-summary">
-        <div className="summary-box">
-          <h4>Summary</h4>
-          {balanceSheet ? (
-            <p>
-              Your balance sheet shows total assets of ${formatCurrency(balanceSheet.totals.total_assets).slice(1)} 
-              with a net worth of ${formatCurrency(balanceSheet.totals.total_equity).slice(1)}.
-            </p>
-          ) : (
-            <p>Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.</p>
-          )}
-          <div className="btn-container"> 
-            <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
-            <button className="download-btn1" onClick={handleExportPdf}>Download Report</button>
-          </div>
+      <div className="chart-summary bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Summary</h4>
+        {balanceSheet ? (
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Your balance sheet shows total assets of ${formatCurrency(balanceSheet.totals.total_assets).slice(1)} 
+            with a net worth of ${formatCurrency(balanceSheet.totals.total_equity).slice(1)}.
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.
+          </p>
+        )}
+        <div className="btn-container flex gap-3 flex-wrap md:flex-col">
+          <button className="close-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>Close</button>
+          <button className="download-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportPdf}>Download Report</button>
         </div>
       </div>
     </div>
   );
 
   const renderTableView = () => (
-    <div className="table-view">
-      <div className="export-actions">
-        <button className="export-excel" onClick={handleExportExcel} disabled={loading}>
+    <div className="table-view flex flex-col h-full bg-white">
+      <div className="export-actions p-4 border-b border-gray-200 bg-white flex justify-end gap-3 md:flex-col">
+        <button className="export-excel py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:w-full md:justify-center" onClick={handleExportExcel} disabled={loading}>
           📊 Export To Excel
         </button>
-        <button onClick={handleRefresh} disabled={loading} style={{marginLeft: '10px'}}>
+        <button className="py-2.5 px-4 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-200 hover:border-gray-400 transition-all md:w-full md:justify-center" onClick={handleRefresh} disabled={loading}>
           🔄 Refresh
         </button>
       </div>
 
-      {loading && <div className="loading">Loading balance sheet...</div>}
+      {loading && <div className="loading text-center py-10 text-gray-600 text-base">Loading balance sheet...</div>}
       {error && (
-        <div className="error" style={{color: 'red', margin: '10px 0'}}>
+        <div className="error bg-red-50 text-red-600 py-3 px-6 border-l-4 border-red-600 flex justify-between items-center">
           Error: {error}
-          <button onClick={clearError} style={{marginLeft: '10px'}}>Dismiss</button>
+          <button className="bg-transparent border-none text-red-600 underline text-sm cursor-pointer" onClick={clearError}>Dismiss</button>
         </div>
       )}
 
-      <div className="balance-sections">
-        {/* Assets Section */}
-        <div className="section-group">
+      <div className="balance-sections flex-1 overflow-y-auto bg-gray-50">
+        <div className="section-group bg-white mb-[2px]">
           <div 
-            className="section-header"
+            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
             onClick={() => toggleSection('assets')}
           >
-            <span className={`expand-arrow ${expandedSections.assets ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Assets</span>
-            <span className="section-amount">${formatCurrency(calculateTotalAssets()).slice(1)}</span>
+            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.assets ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+            <span className="section-title flex-1 text-lg text-gray-900">Assets</span>
+            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalAssets()).slice(1)}</span>
           </div>
           
           {expandedSections.assets && (
-            <div className="section-content">
-              <div className="subsection">
-                <div className="subsection-header">
+            <div className="section-content bg-gray-50 border-t border-gray-200">
+              <div className="subsection bg-white mb-[1px]">
+                <div className="subsection-header flex justify-between items-center p-4 bg-gray-50 text-gray-700 font-semibold text-base border-b border-gray-200">
                   <span className="subsection-title">Current Assets</span>
-                  <span className="subsection-total">${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
+                  <span className="subsection-total text-gray-900 font-bold">${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
                 </div>
                 {balanceSheetData.assets.current.map((item, index) => (
-                  <div key={index} className="line-item">
-                    <span className="item-name">{item.name}</span>
-                    <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                    <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
                   </div>
                 ))}
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Current Assets</span>
                   <span>${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
                 </div>
               </div>
 
-              <div className="subsection">
-                <div className="subsection-header">
+              <div className="subsection bg-white">
+                <div className="subsection-header flex justify-between items-center p-4 bg-gray-50 text-gray-700 font-semibold text-base border-b border-gray-200">
                   <span className="subsection-title">Non-Current Assets</span>
-                  <span className="subsection-total">${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
+                  <span className="subsection-total text-gray-900 font-bold">${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
                 </div>
                 {balanceSheetData.assets.nonCurrent.map((item, index) => (
-                  <div key={index} className="line-item">
-                    <span className="item-name">{item.name}</span>
-                    <span className="item-amount">
+                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                    <span className="item-amount font-semibold text-gray-900">
                       {item.amount < 0 ? '-' : ''}${formatCurrency(item.amount).slice(1)}
                     </span>
                   </div>
                 ))}
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Non-Current Assets</span>
                   <span>${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
                 </div>
@@ -347,71 +338,68 @@ const BalanceSheet: React.FC = () => {
           )}
         </div>
 
-        {/* Liabilities Section */}
-        <div className="section-group">
+        <div className="section-group bg-white mb-[2px]">
           <div 
-            className="section-header"
+            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
             onClick={() => toggleSection('liabilities')}
           >
-            <span className={`expand-arrow ${expandedSections.liabilities ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Liabilities</span>
-            <span className="section-amount">${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
+            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.liabilities ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+            <span className="section-title flex-1 text-lg text-gray-900">Liabilities</span>
+            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
           </div>
           
           {expandedSections.liabilities && (
-            <div className="section-content">
+            <div className="section-content bg-gray-50 border-t border-gray-200">
               {balanceSheetData.liabilities.map((item, index) => (
-                <div key={index} className="line-item">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+                <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                  <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                  <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Equity Section */}
-        <div className="section-group">
+        <div className="section-group bg-white mb-[2px]">
           <div 
-            className="section-header"
+            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
             onClick={() => toggleSection('equity')}
           >
-            <span className={`expand-arrow ${expandedSections.equity ? 'expanded' : ''}`}>▼</span>
-            <span className="section-title">Equity</span>
-            <span className="section-amount">${formatCurrency(calculateTotalEquity()).slice(1)}</span>
+            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.equity ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+            <span className="section-title flex-1 text-lg text-gray-900">Equity</span>
+            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalEquity()).slice(1)}</span>
           </div>
           
           {expandedSections.equity && (
-            <div className="section-content">
+            <div className="section-content bg-gray-50 border-t border-gray-200">
               {balanceSheetData.equity.map((item, index) => (
-                <div key={index} className="line-item">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+                <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                  <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                  <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Totals */}
-        <div className="totals-section">
-          <div className="total-line">
+        <div className="totals-section bg-white p-6 border-t-4 border-gray-200 mt-2">
+          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
             <span>Total Assets</span>
             <span>${formatCurrency(calculateTotalAssets()).slice(1)}</span>
           </div>
-          <div className="total-line">
+          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
             <span>Total Liabilities</span>
             <span>${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
           </div>
-          <div className="total-line">
+          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
             <span>Total Equity</span>
             <span>${formatCurrency(calculateTotalEquity()).slice(1)}</span>
           </div>
-          <div className="total-line balance-check">
+          <div className="total-line balance-check flex justify-between items-center py-4 mt-4 text-lg font-bold text-gray-900 border-t-2 border-gray-300 border-b-4 border-double border-gray-700">
             <span>Liabilities + Equity</span>
             <span>${formatCurrency(calculateTotalLiabilities() + calculateTotalEquity()).slice(1)}</span>
           </div>
-          <div className="balance-status">
+          <div className="balance-status text-center text-emerald-600 text-base font-semibold mt-5 p-3 bg-emerald-100 rounded-lg border border-emerald-200">
             ✓ Balance Sheet is balanced
           </div>
         </div>
@@ -420,41 +408,41 @@ const BalanceSheet: React.FC = () => {
   );
 
   return (
-    <div className="balance-sheet-container">
-      <div className="balance-sheet-header">
-        <div className="header-top">
-          <button className="back-btn" onClick={()=> navigate(-1)}>← Balance Sheet</button>
+    <div className="balance-sheet-container flex flex-col w-full h-screen bg-white font-sans rounded-none border border-gray-200 shadow-md md:rounded-none">
+      <div className="balance-sheet-header bg-white p-6 border-b border-gray-200">
+        <div className="header-top mb-4">
+          <button className="back-btn bg-transparent border-none text-gray-500 text-sm flex items-center gap-2 py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all" onClick={() => navigate(-1)}>← Balance Sheet</button>
         </div>
         <div className="header-content">
-          <h1>Balance Sheet</h1>
-          <p>View your company's assets, liabilities, and equity</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight md:text-xl">Balance Sheet</h1>
+          <p className="text-base text-gray-500 mb-2 leading-snug">View your company's assets, liabilities, and equity</p>
           {balanceSheet && (
-            <small>As of: {new Date(balanceSheet.as_of_date).toLocaleDateString()}</small>
+            <small className="text-sm text-gray-400 block mb-5">As of: {new Date(balanceSheet.as_of_date).toLocaleDateString()}</small>
           )}
         </div>
         
-        <div className="view-tabs">
+        <div className="view-tabs flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit md:w-full">
           <button 
-            className={`tab-btn ${activeView === 'chart' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('chart')}
           >
             Chart View
           </button>
           <button 
-            className={`tab-btn ${activeView === 'table' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('table')}
           >
             Table View
           </button>
         </div>
         
-        <div className="report-period">
+        <div className="report-period flex justify-between items-center text-sm text-gray-700">
           <span>Daily Report</span>
-          <button className="filter-btn">🔽 Filter</button>
+          <button className="filter-btn bg-transparent border border-gray-300 text-purple-600 text-sm flex items-center gap-1.5 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all">🔽 Filter</button>
         </div>
       </div>
 
-      <div className="balance-sheet-content">
+      <div className="balance-sheet-content flex-1 overflow-y-auto bg-gray-50">
         {activeView === 'chart' ? renderChartView() : renderTableView()}
       </div>
     </div>

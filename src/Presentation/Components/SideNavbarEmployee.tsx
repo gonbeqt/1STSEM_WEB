@@ -1,35 +1,37 @@
-
+// src/Presentation/Components/SideNavbarEmployee.tsx
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import './SideNavbar.css';
-import { Home, Receipt, History, Settings, LogOut } from 'lucide-react';
+import { Home, History, Settings, LogOut } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 
 const SideNavbarEmployee = () => {
   const navigate = useNavigate();
   const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
-const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons only)
-  const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false); // Track if user clicked a nav item
- useEffect(() => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false);
+
+  useEffect(() => {
     if (!loginViewModel.isLoggedIn) {
       navigate('/login');
       return;
     }
   }, [loginViewModel.isLoggedIn, navigate]);
-   const handleLogout = async () => {
+
+  const handleLogout = async () => {
     const success = await loginViewModel.logout();
     if (success) {
       navigate('/login');
     }
   };
+
   const handleMouseEnter = () => {
-    setIsExpanded(true);//expand when mouse enters
+    setIsExpanded(true);
   };
 
   const handleMouseLeave = () => {
     if (!isPermanentlyExpanded) {
-      setIsExpanded(false);// only collapsed when not locked
+      setIsExpanded(false);
     }
   };
 
@@ -39,23 +41,23 @@ const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons o
   };
 
   const handleNavClick = () => {
-    console.log('Nav clicked - setting permanently expanded'); // Debug log
-    setIsExpanded(true);//expanded when hover
-    setIsPermanentlyExpanded(true);//stayes expanded when nav is chosen
+    setIsExpanded(true);
+    setIsPermanentlyExpanded(true);
   };
+
   return (
     <div
-      className={`side-navbar ${isExpanded ? 'expanded' : 'collapsed'}`}
+      className={`${isExpanded ? 'w-52' : 'w-16'} h-screen bg-white bg-opacity-10 text-white p-4 m-1 flex flex-col sticky top-2 rounded-xl border border-white border-opacity-30 backdrop-blur-lg transition-all duration-300 shadow-lg overflow-hidden`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="logo-container">
+      <div className="text-center mb-10 relative h-10 flex items-center justify-center">
         {isExpanded && (
           <>
-            <h2>LOGO</h2>
+            <h2 className="m-0 text-lg text-black font-bold">LOGO</h2>
             {isPermanentlyExpanded && (
               <button
-                className="close-btn"
+                className="absolute -top-2 -right-2 bg-black bg-opacity-20 border-none text-black w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-black hover:bg-opacity-30"
                 onClick={handleCloseClick}
                 aria-label="Collapse sidebar"
               >
@@ -65,22 +67,66 @@ const [isExpanded, setIsExpanded] = useState(false); // Start collapsed (icons o
           </>
         )}
         {!isExpanded && (
-          <div className="logo-icon">
+          <div className="w-8 h-8 bg-black bg-opacity-20 rounded-full flex items-center justify-center font-bold cursor-pointer transition-colors text-black hover:bg-black hover:bg-opacity-30">
             L
           </div>
         )}
       </div>
-      <ul className="nav-links">
-        <li>
-          <NavLink to="/employee/home" className={({ isActive }) => isActive ? "active" : "" } onClick={handleNavClick}>
-          <Home /> {isExpanded && <span className="nav-text">Home</span>}</NavLink></li>
-        <li><NavLink to="/employee/history" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><History /> {isExpanded && <span className="nav-text">History</span>}</NavLink></li>
-        <li><NavLink to="/employee/settings" className={({ isActive }) => isActive ? "active" : ""} onClick={handleNavClick}><Settings /> {isExpanded && <span className="nav-text">Settings</span>}</NavLink></li>
+
+      <ul className="list-none p-0 flex-grow m-0">
+        <li className="mb-4 p-0">
+          <NavLink 
+            to="/employee/home" 
+            className={({ isActive }) => 
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
+              } ${!isExpanded ? 'justify-center' : ''}`
+            }
+            onClick={handleNavClick}
+          >
+            <Home className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Home</span>}
+          </NavLink>
+        </li>
+        
+        <li className="mb-4 p-0">
+          <NavLink 
+            to="/employee/history" 
+            className={({ isActive }) => 
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
+              } ${!isExpanded ? 'justify-center' : ''}`
+            }
+            onClick={handleNavClick}
+          >
+            <History className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            {isExpanded && <span className="opacity-100 transition-opacity duration-300">History</span>}
+          </NavLink>
+        </li>
+        
+        <li className="mb-4 p-0">
+          <NavLink 
+            to="/employee/settings" 
+            className={({ isActive }) => 
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
+              } ${!isExpanded ? 'justify-center' : ''}`
+            }
+            onClick={handleNavClick}
+          >
+            <Settings className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Settings</span>}
+          </NavLink>
+        </li>
       </ul>
-      <button onClick={handleLogout} className="logout-btn">
-          <LogOut />
-          {isExpanded && <span className="nav-text">Log out</span>}
-        </button>
+
+      <button 
+        onClick={handleLogout} 
+        className="bg-transparent border-none text-black text-base flex items-center p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none"
+      >
+        <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0`} />
+        {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
+      </button>
     </div>
   );
 };

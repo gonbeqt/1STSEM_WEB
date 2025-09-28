@@ -1,3 +1,4 @@
+// InputWithIcon.tsx - Updated with Tailwind
 import React, { useState } from "react";
 import EyeIcon from "./icons/EyeIcon";
 import EyeOffIcon from "./icons/EyeOffIcon";
@@ -17,17 +18,22 @@ const InputWithIcon = ({
   };
 
   return (
-    <div style={styles.container}>
-      <span style={styles.icon}>{icon}</span>
+    <div className="flex items-center rounded-lg p-3 w-full max-w-sm h-12 bg-transparent relative border border-gray-700">
+      <span className="mr-2 mt-1 text-black border-r border-gray-300 pr-2">
+        {icon}
+      </span>
       <input
         type={type === "password" && showPassword ? "text" : type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        style={styles.input}
+        className="border-none outline-none flex-1 bg-transparent text-black w-full placeholder:text-gray-500"
       />
       {type === "password" && (
-        <button onClick={togglePasswordVisibility} style={styles.eyeButton}>
+        <button 
+          onClick={togglePasswordVisibility} 
+          className="bg-transparent border-none cursor-pointer text-white p-0 hover:opacity-70 transition-opacity"
+        >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>
       )}
@@ -35,41 +41,5 @@ const InputWithIcon = ({
   );
 };
 
-const styles = {
-  container: {
-    display: "flex",
-    alignItems: "center",
-    borderRadius: "0.5rem",
-    padding: "0.75rem 1rem",
-    width: "90%",
-    height: "25px ",
-    backgroundColor: "transparent",
-    position: "relative",
-    border: "1px solid  #333",
-
-  },
-  icon: {
-    marginRight: "0.5rem",
-    marginTop: "0.3rem",
-    color: "black",
-    borderRight: "1px solid #d1d5db",
-    paddingRight: "0.5rem",
-  },
-  input: {
-    border: "none",
-    outline: "none",
-    flex: 1,
-    backgroundColor: "transparent",
-    color: "black",
-    width: "100%",
-  },
-  eyeButton: {
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    color: "white",
-    padding: "0",
-  },
-};
-
 export default InputWithIcon;
+

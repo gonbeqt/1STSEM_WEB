@@ -1,6 +1,7 @@
+
+// src/Presentation/pages/manager/home/Modal/Payroll/PayrollModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, Info } from 'lucide-react';
-import './PayrollModal.css' 
 
 interface Employee {
   id: string;
@@ -80,14 +81,12 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     onClose();
   };
 
-  // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -112,21 +111,21 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
 
   return (
     <div 
-      className="payroll-modal-overlay"
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
       onClick={handleBackdropClick}
     >
-      <div className="payroll-modal-container">
+      <div className="bg-white p-5 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-2 duration-200">
         {/* Header */}
-        <div className="payroll-modal-header">
-          <div className="payroll-modal-title">
-            <div className="payroll-modal-icon">
-              <div className="payroll-modal-icon-inner"></div>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-sm"></div>
             </div>
-            <h2>Process Payroll</h2>
+            <h2 className="text-lg font-semibold text-gray-900 m-0">Process Payroll</h2>
           </div>
           <button
             onClick={onClose}
-            className="payroll-modal-close"
+            className="bg-transparent border-none text-gray-400 cursor-pointer p-1 rounded transition-colors hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             type="button"
           >
             <X size={20} />
@@ -134,20 +133,20 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         </div>
 
         {/* Content */}
-        <div className="payroll-modal-content">
-          <p className="payroll-modal-description">
+        <div className="p-4">
+          <p className="text-sm text-gray-600 mb-4 leading-normal">
             Process automated batch payments for your employees with calculated deductions and taxes.
           </p>
 
           {/* Payroll Type */}
-          <div className="payroll-form-group">
-            <label className="payroll-form-label">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Payroll Type
             </label>
             <select
               value={payrollType}
               onChange={(e) => setPayrollType(e.target.value)}
-              className="payroll-form-select"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:shadow-sm"
             >
               <option>Regular Payroll</option>
               <option>Bonus Payroll</option>
@@ -156,71 +155,71 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           </div>
 
           {/* Pay Period */}
-          <div className="payroll-form-row">
-            <div className="payroll-form-group">
-              <label className="payroll-form-label">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Pay Period Start
               </label>
               <input
                 type="date"
                 value={payPeriodStart}
                 onChange={(e) => setPayPeriodStart(e.target.value)}
-                className="payroll-form-input"
+                className="w-full p-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:shadow-sm"
               />
             </div>
-            <div className="payroll-form-group">
-              <label className="payroll-form-label">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Pay Period End
               </label>
               <input
                 type="date"
                 value={payPeriodEnd}
                 onChange={(e) => setPayPeriodEnd(e.target.value)}
-                className="payroll-form-input"
+                className="w-full p-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:shadow-sm"
               />
             </div>
           </div>
 
           {/* Pay Date */}
-          <div className="payroll-form-group">
-            <label className="payroll-form-label">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Pay Date
             </label>
             <input
               type="date"
               value={payDate}
               onChange={(e) => setPayDate(e.target.value)}
-              className="payroll-form-input"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm transition-all focus:outline-none focus:border-blue-600 focus:shadow-sm"
             />
           </div>
 
           {/* Employees */}
-          <div className="payroll-employee-section">
-            <div className="payroll-employee-header">
-              <label className="payroll-form-label">
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-gray-700">
                 Employees to be paid
               </label>
-              <span className="payroll-employee-count">
+              <span className="text-xs text-gray-600">
                 {employees.filter(emp => emp.selected).length} selected
               </span>
             </div>
             
-            <div className="payroll-employee-list">
+            <div className="max-h-64 overflow-y-auto pr-1">
               {employees.map((employee) => (
-                <div key={employee.id} className="payroll-employee-item">
+                <div key={employee.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md mb-3 last:mb-0 transition-colors hover:border-gray-300">
                   <input
                     type="checkbox"
                     checked={employee.selected}
                     onChange={() => toggleEmployee(employee.id)}
-                    className="payroll-employee-checkbox"
+                    className="mt-0.5 w-4 h-4 text-blue-600 rounded-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                   />
-                  <div className="payroll-employee-info">
-                    <div className="payroll-employee-details">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <p className="payroll-employee-name">{employee.name}</p>
-                        <p className="payroll-employee-status">{employee.status}</p>
+                        <p className="text-sm font-medium text-gray-900 m-0 mb-1">{employee.name}</p>
+                        <p className="text-xs text-gray-600 m-0">{employee.status}</p>
                       </div>
-                      <p className="payroll-employee-amount">
+                      <p className="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">
                         ₱{employee.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -231,33 +230,33 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           </div>
 
           {/* Total */}
-          <div className="payroll-total-section">
-            <div className="payroll-total-row">
-              <span className="payroll-total-label">Total</span>
-              <span className="payroll-total-amount">
+          <div className="border-t border-gray-200 pt-3 mb-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-700">Total</span>
+              <span className="text-lg font-bold text-gray-900">
                 ₱{getTotalAmount().toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
 
           {/* Notices */}
-          <div className="payroll-notices">
-            <div className="payroll-notice payroll-notice-info">
-              <Info size={16} className="payroll-notice-icon" />
-              <div className="payroll-notice-content">
-                <p className="payroll-notice-title">Payroll Payment Notice</p>
-                <p className="payroll-notice-text">
+          <div className="mb-4 space-y-3">
+            <div className="flex gap-2 p-3 bg-blue-50 rounded-md">
+              <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-blue-900 m-0 mb-1">Payroll Payment Notice</p>
+                <p className="text-xs text-blue-900 m-0 leading-normal">
                   This will initiate payment processing for selected employees. Ensure addresses,
                   bank information, and tax data are up-to-date before processing.
                 </p>
               </div>
             </div>
             
-            <div className="payroll-notice payroll-notice-warning">
-              <AlertCircle size={16} className="payroll-notice-icon" />
-              <div className="payroll-notice-content">
-                <p className="payroll-notice-title">Important Notice</p>
-                <p className="payroll-notice-text">
+            <div className="flex gap-2 p-3 bg-yellow-50 rounded-md">
+              <AlertCircle size={16} className="text-yellow-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-yellow-900 m-0 mb-1">Important Notice</p>
+                <p className="text-xs text-yellow-900 m-0 leading-normal">
                   Review employee information, communication preferences, and
                   personal data before final submission. Errors or corrections should be resolved before
                   submitting to Payroll Service.
@@ -268,10 +267,10 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         </div>
 
         {/* Footer */}
-        <div className="payroll-modal-footer">
+        <div className="flex gap-3 p-4 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="payroll-btn payroll-btn-secondary"
+            className="flex-1 p-2 rounded-md text-sm font-medium cursor-pointer transition-all border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             type="button"
           >
             Cancel
@@ -279,12 +278,13 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           <button
             onClick={handleProcess}
             disabled={employees.filter(emp => emp.selected).length === 0}
-            className="payroll-btn payroll-btn-primary"
+            className="flex-1 p-2 rounded-md text-sm font-medium cursor-pointer transition-all text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             type="button"
           >
             Process Payroll
           </button>
         </div>
+
       </div>
     </div>
   );

@@ -1,7 +1,5 @@
-// Invest.tsx - Backend Connected
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
-import './Invest.css';
 import { useNavigate } from 'react-router-dom';
 
 interface InvestmentHolding {
@@ -25,7 +23,6 @@ interface PortfolioData {
 const Invest: React.FC = () => {
   const navigate = useNavigate();
   
-  // State for portfolio data and UI
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +38,6 @@ const Invest: React.FC = () => {
     summary: false,
   });
 
-  // Load portfolio data on component mount
   useEffect(() => {
     fetchPortfolioData();
   }, []);
@@ -62,7 +58,6 @@ const Invest: React.FC = () => {
         },
       });
 
-      // Check if response is HTML (error page) instead of JSON
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('text/html')) {
         const htmlText = await response.text();
@@ -75,23 +70,21 @@ const Invest: React.FC = () => {
         throw new Error(data.error || `HTTP ${response.status}: Failed to fetch portfolio data`);
       }
 
-      // Handle the actual response format from /api/portfolio/value/ endpoint
       if (data && typeof data.total_value !== 'undefined') {
-        // Transform the portfolio value data to match expected interface
         const transformedPortfolio: PortfolioData = {
           holdings: data.breakdown ? data.breakdown.map((item: any) => ({
             symbol: item.cryptocurrency,
             name: item.cryptocurrency,
             quantity: item.amount,
             current_value: item.value,
-            cost_basis: item.value, // Placeholder since this endpoint doesn't provide cost basis
-            unrealized_gain_loss: 0, // Placeholder since this endpoint doesn't provide gains/losses
+            cost_basis: item.value,
+            unrealized_gain_loss: 0,
             percentage_of_portfolio: (item.value / data.total_value) * 100
           })) : [],
           total_value: data.total_value || 0,
-          total_cost_basis: data.total_value || 0, // Placeholder
-          total_unrealized_gain_loss: 0, // Placeholder
-          cash_balance: 0 // Placeholder
+          total_cost_basis: data.total_value || 0,
+          total_unrealized_gain_loss: 0,
+          cash_balance: 0
         };
         setPortfolio(transformedPortfolio);
       } else {
@@ -100,7 +93,6 @@ const Invest: React.FC = () => {
     } catch (err: any) {
       console.error('Portfolio fetch error:', err);
       
-      // Provide more specific error messages
       let errorMessage = 'Failed to load portfolio data';
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         errorMessage = 'Network error: Unable to connect to the backend server. Please check if the server is running.';
@@ -122,7 +114,6 @@ const Invest: React.FC = () => {
     try {
       setLoading(true);
       
-      // Create a simple CSV export since the backend portfolio export endpoint is not available
       if (!portfolio) {
         return;
       }
@@ -156,13 +147,11 @@ const Invest: React.FC = () => {
     }
   };
 
-  // Chart data from real portfolio data
   const chartData = portfolio ? portfolio.holdings.map(holding => ({
     name: holding.symbol,
     value: holding.current_value,
     percentage: holding.percentage_of_portfolio
   })) : [];
-
 
   const toggleSection = (section: 'holdings' | 'performance' | 'summary') => {
     setExpandedSections(prev => ({
@@ -186,19 +175,19 @@ const Invest: React.FC = () => {
 
   const renderChartView = () => {
     if (loading) {
-      return <div className="loading">Loading portfolio data...</div>;
+      return <div className="loading text-center py-10 text-gray-600 text-base">Loading portfolio data...</div>;
     }
 
     if (error) {
-      return <div className="error">Error: {error}</div>;
+      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
     }
 
     if (!portfolio || chartData.length === 0) {
-      return <div className="no-data">No portfolio data available for chart view</div>;
+      return <div className="no-data text-center py-10 text-gray-600 text-base">No portfolio data available for chart view</div>;
     }
 
     return (
-      <div className="chart-view">
+      <div className="chart-view p-6 h-full overflow-y-auto">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
             data={chartData}
@@ -217,14 +206,12 @@ const Invest: React.FC = () => {
             <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
           </LineChart>
         </ResponsiveContainer>
-        <div className="chart-summary">
-          <div className="summary-box">
-            <h4>Portfolio Summary</h4>
-            <p>Your investment portfolio shows current holdings, performance, and total value.</p>
-            <div className="btn-container"> 
-              <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
-              <button className="download-btn1" onClick={exportToExcel}>Download Report</button>
-            </div>
+        <div className="chart-summary bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Summary</h4>
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">Your investment portfolio shows current holdings, performance, and total value.</p>
+          <div className="btn-container flex gap-3 flex-wrap md:flex-col">
+            <button className="close-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>Close</button>
+            <button className="download-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={exportToExcel}>Download Report</button>
           </div>
         </div>
       </div>
@@ -233,57 +220,52 @@ const Invest: React.FC = () => {
 
   const renderTableView = () => {
     if (loading) {
-      return <div className="loading">Loading portfolio...</div>;
+      return <div className="loading text-center py-10 text-gray-600 text-base">Loading portfolio...</div>;
     }
 
     if (error) {
-      return <div className="error">Error: {error}</div>;
+      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
     }
 
     if (!portfolio) {
-      return <div className="no-data">No portfolio data available</div>;
+      return <div className="no-data text-center py-10 text-gray-600 text-base">No portfolio data available</div>;
     }
 
     return (
-      <div className="table-view">
-        <div className="export-actions">
-          <button className="export-excel" onClick={exportToExcel}>📊 Export To Excel</button>
+      <div className="table-view flex flex-col h-full bg-white">
+        <div className="export-actions p-4 border-b border-gray-200 bg-white flex justify-end">
+          <button className="export-excel py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-emerald-600 transition-colors" onClick={exportToExcel}>📊 Export To Excel</button>
         </div>
 
-        <div className="portfolio-sections">
-          {/* Holdings Section */}
-          <div className="section-group">
+        <div className="portfolio-sections flex-1 overflow-y-auto bg-gray-50">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('holdings')}
             >
-              <span className={`expand-arrow ${expandedSections.holdings ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Investment Holdings</span>
-              <span className="section-amount">${formatCurrency(portfolio.total_value).slice(1)}</span>
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.holdings ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Investment Holdings</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(portfolio.total_value).slice(1)}</span>
             </div>
             
             {expandedSections.holdings && (
-              <div className="section-content">
+              <div className="section-content bg-gray-50 border-t border-gray-200">
                 {portfolio.holdings.map((holding: InvestmentHolding, index: number) => (
-                  <div key={index} className="line-item">
-                    <span className="item-name">
+                  <div key={index} className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                    <span className="item-name flex flex-col gap-1 text-gray-700">
                       {holding.symbol} - {holding.name}
-                      <small className="item-details">
-                        {holding.quantity} shares @ {formatPercentage(holding.percentage_of_portfolio)}
-                      </small>
+                      <small className="item-details text-xs text-gray-400 font-normal">{holding.quantity} shares @ {formatPercentage(holding.percentage_of_portfolio)}</small>
                     </span>
-                    <span className="item-amount">
+                    <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">
                       ${formatCurrency(holding.current_value).slice(1)}
-                      <small className={`gain-loss ${
-                        holding.unrealized_gain_loss >= 0 ? 'gain' : 'loss'
-                      }`}>
+                      <small className={`gain-loss text-xs font-medium ${holding.unrealized_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {holding.unrealized_gain_loss >= 0 ? '+' : ''}
                         ${formatCurrency(holding.unrealized_gain_loss).slice(1)}
                       </small>
                     </span>
                   </div>
                 ))}
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Holdings Value</span>
                   <span>${formatCurrency(portfolio.total_value).slice(1)}</span>
                 </div>
@@ -291,37 +273,36 @@ const Invest: React.FC = () => {
             )}
           </div>
 
-          {/* Performance Section */}
-          <div className="section-group">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('performance')}
             >
-              <span className={`expand-arrow ${expandedSections.performance ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Performance</span>
-              <span className="section-amount">
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.performance ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Performance</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">
                 {portfolio.total_unrealized_gain_loss >= 0 ? '+' : ''}
                 ${formatCurrency(portfolio.total_unrealized_gain_loss).slice(1)}
               </span>
             </div>
             
             {expandedSections.performance && (
-              <div className="section-content">
-                <div className="line-item">
-                  <span className="item-name">Total Cost Basis</span>
-                  <span className="item-amount">${formatCurrency(portfolio.total_cost_basis).slice(1)}</span>
+              <div className="section-content bg-gray-50 border-t border-gray-200">
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Total Cost Basis</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_cost_basis).slice(1)}</span>
                 </div>
-                <div className="line-item">
-                  <span className="item-name">Current Market Value</span>
-                  <span className="item-amount">${formatCurrency(portfolio.total_value).slice(1)}</span>
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Current Market Value</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_value).slice(1)}</span>
                 </div>
-                <div className="line-item">
-                  <span className="item-name">Cash Balance</span>
-                  <span className="item-amount">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Cash Balance</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
                 </div>
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Unrealized Gain/Loss</span>
-                  <span className={portfolio.total_unrealized_gain_loss >= 0 ? 'gain' : 'loss'}>
+                  <span className={portfolio.total_unrealized_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}>
                     {portfolio.total_unrealized_gain_loss >= 0 ? '+' : ''}
                     ${formatCurrency(portfolio.total_unrealized_gain_loss).slice(1)}
                   </span>
@@ -330,34 +311,31 @@ const Invest: React.FC = () => {
             )}
           </div>
 
-          {/* Summary Section */}
-          <div className="section-group">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('summary')}
             >
-              <span className={`expand-arrow ${expandedSections.summary ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Portfolio Summary</span>
-              <span className="section-amount">
-                ${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}
-              </span>
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.summary ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Portfolio Summary</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
             </div>
             
             {expandedSections.summary && (
-              <div className="section-content">
-                <div className="line-item">
-                  <span className="item-name">Total Investment Value</span>
-                  <span className="item-amount">${formatCurrency(portfolio.total_value).slice(1)}</span>
+              <div className="section-content bg-gray-50 border-t border-gray-200">
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Total Investment Value</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_value).slice(1)}</span>
                 </div>
-                <div className="line-item">
-                  <span className="item-name">Available Cash</span>
-                  <span className="item-amount">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Available Cash</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
                 </div>
-                <div className="line-item">
-                  <span className="item-name">Number of Holdings</span>
-                  <span className="item-amount">{portfolio.holdings.length}</span>
+                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <span className="item-name flex flex-col gap-1 text-gray-700">Number of Holdings</span>
+                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">{portfolio.holdings.length}</span>
                 </div>
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Portfolio Value</span>
                   <span>${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
                 </div>
@@ -365,21 +343,20 @@ const Invest: React.FC = () => {
             )}
           </div>
 
-          {/* Totals */}
-          <div className="totals-section">
-            <div className="total-line">
+          <div className="totals-section bg-white p-6 border-t-4 border-gray-200 mt-2">
+            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
               <span>Investment Holdings</span>
               <span>${formatCurrency(portfolio.total_value).slice(1)}</span>
             </div>
-            <div className="total-line">
+            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
               <span>Cash Balance</span>
               <span>${formatCurrency(portfolio.cash_balance).slice(1)}</span>
             </div>
-            <div className="total-line balance-check">
+            <div className="total-line balance-check flex justify-between items-center py-4 mt-4 text-lg font-bold text-gray-900 border-t-2 border-gray-300 border-b-4 border-double border-gray-700">
               <span>Total Portfolio Value</span>
               <span>${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
             </div>
-            <div className="balance-status">
+            <div className="balance-status text-center text-emerald-600 text-base font-semibold mt-5 p-3 bg-emerald-100 rounded-lg border border-emerald-200">
               ✓ Portfolio data loaded successfully
             </div>
           </div>
@@ -389,38 +366,38 @@ const Invest: React.FC = () => {
   };
 
   return (
-    <div className="invest-container">
-      <div className="invest-header">
-        <div className="header-top">
-          <button className="back-btn" onClick={()=> navigate(-1)}>← Investment Portfolio</button>
+    <div className="invest-container flex flex-col w-full h-screen bg-white font-sans rounded-none border border-gray-200 shadow-md md:rounded-none">
+      <div className="invest-header bg-white p-6 border-b border-gray-200">
+        <div className="header-top mb-4">
+          <button className="back-btn bg-transparent border-none text-gray-500 text-sm flex items-center gap-2 py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all" onClick={() => navigate(-1)}>← Investment Portfolio</button>
         </div>
         <div className="header-content">
-          <h1>Investment Portfolio</h1>
-          <p>View your investment holdings, performance, and portfolio summary</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight md:text-xl">Investment Portfolio</h1>
+          <p className="text-base text-gray-500 mb-5 leading-snug">View your investment holdings, performance, and portfolio summary</p>
         </div>
         
-        <div className="view-tabs">
+        <div className="view-tabs flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit md:w-full">
           <button 
-            className={`tab-btn ${activeView === 'chart' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('chart')}
           >
             Chart View
           </button>
           <button 
-            className={`tab-btn ${activeView === 'table' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('table')}
           >
             Table View
           </button>
         </div>
         
-        <div className="report-period">
+        <div className="report-period flex justify-between items-center text-sm text-gray-700">
           <span>Portfolio Report</span>
-          <button className="filter-btn">🔽 Filter</button>
+          <button className="filter-btn bg-transparent border border-gray-300 text-purple-600 text-sm flex items-center gap-1.5 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all">🔽 Filter</button>
         </div>
       </div>
 
-      <div className="invest-content">
+      <div className="invest-content flex-1 overflow-y-auto bg-gray-50">
         {activeView === 'chart' ? renderChartView() : renderTableView()}
       </div>
     </div>

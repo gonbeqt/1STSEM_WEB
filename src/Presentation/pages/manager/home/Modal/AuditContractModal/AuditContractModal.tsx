@@ -1,7 +1,7 @@
+// src/Presentation/pages/manager/home/Modal/AuditContractModal/AuditContractModal.tsx
 import React, { useState, useCallback, ChangeEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
-import './AuditContractModal.css';
 import { useAuditContractViewModel } from '../../../../../../domain/viewmodel/AuditContractViewModel';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -61,7 +61,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
     const handleNext = async () => {
         if (currentStep === 1 && selectedFile) {
-            setCurrentStep(2); // Move to AI analysis step
+            setCurrentStep(2);
             const uploadRes = await uploadFile(selectedFile);
             if (uploadRes?.success && uploadRes.contract_data) {
                 const auditRes = await auditContract({
@@ -72,14 +72,14 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                     file_size: selectedFile.size
                 });
                 if(auditRes.success){
-                    setCurrentStep(3); // Move to Audit Result step
+                    setCurrentStep(3);
                 } else {
-                    setAuditResponse(auditRes); // Set error for display
-                    setCurrentStep(1); // Go back to show error
+                    setAuditResponse(auditRes);
+                    setCurrentStep(1);
                 }
             } else {
-                setUploadResponse(uploadRes); // Set error for display
-                setCurrentStep(1); // Go back to show error
+                setUploadResponse(uploadRes);
+                setCurrentStep(1);
             }
         } else if (currentStep < 4) {
             setCurrentStep(currentStep + 1);
@@ -103,51 +103,87 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
     const renderPdfContent = () => (
         <div>
-            <div className="results-step">
-                <div className="step-header">
-                    <h3>Audit Results</h3>
-                    <span className={`status-badge ${auditResponse?.audit?.status === 'COMPLETED' ? 'success' : ''}`}>
+            <div className="space-y-6">
+                <div className="flex justify-between items-start mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Audit Results</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        auditResponse?.audit?.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
                         {auditResponse?.audit?.status}
                     </span>
                 </div>
-                <div className="results-grid">
-                    <div className="result-card">
-                        <h4>Overview</h4>
-                        <div className="info-item"><span className="label">Contract Name:</span> <span className="value">{auditResponse?.audit?.contract_name}</span></div>
-                        <div className="info-item"><span className="label">Risk Level:</span> <span className={`value risk-${auditResponse?.audit?.risk_level?.toLowerCase()}`}>{auditResponse?.audit?.risk_level}</span></div>
-                        <div className="info-item"><span className="label">Vulnerabilities Found:</span> <span className="value">{auditResponse?.audit?.vulnerabilities_found}</span></div>
-                        <div className="info-item"><span className="label">Completed On:</span> <span className="value">{auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}</span></div>
+                <div className="grid gap-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                        <h4 className="text-base font-semibold mb-4 text-gray-900">Overview</h4>
+                        <div className="space-y-2">
+                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                <span className="font-medium text-gray-600 text-sm">Contract Name:</span>
+                                <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.contract_name}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                <span className="font-medium text-gray-600 text-sm">Risk Level:</span>
+                                <span className={`font-semibold text-sm ${
+                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'critical' ? 'text-red-600' :
+                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'high' ? 'text-orange-600' :
+                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                    'text-green-600'
+                                }`}>
+                                    {auditResponse?.audit?.risk_level}
+                                </span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                <span className="font-medium text-gray-600 text-sm">Vulnerabilities Found:</span>
+                                <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.vulnerabilities_found}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-medium text-gray-600 text-sm">Completed On:</span>
+                                <span className="font-semibold text-gray-900 text-sm">
+                                    {auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="result-card">
-                        <h4>Vulnerabilities Summary</h4>
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                        <h4 className="text-base font-semibold mb-4 text-gray-900">Vulnerabilities Summary</h4>
                         {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
-                            auditResponse.vulnerabilities.map((vuln, index) => (
-                                <div key={index} className="info-item">
-                                    <span className="label">{vuln.title}</span>
-                                    <span className={`value severity-${vuln.severity.toLowerCase()}`}>{vuln.severity}</span>
-                                </div>
-                            ))
+                            <div className="space-y-2">
+                                {auditResponse.vulnerabilities.map((vuln, index) => (
+                                    <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
+                                        <span className={`font-semibold text-sm ${
+                                            vuln.severity.toLowerCase() === 'critical' ? 'text-red-600' :
+                                            vuln.severity.toLowerCase() === 'high' ? 'text-orange-600' :
+                                            vuln.severity.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                            'text-green-600'
+                                        }`}>
+                                            {vuln.severity}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         ) : (
-                            <p>No major vulnerabilities found.</p>
+                            <p className="text-sm text-gray-600">No major vulnerabilities found.</p>
                         )}
                     </div>
                 </div>
             </div>
-            <div className="assessment-step">
-                <div className="step-header">
-                    <h3>Detailed Assessment</h3>
+            <div className="mt-6 space-y-4">
+                <div className="flex justify-between items-start mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Detailed Assessment</h3>
                 </div>
-                <div className="result-card">
-                    <h4>AI Analysis Overview</h4>
-                    <p>{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                    <h4 className="text-base font-semibold mb-4 text-gray-900">AI Analysis Overview</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
                 </div>
-                <div className="result-card">
-                    <h4>Gas Optimization Insights</h4>
-                    <p>{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                    <h4 className="text-base font-semibold mb-4 text-gray-900">Gas Optimization Insights</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
                 </div>
-                <div className="result-card">
-                    <h4>Recommendations</h4>
-                    <pre>{auditResponse?.audit?.recommendations || 'No specific recommendations.'}</pre>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                    <h4 className="text-base font-semibold mb-4 text-gray-900">Recommendations</h4>
+                    <pre className="text-sm text-gray-700 bg-gray-100 p-3 rounded-md whitespace-pre-wrap break-words">
+                        {auditResponse?.audit?.recommendations || 'No specific recommendations.'}
+                    </pre>
                 </div>
             </div>
         </div>
@@ -162,18 +198,16 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         const root = createRoot(tempDiv);
         root.render(renderPdfContent());
 
-        // Add a small delay to ensure the component is fully rendered
         setTimeout(() => {
             html2canvas(tempDiv, {
-                scale: 2, // Increase scale for better quality
-                useCORS: true, // Enable CORS if you have external images
+                scale: 2,
+                useCORS: true,
                 logging: true
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
-                console.log(imgData);
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
+                const imgWidth = 210;
+                const pageHeight = 297;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
                 let heightLeft = imgHeight;
 
@@ -192,7 +226,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 root.unmount();
                 document.body.removeChild(tempDiv);
             });
-        }, 100); // 100ms delay
+        }, 100);
     };
 
     if (!isOpen) {
@@ -203,22 +237,25 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         switch (currentStep) {
             case 1:
                 return (
-                    <div className="form-section">
-                        <div className="input-group">
-                            <label htmlFor="contractName" className="input-label">Contract Name</label>
+                    <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="contractName" className="text-sm font-semibold text-gray-700">Contract Name</label>
                             <input 
                                 type="text" 
                                 id="contractName" 
-                                className="modern-input" 
+                                className="p-3 border border-gray-300 rounded-lg text-sm transition-all bg-white text-gray-900 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                                 value={contractName} 
                                 onChange={(e) => setContractName(e.target.value)} 
                                 placeholder="e.g., MyERC20Token"
                             />
                         </div>
-                        <div className="upload-section">
-                            <label className="input-label">Upload Contract File</label>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-semibold text-gray-700">Upload Contract File</label>
                             <div
-                                className={`upload-zone ${isDragOver ? 'drag-active' : ''} ${selectedFile ? 'has-file' : ''}`}
+                                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all min-h-[200px] flex flex-col justify-center items-center ${
+                                    isDragOver ? 'border-purple-600 bg-purple-50 transform scale-105' : 
+                                    selectedFile ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-purple-600 hover:bg-gray-100'
+                                }`}
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
@@ -227,22 +264,26 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                                 <input
                                     type="file"
                                     id="fileInput"
-                                    className="file-input"
+                                    className="hidden"
                                     onChange={handleFileChange}
                                     accept=".sol,.solidity"
                                 />
                                 {!selectedFile ? (
-                                    <div className="upload-content">
-                                        <div className="upload-icon"><UploadCloud size={32} /></div>
-                                        <h4>Drag & Drop or Click to Upload</h4>
-                                        <p>Solidity (.sol) files, max 1MB</p>
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center text-white">
+                                            <UploadCloud size={32} />
+                                        </div>
+                                        <h4 className="text-lg font-semibold text-gray-900 m-0">Drag & Drop or Click to Upload</h4>
+                                        <p className="text-sm text-gray-600 m-0">Solidity (.sol) files, max 1MB</p>
                                     </div>
                                 ) : (
-                                    <div className="file-selected">
-                                        <div className="file-icon"><FileText size={24} /></div>
-                                        <div className="file-details">
-                                            <h4>{selectedFile.name}</h4>
-                                            <p>{(selectedFile.size / 1024).toFixed(2)} KB</p>
+                                    <div className="flex items-center gap-4 p-4 bg-green-100 rounded-lg w-full">
+                                        <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                            <FileText size={24} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-semibold text-gray-900 m-0 mb-1">{selectedFile.name}</h4>
+                                            <p className="text-xs text-gray-600 m-0">{(selectedFile.size / 1024).toFixed(2)} KB</p>
                                         </div>
                                     </div>
                                 )}
@@ -252,25 +293,35 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 );
             case 2:
                 return (
-                    <div className="analysis-step">
-                        <div className="analysis-loader">
-                            <div className="spinner"></div>
-                        </div>
-                        <div className="analysis-container">
-                            <h3>Analyzing Contract with AI</h3>
-                            <p>Please wait while our advanced AI performs a comprehensive security audit on your Solidity contract.</p>
-                            <div className="analysis-progress">
-                                <div className={`progress-item ${isLoading ? 'active' : ''}`}>
-                                    <div className="progress-dot"></div>
-                                    <span>Scanning for common vulnerabilities...</span>
-                                </div>
-                                <div className={`progress-item ${isLoading ? 'active' : ''}`}>
-                                    <div className="progress-dot"></div>
-                                    <span>Performing static code analysis...</span>
-                                </div>
-                                <div className={`progress-item ${isLoading ? 'active' : ''}`}>
-                                    <div className="progress-dot"></div>
-                                    <span>Generating risk assessment...</span>
+                    <div className="flex flex-col items-center justify-center text-center min-h-[300px]">
+                        <div className="max-w-md">
+                            <div className="mb-8">
+                                <div className="w-15 h-15 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3 m-0">Analyzing Contract with AI</h3>
+                                <p className="text-sm text-gray-600 mb-8 m-0 leading-relaxed">
+                                    Please wait while our advanced AI performs a comprehensive security audit on your Solidity contract.
+                                </p>
+                                <div className="flex flex-col gap-3 text-left">
+                                    <div className={`flex items-center gap-3 py-2 transition-opacity ${isLoading ? 'opacity-100' : 'opacity-40'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+                                        <span className={`text-sm ${isLoading ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                            Scanning for common vulnerabilities...
+                                        </span>
+                                    </div>
+                                    <div className={`flex items-center gap-3 py-2 transition-opacity ${isLoading ? 'opacity-100' : 'opacity-40'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+                                        <span className={`text-sm ${isLoading ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                            Performing static code analysis...
+                                        </span>
+                                    </div>
+                                    <div className={`flex items-center gap-3 py-2 transition-opacity ${isLoading ? 'opacity-100' : 'opacity-40'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+                                        <span className={`text-sm ${isLoading ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                            Generating risk assessment...
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -278,32 +329,66 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 );
             case 3:
                 return (
-                    <div className="results-step">
-                        <div className="step-header">
-                            <h3>Audit Results</h3>
-                            <span className={`status-badge ${auditResponse?.audit?.status === 'COMPLETED' ? 'success' : ''}`}>
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-start">
+                            <h3 className="text-xl font-bold text-gray-900">Audit Results</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                auditResponse?.audit?.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
                                 {auditResponse?.audit?.status}
                             </span>
                         </div>
-                        <div className="results-grid">
-                            <div className="result-card">
-                                <h4>Overview</h4>
-                                <div className="info-item"><span className="label">Contract Name:</span> <span className="value">{auditResponse?.audit?.contract_name}</span></div>
-                                <div className="info-item"><span className="label">Risk Level:</span> <span className={`value risk-${auditResponse?.audit?.risk_level?.toLowerCase()}`}>{auditResponse?.audit?.risk_level}</span></div>
-                                <div className="info-item"><span className="label">Vulnerabilities Found:</span> <span className="value">{auditResponse?.audit?.vulnerabilities_found}</span></div>
-                                <div className="info-item"><span className="label">Completed On:</span> <span className="value">{auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}</span></div>
+                        <div className="grid gap-4">
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                                <h4 className="text-base font-semibold mb-4 text-gray-900">Overview</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-medium text-gray-600 text-sm">Contract Name:</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.contract_name}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-medium text-gray-600 text-sm">Risk Level:</span>
+                                        <span className={`font-semibold text-sm ${
+                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'critical' ? 'text-red-600' :
+                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'high' ? 'text-orange-600' :
+                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                            'text-green-600'
+                                        }`}>
+                                            {auditResponse?.audit?.risk_level}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-medium text-gray-600 text-sm">Vulnerabilities Found:</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.vulnerabilities_found}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2">
+                                        <span className="font-medium text-gray-600 text-sm">Completed On:</span>
+                                        <span className="font-semibold text-gray-900 text-sm">
+                                            {auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="result-card">
-                                <h4>Vulnerabilities Summary</h4>
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                                <h4 className="text-base font-semibold mb-4 text-gray-900">Vulnerabilities Summary</h4>
                                 {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
-                                    auditResponse.vulnerabilities.slice(0, 3).map((vuln, index) => (
-                                        <div key={index} className="info-item">
-                                            <span className="label">{vuln.title}</span>
-                                            <span className={`value severity-${vuln.severity.toLowerCase()}`}>{vuln.severity}</span>
-                                        </div>
-                                    ))
+                                    <div className="space-y-2">
+                                        {auditResponse.vulnerabilities.slice(0, 3).map((vuln, index) => (
+                                            <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
+                                                <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
+                                                <span className={`font-semibold text-sm ${
+                                                    vuln.severity.toLowerCase() === 'critical' ? 'text-red-600' :
+                                                    vuln.severity.toLowerCase() === 'high' ? 'text-orange-600' :
+                                                    vuln.severity.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                                    'text-green-600'
+                                                }`}>
+                                                    {vuln.severity}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 ) : (
-                                    <p>No major vulnerabilities found.</p>
+                                    <p className="text-sm text-gray-600">No major vulnerabilities found.</p>
                                 )}
                             </div>
                         </div>
@@ -311,21 +396,23 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 );
             case 4:
                 return (
-                    <div className="assessment-step">
-                        <div className="step-header">
-                            <h3>Detailed Assessment</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-start">
+                            <h3 className="text-xl font-bold text-gray-900">Detailed Assessment</h3>
                         </div>
-                        <div className="result-card">
-                            <h4>AI Analysis Overview</h4>
-                            <p>{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                            <h4 className="text-base font-semibold mb-4 text-gray-900">AI Analysis Overview</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
                         </div>
-                        <div className="result-card">
-                            <h4>Gas Optimization Insights</h4>
-                            <p>{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                            <h4 className="text-base font-semibold mb-4 text-gray-900">Gas Optimization Insights</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
                         </div>
-                        <div className="result-card">
-                            <h4>Recommendations</h4>
-                            <pre>{auditResponse?.audit?.recommendations || 'No specific recommendations.'}</pre>
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
+                            <h4 className="text-base font-semibold mb-4 text-gray-900">Recommendations</h4>
+                            <pre className="text-sm text-gray-700 bg-gray-100 p-3 rounded-md whitespace-pre-wrap break-words">
+                                {auditResponse?.audit?.recommendations || 'No specific recommendations.'}
+                            </pre>
                         </div>
                     </div>
                 );
@@ -333,87 +420,134 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 return null;
         }
     }
+
     const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) return null; // Should not happen if index.html is correct
+    if (!modalRoot) return null;
 
     return ReactDOM.createPortal(
-        <div className="audit-contract-modal-overlay">
-            <div className="modal-container">
-                <div className="modal-header">
-                    <div className="header-content">
-                        <h1>Audit Solidity Contract</h1>
-                        <p className="header-subtitle">Secure your smart contracts with AI-powered analysis.</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5 animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in slide-in-from-bottom-4 scale-in-95 duration-300">
+                <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white p-6 relative flex flex-col">
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold mb-1 tracking-tight text-white">Audit Solidity Contract</h1>
+                        <p className="text-sm opacity-90 font-normal text-white">Secure your smart contracts with AI-powered analysis.</p>
                     </div>
-                    <button className="close-button" onClick={handleClose}><X size={20} /></button>
+                    <button 
+                        className="absolute top-4 right-4 bg-white bg-opacity-20 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-all hover:bg-white hover:bg-opacity-30" 
+                        onClick={handleClose}
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <div className="progress-bar">
-                    <div className="progress-steps">
-                        <div className={`progress-step ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-                            <div className="step-indicator">1</div>
-                            <span className="step-title">Contract Set up</span>
+                <div className="bg-white p-5 border-b border-gray-200 relative ml-[7%]">
+                    <div className="flex justify-between items-start relative">
+                        <div className="absolute top-8 left-15 right-15 h-0.5 bg-gray-200 z-10">
+                            <div 
+                                className="h-full bg-purple-600 transition-all duration-500 rounded-sm"
+                                style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                            ></div>
                         </div>
-                        <div className={`progress-step ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-                            <div className="step-indicator">2</div>
-                            <span className="step-title">AI Analysis</span>
-                        </div>
-                        <div className={`progress-step ${currentStep >= 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}>
-                            <div className="step-indicator">3</div>
-                            <span className="step-title">Audit Result</span>
-                        </div>
-                        <div className={`progress-step ${currentStep >= 4 ? 'active' : ''}`}>
-                            <div className="step-indicator">4</div>
-                            <span className="step-title">Assessment</span>
-                        </div>
+                        
+                        {[1, 2, 3, 4].map((step, index) => (
+                            <div key={step} className="flex flex-col items-center gap-2 relative z-20 bg-white px-2 flex-1 text-center">
+                                <div className={`w-10 h-10 rounded-full border-3 flex items-center justify-center font-semibold text-sm mt-[10%] transition-all duration-300 ${
+                                    currentStep >= step 
+                                        ? currentStep > step 
+                                            ? 'bg-green-500 text-white border-green-500'
+                                            : 'bg-purple-600 text-white border-purple-600'
+                                        : 'bg-gray-200 text-gray-600 border-gray-200'
+                                }`}>
+                                    {currentStep > step ? '✓' : step}
+                                </div>
+                                <span className={`text-xs font-medium whitespace-nowrap leading-tight ${
+                                    currentStep >= step 
+                                        ? currentStep > step
+                                            ? 'text-green-500'
+                                            : 'text-purple-600 font-semibold'
+                                        : 'text-gray-600'
+                                }`}>
+                                    {step === 1 ? 'Contract Set up' : 
+                                     step === 2 ? 'AI Analysis' : 
+                                     step === 3 ? 'Audit Result' : 
+                                     'Assessment'}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="modal-body">
-                   
+                <div className="p-6 flex-1 overflow-y-auto bg-white min-h-[300px]">
                     {(auditResponse && !auditResponse.success && currentStep === 1) && (
-                        <div className="error-message">
-                            <AlertCircle size={20} className="error-icon" />
-                            <div className="error-content">
-                                <h4>Audit Failed</h4>
-                                <p>{auditResponse.error}</p>
+                        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-4">
+                            <AlertCircle size={20} className="flex-shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-semibold mb-1 m-0">Audit Failed</h4>
+                                <p className="text-sm opacity-80 m-0">{auditResponse.error}</p>
                             </div>
                         </div>
                     )}
                     {renderStepContent()}
-                     {(uploadResponse && !uploadResponse.success && currentStep === 1) && (
-                        <div className="error-message">
-                            <AlertCircle size={20} className="error-icon" />
-                            <div className="error-content">
-                                <h4>Upload Failed</h4>
-                                <p>{uploadResponse.error}</p>
+                    {(uploadResponse && !uploadResponse.success && currentStep === 1) && (
+                        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-4">
+                            <AlertCircle size={20} className="flex-shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-semibold mb-1 m-0">Upload Failed</h4>
+                                <p className="text-sm opacity-80 m-0">{uploadResponse.error}</p>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="modal-footer">
-                    <div className="button-group">
-                        {currentStep > 1 && currentStep < 4 && <button onClick={handleBack} className="btn btn-secondary">Back</button>}
-                        {currentStep < 4 && <button onClick={handleNext} className="btn btn-primary" disabled={(currentStep === 1 && (!selectedFile || !contractName)) || isLoading}>
+                <div className="flex justify-end gap-3 p-5 border-t border-gray-200 bg-gray-50">
+                    {currentStep > 1 && currentStep < 4 && (
+                        <button 
+                            onClick={handleBack} 
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 hover:-translate-y-0.5"
+                        >
+                            Back
+                        </button>
+                    )}
+                    {currentStep < 4 && (
+                        <button 
+                            onClick={handleNext} 
+                            className={`inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0 ${
+                                (currentStep === 1 && (!selectedFile || !contractName)) || isLoading ? 'opacity-50 cursor-not-allowed transform-none shadow-none' : ''
+                            }`}
+                            disabled={(currentStep === 1 && (!selectedFile || !contractName)) || isLoading}
+                        >
                             {isLoading ? (
-                                <><Loader2 size={16} className="btn-spinner" /> Analyzing...</>
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin"></div>
+                                    Analyzing...
+                                </>
                             ) : (
                                 currentStep === 1 ? 'Start Analysis' : 'Next'
                             )}
-                        </button>}
-                        {currentStep === 4 && (
-                            <button onClick={handleDownloadPdf} className="btn btn-secondary download-btn">
+                        </button>
+                    )}
+                    {currentStep === 4 && (
+                        <>
+                            <button 
+                                onClick={handleDownloadPdf} 
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 hover:-translate-y-0.5"
+                            >
                                 <Download size={16} />
                                 Download PDF
                             </button>
-                        )}
-                        {currentStep === 4 && <button onClick={handleClose} className="btn btn-primary">Finish</button>}
-                    </div>
+                            <button 
+                                onClick={handleClose} 
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
+                            >
+                                Finish
+                            </button>
+                        </>
+                    )}
                 </div>
-                
             </div>
         </div>,
         modalRoot
     );
 };
+
 export default AuditContractModal;

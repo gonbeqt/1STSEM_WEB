@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './waiting-approval.css';
 import { container } from '../../../di/container';
 
 const WaitingApprovalPage: React.FC = () => {
@@ -53,28 +52,47 @@ const WaitingApprovalPage: React.FC = () => {
   }, [approvalStatus, navigate]);
 
   return (
-    <div className="waiting-approval-container">
-      <div className="waiting-approval-card">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 font-sans">
+      <div className="bg-white p-10 rounded-lg shadow-lg text-center max-w-md w-[90%]">
+        
+        {/* Pending State */}
         {approvalStatus === 'pending' && (
           <>
-            <h2>Awaiting Session Approval</h2>
-            <p>Your login session is awaiting approval from your main device.</p>
-            <p>Please keep this page open. You will be redirected automatically once approved.</p>
-            <div className="spinner"></div>
+            <h2 className="text-gray-800 mb-5 text-2xl font-semibold">
+              Awaiting Session Approval
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Your login session is awaiting approval from your main device.
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Please keep this page open. You will be redirected automatically once approved.
+            </p>
+            
+            {/* Loading Spinner */}
+            <div className="border-4 border-gray-200 border-l-blue-500 rounded-full w-8 h-8 animate-spin mx-auto my-5"></div>
           </>
         )}
+        
+        {/* Rejected State */}
         {approvalStatus === 'rejected' && (
           <>
-            <h2>Session Approval Rejected</h2>
-            <p>Your login session was rejected or could not be approved.</p>
-            <button onClick={handleSignOut} className="sign-out-button">Sign Out</button>
+            <h2 className="text-gray-800 mb-5 text-2xl font-semibold">
+              Session Approval Rejected
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Your login session was rejected or could not be approved.
+            </p>
           </>
         )}
-        {/* You can add more UI elements here, like a cancel button or status updates */}
-              <button onClick={handleSignOut} className="sign-out-button">Sign Out</button>
-
+        
+        {/* Sign Out Button */}
+        <button 
+          onClick={handleSignOut} 
+          className="bg-red-600 text-white border-none py-2.5 px-5 rounded cursor-pointer text-base mt-5 transition-colors duration-300 ease-in-out hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Sign Out
+        </button>
       </div>
-
     </div>
   );
 };

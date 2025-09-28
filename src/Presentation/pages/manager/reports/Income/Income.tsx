@@ -1,8 +1,6 @@
-// Income.tsx - Backend Connected
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Income.css';
 
 interface IncomeItem {
   name: string;
@@ -20,7 +18,6 @@ interface IncomeStatementData {
 const Income: React.FC = () => {
   const navigate = useNavigate();
   
-  // State for income statement data and UI
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatementData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +33,6 @@ const Income: React.FC = () => {
     summary: false,
   });
 
-  // Load income statement on component mount
   useEffect(() => {
     generateIncomeStatement();
   }, []);
@@ -49,7 +45,6 @@ const Income: React.FC = () => {
       const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
       const token = localStorage.getItem('token');
       
-      // Use portfolio value endpoint to get basic financial data
       const response = await fetch(`${API_URL}/portfolio/value/?currency=USD`, {
         method: 'GET',
         headers: {
@@ -58,7 +53,6 @@ const Income: React.FC = () => {
         },
       });
 
-      // Check if response is HTML (error page) instead of JSON
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('text/html')) {
         throw new Error(`Server returned HTML error page (${response.status}). Portfolio endpoint may not be available.`);
@@ -70,8 +64,6 @@ const Income: React.FC = () => {
         throw new Error(data.error || `HTTP ${response.status}: Failed to fetch portfolio data`);
       }
 
-      // Create a basic income statement from portfolio value data
-      // Since we don't have transaction data, show portfolio value as revenue
       const portfolioValue = data.total_value || 0;
       
       const incomeStatementData: IncomeStatementData = {
@@ -101,7 +93,6 @@ const Income: React.FC = () => {
     try {
       setLoading(true);
       
-      // Create CSV export using the calculated income statement data
       if (!incomeStatement) {
         setError('No income statement data to export');
         return;
@@ -138,7 +129,6 @@ const Income: React.FC = () => {
     }
   };
 
-  // Chart data from real income statement data
   const chartData = incomeStatement ? [
     { 
       name: 'Revenue', 
@@ -153,7 +143,6 @@ const Income: React.FC = () => {
       value: incomeStatement.net_income
     }
   ] : [];
-
 
   const toggleSection = (section: 'revenue' | 'expenses' | 'summary') => {
     setExpandedSections(prev => ({
@@ -173,19 +162,19 @@ const Income: React.FC = () => {
 
   const renderChartView = () => {
     if (loading) {
-      return <div className="loading">Loading income statement data...</div>;
+      return <div className="loading text-center py-10 text-gray-600 text-base">Loading income statement data...</div>;
     }
 
     if (error) {
-      return <div className="error">Error: {error}</div>;
+      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
     }
 
     if (!incomeStatement || chartData.length === 0) {
-      return <div className="no-data">No income statement data available for chart view</div>;
+      return <div className="no-data text-center py-10 text-gray-600 text-base">No income statement data available for chart view</div>;
     }
 
     return (
-      <div className="chart-view">
+      <div className="chart-view p-6 h-full overflow-y-auto">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
             data={chartData}
@@ -204,14 +193,12 @@ const Income: React.FC = () => {
             <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
           </LineChart>
         </ResponsiveContainer>
-        <div className="chart-summary">
-          <div className="summary-box">
-            <h4>Income Statement Summary</h4>
-            <p>Your income statement shows revenue, expenses, and net income for the current period.</p>
-            <div className="btn-container"> 
-              <button className="close-btn1" onClick={()=> navigate(-1)}>Close</button>
-              <button className="download-btn1" onClick={exportToExcel}>Download Report</button>
-            </div>
+        <div className="chart-summary bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Income Statement Summary</h4>
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">Your income statement shows revenue, expenses, and net income for the current period.</p>
+          <div className="btn-container flex gap-3 flex-wrap md:flex-col">
+            <button className="close-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>Close</button>
+            <button className="download-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={exportToExcel}>Download Report</button>
           </div>
         </div>
       </div>
@@ -220,44 +207,43 @@ const Income: React.FC = () => {
 
   const renderTableView = () => {
     if (loading) {
-      return <div className="loading">Loading income statement...</div>;
+      return <div className="loading text-center py-10 text-gray-600 text-base">Loading income statement...</div>;
     }
 
     if (error) {
-      return <div className="error">Error: {error}</div>;
+      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
     }
 
     if (!incomeStatement) {
-      return <div className="no-data">No income statement data available</div>;
+      return <div className="no-data text-center py-10 text-gray-600 text-base">No income statement data available</div>;
     }
 
     return (
-      <div className="table-view">
-        <div className="export-actions">
-          <button className="export-excel" onClick={exportToExcel}>📊 Export To Excel</button>
+      <div className="table-view flex flex-col h-full bg-white">
+        <div className="export-actions p-4 border-b border-gray-200 bg-white flex justify-end">
+          <button className="export-excel py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-emerald-600 transition-colors" onClick={exportToExcel}>📊 Export To Excel</button>
         </div>
 
-        <div className="income-sections">
-          {/* Revenue Section */}
-          <div className="section-group">
+        <div className="income-sections flex-1 overflow-y-auto bg-gray-50">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('revenue')}
             >
-              <span className={`expand-arrow ${expandedSections.revenue ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Revenue</span>
-              <span className="section-amount">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.revenue ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Revenue</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
             </div>
             
             {expandedSections.revenue && (
-              <div className="section-content">
+              <div className="section-content bg-gray-50 border-t border-gray-200">
                 {incomeStatement.revenue.map((item: IncomeItem, index: number) => (
-                  <div key={index} className="line-item">
-                    <span className="item-name">{item.name}</span>
-                    <span className="item-amount">${formatCurrency(item.amount).slice(1)}</span>
+                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                    <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
                   </div>
                 ))}
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Revenue</span>
                   <span>${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
                 </div>
@@ -265,26 +251,25 @@ const Income: React.FC = () => {
             )}
           </div>
 
-          {/* Expenses Section */}
-          <div className="section-group">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('expenses')}
             >
-              <span className={`expand-arrow ${expandedSections.expenses ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Expenses</span>
-              <span className="section-amount">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.expenses ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Expenses</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
             </div>
             
             {expandedSections.expenses && (
-              <div className="section-content">
+              <div className="section-content bg-gray-50 border-t border-gray-200">
                 {incomeStatement.expenses.map((item: IncomeItem, index: number) => (
-                  <div key={index} className="line-item">
-                    <span className="item-name">{item.name}</span>
-                    <span className="item-amount">-${formatCurrency(item.amount).slice(1)}</span>
+                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
+                    <span className="item-amount font-semibold text-gray-900">-${formatCurrency(item.amount).slice(1)}</span>
                   </div>
                 ))}
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Total Expenses</span>
                   <span>-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
                 </div>
@@ -292,31 +277,30 @@ const Income: React.FC = () => {
             )}
           </div>
 
-          {/* Summary Section */}
-          <div className="section-group">
+          <div className="section-group bg-white mb-[2px]">
             <div 
-              className="section-header"
+              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
               onClick={() => toggleSection('summary')}
             >
-              <span className={`expand-arrow ${expandedSections.summary ? 'expanded' : ''}`}>▼</span>
-              <span className="section-title">Income Summary</span>
-              <span className="section-amount">
+              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.summary ? 'rotate-0' : '-rotate-90'}`}>▼</span>
+              <span className="section-title flex-1 text-lg text-gray-900">Income Summary</span>
+              <span className="section-amount text-lg text-gray-900 font-bold">
                 {incomeStatement.net_income >= 0 ? '' : '-'}
                 ${formatCurrency(incomeStatement.net_income).slice(1)}
               </span>
             </div>
             
             {expandedSections.summary && (
-              <div className="section-content">
-                <div className="line-item">
-                  <span className="item-name">Total Revenue</span>
-                  <span className="item-amount">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
+              <div className="section-content bg-gray-50 border-t border-gray-200">
+                <div className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                  <span className="item-name flex-1 text-gray-700">Total Revenue</span>
+                  <span className="item-amount font-semibold text-gray-900">${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
                 </div>
-                <div className="line-item">
-                  <span className="item-name">Total Expenses</span>
-                  <span className="item-amount">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
+                <div className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                  <span className="item-name flex-1 text-gray-700">Total Expenses</span>
+                  <span className="item-amount font-semibold text-gray-900">-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
                 </div>
-                <div className="subsection-total-line">
+                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
                   <span>Net Income</span>
                   <span>
                     {incomeStatement.net_income >= 0 ? '' : '-'}
@@ -327,24 +311,23 @@ const Income: React.FC = () => {
             )}
           </div>
 
-          {/* Totals */}
-          <div className="totals-section">
-            <div className="total-line">
+          <div className="totals-section bg-white p-6 border-t-4 border-gray-200 mt-2">
+            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
               <span>Total Revenue</span>
               <span>${formatCurrency(incomeStatement.total_revenue).slice(1)}</span>
             </div>
-            <div className="total-line">
+            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
               <span>Total Expenses</span>
               <span>-${formatCurrency(incomeStatement.total_expenses).slice(1)}</span>
             </div>
-            <div className="total-line balance-check">
+            <div className="total-line balance-check flex justify-between items-center py-4 mt-4 text-lg font-bold text-gray-900 border-t-2 border-gray-300 border-b-4 border-double border-gray-700">
               <span>Net Income</span>
               <span>
                 {incomeStatement.net_income >= 0 ? '' : '-'}
                 ${formatCurrency(incomeStatement.net_income).slice(1)}
               </span>
             </div>
-            <div className="balance-status">
+            <div className="balance-status text-center text-emerald-600 text-base font-semibold mt-5 p-3 bg-emerald-100 rounded-lg border border-emerald-200">
               ✓ Income statement generated successfully
             </div>
           </div>
@@ -354,38 +337,38 @@ const Income: React.FC = () => {
   };
 
   return (
-    <div className="income-container">
-      <div className="income-header">
-        <div className="header-top">
-          <button className="back-btn" onClick={()=> navigate(-1)}>← Income Statement</button>
+    <div className="income-container flex flex-col w-full h-screen bg-white font-sans rounded-none border border-gray-200 shadow-md md:rounded-none">
+      <div className="income-header bg-white p-6 border-b border-gray-200">
+        <div className="header-top mb-4">
+          <button className="back-btn bg-transparent border-none text-gray-500 text-sm flex items-center gap-2 py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all" onClick={() => navigate(-1)}>← Income Statement</button>
         </div>
         <div className="header-content">
-          <h1>Income Statement</h1>
-          <p>View your company's revenue, expenses, and net income</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight md:text-xl">Income Statement</h1>
+          <p className="text-base text-gray-500 mb-5 leading-snug">View your company's revenue, expenses, and net income</p>
         </div>
         
-        <div className="view-tabs">
+        <div className="view-tabs flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit md:w-full">
           <button 
-            className={`tab-btn ${activeView === 'chart' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('chart')}
           >
             Chart View
           </button>
           <button 
-            className={`tab-btn ${activeView === 'table' ? 'active' : ''}`}
+            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
             onClick={() => setActiveView('table')}
           >
             Table View
           </button>
         </div>
         
-        <div className="report-period">
+        <div className="report-period flex justify-between items-center text-sm text-gray-700">
           <span>Monthly Report</span>
-          <button className="filter-btn">🔽 Filter</button>
+          <button className="filter-btn bg-transparent border border-gray-300 text-purple-600 text-sm flex items-center gap-1.5 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all">🔽 Filter</button>
         </div>
       </div>
 
-      <div className="income-content">
+      <div className="income-content flex-1 overflow-y-auto bg-gray-50">
         {activeView === 'chart' ? renderChartView() : renderTableView()}
       </div>
     </div>

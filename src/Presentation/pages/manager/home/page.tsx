@@ -1,4 +1,4 @@
-// src/Presentation/pages/manager/home/page.tsx (With Auto Reconnect)
+// src/Presentation/pages/manager/home/page.tsx
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import Charts from '../../../components/Charts';
@@ -6,7 +6,6 @@ import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import './home.css';
 import {
   Bell,
   User,
@@ -40,12 +39,10 @@ const Home = observer(() => {
   // Wallet state
   const {
     isWalletConnected,
-    
     walletAddress,
     ethBalance,
     isFetchingBalance,
     fetchBalanceError,
-
     successMessage,
     clearSuccessMessage,
     isReconnecting,
@@ -53,6 +50,7 @@ const Home = observer(() => {
     fetchWalletBalance
   } = useWallet();
   const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
+  
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -76,9 +74,9 @@ const Home = observer(() => {
 
   const getTransactionIcon = (transaction: any) => {
     if (transaction.status === 'pending') {
-      return <Clock className="transaction-icon pending" />;
+      return <Clock className="w-5 h-5 text-yellow-600" />;
     }
-    return <TrendingDown className="transaction-icon outflow" />;
+    return <TrendingDown className="w-5 h-5 text-red-600" />;
   };
 
   const getTransactionName = (transaction: any): string => {
@@ -88,7 +86,7 @@ const Home = observer(() => {
     return 'ETH Transaction';
   };
 
-  // Convert API transactions to display format (replace mock transactionData)
+  // Convert API transactions to display format
   const transactionData = transactions.map(transaction => ({
     name: getTransactionName(transaction),
     amount: typeof transaction.amount_eth === 'string' ? parseFloat(transaction.amount_eth) : transaction.amount_eth,
@@ -97,6 +95,7 @@ const Home = observer(() => {
     icon: getTransactionIcon(transaction),
     hash: transaction.transaction_hash
   }));
+
   // Clear success message after showing it
   useEffect(() => {
     if (successMessage) {
@@ -128,7 +127,6 @@ const Home = observer(() => {
     handleOpenWalletModal('send');
   };
 
-  // Add handler for payroll modal
   const handleSendPayroll = () => {
     if (!isWalletConnected) {
       alert('Please connect a wallet first');
@@ -148,34 +146,29 @@ const Home = observer(() => {
     setIsGenerateReportModalOpen(true);
   }
 
-  // Add handler for processing payroll
   const handleProcessPayroll = (data: any) => {
     console.log('Processing payroll:', data);
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
   };
 
-
-
   return (
-    <div className="home-content-new">
+    <div className="flex flex-col w-full min-h-screen bg-gray-50 font-sans p-0 m-0 box-border overflow-y-auto">
       {/* Success Message */}
       {successMessage && (
-        <div className="success-message-container">
-          <div className="success-message-content">
-            <div className="success-message-dot"></div>
-            <span className="success-message-text">{successMessage}</span>
-          </div>
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span className="text-sm font-medium">{successMessage}</span>
         </div>
       )}
 
       {/* Reconnection Error Message */}
       {reconnectError && (
-        <div className="reconnect-error-message">
-          <div className="reconnect-error-content">
-            <WifiOff className="reconnect-error-icon" />
+        <div className="fixed top-16 right-4 z-50 bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <WifiOff className="w-4 h-4" />
             <div>
-              <p className="reconnect-error-title">Auto-reconnect failed</p>
-              <p className="reconnect-error-description">Please connect your wallet manually</p>
+              <p className="text-sm font-medium">Auto-reconnect failed</p>
+              <p className="text-xs">Please connect your wallet manually</p>
             </div>
           </div>
         </div>
@@ -183,56 +176,56 @@ const Home = observer(() => {
 
       {/* Reconnecting Indicator */}
       {isReconnecting && (
-        <div className="reconnecting-indicator">
-          <div className="reconnecting-content">
-            <Loader2 className="reconnecting-icon" />
-            <span className="reconnecting-text">Reconnecting wallet...</span>
+        <div className="fixed top-4 right-4 z-50 bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm font-medium">Reconnecting wallet...</span>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="header6">
-        <h1>Home</h1>
+      <div className="text-black p-5">
+        <h1 className="text-2xl font-bold">Home</h1>
       </div>
-      <div className="wallet-header">
-        <div className="greeting">
-          <h2>Hi Manager</h2>
-          <p>How are you today?</p>
+      
+      <div className="flex justify-between items-center p-5 pb-0">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Hi Manager</h2>
+          <p className="text-gray-600">How are you today?</p>
         </div>
-        <div className="header-icons">
-          <button className="icon-btn">
-            <Bell size={20} />
+        <div className="flex items-center gap-4">
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <Bell size={20} className="text-gray-600" />
           </button>
-          <button className="icon-btn">
-            <RotateCcw size={20} />
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <RotateCcw size={20} className="text-gray-600" />
           </button>
         </div>
       </div>
 
       {/* Current Wallet Card */}
-      <div className="current-wallet-card">
-        <div className="wallet-header">
+      <div className="mx-5 my-5 bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 rounded-2xl p-6 text-white relative flex-shrink-0">
+        <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
-            <span className="wallet-label">Current Wallet</span>
+            <span className="text-lg opacity-90 font-medium text-white">Current Wallet</span>
             {isWalletConnected && (
-              <div className="wallet-status-connected">
-                <Wifi className="wallet-status-connected-icon" />
-                <span className="wallet-status-connected-text">Connected</span>
+              <div className="flex items-center gap-1 bg-green-500 bg-opacity-20 px-2 py-1 rounded-full">
+                <Wifi className="w-3 h-3 text-green-400" />
+                <span className="text-xs text-green-400 font-medium">Connected</span>
               </div>
             )}
             {isReconnecting && (
-              <div className="wallet-status-connecting">
-                <Loader2 className="wallet-status-connecting-icon" />
-                <span className="wallet-status-connecting-text">Connecting...</span>
+              <div className="flex items-center gap-1 bg-blue-500 bg-opacity-20 px-2 py-1 rounded-full">
+                <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
+                <span className="text-xs text-blue-400 font-medium">Connecting...</span>
               </div>
             )}
-
           </div>
 
           {!isWalletConnected && !isReconnecting ? (
             <button
-              className="connect-wallet-new"
+              className="bg-white bg-opacity-20 border border-white border-opacity-30 text-white px-6 py-4 rounded-full text-base font-medium cursor-pointer backdrop-blur-sm hover:bg-white hover:bg-opacity-40 transition-all"
               onClick={() => handleOpenWalletModal('connect')}
             >
               Connect Wallet
@@ -240,168 +233,176 @@ const Home = observer(() => {
           ) : null}
         </div>
 
-        <div className="wallet-balance">
-          <div className="balance-main">
-            <EthereumIcon className="eth-icon" />
-            <span className="balance-amount">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <EthereumIcon className="w-6 h-6 fill-white text-white" />
+            <span className="text-3xl font-bold text-white">
               {isFetchingBalance ? (
-                <Loader2 className="balance-fetching-icon" />
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
               ) : ethBalance !== null ? (
                 `${ethBalance.toFixed(4)} ETH`
               ) : (
-                <span className="balance-empty-text"> 0 ETH</span>
+                <span className="text-white"> 0 ETH</span>
               )}
             </span>
           </div>
-          <div className="balance-converted">
+          <div className="text-base opacity-90 font-medium">
             {isFetchingBalance ? (
-              <span className="balance-fetching-text">Fetching...</span>
+              <span className="text-sm text-gray-400">Fetching...</span>
             ) : fetchBalanceError ? (
-              <span className="balance-error-text">Error fetching balance</span>
-            
+              <span className="text-sm text-red-400">Error fetching balance</span>
             ) : walletAddress ? (
-              <span className="wallet-address-display">
+              <span className="text-sm font-mono">
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
             ) : (
-              <span className="balance-empty-text">Wallet Not Connected</span>
+              <span className="text-white">Wallet Not Connected</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="quick-actions">
+      <div className="grid grid-cols-4 gap-3 px-5 mb-8 flex-shrink-0">
         {/* Send Payment */}
         <button
-          className="action-button send"
+          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
           onClick={handleSendPayment}
         >
-          <div className="action-icon-wrapper">
-            <TrendingUpIcon className="action-icon" />
+          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-blue-100 text-blue-600">
+            <TrendingUpIcon className="w-5 h-5" />
           </div>
-          <span className="action-name">Send Payment</span>
+          <span className="text-xs font-medium text-gray-700 text-center">Send Payment</span>
         </button>
 
         {/* Send Payroll */}
         <button
-          className="action-button payroll"
+          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
           onClick={handleSendPayroll}
         >
-          <div className="action-icon-wrapper">
-            <Users className="action-icon" />
+          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-yellow-500 text-white">
+            <Users className="w-5 h-5" />
           </div>
-          <span className="action-name">Send Payroll</span>
+          <span className="text-xs font-medium text-gray-700 text-center">Send Payroll</span>
         </button>
 
         {/* Audit Contract */}
         <button
-          className="action-button add"
+          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
           onClick={handleAuditContract}
         >
-          <div className="action-icon-wrapper">
-            <ClipboardList className="action-icon" />
+          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-green-100 text-green-600">
+            <ClipboardList className="w-5 h-5" />
           </div>
-          <span className="action-name">Audit Contract</span>
+          <span className="text-xs font-medium text-gray-700 text-center">Audit Contract</span>
         </button>
 
         {/* Generate Report */}
         <button
-          className="action-button withdraw"
+          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
           onClick={handleGenerateReport}
         >
-          <div className="action-icon-wrapper">
-            <ChartBarIncreasing className="action-icon" />
+          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-pink-100 text-pink-600">
+            <ChartBarIncreasing className="w-5 h-5" />
           </div>
-          <span className="action-name">Generate Report</span>
+          <span className="text-xs font-medium text-gray-700 text-center">Generate Report</span>
         </button>
       </div>
 
       {/* Recent Transactions */}
-      <div className="section-header3">
-        <h2>Recent Transactions</h2>
-        <div className="view-all" onClick={refreshTransactions}>
+      <div className="flex justify-between items-center px-5 my-6 bg-transparent">
+        <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
+        <div 
+          className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
+          onClick={refreshTransactions}
+        >
           <span>Refresh</span>
-          <ChevronRight className="chevron-icon" />
+          <ChevronRight className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="transactions-list">
+      <div className="mx-5 mb-8 rounded-xl overflow-hidden min-h-[200px]">
         {isLoadingTransactions ? (
-          <div className="transaction-item2">
-            <div className="transaction-left">
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-              <div className="transaction-details">
-                <div className="transaction-name">Loading transactions...</div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">Loading transactions...</div>
               </div>
             </div>
           </div>
         ) : transactionError ? (
-          <div className="transaction-item2">
-            <div className="transaction-left">
-              <div className="transaction-details">
-                <div className="transaction-name">Error loading transactions</div>
-                <div className="transaction-date">{transactionError}</div>
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">Error loading transactions</div>
+                <div className="text-sm text-gray-900">{transactionError}</div>
               </div>
             </div>
           </div>
         ) : transactionData.length === 0 ? (
-          <div className="transaction-item2">
-            <div className="transaction-left">
-              <div className="transaction-details">
-                <div className="transaction-name">No transactions found</div>
-                <div className="transaction-date">Start making transactions to see them here.</div>
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">No transactions found</div>
+                <div className="text-sm text-gray-900">Start making transactions to see them here.</div>
               </div>
             </div>
           </div>
         ) : (
-          transactionData.map((transaction, index) => (
-            <div key={index} className="transaction-item2">
-              <div className="transaction-left">
-                <div className={`transaction-icon-wrapper ${transaction.type}`}>
-                  {transaction.icon}
+          <div className="space-y-2">
+            {transactionData.map((transaction, index) => (
+              <div key={index} className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    transaction.type === 'outflow' ? 'bg-red-100' : 'bg-yellow-100'
+                  }`}>
+                    {transaction.icon}
+                  </div>
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
+                  </div>
                 </div>
-                <div className="transaction-details">
-                  <div className="transaction-name">{transaction.name}</div>
+                <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap ${
+                  transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
+                }`}>
+                  {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
+                  {(transaction.amount || 0).toFixed(4)} ETH
                 </div>
               </div>
-              <div className={`transaction-amount2 ${transaction.type}`}>
-                {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
-                {(transaction.amount || 0).toFixed(4)} ETH
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
       {/* Revenue vs Expenses */}
-      <div className="revenue-section">
-        <div className="section-header3">
-          <h2>Revenue vs Expenses</h2>
-          <select className="period-selector1">
+      <div className="mb-8 flex-shrink-0">
+        <div className="flex justify-between items-center px-5 my-6 bg-transparent">
+          <h2 className="text-lg font-semibold text-gray-900 m-0">Revenue vs Expenses</h2>
+          <select className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 cursor-pointer">
             <option>Last 6 months</option>
             <option>Last 3 months</option>
             <option>Last month</option>
           </select>
         </div>
 
-        <div className="revenue-stats">
-          <div className="stat-item">
-            <span className="stat-label">Revenue</span>
-            <span className="stat-value revenue">₱7120</span>
+        <div className="flex justify-around bg-white mx-5 mb-5 p-5 rounded-xl border border-gray-100">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs text-gray-600 uppercase tracking-wide">Revenue</span>
+            <span className="text-xl font-bold text-green-600">₱7120</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">Expenses</span>
-            <span className="stat-value expenses">₱4200</span>
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs text-gray-600 uppercase tracking-wide">Expenses</span>
+            <span className="text-xl font-bold text-red-600">₱4200</span>
           </div>
         </div>
 
-        <div className="chart-container">
+        <div className="bg-white mx-5 p-5 rounded-xl border border-gray-100">
           <Charts />
         </div>
       </div>
 
-      {/* Wallet Modal (for initial connection only) */}
+      {/* Wallet Modal */}
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
@@ -414,7 +415,7 @@ const Home = observer(() => {
         onClose={() => setIsPaymentModalOpen(false)}
       />
 
-      {/* Add Payroll Modal */}
+      {/* Payroll Modal */}
       <PayrollModal
         isOpen={isPayrollModalOpen}
         onClose={() => setIsPayrollModalOpen(false)}
@@ -432,8 +433,6 @@ const Home = observer(() => {
       />
     </div>
   );
- })
+})
 
 export default Home;
-
-
