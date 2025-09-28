@@ -28,6 +28,61 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     const [isDragOver, setIsDragOver] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
 
+    // Helper function to get unique vulnerabilities
+    const getUniqueVulnerabilities = (vulnerabilities: any[]) => {
+        if (!vulnerabilities || vulnerabilities.length === 0) return [];
+        
+        console.log('Original vulnerabilities count:', vulnerabilities.length);
+        console.log('Original vulnerabilities:', vulnerabilities);
+        
+        // Use a Set to track seen combinations and filter out exact duplicates
+        const seen = new Set();
+        const uniqueVulns = vulnerabilities.filter((vuln, index) => {
+            // Create a more specific key including index to catch true duplicates
+            const key = JSON.stringify({
+                title: vuln.title?.trim() || '',
+                severity: vuln.severity?.trim().toUpperCase() || '',
+                description: vuln.description?.trim() || ''
+            });
+            
+            console.log(`Vuln ${index}:`, key);
+            
+            if (seen.has(key)) {
+                console.log(`Duplicate found at index ${index}`);
+                return false;
+            }
+            
+            seen.add(key);
+            return true;
+        });
+
+        console.log('Unique vulnerabilities count:', uniqueVulns.length);
+        
+        // Sort by severity priority
+        const sorted = uniqueVulns.sort((a, b) => {
+            const severityOrder: { [key: string]: number } = { 
+                'CRITICAL': 0, 
+                'HIGH': 1, 
+                'MEDIUM': 2, 
+                'LOW': 3, 
+                'INFO': 4 
+            };
+            const aSeverityKey = (a.severity || '').toUpperCase();
+            const bSeverityKey = (b.severity || '').toUpperCase();
+            const aSeverity = severityOrder[aSeverityKey] !== undefined ? severityOrder[aSeverityKey] : 5;
+            const bSeverity = severityOrder[bSeverityKey] !== undefined ? severityOrder[bSeverityKey] : 5;
+            
+            if (aSeverity === bSeverity) {
+                return (a.title || '').localeCompare(b.title || '');
+            }
+            
+            return aSeverity - bSeverity;
+        });
+        
+        console.log('Final sorted vulnerabilities:', sorted);
+        return sorted;
+    };
+
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             setSelectedFile(event.target.files[0]);
@@ -147,7 +202,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                         <h4 className="text-base font-semibold mb-4 text-gray-900">Vulnerabilities Summary</h4>
                         {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
                             <div className="space-y-2">
-                                {auditResponse.vulnerabilities.map((vuln, index) => (
+                                {getUniqueVulnerabilities(auditResponse.vulnerabilities).map((vuln, index) => (
                                     <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
                                         <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
                                         <span className={`font-semibold text-sm ${
@@ -190,43 +245,172 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     );
 
     const handleDownloadPdf = () => {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.position = 'absolute';
-        tempDiv.style.left = '-9999px';
-        document.body.appendChild(tempDiv);
+        if (!auditResponse?.audit) return;
 
-        const root = createRoot(tempDiv);
-        root.render(renderPdfContent());
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 20;
+        const lineHeight = 6;
+        let yPosition = margin;
 
-        setTimeout(() => {
-            html2canvas(tempDiv, {
-                scale: 2,
-                useCORS: true,
-                logging: true
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const pageHeight = 297;
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight: number) => {
+            if (yPosition + requiredHeight > pageHeight - margin) {
+                pdf.addPage();
+                yPosition = margin;
+            }
+        };
 
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-                pdf.save('audit-report.pdf');
-                root.unmount();
-                document.body.removeChild(tempDiv);
+        // Helper function to wrap text
+        const addWrappedText = (text: string, x: number, fontSize: number = 10, maxWidth?: number) => {
+            pdf.setFontSize(fontSize);
+            const width = maxWidth || pageWidth - 2 * margin;
+            const textLines = pdf.splitTextToSize(text, width);
+            
+            textLines.forEach((line: string) => {
+                checkPageBreak(lineHeight);
+                pdf.text(line, x, yPosition);
+                yPosition += lineHeight;
             });
-        }, 100);
+            return yPosition;
+        };
+
+        // Title
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Smart Contract Audit Report', margin, yPosition);
+        yPosition += 15;
+
+        // Audit status badge (simulate with text)
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Status: ${auditResponse.audit.status}`, pageWidth - margin - 40, yPosition - 10);
+
+        // Overview Section
+        checkPageBreak(30);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Overview', margin, yPosition);
+        yPosition += 10;
+
+        // Overview details
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        
+        const overviewData = [
+            ['Contract Name:', auditResponse.audit.contract_name || 'N/A'],
+            ['Risk Level:', auditResponse.audit.risk_level || 'N/A'],
+            ['Vulnerabilities Found:', auditResponse.audit.vulnerabilities_found?.toString() || '0'],
+            ['Completed On:', auditResponse.audit.completed_at 
+                ? new Date(auditResponse.audit.completed_at).toLocaleString() 
+                : 'N/A']
+        ];
+
+        overviewData.forEach(([label, value]) => {
+            checkPageBreak(lineHeight);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(label, margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(value, margin + 50, yPosition);
+            yPosition += lineHeight;
+        });
+
+        yPosition += 10;
+
+        // Vulnerabilities Summary Section
+        checkPageBreak(20);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Vulnerabilities Summary', margin, yPosition);
+        yPosition += 10;
+
+        if (auditResponse.vulnerabilities && auditResponse.vulnerabilities.length > 0) {
+            const uniqueVulnerabilities = getUniqueVulnerabilities(auditResponse.vulnerabilities);
+            
+            uniqueVulnerabilities.forEach((vuln, index) => {
+                checkPageBreak(lineHeight * 2);
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(`${index + 1}. ${vuln.title}`, margin, yPosition);
+                pdf.setFont('helvetica', 'normal');
+                
+                // Add severity with color coding (simulate with text)
+                const severityText = `[${vuln.severity.toUpperCase()}]`;
+                const severityWidth = pdf.getTextWidth(severityText);
+                pdf.text(severityText, pageWidth - margin - severityWidth, yPosition);
+                yPosition += lineHeight + 2;
+            });
+        } else {
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('No major vulnerabilities found.', margin, yPosition);
+            yPosition += lineHeight;
+        }
+
+        yPosition += 10;
+
+        // Detailed Assessment Section
+        checkPageBreak(20);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Detailed Assessment', margin, yPosition);
+        yPosition += 15;
+
+        // AI Analysis Overview
+        checkPageBreak(15);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('AI Analysis Overview', margin, yPosition);
+        yPosition += 8;
+
+        const aiAnalysis = auditResponse.audit.ai_analysis || 'No AI analysis provided.';
+        addWrappedText(aiAnalysis, margin, 10);
+        yPosition += 10;
+
+        // Gas Optimization Insights
+        checkPageBreak(15);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Gas Optimization Insights', margin, yPosition);
+        yPosition += 8;
+
+        const gasOptimization = auditResponse.audit.gas_optimization || 'No gas optimization insights.';
+        addWrappedText(gasOptimization, margin, 10);
+        yPosition += 10;
+
+        // Recommendations
+        checkPageBreak(15);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Recommendations', margin, yPosition);
+        yPosition += 8;
+
+        const recommendations = auditResponse.audit.recommendations || 'No specific recommendations.';
+        addWrappedText(recommendations, margin, 10);
+
+        // Add footer with page numbers
+        const totalPages = pdf.internal.pages.length - 1; // Subtract 1 because first element is metadata
+        for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(
+                `Page ${i} of ${totalPages}`,
+                pageWidth - margin,
+                pageHeight - 10,
+                { align: 'right' }
+            );
+            pdf.text(
+                `Generated on ${new Date().toLocaleString()}`,
+                margin,
+                pageHeight - 10
+            );
+        }
+
+        // Save the PDF
+        const fileName = `${auditResponse.audit.contract_name || 'audit'}-report.pdf`;
+        pdf.save(fileName);
     };
 
     if (!isOpen) {
@@ -373,7 +557,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                                 <h4 className="text-base font-semibold mb-4 text-gray-900">Vulnerabilities Summary</h4>
                                 {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
                                     <div className="space-y-2">
-                                        {auditResponse.vulnerabilities.slice(0, 3).map((vuln, index) => (
+                                        {getUniqueVulnerabilities(auditResponse.vulnerabilities).slice(0, 3).map((vuln, index) => (
                                             <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
                                                 <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
                                                 <span className={`font-semibold text-sm ${

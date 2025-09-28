@@ -1,7 +1,7 @@
 // src/Presentation/pages/employee/home/page.tsx
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Bell, RotateCcw, Loader2, Wifi, Clipboard } from 'lucide-react';
+import { Bell, RotateCcw, Loader2, Wifi, Clipboard, WifiOff } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
@@ -13,7 +13,17 @@ const EmployeeHome = observer(() => {
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   
-  const { isWalletConnected, walletAddress, ethBalance, isFetchingBalance, fetchBalanceError, successMessage, clearSuccessMessage, isReconnecting, fetchWalletBalance, rates, fiatCurrency } = useWallet();
+  const { isWalletConnected,
+    walletAddress,
+    ethBalance,
+    isFetchingBalance,
+    fetchBalanceError,
+    successMessage,
+    clearSuccessMessage,
+    isReconnecting,
+    reconnectError,
+    fetchWalletBalance
+  } = useWallet();;
   const usd = 4469.44;
     // Clear success message after showing it
     useEffect(() => {
@@ -60,7 +70,35 @@ const EmployeeHome = observer(() => {
 
  return (
     <div className="w-full h-screen max-w-full mx-auto text-gray-800 font-sans p-4 box-border bg-gray-50 animate-[slideIn_0.3s_ease-out]">
-      
+      {successMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span className="text-sm font-medium">{successMessage}</span>
+        </div>
+      )}
+
+      {/* Reconnection Error Message */}
+      {reconnectError && (
+        <div className="fixed top-16 right-4 z-50 bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <WifiOff className="w-4 h-4" />
+            <div>
+              <p className="text-sm font-medium">Auto-reconnect failed</p>
+              <p className="text-xs">Please connect your wallet manually</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reconnecting Indicator */}
+      {isReconnecting && (
+        <div className="fixed top-4 right-4 z-50 bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm font-medium">Reconnecting wallet...</span>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center p-2 bg-gray-50">
         <h1 className="text-2xl font-semibold">Home</h1>
@@ -82,73 +120,60 @@ const EmployeeHome = observer(() => {
       </div>
 
       {/* Wallet Balance Card */}
-      <div className="bg-gradient-to-b from-purple-700/70 to-purple-800/70 rounded-2xl border border-gray-300/20 p-3 px-8 flex justify-between items-center text-gray-800 shadow-lg backdrop-blur-sm mb-6">
-        <div className="flex flex-col justify-center h-full">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-medium text-white/90">Current Wallet</span>
+       <div className="mx-5 my-5 bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 rounded-2xl p-6 text-white relative flex-shrink-0">
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-2">
+            <span className="text-lg opacity-90 font-medium text-white">Current Wallet</span>
             {isWalletConnected && (
-              <div className="flex items-center gap-1 text-green-400">
-                <Wifi className="w-4 h-4" />
-                <span className="text-xs font-medium">Connected</span>
+              <div className="flex items-center gap-1 bg-green-500 bg-opacity-20 px-2 py-1 rounded-full">
+                <Wifi className="w-3 h-3 text-green-400" />
+                <span className="text-xs text-green-400 font-medium">Connected</span>
               </div>
             )}
             {isReconnecting && (
-              <div className="flex items-center gap-1 text-yellow-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs font-medium">Connecting...</span>
+              <div className="flex items-center gap-1 bg-blue-500 bg-opacity-20 px-2 py-1 rounded-full">
+                <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
+                <span className="text-xs text-blue-400 font-medium">Connecting...</span>
               </div>
             )}
           </div>
 
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-2">
-              <EthereumIcon className="w-6 h-6 text-white" />
-              <span className="text-3xl font-bold text-white">
-                {isFetchingBalance ? (
-                  <Loader2 className="w-6 h-6 animate-spin inline" />
-                ) : ethBalance !== null ? (
-                  `${ethBalance.toFixed(4)} ETH`
-                ) : (
-                  <span className="text-gray-400">0 ETH</span>
-                )}
-              </span>
-            </div>
-            
-            {walletAddress && (
-              <div className="flex items-center gap-2 text-sm text-white/80 mb-1">
-                <span>Wallet: {walletAddress}</span>
-                <button onClick={handleCopyAddress} className="bg-transparent border-none text-white hover:text-purple-300 transition-colors">
-                  <Clipboard size={16} />
-                </button>
-                {copiedMessage && <span className="text-xs text-green-300">{copiedMessage}</span>}
-              </div>
-            )}
-            
-            <div className="text-lg text-white/70 font-medium">
-              {isFetchingBalance ? (
-                <span>Fetching...</span>
-              ) : fetchBalanceError ? (
-                <span className="text-red-300">Error fetching balance</span>
-              ) : ethBalance !== null ? (
-                `${(ethBalance * usd).toFixed(2)} USD`
-              ) : walletAddress ? (
-                <span className="font-mono">
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                </span>
-              ) : (
-                <span className="text-gray-400">Wallet Not Connected</span>
-              )}
-            </div>
-          </div>
-
-          {!isWalletConnected && !isReconnecting && (
+          {!isWalletConnected && !isReconnecting ? (
             <button
-              className="bg-purple-600 text-white border-none rounded-lg px-6 py-2.5 text-sm font-semibold ml-2 shadow-lg shadow-purple-600/30 cursor-pointer mt-4 self-start hover:bg-purple-700 transition-colors"
+              className="bg-white bg-opacity-20 border border-white border-opacity-30 text-white px-6 py-4 rounded-full text-base font-medium cursor-pointer backdrop-blur-sm hover:bg-white hover:bg-opacity-40 transition-all"
               onClick={() => handleOpenWalletModal('connect')}
             >
               Connect Wallet
             </button>
-          )}
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <EthereumIcon className="w-6 h-6 fill-white text-white" />
+            <span className="text-3xl font-bold text-white">
+              {isFetchingBalance ? (
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              ) : ethBalance !== null ? (
+                `${ethBalance.toFixed(4)} ETH`
+              ) : (
+                <span className="text-white"> 0 ETH</span>
+              )}
+            </span>
+          </div>
+          <div className="text-base opacity-90 font-medium">
+            {isFetchingBalance ? (
+              <span className="text-sm text-gray-400">Fetching...</span>
+            ) : fetchBalanceError ? (
+              <span className="text-sm text-red-400">Error fetching balance</span>
+            ) : walletAddress ? (
+              <span className="text-sm font-mono">
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </span>
+            ) : (
+              <span className="text-white">Wallet Not Connected</span>
+            )}
+          </div>
         </div>
       </div>
 

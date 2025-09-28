@@ -64,12 +64,12 @@ const EmployeeManagement: React.FC = () => {
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const { 
-    getEmployeesByManager, 
-    isLoading: isLoadingEmployees, 
-    error: employeesError 
+  const {
+    getEmployeesByManager,
+    isLoading: isLoadingEmployees,
+    error: employeesError
   } = useEmployeeViewModel(
-    container.addEmployeeUseCase, 
+    container.addEmployeeUseCase,
     container.getEmployeesByManagerUseCase
   );
 
@@ -78,7 +78,7 @@ const EmployeeManagement: React.FC = () => {
       try {
         console.log('Fetching employees...');
         const response = await getEmployeesByManager({});
-        
+
         if (response.success) {
           console.log('Employees fetched successfully:', response.employees);
           setEmployees(response.employees);
@@ -222,8 +222,8 @@ const EmployeeManagement: React.FC = () => {
       </div>
 
       {/* Search and Add Employee */}
-      <div className="flex justify-between items-center mb-6 gap-5 md:flex-col md:items-stretch md:gap-3">
-        <div className="flex-1 min-w-[280px] max-w-[400px] md:min-w-full md:max-w-full">
+      <div className="flex flex-row justify-between items-center mb-6 gap-3">
+        <div className="flex-1 min-w-100">
           <InputWithIcon
             icon={<SearchIcon />}
             placeholder="Search employees..."
@@ -231,8 +231,8 @@ const EmployeeManagement: React.FC = () => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button 
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none rounded-lg px-6 py-3.5 text-sm font-semibold hover:from-purple-600 hover:to-purple-700 hover:-translate-y-0.5 hover:shadow-lg transition-all md:w-full md:flex md:justify-center"
+        <button
+          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none rounded-lg px-6 py-3.5 text-sm font-semibold hover:from-purple-600 hover:to-purple-700 hover:-translate-y-0.5 hover:shadow-lg transition-all whitespace-nowrap flex-shrink-0"
           onClick={handleAddEmployee}
         >
           Add Employee
@@ -250,7 +250,7 @@ const EmployeeManagement: React.FC = () => {
         ) : employeesError ? (
           <div className="flex flex-col items-center justify-center p-16 text-center bg-red-50 rounded-xl border border-red-200">
             <p className="text-red-600 text-base font-medium mb-4">Error: {employeesError}</p>
-            <button 
+            <button
               className="bg-red-600 text-white border-none rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-red-700 transition-colors"
               onClick={() => setRefreshTrigger(prev => prev + 1)}
             >
@@ -276,32 +276,35 @@ const EmployeeManagement: React.FC = () => {
               onClick={() => handleEmployeeDetails(employee)}
             >
               <div className="flex items-center gap-4 w-full">
-                <img 
-                  src={employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User'} 
-                  alt={employee.full_name || employee.username} 
-                  className="rounded-full w-14 h-14 object-cover border-2 border-gray-200 flex-shrink-0 hover:scale-105 transition-transform md:w-12 md:h-12" 
+                <img
+                  src={employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User'}
+                  alt={employee.full_name || employee.username}
+                  className="rounded-full w-14 h-14 object-cover border-2 border-gray-200 flex-shrink-0 hover:scale-105 transition-transform md:w-12 md:h-12"
                 />
                 <div className="flex-1 flex flex-col gap-2 min-w-0">
-                  <div className="flex justify-between items-center gap-4 md:flex-col md:items-start md:gap-1">
-                    <h3 className="text-lg font-semibold text-gray-900 m-0 overflow-hidden text-ellipsis whitespace-nowrap flex-1 md:text-base">
-                      {employee.full_name || employee.username}
-                    </h3>
-                    <p className="text-sm text-gray-500 font-medium m-0 flex-shrink-0 md:text-xs">
-                      Position: {employee.position || 'N/A'}
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 m-0 overflow-hidden text-ellipsis whitespace-nowrap md:text-base">
+                        {employee.full_name || employee.username}
+                      </h3>
+                      <p className="text-sm text-gray-500 font-medium m-0 md:text-xs">
+                        Position: {employee.position || 'N/A'}
+                      </p>
+                    </div>
+                    <p className="text-xs text-green-800 bg-green-100 px-3 py-1 rounded-full font-medium uppercase tracking-wide m-0 flex-shrink-0 md:text-[11px]">
+                      STATUS: {employee.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center gap-4 md:flex-col md:items-start md:gap-1">
+                  <div className="flex justify-between items-center gap-4">
                     <h5 className="text-sm text-purple-500 font-medium m-0 overflow-hidden text-ellipsis whitespace-nowrap flex-1 md:text-xs">
                       {employee.department || 'N/A'}
                     </h5>
-                    <p className="text-xs text-green-800 bg-green-100 px-3 py-1 rounded-full font-medium uppercase tracking-wide m-0 flex-shrink-0 md:text-[11px]">
-                      Status: {employee.is_active ? 'Active' : 'Inactive'}
-                    </p>
                   </div>
                 </div>
               </div>
             </div>
           ))
+
         )}
       </div>
 

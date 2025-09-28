@@ -6,7 +6,7 @@ import { useViewModel } from '../../../../hooks/useViewModel';
 import { SessionViewModel } from '../../../../../domain/viewmodel/SessionViewModel';
 import { RefreshCcw, Monitor, Smartphone, Tablet } from 'lucide-react';
 
-export const ManagerSessionsPage: React.FC = () => {
+export const EmoployeeSessionsPage: React.FC = () => {
     const { sessions, loading, error, revokeSession, transferMainDevice, refreshSessions } = useSessions();
     const sessionViewModel = useViewModel(SessionViewModel);
 

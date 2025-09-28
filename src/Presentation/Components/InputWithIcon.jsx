@@ -18,7 +18,7 @@ const InputWithIcon = ({
   };
 
   return (
-    <div className="flex items-center rounded-lg p-3 w-full max-w-sm h-12 bg-transparent relative border border-gray-700">
+    <div className="flex items-center rounded-lg p-3 w-full  h-12 bg-transparent relative border border-gray-700">
       <span className="mr-2 mt-1 text-black border-r border-gray-300 pr-2">
         {icon}
       </span>

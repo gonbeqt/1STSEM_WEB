@@ -27,10 +27,7 @@ const Profile: React.FC = () => {
   };
 
   const menuItems: MenuItem[] = [
-    { icon: "wallet", title: "Wallet", path: "/wallet" },
     { icon: "document", title: "Compliance", path: "/compliance" },
-    { icon: "currency", title: "Currency", value: "ETH/USD", path: "/currency" },
-    { icon: "shield", title: "Security", path: "/security" },
     { icon: "session", title: "Session Management", path: "/manager/sessions" },
     { icon: "help", title: "Help & Support", path: "/help" }
   ];
@@ -75,7 +72,7 @@ const Profile: React.FC = () => {
         .icon.settings::before { content: "⚙️"; }
         .icon.logout::before { content: "🚪"; }
       `}</style>
-      <div className="sidebar flex flex-col w-full min-h-screen bg-gray-100 font-sans p-6 gap-6 xl:p-5 md:p-4 md:w-[280px] sm:w-full sm:min-h-fit sm:max-h-screen">
+      <div className="sidebar flex flex-col w-full min-h-screen bg-gray-100 font-sans p-6 gap-6 xl:p-5 md:p-4  sm:w-full sm:min-h-fit sm:max-h-screen">
         <div 
           className="user-profile flex items-center mb-8 p-5 rounded-[20px] relative backdrop-blur-md border border-white/10 transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-500 hover:to-purple-600 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer focus:outline focus:outline-2 focus:outline-white/50 focus:outline-offset-2"
           tabIndex={0}
@@ -89,7 +86,7 @@ const Profile: React.FC = () => {
               target.src = 'https://via.placeholder.com/64x64/667eea/ffffff?text=JD';
             }}
           />
-          <div className="user-info flex-1 min-w-0">
+          <div className="user-info flex-1 min-w-full">
             <h2 className="text-lg font-bold tracking-tight whitespace-nowrap overflow-hidden text-ellipsis mb-1">{user.name}</h2>
             <span className="text-sm opacity-85 block font-normal whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">{user.title}</span>
             {user.email && <span className="user-email text-xs opacity-70 italic block whitespace-nowrap overflow-hidden text-ellipsis">{user.email}</span>}
@@ -102,7 +99,7 @@ const Profile: React.FC = () => {
         <nav className="menu flex-1 flex flex-col" role="navigation">
           <div className="menu-section mb-6">
             <h3 className="menu-section-title text-xs font-bold uppercase tracking-wide opacity-70 mb-3 px-5">Main</h3>
-            {menuItems.slice(0, 4).map((item, index) => (
+            {menuItems.slice(0, 2).map((item, index) => (
               <div 
                 key={index} 
                 className={`menu-item flex items-center p-4 mb-1 bg-white border border-gray-200 rounded-[16px] cursor-pointer transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-500 hover:to-purple-600 hover:translate-x-1 hover:shadow-md focus:outline focus:outline-2 focus:outline-white/50 focus:outline-offset-2 animate-slideInLeft ${item.path === window.location.pathname ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : ''}`}
@@ -127,9 +124,9 @@ const Profile: React.FC = () => {
 
           <div className="menu-section mb-6">
             <h3 className="menu-section-title text-xs font-bold uppercase tracking-wide opacity-70 mb-3 px-5">Support</h3>
-            {menuItems.slice(4).map((item, index) => (
+           {menuItems.slice(2).map((item, index) => (
               <div 
-                key={index + 4} 
+                key={index + 2} 
                 className={`menu-item flex items-center p-4 mb-1 bg-white border border-gray-200 rounded-[16px] cursor-pointer transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-500 hover:to-purple-600 hover:translate-x-1 hover:shadow-md focus:outline focus:outline-2 focus:outline-white/50 focus:outline-offset-2 animate-slideInLeft ${item.path === window.location.pathname ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : ''}`}
                 style={{ animationDelay: `${0.1 * (index + 5)}s` }}
                 onClick={() => handleMenuItemClick(item)}
@@ -155,4 +152,4 @@ const Profile: React.FC = () => {
   );
 };
 
-export default Profile;
+export default Profile; 

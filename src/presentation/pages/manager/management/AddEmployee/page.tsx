@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { container } from '../../../../../di/container';
 import { useEmployeeViewModel } from '../../../../../domain/viewmodel/EmployeeViewModel';
 import { AddEmployeeRequest, AddEmployeeResponse } from '../../../../../domain/repositories/EmployeeRepository';
+import { ArrowLeft, MoveLeft } from 'lucide-react';
 
 interface AddEmployeeData {
   email: string;
@@ -137,11 +138,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
           {/* Header */}
           <div className="flex items-center p-6 pb-4 border-b border-gray-200 relative">
             <button 
-              className="bg-transparent border-none text-2xl text-gray-500 p-0 mr-4 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+              className="bg-transparent border-none text-2xl text-gray-500 p-0 mr-4 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100  transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
               onClick={handleClose}
               disabled={isLoading}
             >
-              ←
+              <ArrowLeft/>
             </button>
             <h2 className="text-lg font-semibold text-gray-900 m-0">Add Employee to Team</h2>
           </div>

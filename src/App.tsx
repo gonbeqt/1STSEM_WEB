@@ -31,6 +31,7 @@ import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
 import { container } from './di/container'; // Import the container
+import { EmoployeeSessionsPage } from './presentation/pages/employee/settings/sessions/page';
 
 const ManagerLayout = () => (
   <div className="flex min-h-screen bg-gray-50">
@@ -97,6 +98,7 @@ function App() {
             <Route path="/employee/history" element={<EmployeeHistory />} />
             <Route path="/employee/settings" element={<EmployeeSettings />} />
             <Route path="/transaction_details" element={<TransactionDetails />} />
+            <Route path="/employee/sessions"element={<EmoployeeSessionsPage />}/>
           </Route>
         </Routes>
       </Router>
