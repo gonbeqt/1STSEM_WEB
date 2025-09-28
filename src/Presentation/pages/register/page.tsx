@@ -1,5 +1,4 @@
 import React from 'react';
-import './register.css';
 import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';
 import PasswordIcon from '../../components/icons/PasswordIcon';
@@ -7,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { RegisterViewModel } from '../../../domain/viewmodel/RegisterViewModel';
 import { useViewModel } from '../../hooks/useViewModel';
 import { observer } from 'mobx-react-lite';
-
 
 const Register = observer(() => {
   const navigate = useNavigate();
@@ -25,34 +23,59 @@ const Register = observer(() => {
   };
 
   return (
-    <div className="register-container-wrapper">
-      <div className="register-container">
-        <h1>Create Account</h1>
-        <p className="register-subtitle">Sign up and simplify crypto bookkeeping and invoicing.</p>
+    <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">
+      <div className="w-full max-w-md mx-auto p-10 text-gray-900 bg-white rounded-2xl shadow-lg shadow-black/8 animate-[slideIn_0.4s_ease-out]">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            Create Account
+          </h1>
+          <p className="text-center text-gray-500 text-base">
+            Sign up and simplify crypto bookkeeping and invoicing.
+          </p>
+        </div>
 
-        {formData.error && <div className="error-message">{formData.error}</div>}
+        {/* Error Message */}
+        {formData.error && (
+          <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+            {formData.error}
+          </div>
+        )}
 
-        <div className="user-type-toggle">
+        {/* User Type Toggle */}
+        <div className="flex gap-3 mb-6">
           <button
             type="button"
-            className={`type-btn ${formData.userType === 'manager' ? 'active' : ''}`}
+            className={`flex-1 p-3 border rounded-xl cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 ${
+              formData.userType === 'manager'
+                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold'
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+            }`}
             onClick={() => viewModel.setUserType('manager')}
           >
-            <span className="icon">👤</span>
+            <span className="text-xl">👤</span>
             Manager
           </button>
           <button
             type="button"
-            className={`type-btn ${formData.userType === 'employee' ? 'active' : ''}`}
+            className={`flex-1 p-3 border rounded-xl cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 ${
+              formData.userType === 'employee'
+                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold'
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+            }`}
             onClick={() => viewModel.setUserType('employee')}
           >
-            <span className="icon">👥</span>
+            <span className="text-xl">👥</span>
             Employee
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Username Field */}
+          <div>
             <InputWithIcon
               icon={<EmailIcon />}
               type="text"
@@ -62,7 +85,8 @@ const Register = observer(() => {
             />
           </div>
 
-          <div className="input-group">
+          {/* Email Field */}
+          <div>
             <InputWithIcon
               icon={<EmailIcon />}
               type="email"
@@ -72,7 +96,8 @@ const Register = observer(() => {
             />
           </div>
 
-          <div className="input-group">
+          {/* Password Field */}
+          <div>
             <InputWithIcon
               icon={<PasswordIcon />}
               type="password"
@@ -82,7 +107,8 @@ const Register = observer(() => {
             />
           </div>
 
-          <div className="input-group">
+          {/* Confirm Password Field */}
+          <div>
             <InputWithIcon
               icon={<PasswordIcon />}
               type="password"
@@ -92,29 +118,52 @@ const Register = observer(() => {
             />
           </div>
 
-          <div className="terms-checkbox">
+          {/* Terms and Conditions Checkbox */}
+          <div className="flex items-start gap-2 my-6 text-xs text-gray-500">
             <input
               type="checkbox"
               id="terms"
+              className="mt-0.5 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
               checked={formData.agreeToTerms}
               onChange={(e) => viewModel.setAgreeToTerms(e.target.checked)}
             />
-            <label htmlFor="terms">
-              I agree to the <a href="/terms">Terms and Conditions</a> and{' '}
-              <a href="/privacy">Privacy Policy</a>.
+            <label htmlFor="terms" className="text-sm leading-relaxed">
+              I agree to the{' '}
+              <a 
+                href="/terms" 
+                className="text-indigo-600 no-underline hover:underline"
+              >
+                Terms and Conditions
+              </a>
+              {' '}and{' '}
+              <a 
+                href="/privacy" 
+                className="text-indigo-600 no-underline hover:underline"
+              >
+                Privacy Policy
+              </a>
+              .
             </label>
           </div>
 
+          {/* Sign Up Button */}
           <button 
             type="submit" 
-            className="sign-up-btn"
+            className="w-full p-3.5 bg-gradient-to-br from-indigo-500 to-purple-600 border-none rounded-xl text-white text-base font-semibold cursor-pointer mb-6 transition-all duration-200 hover:shadow-lg hover:shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             disabled={formData.isLoading}
           >
             {formData.isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
 
-          <p className="login-link">
-            Already have an account? <a href="/login">Log in</a>
+          {/* Login Link */}
+          <p className="text-center text-sm text-gray-500">
+            Already have an account?{' '}
+            <a 
+              href="/login" 
+              className="text-indigo-600 no-underline font-medium hover:underline"
+            >
+              Log in
+            </a>
           </p>
         </form>
       </div>
@@ -122,4 +171,4 @@ const Register = observer(() => {
   );
 });
 
-export default Register;
+export default Register

@@ -1,10 +1,10 @@
+// src/Presentation/pages/employee/history/page.tsx
 import React, { useState } from 'react';
 import { SearchIcon, ArrowLeft, Calendar, TrendingUp, Clock, CheckCircle } from 'lucide-react';
-import './history.css';
 import InputWithIcon from '../../../components/InputWithIcon';
 import { usePayslips } from '../../../../presentation/hooks/usePayslips';
 import { Payslip } from '../../../../domain/entities/PayslipEntities';
-import EmployeePayslip from '../payslip/page'; // Import the payslip detail page
+import EmployeePayslip from '../payslip/page';
 
 interface SalaryTransactionsProps {
   onBack?: () => void;
@@ -13,7 +13,7 @@ interface SalaryTransactionsProps {
 const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'paid' | 'pending' | 'failed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null); // New state for selected payslip
+  const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
 
   const { payslips, loading, error } = usePayslips();
 
@@ -75,72 +75,85 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
 
   if (loading) {
     return (
-      <div className="salary-transactions-container">
-        <div className="transactions-header">
+      <div className="w-full mx-auto h-full bg-gray-50 text-gray-800 font-sans p-6 box-border rounded-xl animate-[slideIn_0.3s_ease-out] relative overflow-y-auto">
+        <div className="flex items-center justify-between mb-8 relative z-10">
           {onBack && (
-            <button className="back-btn" onClick={onBack} aria-label="Go back">
+            <button 
+              className="bg-white border border-gray-200 text-gray-600 cursor-pointer p-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+              onClick={onBack} 
+              aria-label="Go back"
+            >
               <ArrowLeft size={20} />
             </button>
           )}
-          <h1 className="page-title">Salary History</h1>
-          <div className="header-spacer"></div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0 text-center tracking-tight">Salary History</h1>
+          <div className="w-12"></div>
         </div>
-        <div className="loading-message">Loading payslips...</div>
+        <div className="text-gray-600">Loading payslips...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="salary-transactions-container">
-        <div className="transactions-header">
+      <div className="w-full mx-auto h-full bg-gray-50 text-gray-800 font-sans p-6 box-border rounded-xl animate-[slideIn_0.3s_ease-out] relative overflow-y-auto">
+        <div className="flex items-center justify-between mb-8 relative z-10">
           {onBack && (
-            <button className="back-btn" onClick={onBack} aria-label="Go back">
+            <button 
+              className="bg-white border border-gray-200 text-gray-600 cursor-pointer p-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+              onClick={onBack} 
+              aria-label="Go back"
+            >
               <ArrowLeft size={20} />
             </button>
           )}
-          <h1 className="page-title">Salary History</h1>
-          <div className="header-spacer"></div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0 text-center tracking-tight">Salary History</h1>
+          <div className="w-12"></div>
         </div>
-        <div className="error-message">Error: {error}</div>
+        <div className="text-red-600">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="salary-transactions-container">
+    <div className="w-full mx-auto h-full bg-gray-50 text-gray-800 font-sans p-6 box-border rounded-xl animate-[slideIn_0.3s_ease-out] relative overflow-y-auto before:content-[''] before:absolute before:top-0 before:right-0 before:w-50 before:h-50 before:bg-gradient-radial before:from-purple-500/3 before:to-transparent before:rounded-full before:translate-x-1/2 before:-translate-y-1/2 before:pointer-events-none after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-40 after:h-40 after:bg-gradient-radial after:from-blue-500/2 after:to-transparent after:rounded-full after:-translate-x-1/2 after:translate-y-1/2 after:pointer-events-none">
+      
       {/* Header */}
-      <div className="transactions-header">
+      <div className="flex items-center justify-between mb-8 relative z-10">
         {onBack && (
-          <button className="back-btn" onClick={onBack} aria-label="Go back">
+          <button 
+            className="bg-white border border-gray-200 text-gray-600 cursor-pointer p-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+            onClick={onBack} 
+            aria-label="Go back"
+          >
             <ArrowLeft size={20} />
           </button>
         )}
-        <h1 className="page-title">Salary History</h1>
-        <div className="header-spacer"></div>
+        <h1 className="text-3xl font-bold text-gray-900 m-0 text-center tracking-tight">Salary History</h1>
+        <div className="w-12"></div>
       </div>
 
       {/* Summary Cards */}
-      <div className="summary-cards">
-        <div className="summary-card">
-          <div className="summary-icon">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5 mb-8">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 flex items-center gap-4 shadow-md transition-all duration-300 relative overflow-hidden hover:-translate-y-0.5 hover:shadow-lg hover:border-purple-500/30 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-blue-500">
+          <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0">
             <TrendingUp size={24} />
           </div>
-          <div className="summary-content">
-            <div className="summary-label">Total Net Earnings</div>
-            <div className="summary-amount">{totalEarnings.eth} ETH</div>
-            <div className="summary-usd">{totalEarnings.usd}</div>
+          <div className="flex-1">
+            <div className="text-sm text-gray-500 font-medium mb-1">Total Net Earnings</div>
+            <div className="text-2xl font-extrabold text-gray-900 mb-0.5 tracking-tight">{totalEarnings.eth} ETH</div>
+            <div className="text-sm text-gray-500 font-medium">{totalEarnings.usd}</div>
           </div>
         </div>
         
-        <div className="summary-card">
-          <div className="summary-icon">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 flex items-center gap-4 shadow-md transition-all duration-300 relative overflow-hidden hover:-translate-y-0.5 hover:shadow-lg hover:border-purple-500/30 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-blue-500">
+          <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0">
             <Calendar size={24} />
           </div>
-          <div className="summary-content">
-            <div className="summary-label">Total Payslips</div>
-            <div className="summary-count">{payslips.length}</div>
-            <div className="summary-detail">
+          <div className="flex-1">
+            <div className="text-sm text-gray-500 font-medium mb-1">Total Payslips</div>
+            <div className="text-3xl font-extrabold text-gray-900 mb-0.5 tracking-tight">{payslips.length}</div>
+            <div className="text-sm text-gray-500 font-medium">
               {payslips.filter(p => p.status === 'paid').length} paid
             </div>
           </div>
@@ -148,7 +161,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
       </div>
 
       {/* Search Bar */}
-      <div className="search-container">
+      <div className="mb-6 relative z-10">
         <InputWithIcon
           icon={<SearchIcon />}
           placeholder="Search by period or amount..."
@@ -158,80 +171,81 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="filter-tabs">
-        <button
-          className={`filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('all')}
-        >
-          All ({getFilterCount('all')})
-        </button>
-        <button
-          className={`filter-tab ${activeFilter === 'paid' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('paid')}
-        >
-          Paid ({getFilterCount('paid')})
-        </button>
-        <button
-          className={`filter-tab ${activeFilter === 'pending' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('pending')}
-        >
-          Pending ({getFilterCount('pending')})
-        </button>
-        <button
-          className={`filter-tab ${activeFilter === 'failed' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('failed')}
-        >
-          Failed ({getFilterCount('failed')})
-        </button>
+      <div className="flex gap-3 mb-6 flex-wrap">
+        {[
+          { key: 'all', label: 'All' },
+          { key: 'paid', label: 'Paid' },
+          { key: 'pending', label: 'Pending' },
+          { key: 'failed', label: 'Failed' }
+        ].map((filter) => (
+          <button
+            key={filter.key}
+            className={`border rounded-3xl px-5 py-3 text-sm font-semibold cursor-pointer transition-all duration-300 whitespace-nowrap shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+              activeFilter === filter.key
+                ? 'bg-gradient-to-br from-purple-500 to-blue-500 border-transparent text-white shadow-lg shadow-purple-500/30'
+                : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-600 hover:-translate-y-0.5'
+            }`}
+            onClick={() => setActiveFilter(filter.key as typeof activeFilter)}
+          >
+            {filter.label} ({getFilterCount(filter.key as typeof activeFilter)})
+          </button>
+        ))}
       </div>
 
       {/* Payslips List */}
-      <div className="transactions-list">
-        {filteredPayslips.map((payslip) => (
+      <div className="flex flex-col gap-4 relative z-10">
+        {filteredPayslips.map((payslip, index) => (
           <div 
             key={payslip.id} 
-            className="transaction-item"
+            className="bg-white border border-gray-200 rounded-2xl p-6 flex justify-between items-start transition-all duration-300 cursor-pointer shadow-sm relative overflow-hidden hover:bg-gray-50 hover:border-purple-500/30 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0 before:bg-gradient-to-br before:from-purple-500 before:to-blue-500 before:transition-all before:duration-300 hover:before:w-1"
             onClick={() => handlePayslipClick(payslip)}
             role="button"
             tabIndex={0}
+            style={{
+              animationDelay: `${(index + 1) * 0.05 + 0.1}s`
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 handlePayslipClick(payslip);
               }
             }}
           >
-            <div className="transaction-left">
-              <div className="transaction-header">
-                <div className="transaction-date">{payslip.pay_period_start} - {payslip.pay_period_end}</div>
-                <div className={`transaction-status ${payslip.status}`}>
-                  <span className="status-icon">
+            <div className="flex-1 relative z-20">
+              <div className="flex items-center justify-between mb-3 gap-4">
+                <div className="text-lg font-bold text-gray-900 tracking-tight">{payslip.pay_period_start} - {payslip.pay_period_end}</div>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap ${
+                  payslip.status === 'paid' 
+                    ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                }`}>
+                  <span className="flex items-center">
                     {getStatusIcon(payslip.status)}
                   </span>
-                  <span className="status-text">
+                  <span className="uppercase tracking-wider">
                     {payslip.status.charAt(0).toUpperCase() + payslip.status.slice(1)}
                   </span>
                 </div>
               </div>
-              <div className="payment-period">
+              <div className="text-sm text-gray-500 font-medium mb-1">
                 Employee ID: {payslip.employee_id}
               </div>
-              <div className="transaction-hash">
+              <div className="text-xs text-gray-400 font-mono font-medium">
                 Created At: {payslip.created_at}
               </div>
             </div>
-            <div className="transaction-right">
-              <div className="transaction-amount4">{payslip.net_salary} ETH</div>
-              <div className="transaction-usd">${(payslip.net_salary * 1900).toFixed(2)} USD</div>
+            <div className="text-right relative z-20 flex-shrink-0 ml-6">
+              <div className="text-xl font-extrabold text-gray-900 mb-1 tracking-tight">{payslip.net_salary} ETH</div>
+              <div className="text-sm text-gray-500 font-semibold">${(payslip.net_salary * 1900).toFixed(2)} USD</div>
             </div>
           </div>
         ))}
       </div>
 
       {filteredPayslips.length === 0 && (
-        <div className="no-transactions">
-          <div className="no-transactions-icon">📄</div>
-          <div className="no-transactions-title">No Payslips Found</div>
-          <div className="no-transactions-text">
+        <div className="flex flex-col justify-center items-center py-20 px-5 text-center">
+          <div className="text-6xl mb-5 opacity-60">📄</div>
+          <div className="text-xl font-bold text-gray-600 mb-2">No Payslips Found</div>
+          <div className="text-base text-gray-500 bg-white border border-gray-200 rounded-2xl p-6 max-w-md leading-relaxed shadow-md">
             {searchQuery 
               ? `No payslips match your search for "${searchQuery}"`
               : `No ${activeFilter === 'all' ? '' : activeFilter} payslips available`
