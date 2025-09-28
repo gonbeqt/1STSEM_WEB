@@ -1,6 +1,5 @@
-// src/Presentation/Components/WalletModal.tsx
 import React, { useState, useEffect } from 'react';
-import { X, Wallet, ArrowRight, Send } from 'lucide-react';
+import { X, Wallet, Send } from 'lucide-react';
 import { useWallet } from '../hooks/useWallet';
 import { observer } from 'mobx-react-lite';
 
@@ -76,7 +75,11 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
         <div className="flex justify-between items-start p-6 pb-0 mb-4">
           <div className="flex items-center gap-3 flex-1">
             <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Wallet className="w-6 h-6 text-purple-600" />
+              {currentView === 'connect' ? (
+                <Wallet className="w-6 h-6 text-purple-600" />
+              ) : (
+                <Send className="w-6 h-6 text-purple-600" />
+              )}
             </div>
             <div>
               <h2 className="text-black text-xl font-semibold m-0 leading-tight">
@@ -95,27 +98,8 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
           </button>
         </div>
 
-        {/* View Tabs */}
-        {isWalletConnected && (
-          <div className="flex mx-6 mb-6 bg-gray-100 border border-gray-300 rounded-xl p-1">
-            <button 
-              className={`flex-1 bg-transparent border-none text-sm font-medium py-3 px-4 rounded-lg cursor-pointer transition-all ${
-                currentView === 'connect' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-black hover:bg-purple-100'
-              }`}
-              onClick={() => setCurrentView('connect')}
-            >
-              Connect
-            </button>
-            <button 
-              className={`flex-1 bg-transparent border-none text-sm font-medium py-3 px-4 rounded-lg cursor-pointer transition-all ${
-                currentView === 'send' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-black hover:bg-purple-100'
-              }`}
-              onClick={() => setCurrentView('send')}
-            >
-              Send
-            </button>
-          </div>
-        )}
+        {/* View Tabs (only shown when wallet is connected) */}
+        
 
         {/* Content */}
         <div className="px-6 pb-6">
@@ -125,12 +109,36 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                 <input
                   type="password"
                   placeholder="Enter Private Key"
+                  value={privateKeyInput}
+                  onChange={(e) => setPrivateKeyInput(e.target.value)}
                   className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
                 />
               </div>
-              
+              <button
+                onClick={() => handleWalletConnect('Private Key')}
+                className="flex items-center justify-center gap-2 w-full bg-purple-600 text-white border-none rounded-xl p-4 text-base font-semibold cursor-pointer transition-all hover:bg-purple-700 hover:-translate-y-px"
+              >
+                Connect with Private Key
+              </button>
+            </div>
+          )}
+
+          {currentView === 'send' && isWalletConnected && (
+            <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2">
-                <label htmlFor="amount" className="text-white text-sm font-medium">Amount (ETH):</label>
+                <label htmlFor="recipient" className="text-black text-sm font-medium">Recipient Address:</label>
+                <input
+                  id="recipient"
+                  type="text"
+                  placeholder="0x..."
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="amount" className="text-black text-sm font-medium">Amount (ETH):</label>
                 <input
                   id="amount"
                   type="number"
@@ -143,7 +151,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="company" className="text-white text-sm font-medium">Company:</label>
+                <label htmlFor="company" className="text-black text-sm font-medium">Company:</label>
                 <input
                   id="company"
                   type="text"
@@ -155,7 +163,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="category" className="text-white text-sm font-medium">Category:</label>
+                <label htmlFor="category" className="text-black text-sm font-medium">Category:</label>
                 <input
                   id="category"
                   type="text"
@@ -167,7 +175,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="description" className="text-white text-sm font-medium">Description:</label>
+                <label htmlFor="description" className="text-black text-sm font-medium">Description:</label>
                 <input
                   id="description"
                   type="text"

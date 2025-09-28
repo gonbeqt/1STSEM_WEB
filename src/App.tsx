@@ -31,20 +31,20 @@ import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
 import { container } from './di/container'; // Import the container
-  
+
 const ManagerLayout = () => (
-  <div className="app-container">
+  <div className="flex min-h-screen bg-gray-50">
     <SideNavbar />
-    <main className="main-content">
+    <main className="flex-grow flex flex-col items-start justify-start p-11 pr-12 pb-8 pl-4 bg-gray-50">
       <Outlet />
     </main>
   </div>
 );
 
 const EmployeeLayout = () => (
-  <div className="app-container">
+  <div className="flex min-h-screen bg-gray-50">
     <SideNavbarEmployee />
-    <main className="main-content">
+    <main className="flex-grow flex flex-col items-start justify-start p-11 pr-12 pb-8 pl-4 bg-gray-50">
       <Outlet />
     </main>
   </div>
@@ -55,48 +55,51 @@ function App() {
 
   return (
     <WalletViewModelProvider value={walletViewModel}>
-    <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<div className="register-page-wrapper"><Register /></div>} />
-          <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
-        <Route element={<ManagerLayout />}>
-          <Route path="/home" element={
-            <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">
-          <Home />
-           </MiddlewareRoute>} />
-          <Route path="/management" element={<Management />} />
-          <Route path="/invoice" element={<Invoice />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/audits" element={<AuditsPage />} />
-          <Route path="/audits/:auditId" element={<AuditDetailsPage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/balance_sheet" element={<BalanceSheet />} />
-          <Route path="/cash_flow" element={<CashFlow />} />
-          <Route path="/income" element={<Income />} />
-          <Route path="/invest" element={<Invest />} />
-          <Route path="/payroll_summary" element={<PayrollSummary />} />
-          <Route path="/tax_summary" element={<TaxSummary />} />
-          <Route path="/manager/sessions" element={<ManagerSessionsPage />} />
-          <Route path="/compliance" element={<CompliancePage/>} />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={
+            <div className="flex justify-center items-center min-h-screen bg-gray-50">
+              <Register />
+            </div>
+          } />          <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
+          <Route element={<ManagerLayout />}>
+            <Route path="/home" element={
+              <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">
+                <Home />
+              </MiddlewareRoute>} />
+            <Route path="/management" element={<Management />} />
+            <Route path="/invoice" element={<Invoice />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/audits" element={<AuditsPage />} />
+            <Route path="/audits/:auditId" element={<AuditDetailsPage />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/balance_sheet" element={<BalanceSheet />} />
+            <Route path="/cash_flow" element={<CashFlow />} />
+            <Route path="/income" element={<Income />} />
+            <Route path="/invest" element={<Invest />} />
+            <Route path="/payroll_summary" element={<PayrollSummary />} />
+            <Route path="/tax_summary" element={<TaxSummary />} />
+            <Route path="/manager/sessions" element={<ManagerSessionsPage />} />
+            <Route path="/compliance" element={<CompliancePage />} />
 
 
 
-        </Route>
+          </Route>
 
-        <Route element={<EmployeeLayout />}>
-          <Route path="/employee/home" element={ 
-            <MiddlewareRoute isAuthenticated={true} role="employee" requiredRole="employee">
-            <EmployeeHome />
-          </MiddlewareRoute>} />
-          <Route path="/employee/payslip" element={<EmployeePayslip />} />
-          <Route path="/employee/history" element={<EmployeeHistory />} />
-          <Route path="/employee/settings" element={<EmployeeSettings />} />
-          <Route path="/transaction_details" element={<TransactionDetails />} />
-        </Route>
-      </Routes>
-    </Router>
+          <Route element={<EmployeeLayout />}>
+            <Route path="/employee/home" element={
+              <MiddlewareRoute isAuthenticated={true} role="employee" requiredRole="employee">
+                <EmployeeHome />
+              </MiddlewareRoute>} />
+            <Route path="/employee/payslip" element={<EmployeePayslip />} />
+            <Route path="/employee/history" element={<EmployeeHistory />} />
+            <Route path="/employee/settings" element={<EmployeeSettings />} />
+            <Route path="/transaction_details" element={<TransactionDetails />} />
+          </Route>
+        </Routes>
+      </Router>
     </WalletViewModelProvider>
   );
 }
