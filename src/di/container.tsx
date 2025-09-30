@@ -15,6 +15,7 @@ import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
 import { EmployeeRepositoryImpl } from '../data/repositoriesImpl/EmployeeRepositoryImpl';
 import { AddEmployeeUseCase } from '../domain/usecases/AddEmployeeUseCase';
 import { GetEmployeesByManagerUseCase } from '../domain/usecases/GetEmployeesByManagerUseCase';
+import { RemoveEmployeeFromTeamUseCase } from '../domain/usecases/RemoveEmployeeFromTeamUseCase';
 import { EmployeeViewModel } from '../domain/viewmodel/EmployeeViewModel';
 import { ReportRepository } from '../domain/repositories/ReportRepository';
 import { ReportRepositoryImpl } from '../data/repositoriesImpl/ReportRepositoryImpl';
@@ -87,6 +88,7 @@ export interface Container {
   getExchangeRatesUseCase: GetExchangeRatesUseCase;
   addEmployeeUseCase: AddEmployeeUseCase;
   getEmployeesByManagerUseCase: GetEmployeesByManagerUseCase;
+  removeEmployeeFromTeamUseCase: RemoveEmployeeFromTeamUseCase;
 
   // Report Use Cases
   generateBalanceSheetUseCase: GenerateBalanceSheetUseCase;
@@ -149,6 +151,7 @@ const sendEthUseCase = new SendEthUseCase(walletRepository);
 const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
 const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
 const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
+const removeEmployeeFromTeamUseCase = new RemoveEmployeeFromTeamUseCase(employeeRepository);
 
 // ======= Create report use case instances =======
 const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportRepository);
@@ -203,6 +206,7 @@ export const container: Container = {
   getExchangeRatesUseCase,
   addEmployeeUseCase,
   getEmployeesByManagerUseCase,
+  removeEmployeeFromTeamUseCase,
 
   // Report Use Cases
   generateBalanceSheetUseCase,
@@ -250,7 +254,8 @@ export const container: Container = {
   ),
   employeeViewModel: () => new EmployeeViewModel(
     addEmployeeUseCase,
-    getEmployeesByManagerUseCase
+    getEmployeesByManagerUseCase,
+    removeEmployeeFromTeamUseCase
   ),
   businessDocumentViewModel: () => new BusinessDocumentViewModel(
     uploadBusinessDocumentsUseCase

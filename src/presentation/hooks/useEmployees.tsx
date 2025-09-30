@@ -31,7 +31,8 @@ export const useEmployees = (): UseEmployeesReturn => {
     clearMessages
   } = useEmployeeViewModel(
     container.addEmployeeUseCase, 
-    container.getEmployeesByManagerUseCase
+    container.getEmployeesByManagerUseCase,
+    container.removeEmployeeFromTeamUseCase
   );
 
   // Fetch employees function

@@ -61,16 +61,19 @@ const EmployeeManagement: React.FC = () => {
   const [isAddEmployeeModal, setIsAddEmployeeModal] = useState(false);
   const [showEmployeeDetailModal, setShowEmployeeDetailModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<DetailedEmployee | null>(null);
+  const [selectedApiEmployee, setSelectedApiEmployee] = useState<ApiEmployee | null>(null);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const {
     getEmployeesByManager,
+    removeEmployeeFromTeam,
     isLoading: isLoadingEmployees,
     error: employeesError
   } = useEmployeeViewModel(
     container.addEmployeeUseCase,
-    container.getEmployeesByManagerUseCase
+    container.getEmployeesByManagerUseCase,
+    container.removeEmployeeFromTeamUseCase
   );
 
   useEffect(() => {
@@ -180,12 +183,14 @@ const EmployeeManagement: React.FC = () => {
     };
 
     setSelectedEmployee(detailed);
+    setSelectedApiEmployee(employee);
     setShowEmployeeDetailModal(true);
   };
 
   const handleCloseModal = () => {
     setShowEmployeeDetailModal(false);
     setSelectedEmployee(null);
+    setSelectedApiEmployee(null);
   };
 
   const handleEditEmployee = () => {
@@ -194,10 +199,31 @@ const EmployeeManagement: React.FC = () => {
     setIsAddEmployeeModal(true);
   };
 
-  const handleDeleteEmployee = () => {
-    console.log('Delete employee:', selectedEmployee?.fullName);
-    if (window.confirm(`Are you sure you want to delete ${selectedEmployee?.fullName}?`)) {
-      handleCloseModal();
+  const handleDeleteEmployee = async () => {
+    if (!selectedEmployee) return;
+    
+    console.log('Remove employee from team:', selectedEmployee.fullName);
+    const confirmMessage = `Are you sure you want to remove ${selectedEmployee.fullName} from your team? They will become available for other managers to assign.`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        const response = await removeEmployeeFromTeam({
+          username: selectedApiEmployee?.username || selectedEmployee.employeeId
+        });
+        
+        if (response.success) {
+          console.log('Employee removed successfully:', response.message);
+          // Refresh the employee list
+          setRefreshTrigger(prev => prev + 1);
+          handleCloseModal();
+        } else {
+          console.error('Failed to remove employee:', response.message);
+          alert(`Failed to remove employee: ${response.message}`);
+        }
+      } catch (error) {
+        console.error('Error removing employee:', error);
+        alert('An error occurred while removing the employee. Please try again.');
+      }
     }
   };
 
@@ -325,6 +351,7 @@ const EmployeeManagement: React.FC = () => {
           onClose={handleCloseModal}
           onEdit={handleEditEmployee}
           onDelete={handleDeleteEmployee}
+          onRemoveFromTeam={handleDeleteEmployee}
         />
       )}
     </div>

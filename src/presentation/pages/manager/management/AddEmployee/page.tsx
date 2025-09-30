@@ -31,7 +31,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
     clearMessages 
   } = useEmployeeViewModel(
     container.addEmployeeUseCase, 
-    container.getEmployeesByManagerUseCase
+    container.getEmployeesByManagerUseCase,
+    container.removeEmployeeFromTeamUseCase
   );
 
   const [formData, setFormData] = useState<AddEmployeeData>({

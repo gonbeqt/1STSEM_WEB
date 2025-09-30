@@ -58,7 +58,20 @@ export interface GetEmployeesByManagerResponse {
   error?: string;
 }
 
+export interface RemoveEmployeeFromTeamRequest {
+  username: string;
+}
+
+export interface RemoveEmployeeFromTeamResponse {
+  success: boolean;
+  message: string;
+  username?: string;
+  status?: string;
+  error?: string;
+}
+
 export interface EmployeeRepository {
   addEmployee(request: AddEmployeeRequest): Promise<AddEmployeeResponse>;
   getEmployeesByManager(request: GetEmployeesByManagerRequest): Promise<GetEmployeesByManagerResponse>;
+  removeEmployeeFromTeam(request: RemoveEmployeeFromTeamRequest): Promise<RemoveEmployeeFromTeamResponse>;
 }
