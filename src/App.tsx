@@ -54,6 +54,19 @@ const EmployeeLayout = () => (
 function App() {
   const walletViewModel = container.walletViewModel();
 
+  // Auto-reconnect wallet on app load
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      console.log('User is logged in, checking wallet connection...');
+      walletViewModel.checkWalletConnection(token);
+    } else {
+      console.log('User not logged in, skipping wallet reconnection');
+    }
+  }, []);
+
   return (
     <WalletViewModelProvider value={walletViewModel}>
       <Router>

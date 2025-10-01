@@ -7,12 +7,12 @@ import PasswordIcon from '../../components/icons/PasswordIcon';
 
 const Login = observer(() => {
   const { login, isLoading, error } = useLogin();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(username, password);
+    await login(email, password);
   };
 
   return (
@@ -29,16 +29,16 @@ const Login = observer(() => {
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block mb-2 font-medium text-gray-600" htmlFor="username">
-              Username
+            <label className="block mb-2 font-medium text-gray-600" htmlFor="email">
+              Email
             </label>
             <InputWithIcon
-              id="username"
+              id="email"
               icon={<EmailIcon />}
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 

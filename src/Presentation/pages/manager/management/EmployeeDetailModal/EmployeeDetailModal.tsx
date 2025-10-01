@@ -1,5 +1,6 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download, Eye, Calendar, DollarSign } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { usePayslips } from '../../../../hooks/usePayslips';
 
 interface Employee {
   id: string;
@@ -70,6 +71,9 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   onRemoveFromTeam,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details');
+  
+  // Fetch payslips for the employee
+  const { payslips, loading: payslipsLoading, error: payslipsError } = usePayslips(employee.id);
 
   useEffect(() => {
     if (isOpen) {
@@ -103,6 +107,35 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     } catch {
       return 'Not provided';
     }
+  };
+
+  const formatPayPeriod = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'failed':
+        return 'bg-red-100 text-red-700 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const handleViewPayslip = (payslipId: string) => {
+    console.log('Viewing payslip:', payslipId);
+    // TODO: Implement payslip viewing functionality
+  };
+
+  const handleDownloadPayslip = (payslipId: string) => {
+    console.log('Downloading payslip:', payslipId);
+    // TODO: Implement payslip download functionality
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -230,61 +263,165 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     </div>
   );
 
-  const renderPayrollTab = () => (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-2xl text-white shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-white">Current Pay Period</h3>
-          <span className="text-xs text-white/80 bg-white/20 px-3 py-1 rounded-full font-medium">September 2025</span>
-        </div>
-        <div className="flex justify-between items-center mb-6 gap-6 md:flex-col md:gap-4">
-          <div className="flex flex-row bg-white/10 rounded-xl p-4 backdrop-blur-sm justify-between w-full items-center">
-            <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Net Pay</p>
-            <p className="text-3xl font-bold text-white md:text-2xl">{formatCurrency(payrollData.currentPeriod.netPay)}</p>
-          </div>
-          <div className="flex flex-row bg-white/10 rounded-xl p-4 backdrop-blur-sm justify-between w-full items-center">
-            <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Gross Pay</p>
-            <p className="text-xl font-semibold text-white">{formatCurrency(payrollData.currentPeriod.gross)}</p>
-          </div>
-          <div className="flex flex-row bg-white/10 rounded-xl p-4 backdrop-blur-sm justify-between w-full items-center">
-            <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Year to Date</p>
-            <p className="text-xl font-semibold text-white">{formatCurrency(payrollData.currentPeriod.yearToDate)}</p>
-          </div>
-        </div>
-        
-        <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-          <p className="text-white/80 text-xs uppercase tracking-wider font-medium mb-2">Total Deductions</p>
-          <p className="text-lg font-semibold text-red-200">
-            {formatCurrency(Object.values(payrollData.currentPeriod.deductions).reduce((a, b) => a + b, 0))}
-          </p>
-        </div>
-      </div>
+  const renderPayrollTab = () => {
+    // Calculate summary data from payslips
+    const totalGross = payslips.reduce((sum, payslip) => sum + payslip.gross_salary, 0);
+    const totalNet = payslips.reduce((sum, payslip) => sum + payslip.net_salary, 0);
+    const totalDeductions = payslips.reduce((sum, payslip) => sum + payslip.deductions, 0);
+    const latestPayslip = payslips.length > 0 ? payslips[0] : null;
 
-
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Payment History</h3>
-        <div className="space-y-3">
-          {payrollData.paymentHistory.map((payment, index) => (
-            <div key={index} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
-              <div className="flex justify-between items-center md:flex-col md:items-start md:gap-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900">{formatDate(payment.date)}</h4>
-                  <p className="text-sm text-gray-600">{payment.period}</p>
-                  <p className="text-xs text-gray-500">Paid: {payment.payDate}</p>
-                </div>
-                <div className="flex items-center gap-3 md:self-stretch md:justify-between">
-                  <span className="text-lg font-bold text-gray-900">{formatCurrency(payment.amount)}</span>
-                  <button className="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
-                    View Details
-                  </button>
-                </div>
+    return (
+      <div className="space-y-6">
+        {/* Summary Cards */}
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-white">Payroll Summary</h3>
+            <span className="text-xs text-white/80 bg-white/20 px-3 py-1 rounded-full font-medium">
+              {payslips.length} payslip{payslips.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-white/80" />
+                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Net Pay</p>
               </div>
+              <p className="text-2xl font-bold text-white">{formatCurrency(totalNet)}</p>
             </div>
-          ))}
+            
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-white/80" />
+                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Gross</p>
+              </div>
+              <p className="text-2xl font-bold text-white">{formatCurrency(totalGross)}</p>
+            </div>
+            
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-white/80" />
+                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Deductions</p>
+              </div>
+              <p className="text-2xl font-bold text-red-200">{formatCurrency(totalDeductions)}</p>
+            </div>
+          </div>
+
+          {latestPayslip && (
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-white/80" />
+                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Latest Pay Period</p>
+              </div>
+              <p className="text-lg font-semibold text-white">
+                {formatPayPeriod(latestPayslip.pay_period_start, latestPayslip.pay_period_end)}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Payslips List */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Payslips</h3>
+            {payslipsLoading && (
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin"></div>
+                <span className="text-sm">Loading...</span>
+              </div>
+            )}
+          </div>
+
+          {payslipsError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                <p className="text-red-700 font-medium">Error loading payslips</p>
+              </div>
+              <p className="text-red-600 text-sm mt-1">{payslipsError}</p>
+            </div>
+          )}
+
+          {payslipsLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-200 animate-pulse">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : payslips.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-gray-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">No payslips found</h4>
+              <p className="text-gray-500">This employee doesn't have any payslips yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {payslips.map((payslip) => (
+                <div key={payslip.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
+                  <div className="flex justify-between items-center md:flex-col md:items-start md:gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-gray-900">
+                          {formatPayPeriod(payslip.pay_period_start, payslip.pay_period_end)}
+                        </h4>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(payslip.status)}`}>
+                          {payslip.status.charAt(0).toUpperCase() + payslip.status.slice(1)}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Gross Salary</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(payslip.gross_salary)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Net Salary</p>
+                          <p className="font-semibold text-green-600">{formatCurrency(payslip.net_salary)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Deductions</p>
+                          <p className="font-semibold text-red-600">{formatCurrency(payslip.deductions)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Created</p>
+                          <p className="font-semibold text-gray-900">{formatDate(payslip.created_at)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleViewPayslip(payslip.id)}
+                        className="flex items-center gap-2 px-3 py-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-medium transition-all duration-200"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </button>
+                      <button 
+                        onClick={() => handleDownloadPayslip(payslip.id)}
+                        className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   
   if (!isOpen) return null;

@@ -97,16 +97,28 @@ export class WalletRepositoryImpl implements WalletRepository {
       description: request.description || undefined,
     };
 
-    const response = await fetch(`${this.API_URL}/eth/send/`, {
+    const url = `${this.API_URL}/eth/send/`;
+    console.log('Sending ETH to URL:', url);
+    console.log('Request data:', backendRequest);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(backendRequest),
     });
+    
+    console.log('Send ETH response status:', response.status);
 
     const data: SendETHResponse = await response.json();
+    console.log('Send ETH response data:', data);
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to send ETH transaction');
+      console.error('Send ETH failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: data
+      });
+      throw new Error(data.message || `Failed to send ETH transaction: ${response.status} ${response.statusText}`);
     }
 
     return {

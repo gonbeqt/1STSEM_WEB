@@ -5,7 +5,10 @@ interface RegisterState {
   username: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  password_confirm: string;
+  first_name: string;
+  last_name: string;
+  security_answer: string;
   agreeToTerms: boolean;
   userType: 'manager' | 'employee';
   isLoading: boolean;
@@ -17,7 +20,10 @@ export class RegisterViewModel {
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    password_confirm: '',
+    first_name: '',
+    last_name: '',
+    security_answer: '',
     agreeToTerms: false,
     userType: 'manager',
     isLoading: false,
@@ -40,8 +46,25 @@ export class RegisterViewModel {
     this.state.password = password;
   };
 
-  setConfirmPassword = (confirmPassword: string) => {
-    this.state.confirmPassword = confirmPassword;
+  setPasswordConfirm = (password_confirm: string) => {
+    this.state.password_confirm = password_confirm;
+  };
+
+  setFirstName = (first_name: string) => {
+    this.state.first_name = first_name;
+  };
+
+  setLastName = (last_name: string) => {
+    this.state.last_name = last_name;
+  };
+
+  setSecurityAnswer = (security_answer: string) => {
+    this.state.security_answer = security_answer;
+  };
+
+  // Alternative method name in case of hot reload issues
+  setSecurityQuestionAnswer = (security_answer: string) => {
+    this.state.security_answer = security_answer;
   };
 
   setAgreeToTerms = (agree: boolean) => {
@@ -53,12 +76,13 @@ export class RegisterViewModel {
   };
 
   validateForm = (): boolean => {
-    if (!this.state.username || !this.state.email || !this.state.password) {
+    if (!this.state.username || !this.state.email || !this.state.password || 
+        !this.state.first_name || !this.state.last_name || !this.state.security_answer) {
       this.state.error = 'Please fill in all fields';
       return false;
     }
 
-    if (this.state.password !== this.state.confirmPassword) {
+    if (this.state.password !== this.state.password_confirm) {
       this.state.error = 'Passwords do not match';
       return false;
     }
@@ -82,6 +106,10 @@ export class RegisterViewModel {
         username: this.state.username,
         email: this.state.email,
         password: this.state.password,
+        password_confirm: this.state.password_confirm,
+        first_name: this.state.first_name,
+        last_name: this.state.last_name,
+        security_answer: this.state.security_answer,
         role: this.state.userType === 'manager' ? 'Manager' : 'Employee'
       });
 

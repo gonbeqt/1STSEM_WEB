@@ -74,8 +74,18 @@ export interface ReconnectWalletRequest {
 }
 
 export interface ReconnectWalletResponse {
+  success: boolean;
   message: string;
-  wallet_address: string;
+  data: {
+    wallet_id: string;
+    user_id: string;
+    username: string;
+    wallet_address: string;
+    wallet_name: string;
+    wallet_type: string;
+    action: 're_authenticated';
+    last_authenticated: string;
+  };
 }
 
 export interface WalletBalance {

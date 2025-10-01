@@ -1,5 +1,5 @@
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
   device_name?: string;
   device_id?: string;

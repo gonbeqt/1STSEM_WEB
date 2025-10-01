@@ -73,6 +73,21 @@ export class WalletViewModel {
     private getExchangeRatesUseCase: GetExchangeRatesUseCase 
   ) {
     makeAutoObservable(this);
+    
+    // Initialize wallet state from localStorage on startup
+    this.initializeWalletState();
+  }
+
+  // Initialize wallet state from localStorage
+  initializeWalletState = () => {
+    const walletAddress = localStorage.getItem('walletAddress');
+    const walletConnected = localStorage.getItem('walletConnected');
+    
+    if (walletAddress && walletConnected === 'true') {
+      this.state.walletAddress = walletAddress;
+      this.state.reconnectedWalletAddress = walletAddress;
+      console.log('Wallet state initialized from localStorage:', walletAddress);
+    }
   }
 
   // Form setters
@@ -179,6 +194,8 @@ export class WalletViewModel {
       localStorage.setItem('walletAddress', response.data.wallet_address);
       localStorage.setItem('privateKey', walletData.privateKey);
       localStorage.setItem('walletConnected', 'true');
+      
+      console.log('Private key stored in localStorage during wallet connection');
   
       this.clearForm();
       // After successful connection, fetch the balance
@@ -194,9 +211,10 @@ export class WalletViewModel {
   };
 
   reconnectWallet = async (privateKeyToUse?: string): Promise<boolean> => {
-    const key = privateKeyToUse || this.state.reconnectPrivateKey;
+    // Try to get private key from parameter, state, or localStorage
+    const key = privateKeyToUse || this.state.reconnectPrivateKey || localStorage.getItem('privateKey');
 
-    if (!key.trim()) {
+    if (!key || !key.trim()) {
       this.state.reconnectError = 'Private key is required';
       return false;
     }
@@ -223,18 +241,23 @@ export class WalletViewModel {
       });
 
       this.state.successMessage = response.message;
-      this.state.reconnectedWalletAddress = response.wallet_address;
+      this.state.reconnectedWalletAddress = response.data.wallet_address;
       
       // Store wallet info in localStorage for persistence
-      localStorage.setItem('walletAddress', response.wallet_address);
+      localStorage.setItem('walletAddress', response.data.wallet_address);
+      localStorage.setItem('privateKey', key); // Store the private key for future reconnections
       localStorage.setItem('walletConnected', 'true');
+      
+      console.log('Private key stored in localStorage for future reconnections');
 
       // Clear the form for security
       this.state.reconnectPrivateKey = '';
 
+      // Update wallet address in state
+      this.state.walletAddress = response.data.wallet_address;
+
       // After successful reconnection, fetch the balance
       await this.fetchWalletBalance(token);
-      this.state.reconnectedWalletAddress = response.wallet_address; // Set reconnectedWalletAddress after successful balance fetch
 
       return true;
     } catch (error) {
@@ -373,8 +396,43 @@ export class WalletViewModel {
     const privateKey = localStorage.getItem('privateKey');
     const walletConnected = localStorage.getItem('walletConnected');
 
+    console.log('Checking wallet connection on page load:', {
+      walletAddress,
+      walletConnected,
+      hasToken: !!token,
+      hasPrivateKey: !!privateKey
+    });
+
     if (walletAddress && walletConnected === 'true' && token) {
       this.state.reconnectedWalletAddress = walletAddress;
+      
+      // If we have a private key stored, attempt to reconnect automatically
+      if (privateKey) {
+        try {
+          console.log('Attempting auto-reconnect with stored private key');
+          const success = await this.reconnectWallet(privateKey);
+          if (success) {
+            console.log('Auto-reconnect successful');
+            // Update the wallet address in state after successful reconnection
+            this.state.walletAddress = this.state.reconnectedWalletAddress;
+          } else {
+            console.error('Auto-reconnect failed');
+            this.resetWalletState();
+          }
+        } catch (error) {
+          console.error('Auto-reconnect failed:', error);
+          // Clear stored data if auto-reconnect fails
+          this.resetWalletState();
+        }
+      } else {
+        // Just set the address if no private key is available
+        console.log('No private key available, setting wallet address and fetching balance');
+        this.state.walletAddress = walletAddress;
+        // Try to fetch balance without reconnecting
+        await this.fetchWalletBalance(token);
+      }
+    } else {
+      console.log('No wallet connection found in localStorage');
     }
   };
 

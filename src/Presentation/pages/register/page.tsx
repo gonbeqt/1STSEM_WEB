@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';
 import PasswordIcon from '../../components/icons/PasswordIcon';
 import { useNavigate } from 'react-router-dom';
 import { RegisterViewModel } from '../../../domain/viewmodel/RegisterViewModel';
-import { useViewModel } from '../../hooks/useViewModel';
 import { observer } from 'mobx-react-lite';
+import { container } from '../../../di/container';
 
 const Register = observer(() => {
   const navigate = useNavigate();
-  const viewModel = useViewModel(RegisterViewModel);
+  const viewModel = useMemo(() => container.registerViewModel(), []);
   const { formData } = viewModel;
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,6 +75,28 @@ const Register = observer(() => {
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           
+          {/* First Name Field */}
+          <div>
+            <InputWithIcon
+              icon={<EmailIcon />}
+              type="text"
+              placeholder="First Name"
+              value={formData.first_name}
+              onChange={(e: { target: { value: string; }; }) => viewModel.setFirstName(e.target.value)}
+            />
+          </div>
+
+          {/* Last Name Field */}
+          <div>
+            <InputWithIcon
+              icon={<EmailIcon />}
+              type="text"
+              placeholder="Last Name"
+              value={formData.last_name}
+              onChange={(e: { target: { value: string; }; }) => viewModel.setLastName(e.target.value)}
+            />
+          </div>
+
           {/* Username Field */}
           <div>
             <InputWithIcon
@@ -113,8 +136,19 @@ const Register = observer(() => {
               icon={<PasswordIcon />}
               type="password"
               placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={(e: { target: { value: string; }; }) => viewModel.setConfirmPassword(e.target.value)}
+              value={formData.password_confirm}
+              onChange={(e: { target: { value: string; }; }) => viewModel.setPasswordConfirm(e.target.value)}
+            />
+          </div>
+
+          {/* Security Answer Field */}
+          <div>
+            <InputWithIcon
+              icon={<EmailIcon />}
+              type="text"
+              placeholder="Security Answer (e.g., My favorite pet is Max)"
+              value={formData.security_answer}
+              onChange={(e: { target: { value: string; }; }) => viewModel.setSecurityQuestionAnswer(e.target.value)}
             />
           </div>
 

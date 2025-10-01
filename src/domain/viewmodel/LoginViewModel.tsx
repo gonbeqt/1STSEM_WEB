@@ -4,9 +4,10 @@ import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
 import { WalletViewModel } from './WalletViewModal';
 import { LoginResponse } from '../entities/LoginResponse'; // Added this import
+import { isManager } from '../../utils/userRoleUtils';
 
 interface LoginState {
-  username: string;
+  email: string;
   password: string;
   isLoading: boolean;
   isLoggingOut: boolean;
@@ -17,7 +18,7 @@ interface LoginState {
 
 export class LoginViewModel {
   private state: LoginState = {
-    username: '',
+    email: '',
     password: '',
     isLoading: false,
     isLoggingOut: false,
@@ -44,8 +45,8 @@ export class LoginViewModel {
     // and updated by login/logout actions.
   };
 
-  setUsername = (username: string) => {
-    this.state.username = username;
+  setEmail = (email: string) => {
+    this.state.email = email;
     this.clearErrors();
   };
 
@@ -65,26 +66,53 @@ export class LoginViewModel {
       this.state.error = null;
 
       const response = await this.loginUseCase.execute({
-        username: this.state.username,
+        email: this.state.email,
         password: this.state.password,
         device_name: window.navigator.userAgent,
         device_id: 'web'
       });
 
-      const token = response.data.token;
-      const tokenToStore = Array.isArray(token) ? token[0] : token;
+      console.log('Login response in ViewModel:', response);
 
-      if (!tokenToStore) {
-        throw new Error('No token received from login');
+      // Check if response exists and is not null/undefined
+      if (!response || response === null || response === undefined) {
+        console.error('No data in response');
+        throw new Error('No data received from login response');
       }
 
-      localStorage.setItem('token', tokenToStore);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      // Check if login was successful
+      if (!response.success) {
+        throw new Error(response.message || 'Login failed');
+      }
+
+      // Check if user and session_token exist
+      if (!response.user) {
+        console.error('No user data in response:', response);
+        throw new Error('No user data received from login response');
+      }
+
+      // Log the full user object to debug role issue
+      console.log('Full user object:', response.user);
+      console.log('User role:', response.user.role);
+      console.log('User object keys:', Object.keys(response.user));
+
+  
+      // Log role information for debugging
+      console.log('Final user role after processing:', response.user.role);
+      console.log('Is manager check:', isManager(response.user));
+
+      if (!response.session_token) {
+        console.error('No session_token in response:', response);
+        throw new Error('No session token received from login');
+      }
+
+      localStorage.setItem('token', response.session_token);
+      localStorage.setItem('user', JSON.stringify(response.user));
       
       this.state.isLoggedIn = true;
       
       // Clear form after successful login
-      this.state.username = '';
+      this.state.email = '';
       this.state.password = '';
 
       return response;
@@ -107,7 +135,7 @@ export class LoginViewModel {
       this.getWalletViewModel().resetWalletState();
       
       // Clear any other application state if needed
-      this.state.username = '';
+      this.state.email = '';
       this.state.password = '';
       this.clearErrors();
 
@@ -125,7 +153,7 @@ export class LoginViewModel {
   // Getters
   get formData() {
     return {
-      username: this.state.username,
+      email: this.state.email,
       password: this.state.password,
       isLoading: this.state.isLoading,
       error: this.state.error

@@ -24,7 +24,7 @@ import {
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import { useWallet } from '../../../hooks/useWallet';
-import { useTransactions } from '../../../hooks/useTransactions';
+import { useTransactionHistory } from '../../../hooks/useTransactionHistory';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -49,7 +49,13 @@ const Home = observer(() => {
     reconnectError,
     fetchWalletBalance
   } = useWallet();
-  const { transactions, isLoadingTransactions, transactionError, refreshTransactions } = useTransactions(isWalletConnected);
+  const { 
+    transactions, 
+    isLoading: isLoadingTransactions, 
+    error: transactionError, 
+    refreshTransactions,
+    fetchTransactionHistory
+  } = useTransactionHistory();
   
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -81,20 +87,87 @@ const Home = observer(() => {
 
   const getTransactionName = (transaction: any): string => {
     if (transaction.from_wallet_name) {
-      return `ETH from ${transaction.from_wallet_name}`;
+      return `Sent ${transaction.token_symbol || 'ETH'} via ${transaction.from_wallet_name}`;
     }
-    return 'ETH Transaction';
+    if (transaction.transaction_type) {
+      const typeLabels: Record<string, string> = {
+        'transfer': 'Transfer',
+        'salary': 'Salary Payment',
+        'bonus': 'Bonus Payment',
+        'expense': 'Expense',
+        'other': 'Other Transaction'
+      };
+      return typeLabels[transaction.transaction_type] || 'Transaction';
+    }
+    return `${transaction.token_symbol || 'ETH'} Transaction`;
   };
 
   // Convert API transactions to display format
-  const transactionData = transactions.map(transaction => ({
-    name: getTransactionName(transaction),
-    amount: typeof transaction.amount_eth === 'string' ? parseFloat(transaction.amount_eth) : transaction.amount_eth,
-    type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
-    date: formatTransactionDate(transaction.created_at),
-    icon: getTransactionIcon(transaction),
-    hash: transaction.transaction_hash
-  }));
+  const transactionData = transactions.map(transaction => {
+    console.log('Processing transaction:', {
+      id: transaction._id,
+      status: transaction.status,
+      from_address: transaction.from_address,
+      to_address: transaction.to_address,
+      amount: transaction.amount,
+      amountType: typeof transaction.amount,
+      allFields: Object.keys(transaction),
+      fullTransaction: transaction
+    });
+    
+    // Parse amount from database - check multiple possible amount fields
+    let displayAmount = 0;
+    
+    // Try different possible amount field names from eth_transactions collection
+    const amountValue = transaction.amount || 
+                       (transaction as any).amount_eth || 
+                       (transaction as any).value || 
+                       (transaction as any).eth_amount ||
+                       (transaction as any).amount_wei ||
+                       (transaction as any).total_cost_eth;
+    
+    if (amountValue !== null && amountValue !== undefined) {
+      // Convert to number if it's a string
+      displayAmount = typeof amountValue === 'string' 
+        ? parseFloat(amountValue) 
+        : Number(amountValue);
+      
+      // If we're using amount_wei, convert from wei to ETH (divide by 10^18)
+      if ((transaction as any).amount_wei && !(transaction as any).amount_eth) {
+        displayAmount = displayAmount / Math.pow(10, 18);
+        console.log('Converted from wei to ETH:', {
+          wei: amountValue,
+          eth: displayAmount
+        });
+      }
+      
+      console.log('Amount conversion:', {
+        original: amountValue,
+        type: typeof amountValue,
+        parsed: displayAmount,
+        fieldUsed: transaction.amount ? 'amount' : 
+                  (transaction as any).amount_eth ? 'amount_eth' :
+                  (transaction as any).value ? 'value' :
+                  (transaction as any).eth_amount ? 'eth_amount' :
+                  (transaction as any).amount_wei ? 'amount_wei' :
+                  (transaction as any).total_cost_eth ? 'total_cost_eth' : 'none'
+      });
+    } else {
+      console.log('No amount field found. Available fields:', Object.keys(transaction));
+    }
+    
+    console.log('Final display amount:', displayAmount, 'for transaction:', transaction._id);
+    
+    return {
+      name: getTransactionName(transaction),
+      amount: displayAmount,
+      type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
+      date: formatTransactionDate(transaction.timestamp || transaction.created_at),
+      icon: getTransactionIcon(transaction),
+      hash: transaction.transaction_hash,
+      token_symbol: transaction.token_symbol || 'ETH'
+    };
+  });
 
   // Clear success message after showing it
   useEffect(() => {
@@ -112,6 +185,16 @@ const Home = observer(() => {
       fetchWalletBalance();
     }
   }, [isWalletConnected, fetchWalletBalance]);
+
+  // Fetch SENT transactions for manager
+  useEffect(() => {
+    console.log('Fetching SENT transactions for manager...');
+    fetchTransactionHistory({ 
+      category: 'SENT',
+      limit: 10,
+      offset: 0
+    });
+  }, [fetchTransactionHistory]);
 
   const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
@@ -311,13 +394,38 @@ const Home = observer(() => {
 
       {/* Recent Transactions */}
       <div className="flex justify-between items-center px-5 my-6 bg-transparent">
-        <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
-        <div 
-          className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
-          onClick={refreshTransactions}
-        >
-          <span>Refresh</span>
-          <ChevronRight className="w-4 h-4" />
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
+          <p className="text-sm text-gray-600 mt-1">Showing SENT transactions only</p>
+        </div>
+        <div className="flex items-center gap-2">
+           <button 
+             className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
+             onClick={() => {
+               console.log('Refreshing SENT transactions...');
+               fetchTransactionHistory({ 
+                 category: 'SENT',
+                 limit: 10,
+                 offset: 0
+               });
+             }}
+           >
+             <span>Refresh</span>
+             <ChevronRight className="w-4 h-4" />
+           </button>
+           <button 
+             className="flex items-center gap-1 text-blue-600 text-sm font-medium cursor-pointer transition-colors hover:text-blue-700"
+             onClick={() => {
+               console.log('Fetching ALL transactions for testing...');
+               fetchTransactionHistory({ 
+                 category: 'ALL',
+                 limit: 10,
+                 offset: 0
+               });
+             }}
+           >
+             <span>Test ALL</span>
+           </button>
         </div>
       </div>
 
@@ -344,8 +452,9 @@ const Home = observer(() => {
           <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">No transactions found</div>
-                <div className="text-sm text-gray-900">Start making transactions to see them here.</div>
+                <div className="text-sm font-medium text-gray-900">No SENT transactions found</div>
+                <div className="text-sm text-gray-900">No outgoing transactions to display. Check console for debugging info.</div>
+                <div className="text-xs text-gray-500 mt-1">Total transactions loaded: {transactions.length}</div>
               </div>
             </div>
           </div>
@@ -361,13 +470,13 @@ const Home = observer(() => {
                   </div>
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
+                    <div className="text-xs text-gray-500">{transaction.date}</div>
                   </div>
                 </div>
                 <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap ${
                   transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
                 }`}>
-                  {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
-                  {(transaction.amount || 0).toFixed(4)} ETH
+                  {transaction.type === 'outflow' ? '-' : '+'}{(transaction.amount || 0).toFixed(4)} {transaction.token_symbol || 'ETH'}
                 </div>
               </div>
             ))}

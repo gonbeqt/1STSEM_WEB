@@ -1,8 +1,9 @@
 // src/Presentation/pages/employee/home/page.tsx
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Bell, RotateCcw, Loader2, Wifi, Clipboard, WifiOff } from 'lucide-react';
+import { Bell, RotateCcw, Loader2, Wifi, Clipboard, WifiOff, ChevronRight, Clock, TrendingDown } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
+import { useTransactionHistory } from '../../../hooks/useTransactionHistory';
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 
@@ -23,8 +24,92 @@ const EmployeeHome = observer(() => {
     isReconnecting,
     reconnectError,
     fetchWalletBalance
-  } = useWallet();;
+  } = useWallet();
+
+  const { 
+    transactions, 
+    isLoading: isLoadingTransactions, 
+    error: transactionError, 
+    refreshTransactions,
+    fetchTransactionHistory
+  } = useTransactionHistory();
   const usd = 4469.44;
+
+  const formatTransactionDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffHours < 1) {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return `${diffMinutes} mins ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hrs ago`;
+    } else if (diffDays === 1) {
+      return '1 day ago';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const getTransactionIcon = (transaction: any) => {
+    if (transaction.status === 'pending') {
+      return <Clock className="w-5 h-5 text-yellow-600" />;
+    }
+    return <TrendingDown className="w-5 h-5 text-red-600" />;
+  };
+
+  const getTransactionName = (transaction: any): string => {
+    if (transaction.from_wallet_name) {
+      return `Received ${transaction.token_symbol || 'ETH'} from ${transaction.from_wallet_name}`;
+    }
+    if (transaction.transaction_type) {
+      const typeLabels: Record<string, string> = {
+        'transfer': 'Transfer',
+        'salary': 'Salary Payment',
+        'bonus': 'Bonus Payment',
+        'expense': 'Expense',
+        'other': 'Other Transaction'
+      };
+      return typeLabels[transaction.transaction_type] || 'Transaction';
+    }
+    return `Received ${transaction.token_symbol || 'ETH'}`;
+  };
+
+  // Convert API transactions to display format
+  const transactionData = transactions.map(transaction => {
+    // Try different possible amount field names from eth_transactions collection
+    const amountValue = transaction.amount || 
+                       (transaction as any).amount_eth || 
+                       (transaction as any).value || 
+                       (transaction as any).eth_amount ||
+                       (transaction as any).amount_wei ||
+                       (transaction as any).total_cost_eth;
+    
+    let displayAmount = amountValue !== null && amountValue !== undefined
+      ? (typeof amountValue === 'string' ? parseFloat(amountValue) : Number(amountValue))
+      : 0;
+    
+    // If we're using amount_wei, convert from wei to ETH (divide by 10^18)
+    if ((transaction as any).amount_wei && !(transaction as any).amount_eth && displayAmount > 0) {
+      displayAmount = displayAmount / Math.pow(10, 18);
+    }
+    
+    return {
+      name: getTransactionName(transaction),
+      amount: displayAmount,
+      type: transaction.status === 'confirmed' ? 'inflow' : 'pending',
+      date: formatTransactionDate(transaction.timestamp || transaction.created_at),
+      icon: getTransactionIcon(transaction),
+      hash: transaction.transaction_hash,
+      token_symbol: transaction.token_symbol || 'ETH'
+    };
+  });
+
     // Clear success message after showing it
     useEffect(() => {
       if (successMessage) {
@@ -41,6 +126,15 @@ const EmployeeHome = observer(() => {
         fetchWalletBalance();
       }
     }, [isWalletConnected, fetchWalletBalance]);
+
+  // Fetch RECEIVED transactions for employee
+  useEffect(() => {
+    fetchTransactionHistory({ 
+      category: 'RECEIVED',
+      limit: 10,
+      offset: 0
+    });
+  }, [fetchTransactionHistory]);
   
  
   const getNextMonthFirstDay = () => {
@@ -194,6 +288,75 @@ const EmployeeHome = observer(() => {
             <div className="text-xs text-gray-600">Monthly</div>
           </div>
         </div>
+      </div>
+
+      {/* Recent Transactions */}
+      <div className="flex justify-between items-center px-5 my-6 bg-transparent">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
+          <p className="text-sm text-gray-600 mt-1">Showing RECEIVED transactions only</p>
+        </div>
+        <div 
+          className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
+          onClick={refreshTransactions}
+        >
+          <span>Refresh</span>
+          <ChevronRight className="w-4 h-4" />
+        </div>
+      </div>
+
+      <div className="mx-5 mb-8 rounded-xl overflow-hidden min-h-[200px]">
+        {isLoadingTransactions ? (
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">Loading transactions...</div>
+              </div>
+            </div>
+          </div>
+        ) : transactionError ? (
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">Error loading transactions</div>
+                <div className="text-sm text-gray-900">{transactionError}</div>
+              </div>
+            </div>
+          </div>
+        ) : transactionData.length === 0 ? (
+          <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">No transactions found</div>
+                <div className="text-sm text-gray-900">Start making transactions to see them here.</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {transactionData.map((transaction, index) => (
+              <div key={index} className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    transaction.type === 'outflow' ? 'bg-red-100' : 'bg-yellow-100'
+                  }`}>
+                    {transaction.icon}
+                  </div>
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
+                  </div>
+                </div>
+                <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap ${
+                  transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
+                }`}>
+                  {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
+                  {(transaction.amount || 0).toFixed(4)} {transaction.token_symbol || 'ETH'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <WalletModal
