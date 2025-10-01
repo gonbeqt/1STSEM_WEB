@@ -39,6 +39,12 @@ import {
 import { Container } from 'lucide-react';
 import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
 import { PayslipRepository } from '../domain/repositories/PayslipRepository';
+import { CreatePayslipUseCase } from '../domain/usecases/CreatePayslipUseCase';
+import { CreatePayrollEntryUseCase } from '../domain/usecases/CreatePayrollEntryUseCase';
+import { ProcessPayrollPaymentUseCase } from '../domain/usecases/ProcessPayrollPaymentUseCase';
+import { CreateRecurringPaymentUseCase } from '../domain/usecases/CreateRecurringPaymentUseCase';
+import { GetPaymentScheduleUseCase } from '../domain/usecases/GetPaymentScheduleUseCase';
+import { PayslipViewModel } from '../domain/viewmodel/PayslipViewModel';
 import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
 import { ReconnectWalletUseCase } from '../domain/usecases/ReconnectWalletUseCase';
 import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
@@ -61,6 +67,16 @@ import { InvoiceRepositoryImpl } from '../data/repositoriesImpl/InvoiceRepositor
 import { GetInvoicesUseCase } from '../domain/usecases/GetInvoicesUseCase';
 import { InvoiceViewModel } from '../domain/viewmodel/InvoiceViewModel';
 
+// Audit Contract imports
+import { ContractRepository } from '../domain/repositories/ContractRepository';
+import { ContractRepositoryImpl } from '../data/repositoriesImpl/ContractRepositoryImpl';
+import { UploadContractUseCase } from '../domain/usecases/UploadContractUseCase';
+import { AuditContractUseCase } from '../domain/usecases/AuditContractUseCase';
+import { ListAuditsUseCase } from '../domain/usecases/ListAuditsUseCase';
+import { GetAuditDetailsUseCase } from '../domain/usecases/GetAuditDetailsUseCase';
+import { GetAuditStatisticsUseCase } from '../domain/usecases/GetAuditStatisticsUseCase';
+import { AuditContractViewModel } from '../domain/viewmodel/AuditContractViewModel';
+
 
 
 export interface Container {
@@ -74,6 +90,7 @@ export interface Container {
   payslipRepository: PayslipRepository;
   businessDocumentRepository: BusinessDocumentRepository;
   invoiceRepository: InvoiceRepository;
+  contractRepository: ContractRepository;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -89,6 +106,18 @@ export interface Container {
   addEmployeeUseCase: AddEmployeeUseCase;
   getEmployeesByManagerUseCase: GetEmployeesByManagerUseCase;
   removeEmployeeFromTeamUseCase: RemoveEmployeeFromTeamUseCase;
+  createPayslipUseCase: CreatePayslipUseCase;
+  createPayrollEntryUseCase: CreatePayrollEntryUseCase;
+  processPayrollPaymentUseCase: ProcessPayrollPaymentUseCase;
+  createRecurringPaymentUseCase: CreateRecurringPaymentUseCase;
+  getPaymentScheduleUseCase: GetPaymentScheduleUseCase;
+  
+  // Audit Contract Use Cases
+  uploadContractUseCase: UploadContractUseCase;
+  auditContractUseCase: AuditContractUseCase;
+  listAuditsUseCase: ListAuditsUseCase;
+  getAuditDetailsUseCase: GetAuditDetailsUseCase;
+  getAuditStatisticsUseCase: GetAuditStatisticsUseCase;
 
   // Report Use Cases
   generateBalanceSheetUseCase: GenerateBalanceSheetUseCase;
@@ -123,6 +152,8 @@ export interface Container {
   employeeViewModel: () => EmployeeViewModel;
   businessDocumentViewModel: () => BusinessDocumentViewModel;
   invoiceViewModel: () => InvoiceViewModel;
+  payslipViewModel: () => PayslipViewModel;
+  auditContractViewModel: () => AuditContractViewModel;
 
 }
 // ======= Create repository instances =======
@@ -136,6 +167,7 @@ const reportRepository = new ReportRepositoryImpl();
 const payslipRepository = new PayslipRepositoryImpl();
 const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
 const invoiceRepository = new InvoiceRepositoryImpl();
+const contractRepository = new ContractRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -152,6 +184,11 @@ const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateReposito
 const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
 const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
 const removeEmployeeFromTeamUseCase = new RemoveEmployeeFromTeamUseCase(employeeRepository);
+const createPayslipUseCase = new CreatePayslipUseCase(payslipRepository);
+const createPayrollEntryUseCase = new CreatePayrollEntryUseCase(payslipRepository);
+const processPayrollPaymentUseCase = new ProcessPayrollPaymentUseCase(payslipRepository);
+const createRecurringPaymentUseCase = new CreateRecurringPaymentUseCase(payslipRepository);
+const getPaymentScheduleUseCase = new GetPaymentScheduleUseCase(payslipRepository);
 
 // ======= Create report use case instances =======
 const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportRepository);
@@ -180,6 +217,13 @@ const getSessionApprovalStatusUseCase = new GetSessionApprovalStatusUseCase(sess
 const getTransactionHistoryUseCase = new GetTransactionHistoryUseCase(transactionRepository);
 const getUserPayslipsUseCase = new GetUserPayslipsUseCase(payslipRepository);
 
+// Audit Contract Use Cases
+const uploadContractUseCase = new UploadContractUseCase();
+const auditContractUseCase = new AuditContractUseCase();
+const listAuditsUseCase = new ListAuditsUseCase();
+const getAuditDetailsUseCase = new GetAuditDetailsUseCase();
+const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase();
+
 // ======= Container =======
 export const container: Container = {
   userRepository,
@@ -192,6 +236,7 @@ export const container: Container = {
   payslipRepository,
   businessDocumentRepository,
   invoiceRepository,
+  contractRepository,
 
   registerUseCase,
   loginUseCase,
@@ -207,6 +252,18 @@ export const container: Container = {
   addEmployeeUseCase,
   getEmployeesByManagerUseCase,
   removeEmployeeFromTeamUseCase,
+  createPayslipUseCase,
+  createPayrollEntryUseCase,
+  processPayrollPaymentUseCase,
+  createRecurringPaymentUseCase,
+  getPaymentScheduleUseCase,
+  
+  // Audit Contract Use Cases
+  uploadContractUseCase,
+  auditContractUseCase,
+  listAuditsUseCase,
+  getAuditDetailsUseCase,
+  getAuditStatisticsUseCase,
 
   // Report Use Cases
   generateBalanceSheetUseCase,
@@ -236,7 +293,13 @@ export const container: Container = {
 
   registerViewModel: () => new RegisterViewModel(registerUseCase),
   loginViewModel: () => {
-    return new LoginViewModel(loginUseCase, logoutUseCase, () => container.walletViewModel());
+    return new LoginViewModel(loginUseCase, logoutUseCase, () => new WalletViewModel(
+      connectWalletUseCase,
+      reconnectWalletUseCase,
+      getWalletBalanceUseCase,
+      sendEthUseCase,
+      getExchangeRatesUseCase
+    ));
   },
   walletViewModel: () => new WalletViewModel(
     connectWalletUseCase,
@@ -260,5 +323,13 @@ export const container: Container = {
   businessDocumentViewModel: () => new BusinessDocumentViewModel(
     uploadBusinessDocumentsUseCase
   ),
-  invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase)
+  invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase),
+  payslipViewModel: () => new PayslipViewModel(createPayslipUseCase),
+  auditContractViewModel: () => new AuditContractViewModel(
+    uploadContractUseCase,
+    auditContractUseCase,
+    listAuditsUseCase,
+    getAuditDetailsUseCase,
+    getAuditStatisticsUseCase
+  )
 };

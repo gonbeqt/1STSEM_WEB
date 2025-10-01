@@ -2,7 +2,7 @@
 import React, { useState, useCallback, ChangeEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
-import { useAuditContractViewModel } from '../../../../../../domain/viewmodel/AuditContractViewModel';
+import { container } from '../../../../../../di/container';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { FileText, UploadCloud, X, AlertCircle, Loader2, Download } from 'lucide-react';
@@ -13,15 +13,14 @@ interface AuditContractModalProps {
 }
 
 const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose }) => {
-    const {
-        uploadResponse,
-        auditResponse,
-        isLoading,
-        uploadFile,
-        auditContract,
-        setUploadResponse,
-        setAuditResponse
-    } = useAuditContractViewModel();
+    const auditViewModel = container.auditContractViewModel();
+    
+    const [uploadResponse, setUploadResponse] = useState<any>(null);
+    const [auditResponse, setAuditResponse] = useState<any>(null);
+    const [audits, setAudits] = useState<any[]>([]);
+    const [auditDetails, setAuditDetails] = useState<any>(null);
+    const [auditStatistics, setAuditStatistics] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [contractName, setContractName] = useState('');
@@ -117,24 +116,36 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     const handleNext = async () => {
         if (currentStep === 1 && selectedFile) {
             setCurrentStep(2);
-            const uploadRes = await uploadFile(selectedFile);
-            if (uploadRes?.success && uploadRes.contract_data) {
-                const auditRes = await auditContract({
-                    contract_code: uploadRes.contract_data.contract_code,
-                    contract_name: contractName,
-                    upload_method: "file",
-                    filename: selectedFile.name,
-                    file_size: selectedFile.size
-                });
-                if(auditRes.success){
-                    setCurrentStep(3);
-                } else {
+            setIsLoading(true);
+            try {
+                console.log('Starting file upload...');
+                const uploadRes = await auditViewModel.uploadFile(selectedFile);
+                console.log('Upload response:', uploadRes);
+                setUploadResponse(uploadRes);
+                if (uploadRes?.success && uploadRes.contract_data) {
+                    console.log('Starting contract audit...');
+                    const auditRes = await auditViewModel.auditContract({
+                        contract_code: uploadRes.contract_data.contract_code,
+                        contract_name: contractName,
+                        upload_method: "file",
+                        filename: selectedFile.name,
+                        file_size: selectedFile.size
+                    });
+                    console.log('Audit response:', auditRes);
                     setAuditResponse(auditRes);
+                    if (auditRes.success) {
+                        setCurrentStep(3);
+                    } else {
+                        setCurrentStep(1);
+                    }
+                } else {
                     setCurrentStep(1);
                 }
-            } else {
-                setUploadResponse(uploadRes);
+            } catch (error) {
+                console.error('Error in audit process:', error);
                 setCurrentStep(1);
+            } finally {
+                setIsLoading(false);
             }
         } else if (currentStep < 4) {
             setCurrentStep(currentStep + 1);

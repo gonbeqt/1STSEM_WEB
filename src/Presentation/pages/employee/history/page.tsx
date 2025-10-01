@@ -1,6 +1,6 @@
 // src/Presentation/pages/employee/history/page.tsx
 import React, { useState } from 'react';
-import { SearchIcon, ArrowLeft, Calendar, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { SearchIcon, ArrowLeft, Calendar, TrendingUp, Clock, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import InputWithIcon from '../../../components/InputWithIcon';
 import { usePayslips } from '../../../../presentation/hooks/usePayslips';
 import { Payslip } from '../../../../domain/entities/PayslipEntities';
@@ -15,27 +15,41 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
 
-  const { payslips, loading, error } = usePayslips();
+  // Get current user ID from localStorage or context
+  const currentUserId = localStorage.getItem('userId') || 'current-user';
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { payslips, loading, error, refreshPayslips } = usePayslips(currentUserId, refreshTrigger);
+
+  // Function to refresh payslips
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const filteredPayslips = payslips.filter(payslip => {
-    const matchesFilter = activeFilter === 'all' || payslip.status === activeFilter;
-    const matchesSearch = searchQuery === '' || 
+    // Handle both uppercase and lowercase status values
+    const normalizedPayslipStatus = payslip.status.toLowerCase();
+    const normalizedFilter = activeFilter.toLowerCase();
+    const matchesFilter = activeFilter === 'all' || normalizedPayslipStatus === normalizedFilter;
+    
+    const matchesSearch = searchQuery === '' ||
       payslip.pay_period_start.toLowerCase().includes(searchQuery.toLowerCase()) ||
       payslip.pay_period_end.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      payslip.gross_salary.toString().includes(searchQuery.toLowerCase()) ||
-      payslip.net_salary.toString().includes(searchQuery.toLowerCase());
-    
+      payslip.total_earnings.toString().includes(searchQuery.toLowerCase()) ||
+      payslip.final_net_pay.toString().includes(searchQuery.toLowerCase());
+
     return matchesFilter && matchesSearch;
   });
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    const normalizedStatus = status.toLowerCase();
+    switch (normalizedStatus) {
       case 'paid':
         return <CheckCircle size={16} />;
       case 'pending':
+      case 'generated':
         return <Clock size={16} />;
       case 'failed':
-        return <Clock size={16} />; 
+        return <AlertCircle size={16} />;
       default:
         return <Clock size={16} />;
     }
@@ -43,7 +57,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
 
   const getFilterCount = (filter: 'all' | 'paid' | 'pending' | 'failed') => {
     if (filter === 'all') return payslips.length;
-    return payslips.filter(p => p.status === filter).length;
+    return payslips.filter(p => p.status.toLowerCase() === filter.toLowerCase()).length;
   };
 
   const handlePayslipClick = (payslip: Payslip) => {
@@ -55,8 +69,8 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   };
 
   const getTotalEarnings = () => {
-    const paidPayslips = payslips.filter(p => p.status === 'paid');
-    const totalEth = paidPayslips.reduce((sum, p) => sum + p.net_salary, 0);
+    const paidPayslips = payslips.filter(p => p.status.toLowerCase() === 'paid');
+    const totalEth = paidPayslips.reduce((sum, p) => sum + p.final_net_pay, 0);
     
     // Assuming 1 ETH = 1900 USD for conversion
     const totalUsd = totalEth * 1900;
@@ -108,9 +122,27 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
             </button>
           )}
           <h1 className="text-3xl font-bold text-gray-900 m-0 text-center tracking-tight">Salary History</h1>
-          <div className="w-12"></div>
+          <button 
+            className="bg-white border border-gray-200 text-gray-600 cursor-pointer p-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+            onClick={handleRefresh}
+            aria-label="Refresh payslips"
+          >
+            <RefreshCw size={20} />
+          </button>
         </div>
-        <div className="text-red-600">Error: {error}</div>
+        <div className="flex flex-col items-center justify-center py-20 px-5 text-center">
+          <div className="text-6xl mb-5 opacity-60">⚠️</div>
+          <div className="text-xl font-bold text-gray-600 mb-2">Failed to Load Payslips</div>
+          <div className="text-base text-gray-500 bg-white border border-gray-200 rounded-2xl p-6 max-w-md leading-relaxed shadow-md mb-4">
+            {error}
+          </div>
+          <button 
+            className="bg-gradient-to-br from-purple-500 to-blue-500 text-white border-none px-6 py-3 rounded-xl text-sm font-semibold hover:from-purple-600 hover:to-blue-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
+            onClick={handleRefresh}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -130,7 +162,14 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
           </button>
         )}
         <h1 className="text-3xl font-bold text-gray-900 m-0 text-center tracking-tight">Salary History</h1>
-        <div className="w-12"></div>
+        <button 
+          className="bg-white border border-gray-200 text-gray-600 cursor-pointer p-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+          onClick={handleRefresh}
+          aria-label="Refresh payslips"
+          disabled={loading}
+        >
+          <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+        </button>
       </div>
 
       {/* Summary Cards */}
@@ -196,7 +235,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
       <div className="flex flex-col gap-4 relative z-10">
         {filteredPayslips.map((payslip, index) => (
           <div 
-            key={payslip.id} 
+            key={payslip.payslip_id} 
             className="bg-white border border-gray-200 rounded-2xl p-6 flex justify-between items-start transition-all duration-300 cursor-pointer shadow-sm relative overflow-hidden hover:bg-gray-50 hover:border-purple-500/30 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0 before:bg-gradient-to-br before:from-purple-500 before:to-blue-500 before:transition-all before:duration-300 hover:before:w-1"
             onClick={() => handlePayslipClick(payslip)}
             role="button"
@@ -214,15 +253,17 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
               <div className="flex items-center justify-between mb-3 gap-4">
                 <div className="text-lg font-bold text-gray-900 tracking-tight">{payslip.pay_period_start} - {payslip.pay_period_end}</div>
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap ${
-                  payslip.status === 'paid' 
+                  payslip.status.toLowerCase() === 'paid' 
                     ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : payslip.status.toLowerCase() === 'generated'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
                     : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                 }`}>
                   <span className="flex items-center">
                     {getStatusIcon(payslip.status)}
                   </span>
                   <span className="uppercase tracking-wider">
-                    {payslip.status.charAt(0).toUpperCase() + payslip.status.slice(1)}
+                    {payslip.status.toLowerCase().charAt(0).toUpperCase() + payslip.status.toLowerCase().slice(1)}
                   </span>
                 </div>
               </div>
@@ -234,8 +275,8 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
               </div>
             </div>
             <div className="text-right relative z-20 flex-shrink-0 ml-6">
-              <div className="text-xl font-extrabold text-gray-900 mb-1 tracking-tight">{payslip.net_salary} ETH</div>
-              <div className="text-sm text-gray-500 font-semibold">${(payslip.net_salary * 1900).toFixed(2)} USD</div>
+              <div className="text-xl font-extrabold text-gray-900 mb-1 tracking-tight">{payslip.final_net_pay} ETH</div>
+              <div className="text-sm text-gray-500 font-semibold">${(payslip.final_net_pay * 1900).toFixed(2)} USD</div>
             </div>
           </div>
         ))}

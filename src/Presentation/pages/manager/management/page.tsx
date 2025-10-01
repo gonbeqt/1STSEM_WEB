@@ -208,7 +208,7 @@ const EmployeeManagement: React.FC = () => {
     if (window.confirm(confirmMessage)) {
       try {
         const response = await removeEmployeeFromTeam({
-          username: selectedApiEmployee?.username || selectedEmployee.employeeId
+          username: selectedEmployee.emailAddress // Use email address instead of username
         });
         
         if (response.success) {

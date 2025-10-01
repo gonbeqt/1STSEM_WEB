@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, Eye, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Download, Eye, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { usePayslips } from '../../../../hooks/usePayslips';
 
@@ -71,6 +71,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   onRemoveFromTeam,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details');
+  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
   
   // Fetch payslips for the employee
   const { payslips, loading: payslipsLoading, error: payslipsError } = usePayslips(employee.id);
@@ -146,7 +147,11 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      onClose();
+      if (showRemoveConfirmation) {
+        setShowRemoveConfirmation(false);
+      } else {
+        onClose();
+      }
     }
   };
 
@@ -155,7 +160,20 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, showRemoveConfirmation]);
+
+  const handleRemoveClick = () => {
+    setShowRemoveConfirmation(true);
+  };
+
+  const handleConfirmRemove = () => {
+    setShowRemoveConfirmation(false);
+    onRemoveFromTeam();
+  };
+
+  const handleCancelRemove = () => {
+    setShowRemoveConfirmation(false);
+  };
 
  const renderDetailsTab = () => (
     <div className="space-y-6">
@@ -265,9 +283,9 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
 
   const renderPayrollTab = () => {
     // Calculate summary data from payslips
-    const totalGross = payslips.reduce((sum, payslip) => sum + payslip.gross_salary, 0);
-    const totalNet = payslips.reduce((sum, payslip) => sum + payslip.net_salary, 0);
-    const totalDeductions = payslips.reduce((sum, payslip) => sum + payslip.deductions, 0);
+    const totalGross = payslips.reduce((sum, payslip) => sum + payslip.total_earnings, 0);
+    const totalNet = payslips.reduce((sum, payslip) => sum + payslip.final_net_pay, 0);
+    const totalDeductions = payslips.reduce((sum, payslip) => sum + payslip.total_deductions, 0);
     const latestPayslip = payslips.length > 0 ? payslips[0] : null;
 
     return (
@@ -367,7 +385,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           ) : (
             <div className="space-y-3">
               {payslips.map((payslip) => (
-                <div key={payslip.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
+                <div key={payslip.payslip_id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
                   <div className="flex justify-between items-center md:flex-col md:items-start md:gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -380,16 +398,16 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Gross Salary</p>
-                          <p className="font-semibold text-gray-900">{formatCurrency(payslip.gross_salary)}</p>
+                          <p className="text-gray-500">Total Earnings</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(payslip.total_earnings)}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Net Salary</p>
-                          <p className="font-semibold text-green-600">{formatCurrency(payslip.net_salary)}</p>
+                          <p className="text-gray-500">Net Pay</p>
+                          <p className="font-semibold text-green-600">{formatCurrency(payslip.final_net_pay)}</p>
                         </div>
                         <div>
                           <p className="text-gray-500">Deductions</p>
-                          <p className="font-semibold text-red-600">{formatCurrency(payslip.deductions)}</p>
+                          <p className="font-semibold text-red-600">{formatCurrency(payslip.total_deductions)}</p>
                         </div>
                         <div>
                           <p className="text-gray-500">Created</p>
@@ -399,14 +417,14 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => handleViewPayslip(payslip.id)}
+                        onClick={() => handleViewPayslip(payslip.payslip_id)}
                         className="flex items-center gap-2 px-3 py-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-medium transition-all duration-200"
                       >
                         <Eye className="w-4 h-4" />
                         View
                       </button>
                       <button 
-                        onClick={() => handleDownloadPayslip(payslip.id)}
+                        onClick={() => handleDownloadPayslip(payslip.payslip_id)}
                         className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200"
                       >
                         <Download className="w-4 h-4" />
@@ -442,15 +460,9 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           <div className="flex items-center gap-2">
             <button 
               className="px-4 py-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 border border-orange-200 rounded-lg transition-all duration-200 text-sm font-medium" 
-              onClick={onRemoveFromTeam}
+              onClick={handleRemoveClick}
             >
               Remove from Team
-            </button>
-            <button 
-              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200" 
-              onClick={onDelete}
-            >
-              <span className="text-xl">🗑️</span>
             </button>
           </div>
         </div>
@@ -509,6 +521,40 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           {activeTab === 'payroll' && renderPayrollTab()}
         </div>
       </div>
+
+      {/* Remove Confirmation Modal */}
+      {showRemoveConfirmation && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[60] p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Remove Employee from Team</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to remove <span className="font-semibold text-gray-900">{employee.fullName}</span> from your team? 
+              They will become available for other managers to assign.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleCancelRemove}
+                className="px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg transition-all duration-200 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRemove}
+                className="px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 rounded-lg transition-all duration-200 text-sm font-medium"
+              >
+                Remove from Team
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

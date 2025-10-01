@@ -100,9 +100,14 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
       const headers = this.getAuthHeaders();
       console.log('Using headers:', headers);
 
+      // Convert username to email format for the API
+      const requestData = {
+        email: request.username // The backend expects 'email' field
+      };
+
       const response = await axios.post(
         `${this.baseUrl}/auth/employees/remove-from-team/`,
-        request,
+        requestData,
         { headers }
       );
 

@@ -36,7 +36,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
 
     try {
       // Assuming a backend API endpoint for updating payslip status
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/payslips/${currentPayslip.id}/status/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/payslips/${currentPayslip.payslip_id}/status/`, {
         method: 'PUT', // Or POST, depending on your API design
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
       setSalaryConfirmed(true);
       currentPayslip.status = 'paid'; // Directly modify the object for immediate UI update
 
-      console.log('Payslip status updated to paid:', currentPayslip.id);
+      console.log('Payslip status updated to paid:', currentPayslip.payslip_id);
     } catch (error) {
       console.error('Error confirming salary receipt:', error);
       alert(`Failed to confirm salary receipt: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -187,8 +187,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
             <div className="text-lg font-bold text-gray-900 tracking-tight">Gross Salary</div>
           </div>
           <div className="text-left">
-            <div className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{currentPayslip.gross_salary} ETH</div>
-            <div className="text-base text-gray-500 font-semibold">${(currentPayslip.gross_salary * 1900).toFixed(2)} USD</div>
+            <div className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{currentPayslip.total_earnings} ETH</div>
+            <div className="text-base text-gray-500 font-semibold">${(currentPayslip.total_earnings * 1900).toFixed(2)} USD</div>
           </div>
         </div>
 
@@ -204,8 +204,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
                 <div className="text-sm text-gray-600 font-semibold">Total Deductions</div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-red-500 font-bold mb-1">-{currentPayslip.deductions} ETH</div>
-                <div className="text-xs text-red-500/70 font-medium">-${(currentPayslip.deductions * 1900).toFixed(2)} USD</div>
+                <div className="text-sm text-red-500 font-bold mb-1">-{currentPayslip.total_deductions} ETH</div>
+                <div className="text-xs text-red-500/70 font-medium">-${(currentPayslip.total_deductions * 1900).toFixed(2)} USD</div>
               </div>
             </div>
           </div>
@@ -214,8 +214,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
           <div className="flex justify-between items-center p-4 bg-red-50 border border-red-200 rounded-xl mt-3">
             <div className="text-base text-gray-600 font-bold">Total Deductions</div>
             <div className="text-right">
-              <div className="text-base text-red-500 font-extrabold mb-1">-{currentPayslip.deductions} ETH</div>
-              <div className="text-sm text-red-500/80 font-semibold">-${(currentPayslip.deductions * 1900).toFixed(2)} USD</div>
+              <div className="text-base text-red-500 font-extrabold mb-1">-{currentPayslip.total_deductions} ETH</div>
+              <div className="text-sm text-red-500/80 font-semibold">-${(currentPayslip.total_deductions * 1900).toFixed(2)} USD</div>
             </div>
           </div>
         </div>
@@ -227,8 +227,8 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
             <div className="text-lg font-bold text-gray-900 tracking-tight">Net Salary</div>
           </div>
           <div className="text-left">
-            <div className="text-3xl font-extrabold text-green-700 mb-2 tracking-tight">{currentPayslip.net_salary} ETH</div>
-            <div className="text-base text-gray-500 font-semibold">${(currentPayslip.net_salary * 1900).toFixed(2)} USD</div>
+            <div className="text-3xl font-extrabold text-green-700 mb-2 tracking-tight">{currentPayslip.final_net_pay} ETH</div>
+            <div className="text-base text-gray-500 font-semibold">${(currentPayslip.final_net_pay * 1900).toFixed(2)} USD</div>
           </div>
           <div className="text-sm text-green-800 font-medium mt-3 p-3 bg-green-500/10 rounded-lg">
             This is the amount you will receive after all deductions.

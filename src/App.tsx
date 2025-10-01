@@ -7,7 +7,7 @@ import Home from './presentation/pages/manager/home/page';
 import Login from './presentation/pages/login/page';
 import Register from './presentation/pages/register/page';
 
-import Invoice from './presentation/pages/manager/invoice/page';
+import PayslipDetailsPage from './presentation/pages/manager/invoice/page';
 import Reports from './presentation/pages/manager/reports/page';
 import AuditsPage from './presentation/pages/manager/audits/page';
 import AuditDetailsPage from './presentation/pages/manager/audits/details/page';
@@ -84,7 +84,7 @@ function App() {
                 <Home />
               </MiddlewareRoute>} />
             <Route path="/management" element={<Management />} />
-            <Route path="/invoice" element={<Invoice />} />
+            <Route path="/invoice" element={<PayslipDetailsPage />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/audits" element={<AuditsPage />} />
             <Route path="/audits/:auditId" element={<AuditDetailsPage />} />

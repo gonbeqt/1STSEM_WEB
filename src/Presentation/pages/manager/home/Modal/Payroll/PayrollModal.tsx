@@ -1,14 +1,22 @@
 
 // src/Presentation/pages/manager/home/Modal/Payroll/PayrollModal.tsx
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, Info } from 'lucide-react';
+import { X, AlertCircle, Info, CheckCircle, Loader2 } from 'lucide-react';
+import { container } from '../../../../../../di/container';
+import { usePayslipViewModel } from '../../../../../../domain/viewmodel/PayslipViewModel';
+import { useEmployeeViewModel } from '../../../../../../domain/viewmodel/EmployeeViewModel';
+import { CreatePayslipRequest } from '../../../../../../domain/entities/PayslipEntities';
+import { Employee as ApiEmployee } from '../../../../../../domain/repositories/EmployeeRepository';
 
-interface Employee {
+interface PayrollEmployee {
   id: string;
   name: string;
   amount: number;
   status: string;
   selected: boolean;
+  email: string;
+  department: string;
+  position: string;
 }
 
 interface PayrollModalProps {
@@ -22,42 +30,69 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
   const [payPeriodStart, setPayPeriodStart] = useState<string>('2025-08-07');
   const [payPeriodEnd, setPayPeriodEnd] = useState<string>('2025-08-07');
   const [payDate, setPayDate] = useState<string>('2025-08-07');
+  const [processStatus, setProcessStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
   
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      amount: 3350.00,
-      status: 'Ready (AutoPay ON 7/29)',
-      selected: true
-    },
-    {
-      id: '2',
-      name: 'Michael Chen',
-      amount: 2800.00,
-      status: 'Calculated (PY12345, 8-30)',
-      selected: true
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      amount: 2450.00,
-      status: 'Payroll Submitted',
-      selected: true
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      amount: 2250.00,
-      status: 'Tax Calculated',
-      selected: false
-    }
-  ]);
+  const { createPayslip, isLoading, error, success, clearMessages } = usePayslipViewModel(
+    container.createPayslipUseCase
+  );
+  
+  const [employees, setEmployees] = useState<PayrollEmployee[]>([]);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(false);
+  
+  const { getEmployeesByManager, isLoading: isLoadingEmployeesFromAPI } = useEmployeeViewModel(
+    container.addEmployeeUseCase,
+    container.getEmployeesByManagerUseCase,
+    container.removeEmployeeFromTeamUseCase
+  );
+
+  // Fetch employees when modal opens
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      if (isOpen && employees.length === 0) {
+        setIsLoadingEmployees(true);
+        try {
+          const response = await getEmployeesByManager({});
+          if (response.success && response.employees) {
+            // Convert API employees to PayrollEmployee format
+            const payrollEmployees: PayrollEmployee[] = response.employees.map((emp: ApiEmployee) => ({
+              id: emp.employee_id || emp.user_id,
+              name: emp.full_name || emp.username,
+              amount: 0, // Default amount, can be set by user
+              status: emp.is_active ? 'Active' : 'Inactive',
+              selected: true, // Default to selected
+              email: emp.email,
+              department: emp.department || 'General',
+              position: emp.position || 'Employee'
+            }));
+            setEmployees(payrollEmployees);
+          }
+        } catch (error) {
+          console.error('Error fetching employees:', error);
+          setErrorMessage('Failed to load employees. Please try again.');
+          setProcessStatus('error');
+        } finally {
+          setIsLoadingEmployees(false);
+        }
+      }
+    };
+
+    fetchEmployees();
+  }, [isOpen, getEmployeesByManager, employees.length]);
 
   const toggleEmployee = (id: string) => {
     setEmployees(prev =>
       prev.map(emp =>
         emp.id === id ? { ...emp, selected: !emp.selected } : emp
+      )
+    );
+  };
+
+  const updateEmployeeAmount = (id: string, amount: number) => {
+    setEmployees(prev =>
+      prev.map(emp =>
+        emp.id === id ? { ...emp, amount } : emp
       )
     );
   };
@@ -68,17 +103,69 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
       .reduce((sum, emp) => sum + emp.amount, 0);
   };
 
-  const handleProcess = () => {
+  const handleProcess = async () => {
     const selectedEmployees = employees.filter(emp => emp.selected);
-    onProcess({
-      payrollType,
-      payPeriodStart,
-      payPeriodEnd,
-      payDate,
-      employees: selectedEmployees,
-      total: getTotalAmount()
-    });
-    onClose();
+    
+    if (selectedEmployees.length === 0) {
+      setErrorMessage('Please select at least one employee to process payroll.');
+      setProcessStatus('error');
+      return;
+    }
+
+    setProcessStatus('processing');
+    clearMessages();
+
+      try {
+        const payslipPromises = selectedEmployees.map(async (employee) => {
+          const payslipRequest: CreatePayslipRequest = {
+            employee_name: employee.name,
+            employee_id: employee.id,
+            employee_email: employee.email,
+            salary_amount: employee.amount,
+            salary_currency: 'USD',
+            cryptocurrency: 'ETH',
+            pay_period_start: payPeriodStart,
+            pay_period_end: payPeriodEnd,
+            pay_date: payDate,
+            department: employee.department,
+            position: employee.position,
+            notes: `Payroll processed for ${payrollType}`
+          };
+
+          return await createPayslip(payslipRequest);
+        });
+
+        const results = await Promise.all(payslipPromises);
+        const failedResults = results.filter((result: any) => !result.success);
+        
+        if (failedResults.length === 0) {
+          setSuccessMessage(`Successfully created ${results.length} payslips!`);
+          setProcessStatus('success');
+          
+          // Call the original onProcess callback with the results
+          onProcess({
+            payrollType,
+            payPeriodStart,
+            payPeriodEnd,
+            payDate,
+            employees: selectedEmployees,
+            total: getTotalAmount(),
+            payslips: results
+          });
+          
+          // Close modal after a short delay to show success message
+          setTimeout(() => {
+            onClose();
+          }, 2000);
+        } else {
+          setErrorMessage(`Failed to create ${failedResults.length} out of ${results.length} payslips. Please try again.`);
+          setProcessStatus('error');
+        }
+    } catch (error) {
+      console.error('Error processing payroll:', error);
+      setErrorMessage('An unexpected error occurred while processing payroll.');
+      setProcessStatus('error');
+    }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -137,6 +224,34 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           <p className="text-sm text-gray-600 mb-4 leading-normal">
             Process automated batch payments for your employees with calculated deductions and taxes.
           </p>
+
+          {/* Status Messages */}
+          {processStatus === 'processing' && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                <p className="text-sm text-blue-800 font-medium">Processing payroll...</p>
+              </div>
+            </div>
+          )}
+
+          {processStatus === 'success' && successMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <p className="text-sm text-green-800 font-medium">{successMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {processStatus === 'error' && (errorMessage || error) && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600" />
+                <p className="text-sm text-red-800 font-medium">{errorMessage || error}</p>
+              </div>
+            </div>
+          )}
 
           {/* Payroll Type */}
           <div className="mb-4">
@@ -205,27 +320,49 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
             </div>
             
             <div className="max-h-64 overflow-y-auto pr-1">
-              {employees.map((employee) => (
-                <div key={employee.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md mb-3 last:mb-0 transition-colors hover:border-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={employee.selected}
-                    onChange={() => toggleEmployee(employee.id)}
-                    className="mt-0.5 w-4 h-4 text-blue-600 rounded-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 m-0 mb-1">{employee.name}</p>
-                        <p className="text-xs text-gray-600 m-0">{employee.status}</p>
+              {isLoadingEmployees ? (
+                <div className="flex items-center justify-center p-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                  <span className="ml-2 text-sm text-gray-600">Loading employees...</span>
+                </div>
+              ) : employees.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500">No employees found</p>
+                </div>
+              ) : (
+                employees.map((employee) => (
+                  <div key={employee.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md mb-3 last:mb-0 transition-colors hover:border-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={employee.selected}
+                      onChange={() => toggleEmployee(employee.id)}
+                      className="mt-0.5 w-4 h-4 text-blue-600 rounded-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 m-0 mb-1">{employee.name}</p>
+                          <p className="text-xs text-gray-600 m-0">{employee.department} • {employee.position}</p>
+                          <p className="text-xs text-gray-500 m-0">{employee.email}</p>
+                        </div>
                       </div>
-                      <p className="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">
-                        ₱{employee.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600 font-medium">Amount:</label>
+                        <input
+                          type="number"
+                          value={employee.amount}
+                          onChange={(e) => updateEmployeeAmount(employee.id, parseFloat(e.target.value) || 0)}
+                          className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                        />
+                        <span className="text-xs text-gray-500">USD</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -234,7 +371,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-700">Total</span>
               <span className="text-lg font-bold text-gray-900">
-                ₱{getTotalAmount().toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                ${getTotalAmount().toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
               </span>
             </div>
           </div>
@@ -277,11 +414,18 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           </button>
           <button
             onClick={handleProcess}
-            disabled={employees.filter(emp => emp.selected).length === 0}
-            className="flex-1 p-2 rounded-md text-sm font-medium cursor-pointer transition-all text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            disabled={employees.filter(emp => emp.selected).length === 0 || processStatus === 'processing'}
+            className="flex-1 p-2 rounded-md text-sm font-medium cursor-pointer transition-all text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 flex items-center justify-center gap-2"
             type="button"
           >
-            Process Payroll
+            {processStatus === 'processing' ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Process Payroll'
+            )}
           </button>
         </div>
 
