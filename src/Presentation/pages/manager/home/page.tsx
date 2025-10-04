@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
+import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 
@@ -38,6 +39,7 @@ const Home = observer(() => {
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
+  const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
   
   // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
@@ -242,8 +244,7 @@ const Home = observer(() => {
   }
 
   const handleInvestment = () => {
-    // Navigate to investment page or open investment modal
-    window.location.href = '/manager/reports/invest';
+    setIsInvestModalOpen(true);
   }
 
   const handleProcessPayroll = (data: any) => {
@@ -574,6 +575,11 @@ const Home = observer(() => {
       <GenerateReportModal
         isOpen={isGenerateReportModalOpen}
         onClose={() => setIsGenerateReportModalOpen(false)}
+      />
+      
+      <InvestModal
+        isOpen={isInvestModalOpen}
+        onClose={() => setIsInvestModalOpen(false)}
       />
     </div>
   );

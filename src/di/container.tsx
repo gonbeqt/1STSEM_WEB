@@ -48,6 +48,14 @@ import { CreateRecurringPaymentUseCase } from '../domain/usecases/CreateRecurrin
 import { GetPaymentScheduleUseCase } from '../domain/usecases/GetPaymentScheduleUseCase';
 import { PayslipViewModel } from '../domain/viewmodel/PayslipViewModel';
 import { PayrollViewModel } from '../domain/viewmodel/PayrollViewModel';
+import { AddressBookRepositoryImpl } from '../data/repositoriesImpl/AddressBookRepositoryImpl';
+import {
+  UpsertAddressBookEntryUseCase,
+  ResolveAddressNameUseCase,
+  ListAddressBookUseCase,
+  DeleteAddressBookEntryUseCase
+} from '../domain/usecases/AddressBookUseCases';
+import { AddressBookViewModel } from '../domain/viewmodel/AddressBookViewModel';
 import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
 import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
 import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
@@ -87,6 +95,7 @@ export interface Container {
   sessionRepository: SessionRepositoryImpl;
   transactionRepository: TransactionRepositoryImpl;
   exchangeRateRepository: ExchangeRateRepositoryImpl;
+  addressBookRepository: AddressBookRepositoryImpl;
   employeeRepository: EmployeeRepository;
   reportRepository: ReportRepository;
   payslipRepository: PayslipRepository;
@@ -150,6 +159,7 @@ export interface Container {
   registerViewModel: () => RegisterViewModel;
   loginViewModel: () => LoginViewModel;
   walletViewModel: () => WalletViewModel;
+  addressBookViewModel: () => AddressBookViewModel;
   sessionViewModel: () => SessionViewModel;
   employeeViewModel: () => EmployeeViewModel;
   businessDocumentViewModel: () => BusinessDocumentViewModel;
@@ -165,6 +175,7 @@ const walletRepository = new WalletRepositoryImpl();
 const sessionRepository = new SessionRepositoryImpl();
 const transactionRepository = new TransactionRepositoryImpl();
 const exchangeRateRepository = new ExchangeRateRepositoryImpl();
+const addressBookRepository = new AddressBookRepositoryImpl();
 const employeeRepository = new EmployeeRepositoryImpl();
 const reportRepository = new ReportRepositoryImpl();
 const payslipRepository = new PayslipRepositoryImpl();
@@ -184,6 +195,20 @@ const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository);
 const sendEthUseCase = new SendEthUseCase(walletRepository);
 const disconnectWalletUseCase = new DisconnectWalletUseCase(walletRepository);
 const convertCryptoToFiatUseCase = new ConvertCryptoToFiatUseCase(walletRepository);
+
+// Address Book Use Cases
+const upsertAddressBookEntryUseCase = new UpsertAddressBookEntryUseCase(addressBookRepository);
+const resolveAddressNameUseCase = new ResolveAddressNameUseCase(addressBookRepository);
+const listAddressBookUseCase = new ListAddressBookUseCase(addressBookRepository);
+const deleteAddressBookEntryUseCase = new DeleteAddressBookEntryUseCase(addressBookRepository);
+
+// Address Book ViewModel singleton
+const addressBookViewModelInstance = new AddressBookViewModel(
+  upsertAddressBookEntryUseCase,
+  resolveAddressNameUseCase,
+  listAddressBookUseCase,
+  deleteAddressBookEntryUseCase
+);
 const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
 const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
 const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
@@ -236,6 +261,7 @@ export const container: Container = {
   sessionRepository,
   transactionRepository,
   exchangeRateRepository,
+  addressBookRepository,
   employeeRepository,
   reportRepository,
   payslipRepository,
@@ -315,6 +341,7 @@ export const container: Container = {
     sendEthUseCase,
     getExchangeRatesUseCase
   ),
+  addressBookViewModel: () => addressBookViewModelInstance,
   sessionViewModel: () => new SessionViewModel(
     listSessionsUseCase,
     revokeSessionUseCase,
