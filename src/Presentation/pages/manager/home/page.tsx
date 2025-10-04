@@ -18,6 +18,11 @@ import {
   Clock,
   TrendingDown,
   RotateCcw,
+  Send,
+  DollarSign,
+  FileText,
+  TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
@@ -202,7 +207,7 @@ const Home = observer(() => {
     };
 
     autoConvertBalance();
-  }, [ethBalance, conversionCurrency, isWalletConnected]); // Remove function dependencies to prevent infinite loops
+  }, [ethBalance, conversionCurrency, isWalletConnected]);
 
   const toggleCurrency = () => {
     setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');
@@ -236,6 +241,11 @@ const Home = observer(() => {
     setIsGenerateReportModalOpen(true);
   }
 
+  const handleInvestment = () => {
+    // Navigate to investment page or open investment modal
+    window.location.href = '/manager/reports/invest';
+  }
+
   const handleProcessPayroll = (data: any) => {
     console.log('Processing payroll:', data);
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
@@ -267,14 +277,11 @@ const Home = observer(() => {
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <Bell size={20} className="text-gray-600" />
           </button>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <RotateCcw size={20} className="text-gray-600" />
-          </button>
         </div>
       </div>
 
       {/* Current Wallet Card */}
-      <div className="mx-5 my-5 bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 rounded-2xl p-6 text-white relative flex-shrink-0">
+      <div className="mx-5 my-6 bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 rounded-3xl p-6 text-white relative flex-shrink-0 shadow-xl">
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <span className="text-lg opacity-90 font-medium text-white">Current Wallet</span>
@@ -371,49 +378,60 @@ const Home = observer(() => {
 
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-4 gap-3 px-5 mb-8 flex-shrink-0">
+      <div className="grid grid-cols-5 gap-4 px-5 mb-8 flex-shrink-0">
         {/* Send Payment */}
         <button
-          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
+          className="flex flex-col items-center gap-3 p-5 bg-white rounded-2xl cursor-pointer transition-all duration-200 border border-gray-100 hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 group"
           onClick={handleSendPayment}
         >
-          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-blue-100 text-blue-600">
-            <TrendingUpIcon className="w-5 h-5" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-blue-50 text-blue-600 group-hover:bg-blue-100 transition-colors">
+            <Send className="w-6 h-6" />
           </div>
-          <span className="text-xs font-medium text-gray-700 text-center">Send Payment</span>
+          <span className="text-sm font-semibold text-gray-800 text-center group-hover:text-blue-600 transition-colors">Send Payment</span>
         </button>
 
         {/* Send Payroll */}
         <button
-          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
+          className="flex flex-col items-center gap-3 p-5 bg-white rounded-2xl cursor-pointer transition-all duration-200 border border-gray-100 hover:-translate-y-1 hover:shadow-xl hover:border-yellow-200 group"
           onClick={handleSendPayroll}
         >
-          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-yellow-500 text-white">
-            <Users className="w-5 h-5" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100 transition-colors">
+            <DollarSign className="w-6 h-6" />
           </div>
-          <span className="text-xs font-medium text-gray-700 text-center">Send Payroll</span>
+          <span className="text-sm font-semibold text-gray-800 text-center group-hover:text-yellow-600 transition-colors">Send Payroll</span>
         </button>
 
         {/* Audit Contract */}
         <button
-          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
+          className="flex flex-col items-center gap-3 p-5 bg-white rounded-2xl cursor-pointer transition-all duration-200 border border-gray-100 hover:-translate-y-1 hover:shadow-xl hover:border-green-200 group"
           onClick={handleAuditContract}
         >
-          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-green-100 text-green-600">
-            <ClipboardList className="w-5 h-5" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-green-50 text-green-600 group-hover:bg-green-100 transition-colors">
+            <ClipboardList className="w-6 h-6" />
           </div>
-          <span className="text-xs font-medium text-gray-700 text-center">Audit Contract</span>
+          <span className="text-sm font-semibold text-gray-800 text-center group-hover:text-green-600 transition-colors">Audit Contract</span>
         </button>
 
         {/* Generate Report */}
         <button
-          className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl cursor-pointer transition-all border border-gray-100 hover:-translate-y-0.5 hover:shadow-lg z-10"
+          className="flex flex-col items-center gap-3 p-5 bg-white rounded-2xl cursor-pointer transition-all duration-200 border border-gray-100 hover:-translate-y-1 hover:shadow-xl hover:border-purple-200 group"
           onClick={handleGenerateReport}
         >
-          <div className="w-6 h-6 rounded-xl p-2.5 flex items-center justify-center bg-pink-100 text-pink-600">
-            <ChartBarIncreasing className="w-5 h-5" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-purple-50 text-purple-600 group-hover:bg-purple-100 transition-colors">
+            <FileText className="w-6 h-6" />
           </div>
-          <span className="text-xs font-medium text-gray-700 text-center">Generate Report</span>
+          <span className="text-sm font-semibold text-gray-800 text-center group-hover:text-purple-600 transition-colors">Generate Report</span>
+        </button>
+
+        {/* Investment */}
+        <button
+          className="flex flex-col items-center gap-3 p-5 bg-white rounded-2xl cursor-pointer transition-all duration-200 border border-gray-100 hover:-translate-y-1 hover:shadow-xl hover:border-pink-200 group"
+          onClick={handleInvestment}
+        >
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-pink-50 text-pink-600 group-hover:bg-pink-100 transition-colors">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <span className="text-sm font-semibold text-gray-800 text-center group-hover:text-pink-600 transition-colors">Investment</span>
         </button>
       </div>
 
@@ -425,19 +443,18 @@ const Home = observer(() => {
         </div>
         <div className="flex items-center gap-2">
            <button 
-             className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
+             className="flex items-center gap-2 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700 hover:bg-indigo-50 px-3 py-2 rounded-lg"
              onClick={() => {
-               console.log('Refreshing SENT transactions...');
+               console.log('Refreshing transactions...');
                fetchTransactionHistory({ 
-                 category: 'SENT',
                  limit: 10,
                  offset: 0
                });
              }}
            >
+             <RefreshCw className="w-4 h-4" />
              <span>Refresh</span>
            </button>
-  
         </div>
       </div>
 
@@ -473,19 +490,19 @@ const Home = observer(() => {
         ) : (
           <div className="space-y-2">
             {transactionData.map((transaction, index) => (
-              <div key={index} className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+              <div key={index} className="flex justify-between items-center p-5 bg-white min-h-[80px] shadow-lg border border-gray-100 rounded-2xl hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    transaction.type === 'outflow' ? 'bg-red-100' : 'bg-yellow-100'
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${
+                    transaction.type === 'outflow' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'
                   }`}>
                     {transaction.icon}
                   </div>
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
-                    <div className="text-xs text-gray-500">{transaction.date}</div>
+                    <div className="text-base font-semibold text-gray-900 leading-tight">{transaction.name}</div>
+                    <div className="text-sm text-gray-500">{transaction.date}</div>
                   </div>
                 </div>
-                <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap ${
+                <div className={`text-xl font-bold flex-shrink-0 whitespace-nowrap ${
                   transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
                 }`}>
                   {transaction.type === 'outflow' ? '-' : '+'}{(transaction.amount || 0).toFixed(4)} {transaction.token_symbol || 'ETH'}
@@ -499,26 +516,32 @@ const Home = observer(() => {
       {/* Revenue vs Expenses */}
       <div className="mb-8 flex-shrink-0">
         <div className="flex justify-between items-center px-5 my-6 bg-transparent">
-          <h2 className="text-lg font-semibold text-gray-900 m-0">Revenue vs Expenses</h2>
-          <select className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 cursor-pointer">
+          <h2 className="text-xl font-bold text-gray-900 m-0">Revenue vs Expenses</h2>
+          <select className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 cursor-pointer hover:border-indigo-300 transition-colors shadow-sm">
             <option>Last 6 months</option>
             <option>Last 3 months</option>
             <option>Last month</option>
           </select>
         </div>
 
-        <div className="flex justify-around bg-white mx-5 mb-5 p-5 rounded-xl border border-gray-100">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-gray-600 uppercase tracking-wide">Revenue</span>
-            <span className="text-xl font-bold text-green-600">₱7120</span>
+        <div className="flex justify-around bg-white mx-5 mb-6 p-6 rounded-2xl border border-gray-100 shadow-lg">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-green-600" />
+            </div>
+            <span className="text-sm text-gray-600 uppercase tracking-wide font-medium">Revenue</span>
+            <span className="text-2xl font-bold text-green-600">₱7,120</span>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-gray-600 uppercase tracking-wide">Expenses</span>
-            <span className="text-xl font-bold text-red-600">₱4200</span>
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+              <TrendingDown className="w-6 h-6 text-red-600" />
+            </div>
+            <span className="text-sm text-gray-600 uppercase tracking-wide font-medium">Expenses</span>
+            <span className="text-2xl font-bold text-red-600">₱4,200</span>
           </div>
         </div>
 
-        <div className="bg-white mx-5 p-5 rounded-xl border border-gray-100">
+        <div className="bg-white mx-5 p-6 rounded-2xl border border-gray-100 shadow-lg">
           <Charts />
         </div>
       </div>

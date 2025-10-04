@@ -28,9 +28,9 @@ interface PayrollModalProps {
 
 const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess }) => {
   const [payrollType, setPayrollType] = useState<string>('Regular Payroll');
-  const [payPeriodStart, setPayPeriodStart] = useState<string>('2025-08-07');
-  const [payPeriodEnd, setPayPeriodEnd] = useState<string>('2025-08-07');
-  const [payDate, setPayDate] = useState<string>('2025-08-07');
+  const [payPeriodStart, setPayPeriodStart] = useState<string>('');
+  const [payPeriodEnd, setPayPeriodEnd] = useState<string>('');
+  const [payDate, setPayDate] = useState<string>('');
   const [processStatus, setProcessStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -48,6 +48,16 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     container.getEmployeesByManagerUseCase,
     container.removeEmployeeFromTeamUseCase
   );
+
+  // Initialize dates when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const today = new Date().toISOString().split('T')[0];
+      setPayPeriodStart(today);
+      setPayPeriodEnd(today);
+      setPayDate(today);
+    }
+  }, [isOpen]);
 
   // Fetch employees when modal opens
   useEffect(() => {
