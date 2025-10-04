@@ -1,20 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { CreatePayslipUseCase } from '../usecases/CreatePayslipUseCase';
-import { CreatePayrollEntryUseCase } from '../usecases/CreatePayrollEntryUseCase';
-import { ProcessPayrollPaymentUseCase } from '../usecases/ProcessPayrollPaymentUseCase';
-import { CreateRecurringPaymentUseCase } from '../usecases/CreateRecurringPaymentUseCase';
-import { GetPaymentScheduleUseCase } from '../usecases/GetPaymentScheduleUseCase';
 import { CreatePayslipRequest, CreatePayslipResponse } from '../entities/PayslipEntities';
-import { 
-  CreatePayrollEntryRequest, 
-  CreatePayrollEntryResponse,
-  ProcessPayrollPaymentRequest,
-  ProcessPayrollPaymentResponse,
-  CreateRecurringPaymentRequest,
-  CreateRecurringPaymentResponse,
-  GetPaymentScheduleRequest,
-  GetPaymentScheduleResponse
-} from '../entities/PayrollEntities';
 
 export class PayslipViewModel {
   constructor(

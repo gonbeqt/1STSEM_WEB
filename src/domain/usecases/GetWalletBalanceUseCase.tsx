@@ -1,10 +1,10 @@
 import { WalletRepository } from '../repositories/WalletRepository';
-import { GetWalletsListResponse } from '../entities/WalletEntities';
+import { GetWalletBalanceResponse } from '../entities/WalletEntities';
 
 export class GetWalletBalanceUseCase {
   constructor(private walletRepository: WalletRepository) {}
 
-  async execute(token: string): Promise<GetWalletsListResponse> {
+  async execute(token: string): Promise<GetWalletBalanceResponse> {
     return this.walletRepository.getWalletBalance(token);
   }
 }

@@ -1,11 +1,9 @@
 // src/Presentation/pages/manager/home/Modal/AuditContractModal/AuditContractModal.tsx
 import React, { useState, useCallback, ChangeEvent } from 'react';
-import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
 import { container } from '../../../../../../di/container';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { FileText, UploadCloud, X, AlertCircle, Loader2, Download } from 'lucide-react';
+import { FileText, UploadCloud, X, AlertCircle, Download } from 'lucide-react';
 
 interface AuditContractModalProps {
     isOpen: boolean;
@@ -17,9 +15,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     
     const [uploadResponse, setUploadResponse] = useState<any>(null);
     const [auditResponse, setAuditResponse] = useState<any>(null);
-    const [audits, setAudits] = useState<any[]>([]);
-    const [auditDetails, setAuditDetails] = useState<any>(null);
-    const [auditStatistics, setAuditStatistics] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -167,93 +162,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         onClose();
     }
 
-    const renderPdfContent = () => (
-        <div>
-            <div className="space-y-6">
-                <div className="flex justify-between items-start mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">Audit Results</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        auditResponse?.audit?.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                        {auditResponse?.audit?.status}
-                    </span>
-                </div>
-                <div className="grid gap-4">
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
-                        <h4 className="text-base font-semibold mb-4 text-gray-900">Overview</h4>
-                        <div className="space-y-2">
-                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                <span className="font-medium text-gray-600 text-sm">Contract Name:</span>
-                                <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.contract_name}</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                <span className="font-medium text-gray-600 text-sm">Risk Level:</span>
-                                <span className={`font-semibold text-sm ${
-                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'critical' ? 'text-red-600' :
-                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'high' ? 'text-orange-600' :
-                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'medium' ? 'text-yellow-600' :
-                                    'text-green-600'
-                                }`}>
-                                    {auditResponse?.audit?.risk_level}
-                                </span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                <span className="font-medium text-gray-600 text-sm">Vulnerabilities Found:</span>
-                                <span className="font-semibold text-gray-900 text-sm">{auditResponse?.audit?.vulnerabilities_found}</span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                                <span className="font-medium text-gray-600 text-sm">Completed On:</span>
-                                <span className="font-semibold text-gray-900 text-sm">
-                                    {auditResponse?.audit?.completed_at ? new Date(auditResponse.audit.completed_at).toLocaleString() : 'N/A'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
-                        <h4 className="text-base font-semibold mb-4 text-gray-900">Vulnerabilities Summary</h4>
-                        {auditResponse?.vulnerabilities && auditResponse.vulnerabilities.length > 0 ? (
-                            <div className="space-y-2">
-                                {getUniqueVulnerabilities(auditResponse.vulnerabilities).map((vuln, index) => (
-                                    <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                        <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
-                                        <span className={`font-semibold text-sm ${
-                                            vuln.severity.toLowerCase() === 'critical' ? 'text-red-600' :
-                                            vuln.severity.toLowerCase() === 'high' ? 'text-orange-600' :
-                                            vuln.severity.toLowerCase() === 'medium' ? 'text-yellow-600' :
-                                            'text-green-600'
-                                        }`}>
-                                            {vuln.severity}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-gray-600">No major vulnerabilities found.</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-            <div className="mt-6 space-y-4">
-                <div className="flex justify-between items-start mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">Detailed Assessment</h3>
-                </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
-                    <h4 className="text-base font-semibold mb-4 text-gray-900">AI Analysis Overview</h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.ai_analysis || 'No AI analysis provided.'}</p>
-                </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
-                    <h4 className="text-base font-semibold mb-4 text-gray-900">Gas Optimization Insights</h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{auditResponse?.audit?.gas_optimization || 'No gas optimization insights.'}</p>
-                </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-gray-900">
-                    <h4 className="text-base font-semibold mb-4 text-gray-900">Recommendations</h4>
-                    <pre className="text-sm text-gray-700 bg-gray-100 p-3 rounded-md whitespace-pre-wrap break-words">
-                        {auditResponse?.audit?.recommendations || 'No specific recommendations.'}
-                    </pre>
-                </div>
-            </div>
-        </div>
-    );
 
     const handleDownloadPdf = () => {
         if (!auditResponse?.audit) return;

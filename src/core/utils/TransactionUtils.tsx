@@ -41,7 +41,7 @@ export const getTransactionName = (transaction: Transaction): string => {
 };
 
 export const calculateTransactionValue = (transaction: Transaction): number => {
-  const amount = transaction.amount;
-  const fee = transaction.transaction_fee || 0;
+  const amount = transaction.amount_eth;
+  const fee = transaction.gas_cost_eth || 0;
   return amount + fee;
 };

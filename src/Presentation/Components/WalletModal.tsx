@@ -12,7 +12,7 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, initialView = 'connect' }) => {
-  const { connectWallet, isWalletConnected, walletAddress, ethBalance, sendEth, isSendingEth, sendEthError, successMessage, fetchWalletBalance } = useWallet();
+  const { connectWallet, isWalletConnected, sendEth, isSendingEth, sendEthError, successMessage, fetchWalletBalance } = useWallet();
   const [privateKeyInput, setPrivateKeyInput] = useState<string>('');
   const [currentView, setCurrentView] = useState<ModalView>(initialView);
   const [recipientAddress, setRecipientAddress] = useState<string>('');

@@ -1,8 +1,7 @@
 // src/domain/repositoriesImpl/WalletRepositoryImpl.tsx
-import { ConnectWalletRequest, ReconnectWalletRequest, ReconnectWalletResponse, WalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from '../../domain/entities/WalletEntities';
+import { ConnectWalletRequest, WalletResponse, GetWalletBalanceResponse, SendEthRequest, SendEthResponse, DisconnectWalletResponse, ConversionRequest, ConversionResponse } from '../../domain/entities/WalletEntities';
 import { WalletRepository } from '../../domain/repositories/WalletRepository';
  
-import { SendETHRequest, SendETHResponse } from '../../domain/entities/SendEthEntities'; 
 
 
 export class WalletRepositoryImpl implements WalletRepository {
@@ -20,7 +19,7 @@ export class WalletRepositoryImpl implements WalletRepository {
   }
 
   async connectWallet(request: ConnectWalletRequest): Promise<WalletResponse> {
-    const response = await fetch(`${this.API_URL}/wallets/connect_wallet_with_private_key/`, {
+    const response = await fetch(`${this.API_URL}/wallets/connect_wallet/`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(request),
@@ -34,32 +33,8 @@ export class WalletRepositoryImpl implements WalletRepository {
 
     return data;
   }
-  async reconnectWallet(request: ReconnectWalletRequest): Promise<ReconnectWalletResponse> {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
 
-    const response = await fetch(`${this.API_URL}/wallets/reconnect_wallet_with_private_key/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(request),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Wallet reconnection failed');
-    }
-
-    return data;
-  }
-
-  async getWalletBalance(token: string): Promise<GetWalletsListResponse> {
+  async getWalletBalance(token: string): Promise<GetWalletBalanceResponse> {
     if (!token) {
       throw new Error('Authentication token is missing.');
     }
@@ -87,17 +62,19 @@ export class WalletRepositoryImpl implements WalletRepository {
       throw new Error('Authentication token not found');
     }
 
-    const backendRequest: SendETHRequest = {
-      to_address: request.recipient_address,
+    const backendRequest = {
+      to_address: request.to_address,
       amount: request.amount,
-      private_key: request.private_key,
-      from_address: request.from_address || undefined,
+      gas_price: request.gas_price,
+      gas_limit: request.gas_limit,
       company: request.company || undefined,
       category: request.category || undefined,
       description: request.description || undefined,
+      is_investing: request.is_investing || false,
+      investor_name: request.investor_name || undefined,
     };
 
-    const url = `${this.API_URL}/eth/send/`;
+    const url = `${this.API_URL}/wallets/send_eth/`;
     console.log('Sending ETH to URL:', url);
     console.log('Request data:', backendRequest);
     
@@ -109,7 +86,7 @@ export class WalletRepositoryImpl implements WalletRepository {
     
     console.log('Send ETH response status:', response.status);
 
-    const data: SendETHResponse = await response.json();
+    const data: SendEthResponse = await response.json();
     console.log('Send ETH response data:', data);
 
     if (!response.ok) {
@@ -124,7 +101,53 @@ export class WalletRepositoryImpl implements WalletRepository {
     return {
         success: data.success,
         message: data.message,
-        transaction_hash: data.data ? data.data.transaction_hash : undefined,
+        data: data.data,
     };
+  }
+
+  async disconnectWallet(token: string): Promise<DisconnectWalletResponse> {
+    if (!token) {
+      throw new Error('Authentication token is missing.');
+    }
+
+    const response = await fetch(`${this.API_URL}/wallets/disconnect_wallet/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to disconnect wallet');
+    }
+
+    return data;
+  }
+
+  async convertCryptoToFiat(request: ConversionRequest): Promise<ConversionResponse> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication token is missing.');
+    }
+
+    const response = await fetch(`${this.API_URL}/conversion/crypto-to-fiat/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(request),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to convert crypto to fiat');
+    }
+
+    return data;
   }
 }

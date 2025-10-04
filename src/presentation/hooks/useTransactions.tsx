@@ -28,7 +28,7 @@ export const useTransactions = (isWalletConnected: boolean) => {
       setIsLoadingTransactions(true);
       setTransactionError(null);
 
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/eth/history/category/?limit=5&category=ALL`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/eth/history/category/?limit=5&category=ALL`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -8,7 +8,6 @@ import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
 import {
   Bell,
-  User,
   ChevronRight,
   TrendingUpIcon,
   ClipboardList,
@@ -16,7 +15,6 @@ import {
   Users,
   Loader2,
   Wifi,
-  WifiOff,
   Clock,
   TrendingDown,
   RotateCcw,
@@ -24,7 +22,7 @@ import {
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import { useWallet } from '../../../hooks/useWallet';
-import { useTransactionHistory } from '../../../hooks/useTransactionHistory';
+import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -35,6 +33,11 @@ const Home = observer(() => {
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
+  
+  // Conversion state
+  const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
+  const [conversionCurrency, setConversionCurrency] = useState<string>('USD');
+  const [isAutoConverting, setIsAutoConverting] = useState<boolean>(false);
 
   // Wallet state
   const {
@@ -45,17 +48,19 @@ const Home = observer(() => {
     fetchBalanceError,
     successMessage,
     clearSuccessMessage,
-    isReconnecting,
-    reconnectError,
-    fetchWalletBalance
+    fetchWalletBalance,
+    disconnectWallet,
+    isConnecting,
+    convertCryptoToFiat,
+    conversionResult,
+    checkWalletConnection
   } = useWallet();
   const { 
     transactions, 
     isLoading: isLoadingTransactions, 
     error: transactionError, 
-    refreshTransactions,
     fetchTransactionHistory
-  } = useTransactionHistory();
+  } = useEnhancedTransactionHistory();
   
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -86,88 +91,55 @@ const Home = observer(() => {
   };
 
   const getTransactionName = (transaction: any): string => {
-    if (transaction.from_wallet_name) {
-      return `Sent ${transaction.token_symbol || 'ETH'} via ${transaction.from_wallet_name}`;
+    // Use counterparty name if available
+    if (transaction.counterparty_name) {
+      return `${transaction.transaction_category === 'SENT' ? 'Sent to' : 'Received from'} ${transaction.counterparty_name}`;
     }
-    if (transaction.transaction_type) {
-      const typeLabels: Record<string, string> = {
-        'transfer': 'Transfer',
-        'salary': 'Salary Payment',
-        'bonus': 'Bonus Payment',
-        'expense': 'Expense',
-        'other': 'Other Transaction'
-      };
-      return typeLabels[transaction.transaction_type] || 'Transaction';
+    
+    // Use category description from backend
+    if (transaction.category_description) {
+      return transaction.category_description;
     }
-    return `${transaction.token_symbol || 'ETH'} Transaction`;
+    
+    // Fallback to transaction category
+    const categoryLabels: Record<string, string> = {
+      'SENT': 'Sent ETH',
+      'RECEIVED': 'Received ETH',
+      'TRANSFER': 'Internal Transfer',
+      'EXTERNAL': 'External Transaction'
+    };
+    
+    return categoryLabels[transaction.transaction_category] || 'ETH Transaction';
   };
 
   // Convert API transactions to display format
   const transactionData = transactions.map(transaction => {
-    console.log('Processing transaction:', {
-      id: transaction._id,
-      status: transaction.status,
-      from_address: transaction.from_address,
-      to_address: transaction.to_address,
-      amount: transaction.amount,
-      amountType: typeof transaction.amount,
-      allFields: Object.keys(transaction),
-      fullTransaction: transaction
-    });
-    
-    // Parse amount from database - check multiple possible amount fields
-    let displayAmount = 0;
-    
-    // Try different possible amount field names from eth_transactions collection
-    const amountValue = transaction.amount || 
-                       (transaction as any).amount_eth || 
-                       (transaction as any).value || 
-                       (transaction as any).eth_amount ||
-                       (transaction as any).amount_wei ||
-                       (transaction as any).total_cost_eth;
-    
-    if (amountValue !== null && amountValue !== undefined) {
-      // Convert to number if it's a string
-      displayAmount = typeof amountValue === 'string' 
-        ? parseFloat(amountValue) 
-        : Number(amountValue);
-      
-      // If we're using amount_wei, convert from wei to ETH (divide by 10^18)
-      if ((transaction as any).amount_wei && !(transaction as any).amount_eth) {
-        displayAmount = displayAmount / Math.pow(10, 18);
-        console.log('Converted from wei to ETH:', {
-          wei: amountValue,
-          eth: displayAmount
-        });
-      }
-      
-      console.log('Amount conversion:', {
-        original: amountValue,
-        type: typeof amountValue,
-        parsed: displayAmount,
-        fieldUsed: transaction.amount ? 'amount' : 
-                  (transaction as any).amount_eth ? 'amount_eth' :
-                  (transaction as any).value ? 'value' :
-                  (transaction as any).eth_amount ? 'eth_amount' :
-                  (transaction as any).amount_wei ? 'amount_wei' :
-                  (transaction as any).total_cost_eth ? 'total_cost_eth' : 'none'
-      });
-    } else {
-      console.log('No amount field found. Available fields:', Object.keys(transaction));
-    }
-    
-    console.log('Final display amount:', displayAmount, 'for transaction:', transaction._id);
+    // Use the new amount_eth field from the updated backend and ensure it's a number
+    const displayAmount = typeof transaction.amount_eth === 'string' 
+      ? parseFloat(transaction.amount_eth) || 0
+      : Number(transaction.amount_eth) || 0;
     
     return {
       name: getTransactionName(transaction),
       amount: displayAmount,
       type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
-      date: formatTransactionDate(transaction.timestamp || transaction.created_at),
+      date: formatTransactionDate(transaction.created_at),
       icon: getTransactionIcon(transaction),
       hash: transaction.transaction_hash,
-      token_symbol: transaction.token_symbol || 'ETH'
+      token_symbol: 'ETH',
+      // Enhanced data from new backend
+      counterparty_name: transaction.counterparty_name,
+      counterparty_role: transaction.counterparty_role,
+      category: transaction.transaction_category,
+      ai_analysis: transaction.ai_analysis,
+      explorer_url: transaction.explorer_url
     };
   });
+
+  // Check wallet connection on page load
+  useEffect(() => {
+    checkWalletConnection();
+  }, [checkWalletConnection]);
 
   // Clear success message after showing it
   useEffect(() => {
@@ -199,6 +171,42 @@ const Home = observer(() => {
   const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
     setIsWalletModalOpen(true);
+  };
+
+  const handleDisconnectWallet = async () => {
+    const confirmed = window.confirm('Are you sure you want to disconnect your wallet? This will remove all wallet data from your account.');
+    if (confirmed) {
+      const success = await disconnectWallet();
+      if (success) {
+        // Refresh transactions after disconnecting
+        fetchTransactionHistory();
+      }
+    }
+  };
+
+  // Auto-convert balance when ETH balance or currency changes
+  useEffect(() => {
+    const autoConvertBalance = async () => {
+      if (ethBalance && ethBalance > 0 && isWalletConnected) {
+        setIsAutoConverting(true);
+        try {
+          const success = await convertCryptoToFiat(ethBalance, 'ETH', conversionCurrency);
+          if (success && conversionResult && conversionResult.content && conversionResult.content.length > 0) {
+            setConvertedBalance(conversionResult.content[0].total_value);
+          }
+        } catch (error) {
+          console.error('Auto-conversion failed:', error);
+        } finally {
+          setIsAutoConverting(false);
+        }
+      }
+    };
+
+    autoConvertBalance();
+  }, [ethBalance, conversionCurrency, isWalletConnected, convertCryptoToFiat, conversionResult]);
+
+  const toggleCurrency = () => {
+    setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');
   };
 
   const handleSendPayment = () => {
@@ -244,28 +252,7 @@ const Home = observer(() => {
         </div>
       )}
 
-      {/* Reconnection Error Message */}
-      {reconnectError && (
-        <div className="fixed top-16 right-4 z-50 bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg">
-          <div className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4" />
-            <div>
-              <p className="text-sm font-medium">Auto-reconnect failed</p>
-              <p className="text-xs">Please connect your wallet manually</p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Reconnecting Indicator */}
-      {isReconnecting && (
-        <div className="fixed top-4 right-4 z-50 bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg shadow-lg">
-          <div className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-sm font-medium">Reconnecting wallet...</span>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <div className="text-black p-5">
@@ -298,22 +285,33 @@ const Home = observer(() => {
                 <span className="text-xs text-green-400 font-medium">Connected</span>
               </div>
             )}
-            {isReconnecting && (
-              <div className="flex items-center gap-1 bg-blue-500 bg-opacity-20 px-2 py-1 rounded-full">
-                <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
-                <span className="text-xs text-blue-400 font-medium">Connecting...</span>
-              </div>
-            )}
           </div>
 
-          {!isWalletConnected && !isReconnecting ? (
-            <button
-              className="bg-white bg-opacity-20 border border-white border-opacity-30 text-white px-6 py-4 rounded-full text-base font-medium cursor-pointer backdrop-blur-sm hover:bg-white hover:bg-opacity-40 transition-all"
-              onClick={() => handleOpenWalletModal('connect')}
-            >
-              Connect Wallet
-            </button>
-          ) : null}
+          <div className="flex gap-2">
+            {!isWalletConnected ? (
+              <button
+                className="bg-white bg-opacity-20 border border-white border-opacity-30 text-white px-6 py-4 rounded-full text-base font-medium cursor-pointer backdrop-blur-sm hover:bg-white hover:bg-opacity-40 transition-all"
+                onClick={() => handleOpenWalletModal('connect')}
+              >
+                Connect Wallet
+              </button>
+            ) : isWalletConnected ? (
+              <button
+                className="bg-red-500 bg-opacity-80 border border-red-400 border-opacity-50 text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer backdrop-blur-sm hover:bg-red-600 hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleDisconnectWallet}
+                disabled={isConnecting}
+              >
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                    Disconnecting...
+                  </>
+                ) : (
+                  'Disconnect'
+                )}
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -329,6 +327,33 @@ const Home = observer(() => {
               )}
             </span>
           </div>
+          
+          {/* Auto-converted balance display */}
+          {isWalletConnected && ethBalance && ethBalance > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="text-base opacity-90 font-medium">
+                {isAutoConverting ? (
+                  <span className="text-sm text-gray-400 flex items-center gap-2">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Converting...
+                  </span>
+                ) : convertedBalance !== null ? (
+                  <span className="text-sm text-white">
+                    Converted to {conversionCurrency}: {conversionCurrency === 'USD' ? '$' : '₱'}{convertedBalance.toFixed(2)}
+                  </span>
+                ) : (
+                  <span className="text-sm text-gray-400">Loading conversion...</span>
+                )}
+              </div>
+              <button
+                onClick={toggleCurrency}
+                className="text-xs bg-white bg-opacity-20 text-white px-2 py-1 rounded-full hover:bg-opacity-30 transition-all"
+              >
+                Show {conversionCurrency === 'USD' ? 'PHP' : 'USD'}
+              </button>
+            </div>
+          )}
+          
           <div className="text-base opacity-90 font-medium">
             {isFetchingBalance ? (
               <span className="text-sm text-gray-400">Fetching...</span>
@@ -336,7 +361,7 @@ const Home = observer(() => {
               <span className="text-sm text-red-400">Error fetching balance</span>
             ) : walletAddress ? (
               <span className="text-sm font-mono">
-                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                {walletAddress}
               </span>
             ) : (
               <span className="text-white">Wallet Not Connected</span>
@@ -344,6 +369,7 @@ const Home = observer(() => {
           </div>
         </div>
       </div>
+
 
       {/* Quick Actions */}
       <div className="grid grid-cols-4 gap-3 px-5 mb-8 flex-shrink-0">
@@ -396,7 +422,7 @@ const Home = observer(() => {
       <div className="flex justify-between items-center px-5 my-6 bg-transparent">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
-          <p className="text-sm text-gray-600 mt-1">Showing SENT transactions only</p>
+          <p className="text-sm text-gray-600 mt-1">Showing all transactions</p>
         </div>
         <div className="flex items-center gap-2">
            <button 
@@ -411,21 +437,8 @@ const Home = observer(() => {
              }}
            >
              <span>Refresh</span>
-             <ChevronRight className="w-4 h-4" />
            </button>
-           <button 
-             className="flex items-center gap-1 text-blue-600 text-sm font-medium cursor-pointer transition-colors hover:text-blue-700"
-             onClick={() => {
-               console.log('Fetching ALL transactions for testing...');
-               fetchTransactionHistory({ 
-                 category: 'ALL',
-                 limit: 10,
-                 offset: 0
-               });
-             }}
-           >
-             <span>Test ALL</span>
-           </button>
+  
         </div>
       </div>
 

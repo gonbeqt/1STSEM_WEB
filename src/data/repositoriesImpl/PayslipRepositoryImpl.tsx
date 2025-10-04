@@ -1,14 +1,17 @@
 import { PayslipRepository } from "../../domain/repositories/PayslipRepository";
 import { CreatePayslipRequest, CreatePayslipResponse, Payslip } from "../../domain/entities/PayslipEntities";
 import { 
-  CreatePayrollEntryRequest, 
+  CreatePayrollEntryRequest,
+  CreateSinglePayrollEntryRequest,
   CreatePayrollEntryResponse,
   ProcessPayrollPaymentRequest,
   ProcessPayrollPaymentResponse,
   CreateRecurringPaymentRequest,
   CreateRecurringPaymentResponse,
   GetPaymentScheduleRequest,
-  GetPaymentScheduleResponse
+  GetPaymentScheduleResponse,
+  GetEmployeePayrollDetailsRequest,
+  GetEmployeePayrollDetailsResponse
 } from "../../domain/entities/PayrollEntities";
 import axios from 'axios';
 
@@ -219,25 +222,50 @@ export class PayslipRepositoryImpl implements PayslipRepository {
       );
 
       console.log('Payroll entry creation response:', response.data);
+      
+      // Backend returns the payroll entry data directly
       return response.data as CreatePayrollEntryResponse;
     } catch (error: any) {
       console.error('Payroll entry creation error:', error);
       
+      // Since the response format is different, we need to throw the error
+      // and let the use case handle it
       if (error.response) {
-        return {
-          success: false,
-          error: error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`,
-        };
+        const errorMessage = error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`;
+        throw new Error(errorMessage);
       } else if (error.request) {
-        return {
-          success: false,
-          error: 'Network error. Please check your internet connection.',
-        };
+        throw new Error('Network error. Please check your internet connection.');
       } else {
-        return {
-          success: false,
-          error: error.message || 'An unexpected error occurred',
-        };
+        throw new Error(error.message || 'An unexpected error occurred');
+      }
+    }
+  }
+
+  async createSinglePayrollEntry(request: CreateSinglePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
+    try {
+      console.log('Creating single payroll entry:', request);
+      const headers = this.getAuthHeaders();
+      
+      const response = await axios.post(
+        `${this.baseUrl}/payroll/create/`,
+        request,
+        { headers }
+      );
+
+      console.log('Single payroll entry creation response:', response.data);
+      
+      // Backend returns the payroll entry data directly
+      return response.data as CreatePayrollEntryResponse;
+    } catch (error: any) {
+      console.error('Single payroll entry creation error:', error);
+      
+      if (error.response) {
+        const errorMessage = error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`;
+        throw new Error(errorMessage);
+      } else if (error.request) {
+        throw new Error('Network error. Please check your internet connection.');
+      } else {
+        throw new Error(error.message || 'An unexpected error occurred');
       }
     }
   }
@@ -329,6 +357,43 @@ export class PayslipRepositoryImpl implements PayslipRepository {
       return response.data as GetPaymentScheduleResponse;
     } catch (error: any) {
       console.error('Payment schedule error:', error);
+      
+      if (error.response) {
+        return {
+          success: false,
+          error: error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`,
+        };
+      } else if (error.request) {
+        return {
+          success: false,
+          error: 'Network error. Please check your internet connection.',
+        };
+      } else {
+        return {
+          success: false,
+          error: error.message || 'An unexpected error occurred',
+        };
+      }
+    }
+  }
+
+  async getEmployeePayrollDetails(request: GetEmployeePayrollDetailsRequest): Promise<GetEmployeePayrollDetailsResponse> {
+    try {
+      console.log('Getting employee payroll details:', request);
+      const headers = this.getAuthHeaders();
+      
+      const params = new URLSearchParams();
+      params.append('employee_id', request.employee_id);
+      
+      const response = await axios.get(
+        `${this.baseUrl}/admin/manager/payroll/employee-details/?${params.toString()}`,
+        { headers }
+      );
+
+      console.log('Employee payroll details response:', response.data);
+      return response.data as GetEmployeePayrollDetailsResponse;
+    } catch (error: any) {
+      console.error('Employee payroll details error:', error);
       
       if (error.response) {
         return {

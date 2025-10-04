@@ -3,33 +3,50 @@ export interface Transaction {
   transaction_hash: string;
   from_address: string;
   to_address: string;
-  amount: number;
-  token_symbol: string;
-  token_address?: string;
-  gas_price?: number;
-  gas_used?: number;
-  transaction_fee?: number;
-  block_number?: number;
-  block_hash?: string;
-  transaction_index?: number;
+  amount_eth: number;
+  gas_price_gwei: number;
+  gas_limit: number;
+  gas_used: number;
+  gas_cost_eth: number;
+  total_cost_eth: number;
   status: 'pending' | 'confirmed' | 'failed';
-  transaction_type: 'transfer' | 'salary' | 'bonus' | 'expense' | 'other';
+  chain_id: number;
+  nonce: number;
+  company?: string;
+  category: string;
   description?: string;
-  timestamp: string;
-  confirmation_count?: number;
-  usd_value?: number;
-  exchange_rate?: number;
-  network: 'ethereum' | 'polygon' | 'bsc';
+  is_investing?: boolean;
   created_at: string;
-  updated_at?: string;
+  explorer_url?: string;
   
-  // Additional fields that might be added by the API
-  user_id?: string;
+  // Enhanced fields from new backend
+  user_id: string;
   from_wallet_id?: string;
   from_wallet_name?: string;
   from_wallet_type?: string;
-  transaction_category?: 'SENT' | 'RECEIVED' | 'TRANSFER' | 'EXTERNAL';
-  category_description?: string;
+  transaction_category: 'SENT' | 'RECEIVED' | 'TRANSFER' | 'EXTERNAL';
+  category_description: string;
+  counterparty_name?: string;
+  counterparty_role?: string;
+  
+  // AI Analysis data
+  ai_analysis: {
+    classification: string;
+    confidence: number;
+    reasoning: string;
+    tags: string[];
+    metadata: any;
+    is_analyzed: boolean;
+    analysis_timestamp: string;
+    crypto_to_fiat: {
+      fiat_amount: number;
+      fiat_currency: string;
+      gas_fee_fiat: number;
+      total_cost_fiat: number;
+      exchange_rate: number;
+      conversion_timestamp: string;
+    };
+  };
 }
 
 export interface TransactionHistoryRequest {
@@ -46,13 +63,17 @@ export interface TransactionHistoryResponse {
   data: {
     user_id: string;
     username: string;
-    category: string;
     transactions: Transaction[];
     pagination: {
       total: number;
       limit: number;
       offset: number;
       has_more: boolean;
+    };
+    filters: {
+      category_filter?: string;
+      status_filter?: string;
+      wallet_id?: string;
     };
   };
 }

@@ -18,7 +18,7 @@ const EmployeeHistory: React.FC<SalaryTransactionsProps> = ({ onBack }) => {
   // Get current user ID from localStorage or context
   const currentUserId = localStorage.getItem('userId') || 'current-user';
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { payslips, loading, error, refreshPayslips } = usePayslips(currentUserId, refreshTrigger);
+  const { payslips, loading, error } = usePayslips(currentUserId, refreshTrigger);
 
   // Function to refresh payslips
   const handleRefresh = () => {

@@ -49,6 +49,16 @@ export interface GetWalletsListResponse {
   };
 }
 
+export interface GetWalletBalanceResponse {
+  success: boolean;
+  data: {
+    wallet_address: string;
+    balance_eth: string;
+    balance_wei: string;
+    user_id: string;
+  };
+}
+
 export interface Wallet {
   id: string;
   userId: string;
@@ -69,24 +79,6 @@ export interface DisconnectWalletResponse {
   message: string;
 }
 
-export interface ReconnectWalletRequest {
-  private_key: string;
-}
-
-export interface ReconnectWalletResponse {
-  success: boolean;
-  message: string;
-  data: {
-    wallet_id: string;
-    user_id: string;
-    username: string;
-    wallet_address: string;
-    wallet_name: string;
-    wallet_type: string;
-    action: 're_authenticated';
-    last_authenticated: string;
-  };
-}
 
 export interface WalletBalance {
   wallet_address: string;
@@ -99,17 +91,83 @@ export interface GetWalletsResponse {
 }
 
 export interface SendEthRequest {
-  private_key: string;
-  recipient_address: string;
+  to_address: string;
   amount: string; // Amount in ETH
-  from_address?: string;
+  gas_price?: number; // Gwei, optional
+  gas_limit?: number; // Optional
   company?: string;
   category?: string;
   description?: string;
+  is_investing?: boolean;
+  investor_name?: string;
 }
 
 export interface SendEthResponse {
   success: boolean;
   message: string;
-  transaction_hash?: string;
+  data?: {
+    transaction_hash: string;
+    from_address: string;
+    from_wallet_name: string;
+    to_address: string;
+    amount_eth: number;
+    gas_price_gwei: number;
+    gas_limit: number;
+    gas_used: number;
+    gas_cost_eth: number;
+    total_cost_eth: number;
+    status: string;
+    chain_id: number;
+    nonce: number;
+    company: string;
+    category: string;
+    description: string;
+    timestamp: string;
+    explorer_url?: string;
+    used_connected_wallet: boolean;
+    user_role: string;
+    wallet_type: string;
+    llm_analysis?: {
+      ai_classification: string;
+      ai_confidence: number;
+      ai_reasoning: string;
+      ai_tags: string[];
+      ai_metadata: any;
+      is_ai_analyzed: boolean;
+      tax_category: string;
+      is_business_expense: boolean;
+      crypto_to_fiat: {
+        fiat_amount: number;
+        fiat_currency: string;
+        gas_fee_fiat: number;
+        total_cost_fiat: number;
+        exchange_rate: number;
+        conversion_timestamp: string;
+      };
+    };
+  };
+}
+
+export interface DisconnectWalletResponse {
+  success: boolean;
+  message: string;
+  deleted_count: number;
+}
+
+export interface ConversionRequest {
+  amount: number;
+  from_currency: string;
+  to_currency: string;
+}
+
+export interface ConversionResponse {
+  success: boolean;
+  content?: {
+    quantity: number;
+    crypto: string;
+    total_value: number;
+    fiat: string;
+    unit_price: number;
+  }[];
+  error?: string;
 }

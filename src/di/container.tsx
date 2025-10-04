@@ -9,6 +9,8 @@ import { GetSessionApprovalStatusUseCase } from '../domain/usecases/GetSessionAp
 import { TransactionRepositoryImpl } from '../data/repositoriesImpl/TransactionRepositoryImpl';
 import { GetTransactionHistoryUseCase } from '../domain/usecases/GetTransactionUseCase';
 import { SendEthUseCase } from '../domain/usecases/SendEthUseCase';
+import { DisconnectWalletUseCase } from '../domain/usecases/DisconnectWalletUseCase';
+import { ConvertCryptoToFiatUseCase } from '../domain/usecases/ConvertCryptoToFiatUseCase';
 import { ExchangeRateRepositoryImpl } from '../data/repositoriesImpl/ExchangeRateRepositoryImpl';
 import { GetExchangeRatesUseCase } from '../domain/usecases/GetExchangeRatesUseCase';
 import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
@@ -36,17 +38,17 @@ import {
   GenerateTaxAnalysisYearlyUseCase,
   GenerateTaxAnalysisCustomUseCase
 } from '../domain/usecases/ReportUseCases';
-import { Container } from 'lucide-react';
 import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
 import { PayslipRepository } from '../domain/repositories/PayslipRepository';
 import { CreatePayslipUseCase } from '../domain/usecases/CreatePayslipUseCase';
 import { CreatePayrollEntryUseCase } from '../domain/usecases/CreatePayrollEntryUseCase';
 import { ProcessPayrollPaymentUseCase } from '../domain/usecases/ProcessPayrollPaymentUseCase';
+import { GetEmployeePayrollDetailsUseCase } from '../domain/usecases/GetEmployeePayrollDetailsUseCase';
 import { CreateRecurringPaymentUseCase } from '../domain/usecases/CreateRecurringPaymentUseCase';
 import { GetPaymentScheduleUseCase } from '../domain/usecases/GetPaymentScheduleUseCase';
 import { PayslipViewModel } from '../domain/viewmodel/PayslipViewModel';
+import { PayrollViewModel } from '../domain/viewmodel/PayrollViewModel';
 import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
-import { ReconnectWalletUseCase } from '../domain/usecases/ReconnectWalletUseCase';
 import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
 import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
 import { ListSessionsUseCase } from '../domain/usecases/ListSessionsUseCase';
@@ -99,7 +101,6 @@ export interface Container {
   getInvoicesUseCase: GetInvoicesUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
-  reconnectWalletUseCase: ReconnectWalletUseCase;
   getWalletBalanceUseCase: GetWalletBalanceUseCase;
   sendEthUseCase: SendEthUseCase;
   getExchangeRatesUseCase: GetExchangeRatesUseCase;
@@ -109,6 +110,7 @@ export interface Container {
   createPayslipUseCase: CreatePayslipUseCase;
   createPayrollEntryUseCase: CreatePayrollEntryUseCase;
   processPayrollPaymentUseCase: ProcessPayrollPaymentUseCase;
+  getEmployeePayrollDetailsUseCase: GetEmployeePayrollDetailsUseCase;
   createRecurringPaymentUseCase: CreateRecurringPaymentUseCase;
   getPaymentScheduleUseCase: GetPaymentScheduleUseCase;
   
@@ -153,6 +155,7 @@ export interface Container {
   businessDocumentViewModel: () => BusinessDocumentViewModel;
   invoiceViewModel: () => InvoiceViewModel;
   payslipViewModel: () => PayslipViewModel;
+  payrollViewModel: () => PayrollViewModel;
   auditContractViewModel: () => AuditContractViewModel;
 
 }
@@ -177,9 +180,10 @@ const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(busine
 const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
 
 const connectWalletUseCase = new ConnectWalletUseCase(walletRepository);
-const reconnectWalletUseCase = new ReconnectWalletUseCase(walletRepository);
 const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository);
 const sendEthUseCase = new SendEthUseCase(walletRepository);
+const disconnectWalletUseCase = new DisconnectWalletUseCase(walletRepository);
+const convertCryptoToFiatUseCase = new ConvertCryptoToFiatUseCase(walletRepository);
 const getExchangeRatesUseCase = new GetExchangeRatesUseCase(exchangeRateRepository);
 const addEmployeeUseCase = new AddEmployeeUseCase(employeeRepository);
 const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRepository);
@@ -187,6 +191,7 @@ const removeEmployeeFromTeamUseCase = new RemoveEmployeeFromTeamUseCase(employee
 const createPayslipUseCase = new CreatePayslipUseCase(payslipRepository);
 const createPayrollEntryUseCase = new CreatePayrollEntryUseCase(payslipRepository);
 const processPayrollPaymentUseCase = new ProcessPayrollPaymentUseCase(payslipRepository);
+const getEmployeePayrollDetailsUseCase = new GetEmployeePayrollDetailsUseCase(payslipRepository);
 const createRecurringPaymentUseCase = new CreateRecurringPaymentUseCase(payslipRepository);
 const getPaymentScheduleUseCase = new GetPaymentScheduleUseCase(payslipRepository);
 
@@ -245,7 +250,6 @@ export const container: Container = {
   getInvoicesUseCase,
 
   connectWalletUseCase,
-  reconnectWalletUseCase,
   getWalletBalanceUseCase,
   sendEthUseCase,
   getExchangeRatesUseCase,
@@ -255,6 +259,7 @@ export const container: Container = {
   createPayslipUseCase,
   createPayrollEntryUseCase,
   processPayrollPaymentUseCase,
+  getEmployeePayrollDetailsUseCase,
   createRecurringPaymentUseCase,
   getPaymentScheduleUseCase,
   
@@ -295,16 +300,18 @@ export const container: Container = {
   loginViewModel: () => {
     return new LoginViewModel(loginUseCase, logoutUseCase, () => new WalletViewModel(
       connectWalletUseCase,
-      reconnectWalletUseCase,
       getWalletBalanceUseCase,
+      disconnectWalletUseCase,
+      convertCryptoToFiatUseCase,
       sendEthUseCase,
       getExchangeRatesUseCase
     ));
   },
   walletViewModel: () => new WalletViewModel(
     connectWalletUseCase,
-    reconnectWalletUseCase,
     getWalletBalanceUseCase,
+    disconnectWalletUseCase,
+    convertCryptoToFiatUseCase,
     sendEthUseCase,
     getExchangeRatesUseCase
   ),
@@ -325,6 +332,7 @@ export const container: Container = {
   ),
   invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase),
   payslipViewModel: () => new PayslipViewModel(createPayslipUseCase),
+  payrollViewModel: () => new PayrollViewModel(createPayrollEntryUseCase, processPayrollPaymentUseCase),
   auditContractViewModel: () => new AuditContractViewModel(
     uploadContractUseCase,
     auditContractUseCase,

@@ -2,7 +2,6 @@ import { Invoice } from "../../domain/entities/InvoiceEntities";
 import { InvoiceRepository } from "../../domain/repositories/InvoiceRepository";
 
 export class InvoiceRepositoryImpl implements InvoiceRepository {
-    constructor() {}
     private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
     async getUserInvoices(userId: string): Promise<Invoice[]> {

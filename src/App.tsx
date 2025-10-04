@@ -65,7 +65,7 @@ function App() {
     } else {
       console.log('User not logged in, skipping wallet reconnection');
     }
-  }, []);
+  }, [walletViewModel]);
 
   return (
     <WalletViewModelProvider value={walletViewModel}>

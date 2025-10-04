@@ -1,9 +1,10 @@
 // src/domain/models/WalletViewModel.tsx
 import { makeAutoObservable } from 'mobx';
 import { ConnectWalletUseCase } from '../usecases/ConnectWalletUseCase';
-import { ReconnectWalletUseCase } from '../usecases/ReconnectWalletUseCase';
-import { GetWalletsListResponse } from '../entities/WalletEntities';
+import { DisconnectWalletResponse, ConversionRequest, ConversionResponse } from '../entities/WalletEntities';
 import { GetWalletBalanceUseCase } from '../usecases/GetWalletBalanceUseCase';
+import { DisconnectWalletUseCase } from '../usecases/DisconnectWalletUseCase';
+import { ConvertCryptoToFiatUseCase } from '../usecases/ConvertCryptoToFiatUseCase';
 import { SendEthUseCase } from '../usecases/SendEthUseCase'; // Import SendEthUseCase
 import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
 import { GetExchangeRatesUseCase } from '../usecases/GetExchangeRatesUseCase';
@@ -14,32 +15,31 @@ interface WalletState {
   walletName: string;
   walletType: string;
   
-  // Reconnect wallet form
-  reconnectPrivateKey: string;
   
   // Loading states
   isConnecting: boolean;
-  isReconnecting: boolean;
   isFetchingBalance: boolean;
   isSendingEth: boolean; // New state for sending ETH
+  isConverting: boolean; // New state for currency conversion
   
   // Error states
   connectError: string | null;
-  reconnectError: string | null;
   fetchBalanceError: string | null;
   sendEthError: string | null; // New state for send ETH error
+  conversionError: string | null; // New state for conversion error
   
   // Success messages
   successMessage: string | null;
   
-  // Reconnect success data
-  reconnectedWalletAddress: string | null;
 
   // Wallet Balance Data
   walletAddress: string | null;
   ethBalance: number | null;
   rates: { [key: string]: number } | null;
   fiatCurrency: string | null;
+  
+  // Conversion Data
+  conversionResult: ConversionResponse | null;
 }
 
 export class WalletViewModel {
@@ -47,28 +47,28 @@ export class WalletViewModel {
     privateKey: '',
     walletName: 'MetaMask',
     walletType: 'MetaMask',
-    reconnectPrivateKey: '',
     isConnecting: false,
-    isReconnecting: false,
     isFetchingBalance: false,
-    isSendingEth: false, 
+    isSendingEth: false,
+    isConverting: false,
     connectError: null,
-    reconnectError: null,
     fetchBalanceError: null,
-    sendEthError: null, 
+    sendEthError: null,
+    conversionError: null,
     successMessage: null,
-    reconnectedWalletAddress: null,
     walletAddress: null,
     ethBalance: null,
     rates: null,
     fiatCurrency: null,
+    conversionResult: null,
    
   };
 
   constructor(
     private connectWalletUseCase: ConnectWalletUseCase,
-    private reconnectWalletUseCase: ReconnectWalletUseCase,
     private getWalletBalanceUseCase: GetWalletBalanceUseCase,
+    private disconnectWalletUseCase: DisconnectWalletUseCase,
+    private convertCryptoToFiatUseCase: ConvertCryptoToFiatUseCase,
     private sendEthUseCase: SendEthUseCase, // Inject SendEthUseCase
     private getExchangeRatesUseCase: GetExchangeRatesUseCase 
   ) {
@@ -85,8 +85,14 @@ export class WalletViewModel {
     
     if (walletAddress && walletConnected === 'true') {
       this.state.walletAddress = walletAddress;
-      this.state.reconnectedWalletAddress = walletAddress;
       console.log('Wallet state initialized from localStorage:', walletAddress);
+      
+      // Also check if we have a stored balance
+      const storedBalance = localStorage.getItem('ethBalance');
+      if (storedBalance) {
+        this.state.ethBalance = parseFloat(storedBalance);
+        console.log('ETH balance restored from localStorage:', this.state.ethBalance);
+      }
     }
   }
 
@@ -96,10 +102,6 @@ export class WalletViewModel {
     this.clearErrors();
   };
 
-  setReconnectPrivateKey = (privateKey: string) => {
-    this.state.reconnectPrivateKey = privateKey;
-    this.state.reconnectError = null; // Clear reconnect error when user types
-  };
 
   setWalletName = (walletName: string) => {
     this.state.walletName = walletName;
@@ -112,13 +114,9 @@ export class WalletViewModel {
   // Clear methods
   clearErrors = () => {
     this.state.connectError = null;
-    this.state.reconnectError = null;
     this.state.fetchBalanceError = null;
   };
 
-  clearReconnectError = () => {
-    this.state.reconnectError = null;
-  };
 
   clearSuccessMessage = () => {
     this.state.successMessage = null;
@@ -132,11 +130,6 @@ export class WalletViewModel {
     this.clearSuccessMessage();
   };
 
-  clearReconnectForm = () => {
-    this.state.reconnectPrivateKey = '';
-    this.state.reconnectError = null;
-    this.state.reconnectedWalletAddress = null;
-  };
 
   // Validation
   validateConnectForm = (): boolean => {
@@ -148,21 +141,6 @@ export class WalletViewModel {
     return true;
   };
 
-  validateReconnectForm = (): boolean => {
-    if (!this.state.reconnectPrivateKey.trim()) {
-      this.state.reconnectError = 'Private key is required';
-      return false;
-    }
-
-    // Basic hex validation for private key
-    const hexRegex = /^0x[a-fA-F0-9]{64}$|^[a-fA-F0-9]{64}$/;
-    if (!hexRegex.test(this.state.reconnectPrivateKey)) {
-      this.state.reconnectError = 'Invalid private key format';
-      return false;
-    }
-
-    return true;
-  };
 
   // Actions
   connectWallet = async (walletData: { privateKey: string; walletName: string; walletType: string }): Promise<boolean> => {
@@ -210,69 +188,10 @@ export class WalletViewModel {
     }
   };
 
-  reconnectWallet = async (privateKeyToUse?: string): Promise<boolean> => {
-    // Try to get private key from parameter, state, or localStorage
-    const key = privateKeyToUse || this.state.reconnectPrivateKey || localStorage.getItem('privateKey');
 
-    if (!key || !key.trim()) {
-      this.state.reconnectError = 'Private key is required';
-      return false;
-    }
-
-    // Basic hex validation for private key
-    const hexRegex = /^0x[a-fA-F0-9]{64}$|^[a-fA-F0-9]{64}$/;
-    if (!hexRegex.test(key)) {
-      this.state.reconnectError = 'Invalid private key format';
-      return false;
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.state.reconnectError = 'You must be logged in to reconnect a wallet.';
-      return false;
-    }
-
-    try {
-      this.state.isReconnecting = true;
-      this.state.reconnectError = null;
-
-      const response = await this.reconnectWalletUseCase.execute({
-        private_key: key
-      });
-
-      this.state.successMessage = response.message;
-      this.state.reconnectedWalletAddress = response.data.wallet_address;
-      
-      // Store wallet info in localStorage for persistence
-      localStorage.setItem('walletAddress', response.data.wallet_address);
-      localStorage.setItem('privateKey', key); // Store the private key for future reconnections
-      localStorage.setItem('walletConnected', 'true');
-      
-      console.log('Private key stored in localStorage for future reconnections');
-
-      // Clear the form for security
-      this.state.reconnectPrivateKey = '';
-
-      // Update wallet address in state
-      this.state.walletAddress = response.data.wallet_address;
-
-      // After successful reconnection, fetch the balance
-      await this.fetchWalletBalance(token);
-
-      return true;
-    } catch (error) {
-      this.state.reconnectError = error instanceof Error ? error.message : 'Wallet reconnection failed';
-      return false;
-    } finally {
-      this.state.isReconnecting = false;
-    }
-  };
-
-  sendEth = async (recipientAddress: string, amount: string, company: string, category: string, description: string): Promise<boolean> => {
-    const privateKey = this.state.privateKey || localStorage.getItem('privateKey');
-
-    if (!privateKey) {
-      this.state.sendEthError = 'Wallet not connected or private key not available.';
+  sendEth = async (recipientAddress: string, amount: string, company: string, category: string, description: string, isInvesting: boolean = false, investorName: string = ''): Promise<boolean> => {
+    if (!this.isWalletConnected) {
+      this.state.sendEthError = 'No wallet connected. Please connect a wallet first.';
       return false;
     }
 
@@ -291,19 +210,19 @@ export class WalletViewModel {
       this.state.sendEthError = null;
 
       const request: SendEthRequest = {
-        private_key: privateKey,
-        recipient_address: recipientAddress,
+        to_address: recipientAddress,
         amount: amount,
-        from_address: this.state.walletAddress || undefined,
         company: company,
         category: category,
         description: description,
+        is_investing: isInvesting,
+        investor_name: investorName,
       };
 
       const response: SendEthResponse = await this.sendEthUseCase.execute(request);
 
-      if (response.success) {
-        this.state.successMessage = `Transaction sent: ${response.transaction_hash}`;
+      if (response.success && response.data) {
+        this.state.successMessage = `Transaction sent successfully: ${response.data.transaction_hash}`;
         await this.fetchWalletBalance(); // Refresh balance after sending
         return true;
       } else {
@@ -318,6 +237,65 @@ export class WalletViewModel {
     }
   };
 
+  disconnectWallet = async (authToken?: string): Promise<boolean> => {
+    const token = authToken || localStorage.getItem('token');
+    if (!token) {
+      this.state.fetchBalanceError = 'Authentication required to disconnect wallet.';
+      return false;
+    }
+
+    try {
+      this.state.isConnecting = true; // Reuse connecting state for disconnect loading
+      this.state.fetchBalanceError = null;
+
+      const response: DisconnectWalletResponse = await this.disconnectWalletUseCase.execute(token);
+      
+      if (response.success) {
+        // Clear all wallet-related state
+        this.resetWalletState();
+        this.state.successMessage = response.message;
+        return true;
+      } else {
+        this.state.fetchBalanceError = 'Failed to disconnect wallet';
+        return false;
+      }
+    } catch (error) {
+      this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to disconnect wallet';
+      return false;
+    } finally {
+      this.state.isConnecting = false;
+    }
+  };
+
+  convertCryptoToFiat = async (amount: number, fromCurrency: string, toCurrency: string): Promise<boolean> => {
+    try {
+      this.state.isConverting = true;
+      this.state.conversionError = null;
+      this.state.conversionResult = null;
+
+      const request: ConversionRequest = {
+        amount,
+        from_currency: fromCurrency,
+        to_currency: toCurrency
+      };
+
+      const response: ConversionResponse = await this.convertCryptoToFiatUseCase.execute(request);
+      
+      if (response.success) {
+        this.state.conversionResult = response;
+        this.state.successMessage = `Successfully converted ${amount} ${fromCurrency} to ${toCurrency}`;
+        return true;
+      } else {
+        this.state.conversionError = response.error || 'Conversion failed';
+        return false;
+      }
+    } catch (error) {
+      this.state.conversionError = error instanceof Error ? error.message : 'Failed to convert currency';
+      return false;
+    } finally {
+      this.state.isConverting = false;
+    }
+  };
 
   fetchExchangeRates = async (): Promise<void> => {
     try {
@@ -355,28 +333,25 @@ export class WalletViewModel {
     // Fetch exchange rates first
     await this.fetchExchangeRates();
 
-    const response: GetWalletsListResponse = await this.getWalletBalanceUseCase.execute(token);
+    const response = await this.getWalletBalanceUseCase.execute(token);
     console.log('Fetch Wallet Balance API Response:', response);
-    if (response.data && response.data.wallets && response.data.wallets.length > 0) {
-      const primaryWallet = response.data.wallets[0];
-      console.log('Primary Wallet Data:', primaryWallet);
-      if (primaryWallet.balances && primaryWallet.balances.ETH) {
-        this.state.walletAddress = primaryWallet.address;
-        this.state.ethBalance = parseFloat(primaryWallet.balances.ETH.balance);
-        // Calculate usdValue based on fetched exchange rates
-        if ( this.state.ethBalance !== null) {
-          // No direct assignment to usdBalance, it's now a getter
-        } else {
-          // No direct assignment to usdBalance
-        }
-        console.log('Updated Wallet Balance:', this.state.ethBalance);
-      } else {
-        console.log('Primary wallet does not have ETH balance data.', primaryWallet);
-        this.state.fetchBalanceError = 'ETH balance data not found for primary wallet';
-      }
+    if (response.success && response.data) {
+      const walletData = response.data;
+      console.log('Wallet Data:', walletData);
+      
+      this.state.walletAddress = walletData.wallet_address;
+      this.state.ethBalance = parseFloat(walletData.balance_eth);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem('walletAddress', walletData.wallet_address);
+      localStorage.setItem('ethBalance', this.state.ethBalance.toString());
+      localStorage.setItem('walletConnected', 'true');
+      
+      console.log('Updated Wallet Balance:', this.state.ethBalance);
+      console.log('Updated Wallet Address:', this.state.walletAddress);
     } else {
-      console.log('No wallets found in response data or response data is malformed.', response);
-      this.state.fetchBalanceError = 'No wallets found or invalid response';
+      console.log('No wallet data found in response or response is malformed.', response);
+      this.state.fetchBalanceError = 'No wallet data found or invalid response';
     }
   } catch (error) {
     console.error('Error fetching wallet balance:', error);
@@ -393,44 +368,19 @@ export class WalletViewModel {
     checkWalletConnection = async (authToken?: string) => {
     const token = authToken || localStorage.getItem('token');
     const walletAddress = localStorage.getItem('walletAddress');
-    const privateKey = localStorage.getItem('privateKey');
     const walletConnected = localStorage.getItem('walletConnected');
 
     console.log('Checking wallet connection on page load:', {
       walletAddress,
       walletConnected,
-      hasToken: !!token,
-      hasPrivateKey: !!privateKey
+      hasToken: !!token
     });
 
     if (walletAddress && walletConnected === 'true' && token) {
-      this.state.reconnectedWalletAddress = walletAddress;
-      
-      // If we have a private key stored, attempt to reconnect automatically
-      if (privateKey) {
-        try {
-          console.log('Attempting auto-reconnect with stored private key');
-          const success = await this.reconnectWallet(privateKey);
-          if (success) {
-            console.log('Auto-reconnect successful');
-            // Update the wallet address in state after successful reconnection
-            this.state.walletAddress = this.state.reconnectedWalletAddress;
-          } else {
-            console.error('Auto-reconnect failed');
-            this.resetWalletState();
-          }
-        } catch (error) {
-          console.error('Auto-reconnect failed:', error);
-          // Clear stored data if auto-reconnect fails
-          this.resetWalletState();
-        }
-      } else {
-        // Just set the address if no private key is available
-        console.log('No private key available, setting wallet address and fetching balance');
-        this.state.walletAddress = walletAddress;
-        // Try to fetch balance without reconnecting
-        await this.fetchWalletBalance(token);
-      }
+      console.log('Wallet connection found, setting address and fetching balance');
+      this.state.walletAddress = walletAddress;
+      // Try to fetch balance
+      await this.fetchWalletBalance(token);
     } else {
       console.log('No wallet connection found in localStorage');
     }
@@ -445,23 +395,11 @@ export class WalletViewModel {
     };
   }
 
-  get reconnectFormData() {
-    return {
-      privateKey: this.state.reconnectPrivateKey,
-      isReconnecting: this.state.isReconnecting,
-      error: this.state.reconnectError,
-      walletAddress: this.state.reconnectedWalletAddress,
-      isConnected: !!this.state.reconnectedWalletAddress
-    };
-  }
 
   get isConnecting() {
     return this.state.isConnecting;
   }
 
-  get isReconnecting() {
-    return this.state.isReconnecting;
-  }
 
   get isFetchingBalance() {
     return this.state.isFetchingBalance;
@@ -475,9 +413,6 @@ export class WalletViewModel {
     return this.state.connectError;
   }
 
-  get reconnectError() {
-    return this.state.reconnectError;
-  }
 
   get fetchBalanceError() {
     return this.state.fetchBalanceError;
@@ -487,13 +422,22 @@ export class WalletViewModel {
     return this.state.sendEthError;
   }
 
+  get conversionError() {
+    return this.state.conversionError;
+  }
+
+  get isConverting() {
+    return this.state.isConverting;
+  }
+
+  get conversionResult() {
+    return this.state.conversionResult;
+  }
+
   get successMessage() {
     return this.state.successMessage;
   }
 
-  get reconnectedWalletAddress() {
-    return this.state.reconnectedWalletAddress;
-  }
 
   get walletAddress() {
     return this.state.walletAddress;
@@ -520,20 +464,18 @@ export class WalletViewModel {
     return this.state.fiatCurrency;
   }
 
-  get isReconnectFormValid() {
-    return this.state.reconnectPrivateKey.trim() !== '' && !this.state.isReconnecting;
-  }
 
   resetWalletState = () => {
     this.state.walletAddress = null;
-    this.state.reconnectedWalletAddress = null;
     this.state.ethBalance = null;
     localStorage.removeItem('walletAddress');
     localStorage.removeItem('walletConnected');
+    localStorage.removeItem('ethBalance');
     localStorage.removeItem('privateKey');
   };
 
+
   get isWalletConnected() {
-  return !!this.state.walletAddress || !!this.state.reconnectedWalletAddress;
+  return !!this.state.walletAddress;
   }
 }

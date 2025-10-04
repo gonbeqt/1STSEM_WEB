@@ -102,6 +102,8 @@ const EmployeeManagement: React.FC = () => {
     setIsAddEmployeeModal(true);
   };
 
+  
+
   const samplePayrollData: PayrollData = {
     currentPeriod: {
       gross: 3500.00,
@@ -342,10 +344,10 @@ const EmployeeManagement: React.FC = () => {
       />
 
       {/* Employee Detail Modal */}
-      {selectedEmployee && (
+      {selectedApiEmployee && (
         <EmployeeDetailModal
           isOpen={showEmployeeDetailModal}
-          employee={selectedEmployee}
+          employee={selectedApiEmployee}
           payrollData={samplePayrollData}
           documents={sampleDocuments}
           onClose={handleCloseModal}

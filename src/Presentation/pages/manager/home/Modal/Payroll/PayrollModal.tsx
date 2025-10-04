@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, Info, CheckCircle, Loader2 } from 'lucide-react';
 import { container } from '../../../../../../di/container';
-import { usePayslipViewModel } from '../../../../../../domain/viewmodel/PayslipViewModel';
+import { usePayrollViewModel } from '../../../../../../domain/viewmodel/PayrollViewModel';
 import { useEmployeeViewModel } from '../../../../../../domain/viewmodel/EmployeeViewModel';
-import { CreatePayslipRequest } from '../../../../../../domain/entities/PayslipEntities';
+import { CreatePayrollEntryRequest, PayrollEmployee as PayrollEmployeeEntity } from '../../../../../../domain/entities/PayrollEntities';
 import { Employee as ApiEmployee } from '../../../../../../domain/repositories/EmployeeRepository';
 
-interface PayrollEmployee {
+interface PayrollEmployeeUI {
   id: string;
+  user_id: string; // Employee's user_id for backend API
   name: string;
   amount: number;
   status: string;
@@ -34,11 +35,12 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   
-  const { createPayslip, isLoading, error, success, clearMessages } = usePayslipViewModel(
-    container.createPayslipUseCase
+  const { createPayrollEntry, processPayrollPayment, isLoading, error, success, clearMessages } = usePayrollViewModel(
+    container.createPayrollEntryUseCase,
+    container.processPayrollPaymentUseCase
   );
   
-  const [employees, setEmployees] = useState<PayrollEmployee[]>([]);
+  const [employees, setEmployees] = useState<PayrollEmployeeUI[]>([]);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(false);
   
   const { getEmployeesByManager, isLoading: isLoadingEmployeesFromAPI } = useEmployeeViewModel(
@@ -55,9 +57,10 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         try {
           const response = await getEmployeesByManager({});
           if (response.success && response.employees) {
-            // Convert API employees to PayrollEmployee format
-            const payrollEmployees: PayrollEmployee[] = response.employees.map((emp: ApiEmployee) => ({
+            // Convert API employees to PayrollEmployeeUI format
+            const payrollEmployees: PayrollEmployeeUI[] = response.employees.map((emp: ApiEmployee) => ({
               id: emp.employee_id || emp.user_id,
+              user_id: emp.user_id, // Store the actual user_id for backend API
               name: emp.full_name || emp.username,
               amount: 0, // Default amount, can be set by user
               status: emp.is_active ? 'Active' : 'Inactive',
@@ -115,52 +118,114 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     setProcessStatus('processing');
     clearMessages();
 
-      try {
-        const payslipPromises = selectedEmployees.map(async (employee) => {
-          const payslipRequest: CreatePayslipRequest = {
-            employee_name: employee.name,
-            employee_id: employee.id,
-            employee_email: employee.email,
-            salary_amount: employee.amount,
-            salary_currency: 'USD',
-            cryptocurrency: 'ETH',
-            pay_period_start: payPeriodStart,
-            pay_period_end: payPeriodEnd,
-            pay_date: payDate,
-            department: employee.department,
-            position: employee.position,
-            notes: `Payroll processed for ${payrollType}`
-          };
+    try {
+      // Convert UI employees to PayrollEmployee entities
+      const payrollEmployees: PayrollEmployeeEntity[] = selectedEmployees.map((employee) => ({
+        employee_id: employee.id,
+        user_id: employee.user_id, // Include user_id for backend processing
+        employee_name: employee.name,
+        employee_email: employee.email,
+        department: employee.department,
+        position: employee.position,
+        salary_amount: employee.amount,
+        salary_currency: 'USD',
+        overtime_pay: 0,
+        bonus: 0,
+        allowances: 0,
+        tax_deduction: 0,
+        insurance_deduction: 0,
+        retirement_deduction: 0,
+        other_deductions: 0
+      }));
 
-          return await createPayslip(payslipRequest);
-        });
+      // Create payroll entries for each employee (backend expects individual entries)
+      const results = [];
+      let successCount = 0;
+      let errorCount = 0;
 
-        const results = await Promise.all(payslipPromises);
-        const failedResults = results.filter((result: any) => !result.success);
+      for (const employee of payrollEmployees) {
+        const payrollRequest = {
+          employee_id: employee.employee_id, // Backend expects employee_id, not employee_user_id
+          employee_user_id: employee.user_id, // Keep for reference
+          payroll_type: payrollType,
+          pay_period_start: payPeriodStart,
+          pay_period_end: payPeriodEnd,
+          pay_date: payDate,
+          start_date: payPeriodStart,
+          payment_date: payDate,
+          employee_name: employee.employee_name,
+          employee_wallet: employee.employee_wallet || undefined,
+          salary_amount: employee.salary_amount,
+          salary_currency: employee.salary_currency || 'USDC',
+          payment_frequency: 'MONTHLY',
+          amount: employee.salary_amount, // Use salary_amount as amount
+          cryptocurrency: employee.salary_currency || 'USDC',
+          notes: `Payroll processed for ${payrollType} - ${employee.employee_name}`
+        };
+
+        console.log('🔄 Sending payroll request for employee:', employee.employee_name, payrollRequest);
         
-        if (failedResults.length === 0) {
-          setSuccessMessage(`Successfully created ${results.length} payslips!`);
-          setProcessStatus('success');
+        try {
+          // Call the repository directly for individual payroll entries
+          const repositoryResult = await container.payslipRepository.createSinglePayrollEntry(payrollRequest);
           
-          // Call the original onProcess callback with the results
-          onProcess({
-            payrollType,
-            payPeriodStart,
-            payPeriodEnd,
-            payDate,
-            employees: selectedEmployees,
-            total: getTotalAmount(),
-            payslips: results
+          const result = {
+            success: true,
+            payroll_entry: repositoryResult,
+            message: 'Payroll entry created successfully'
+          };
+          
+          results.push(result);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          console.error('❌ Error creating payroll for employee:', employee.employee_name, error);
+          results.push({ 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Unknown error' 
           });
-          
-          // Close modal after a short delay to show success message
-          setTimeout(() => {
-            onClose();
-          }, 2000);
-        } else {
-          setErrorMessage(`Failed to create ${failedResults.length} out of ${results.length} payslips. Please try again.`);
-          setProcessStatus('error');
         }
+      }
+
+      const result = {
+        success: successCount > 0,
+        successCount,
+        errorCount,
+        totalEmployees: payrollEmployees.length,
+        results
+      };
+      
+      if (result.success) {
+        if (result.errorCount === 0) {
+          setSuccessMessage(`Successfully created payroll entries for all ${result.successCount} employees!`);
+        } else {
+          setSuccessMessage(`Created payroll entries for ${result.successCount} employees. ${result.errorCount} failed.`);
+        }
+        setProcessStatus('success');
+        
+        // Call the original onProcess callback with the results
+        onProcess({
+          payrollType,
+          payPeriodStart,
+          payPeriodEnd,
+          payDate,
+          employees: selectedEmployees,
+          total: getTotalAmount(),
+          payrollEntryId: (() => {
+            const successResult = result.results.find(r => r.success && 'payroll_entry' in r);
+            return successResult && 'payroll_entry' in successResult ? successResult.payroll_entry.entry_id : 'multiple';
+          })(),
+          payrollEntry: result
+        });
+        
+        // Close modal after a short delay to show success message
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        setErrorMessage(`Failed to create payroll entries. ${result.errorCount} out of ${result.totalEmployees} failed.`);
+        setProcessStatus('error');
+      }
     } catch (error) {
       console.error('Error processing payroll:', error);
       setErrorMessage('An unexpected error occurred while processing payroll.');

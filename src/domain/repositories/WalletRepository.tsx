@@ -1,11 +1,11 @@
 // src/data/repositories/WalletRepository.tsx
-import { Wallet, ConnectWalletRequest, ReconnectWalletRequest, ReconnectWalletResponse, GetWalletsListResponse, SendEthRequest, SendEthResponse } from "../entities/WalletEntities";
+import { Wallet, ConnectWalletRequest, GetWalletsListResponse, GetWalletBalanceResponse, SendEthRequest, SendEthResponse, DisconnectWalletResponse, ConversionRequest, ConversionResponse } from "../entities/WalletEntities";
 import { WalletResponse } from "../entities/WalletEntities";
 
 export interface WalletRepository {
     connectWallet(request: ConnectWalletRequest): Promise<WalletResponse>;
-    reconnectWallet(request: ReconnectWalletRequest): Promise<ReconnectWalletResponse>;
-    getWalletBalance(token: string): Promise<GetWalletsListResponse>;
+    getWalletBalance(token: string): Promise<GetWalletBalanceResponse>;
     sendEth(request: SendEthRequest): Promise<SendEthResponse>;
-    // Added sendEth method - forcing re-evaluation
+    disconnectWallet(token: string): Promise<DisconnectWalletResponse>;
+    convertCryptoToFiat(request: ConversionRequest): Promise<ConversionResponse>;
 }

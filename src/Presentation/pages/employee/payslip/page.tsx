@@ -12,7 +12,6 @@ interface PayslipProps {
 const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
   const { payslips, loading, error } = usePayslips(payslipData ? payslipData.employee_id : undefined);
   const [copied, setCopied] = useState(false);
-  const [salaryConfirmed, setSalaryConfirmed] = useState(false);
 
   const currentPayslip: Payslip | undefined = payslipData || payslips[0]; 
   const handleCopy = async (text: string) => {
@@ -31,42 +30,7 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
     // You would typically generate and download the PDF here
   };
 
-  const handleConfirmSalary = async () => {
-    if (!currentPayslip) return;
 
-    try {
-      // Assuming a backend API endpoint for updating payslip status
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/payslips/${currentPayslip.payslip_id}/status/`, {
-        method: 'PUT', // Or POST, depending on your API design
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
-        },
-        body: JSON.stringify({ status: 'paid' }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update payslip status');
-      }
-
-      // Update the local state to reflect the new status
-      // This is a simplified update. In a real app, you might re-fetch the payslip
-      // or update the payslip object in a global state management solution.
-      setSalaryConfirmed(true);
-      currentPayslip.status = 'paid'; // Directly modify the object for immediate UI update
-
-      console.log('Payslip status updated to paid:', currentPayslip.payslip_id);
-    } catch (error) {
-      console.error('Error confirming salary receipt:', error);
-      alert(`Failed to confirm salary receipt: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  const formatAddress = (address: string) => {
-    if (address.length <= 10) return address;
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   // If payslipData is provided, we don't need to show loading/error from hook
   if (!payslipData && loading) {

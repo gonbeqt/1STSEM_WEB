@@ -3,11 +3,10 @@ import { GetTransactionHistoryUseCase } from '../../domain/usecases/GetTransacti
 import { TransactionRepositoryImpl } from '../../data/repositoriesImpl/TransactionRepositoryImpl';
 import { Transaction, TransactionHistoryRequest } from '../../domain/entities/TransactionEntities';
 
-export const useTransactionHistory = () => {
+export const useEnhancedTransactionHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentCategory] = useState<'SENT' | 'RECEIVED' | 'TRANSFER' | 'ALL'>('ALL');
   const [pagination, setPagination] = useState({
     total: 0,
     limit: 10,
@@ -28,12 +27,13 @@ export const useTransactionHistory = () => {
       const defaultRequest = {
         limit: 10,
         offset: 0,
+        // Remove category completely - don't send any category filter
         ...request
       };
 
       const response = await getTransactionHistoryUseCase.execute(defaultRequest);
       
-      console.log('✅ Transaction history loaded successfully:', {
+      console.log('✅ Enhanced transaction history loaded successfully:', {
         message: response.message,
         transactionCount: response.data.transactions?.length || 0,
         pagination: response.data.pagination
@@ -59,26 +59,25 @@ export const useTransactionHistory = () => {
     try {
       const response = await fetchTransactionHistory({
         limit: pagination.limit,
-        offset: pagination.offset + pagination.limit,
-        category: currentCategory
+        offset: pagination.offset + pagination.limit
+        // Remove category completely - get all transactions
       });
 
       setTransactions(prev => [...prev, ...response.data.transactions]);
     } catch (err) {
       console.error('Failed to load more transactions:', err);
     }
-  }, [pagination, isLoading, fetchTransactionHistory, currentCategory]);
+  }, [pagination, isLoading, fetchTransactionHistory]);
 
   const refreshTransactions = useCallback(() => {
-    return fetchTransactionHistory({ limit: pagination.limit, offset: 0, category: currentCategory });
-  }, [fetchTransactionHistory, pagination.limit, currentCategory]);
+    return fetchTransactionHistory({ limit: pagination.limit, offset: 0 });
+  }, [fetchTransactionHistory, pagination.limit]);
 
   return {
     transactions,
     isLoading,
     error,
     pagination,
-    currentCategory,
     fetchTransactionHistory,
     loadMore,
     refreshTransactions

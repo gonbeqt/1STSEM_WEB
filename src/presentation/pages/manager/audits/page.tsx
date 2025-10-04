@@ -13,7 +13,6 @@ const AuditSolidityContract: React.FC = () => {
     const [contractName, setContractName] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [isDragActive, setIsDragActive] = useState(false);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
@@ -82,13 +81,13 @@ const AuditSolidityContract: React.FC = () => {
             return;
         }
 
-        setIsAnalyzing(true);
+        // setIsAnalyzing(true);
         setCurrentStep(2);
 
         // Simulate analysis process
         setTimeout(() => {
             setCurrentStep(3);
-            setIsAnalyzing(false);
+            // setIsAnalyzing(false);
         }, 3000);
     };
 

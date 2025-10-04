@@ -1,20 +1,30 @@
 import { ArrowLeft, Download, Eye, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { usePayslips } from '../../../../hooks/usePayslips';
+import { useEmployeePayrollDetails } from '../../../../hooks/useEmployeePayrollDetails';
+import { container } from '../../../../../di/container';
 
 interface Employee {
-  id: string;
-  fullName: string;
-  position: string;
-  employeeId: string;
-  emailAddress: string;
-  phoneNumber: string;
+  employee_id: string;
+  user_id: string;
+  username: string;
+  email: string;
+  full_name: string;
   department: string;
-  baseSalary: number;
-  paymentSchedule: string;
-  employmentType: string;
-  startDate: string;
-  status: 'Active' | 'Inactive';
+  position: string;
+  phone: string;
+  is_active: boolean;
+  created_at: string;
+  // Optional fields for backward compatibility
+  id?: string;
+  fullName?: string;
+  employeeId?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  baseSalary?: number;
+  paymentSchedule?: string;
+  employmentType?: string;
+  startDate?: string;
+  status?: 'Active' | 'Inactive';
   profileImage?: string;
 }
 
@@ -73,20 +83,30 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('details');
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
   
-  // Fetch payslips for the employee
-  const { payslips, loading: payslipsLoading, error: payslipsError } = usePayslips(employee.id);
+  // Fetch detailed payroll information for the employee
+  const { 
+    payrollDetails, 
+    isLoading: payrollLoading, 
+    error: payrollError, 
+    fetchEmployeePayrollDetails,
+    clearPayrollDetails
+  } = useEmployeePayrollDetails(container.getEmployeePayrollDetailsUseCase);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Fetch payroll details when modal opens
+      fetchEmployeePayrollDetails(employee.user_id);
     } else {
       document.body.style.overflow = 'unset';
+      // Clear payroll details when modal closes to prevent stale data
+      clearPayrollDetails();
     }
 
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, employee.user_id, clearPayrollDetails]); // Use employee.user_id for payroll details
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -110,34 +130,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     }
   };
 
-  const formatPayPeriod = (startDate: string, endDate: string): string => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'failed':
-        return 'bg-red-100 text-red-700 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
-
-  const handleViewPayslip = (payslipId: string) => {
-    console.log('Viewing payslip:', payslipId);
-    // TODO: Implement payslip viewing functionality
-  };
-
-  const handleDownloadPayslip = (payslipId: string) => {
-    console.log('Downloading payslip:', payslipId);
-    // TODO: Implement payslip download functionality
-  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -185,11 +177,11 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         <div className="grid grid-cols-2 gap-6 md:grid-cols-1">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Address</label>
-            <p className="text-gray-900 font-medium">{employee.emailAddress || 'Not provided'}</p>
+            <p className="text-gray-900 font-medium">{employee.email || employee.emailAddress || 'Not provided'}</p>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone Number</label>
-            <p className="text-gray-900 font-medium">{employee.phoneNumber || 'Not provided'}</p>
+            <p className="text-gray-900 font-medium">{employee.phone || employee.phoneNumber || 'Not provided'}</p>
           </div>
         </div>
       </div>
@@ -202,19 +194,19 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         <div className="grid grid-cols-2 gap-6 md:grid-cols-1">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Base Salary</label>
-            <p className="text-gray-900 font-semibold text-lg">{formatCurrency(employee.baseSalary)}</p>
+            <p className="text-gray-900 font-semibold text-lg">{formatCurrency(employee.baseSalary || 0)}</p>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Start Date</label>
-            <p className="text-gray-900 font-medium">{formatDate(employee.startDate)}</p>
+            <p className="text-gray-900 font-medium">{formatDate(employee.startDate || employee.created_at || new Date().toISOString())}</p>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Employment Type</label>
-            <p className="text-gray-900 font-medium">{employee.employmentType}</p>
+            <p className="text-gray-900 font-medium">{employee.position}</p>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment Schedule</label>
-            <p className="text-gray-900 font-medium">{employee.paymentSchedule}</p>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment Frequency</label>
+            <p className="text-gray-900 font-medium">Monthly</p>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Department</label>
@@ -222,7 +214,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee Status</label>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ml-1 ${
               employee.status === 'Active' 
                 ? 'bg-green-100 text-green-700 border border-green-200' 
                 : 'bg-red-100 text-red-700 border border-red-200'
@@ -282,161 +274,189 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   );
 
   const renderPayrollTab = () => {
-    // Calculate summary data from payslips
-    const totalGross = payslips.reduce((sum, payslip) => sum + payslip.total_earnings, 0);
-    const totalNet = payslips.reduce((sum, payslip) => sum + payslip.final_net_pay, 0);
-    const totalDeductions = payslips.reduce((sum, payslip) => sum + payslip.total_deductions, 0);
-    const latestPayslip = payslips.length > 0 ? payslips[0] : null;
-
     return (
       <div className="space-y-6">
-        {/* Summary Cards */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-2xl text-white shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-white">Payroll Summary</h3>
-            <span className="text-xs text-white/80 bg-white/20 px-3 py-1 rounded-full font-medium">
-              {payslips.length} payslip{payslips.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-white/80" />
-                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Net Pay</p>
-              </div>
-              <p className="text-2xl font-bold text-white">{formatCurrency(totalNet)}</p>
-            </div>
-            
-            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-white/80" />
-                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Gross</p>
-              </div>
-              <p className="text-2xl font-bold text-white">{formatCurrency(totalGross)}</p>
-            </div>
-            
-            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-white/80" />
-                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Deductions</p>
-              </div>
-              <p className="text-2xl font-bold text-red-200">{formatCurrency(totalDeductions)}</p>
+        {/* Payroll API Loading State */}
+        {payrollLoading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="text-blue-700 font-medium">Loading detailed payroll information...</p>
             </div>
           </div>
+        )}
 
-          {latestPayslip && (
-            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-4 h-4 text-white/80" />
-                <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Latest Pay Period</p>
-              </div>
-              <p className="text-lg font-semibold text-white">
-                {formatPayPeriod(latestPayslip.pay_period_start, latestPayslip.pay_period_end)}
-              </p>
+        {/* Payroll API Error State - Only show for actual API/network errors */}
+        {payrollError && !payrollLoading && !payrollError.toLowerCase().includes('no data') && !payrollError.toLowerCase().includes('not found') && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+              <p className="text-red-700 font-medium">Failed to load payroll details</p>
             </div>
-          )}
-        </div>
+            <p className="text-red-600 text-sm mt-1">{payrollError}</p>
+          </div>
+        )}
 
-        {/* Payslips List */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Payslips</h3>
-            {payslipsLoading && (
-              <div className="flex items-center gap-2 text-gray-500">
-                <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin"></div>
-                <span className="text-sm">Loading...</span>
+        {/* Payroll Details Content */}
+        {payrollDetails ? (
+          <>
+            {/* Summary Cards */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-2xl text-white shadow-xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-white">Payroll Summary</h3>
+                <span className="text-xs text-white/80 bg-white/20 px-3 py-1 rounded-full font-medium">
+                  {payrollDetails.payroll_entries?.length || 0} payslip{(payrollDetails.payroll_entries?.length || 0) !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-white/80" />
+                    <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Net Pay</p>
+                  </div>
+                    <p className="text-2xl font-bold text-white">{formatCurrency(payrollDetails.payroll_entries?.reduce((sum, entry) => sum + (entry.amount || 0), 0) || 0)}</p>
+                </div>
+                
+                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-white/80" />
+                    <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Gross</p>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{formatCurrency(payrollDetails.total_earnings || 0)}</p>
+                </div>
+                
+                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-white/80" />
+                    <p className="text-white/80 text-xs uppercase tracking-wider font-medium">Total Deductions</p>
+                  </div>
+                  <p className="text-2xl font-bold text-red-200">{formatCurrency(payrollDetails.total_deductions || 0)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payroll Entries */}
+            {payrollDetails.payroll_entries && Array.isArray(payrollDetails.payroll_entries) && payrollDetails.payroll_entries.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Payroll Entries ({payrollDetails.payroll_entries.length})</h3>
+                <div className="space-y-3">
+                  {payrollDetails.payroll_entries.map((entry, index) => (
+                    <div key={entry.entry_id || index} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500 font-medium">Entry ID</p>
+                          <p className="font-semibold text-gray-900 text-xs font-mono">{entry.entry_id}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Employee</p>
+                          <p className="font-semibold text-gray-900">{entry.employee_name || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Amount</p>
+                          <p className="font-semibold text-green-600 text-lg">{formatCurrency(entry.amount || 0)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Status</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            entry.status === 'COMPLETED' ? 'bg-green-100 text-green-800 border border-green-200' :
+                            entry.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                            entry.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                            'bg-gray-100 text-gray-800 border border-gray-200'
+                          }`}>
+                            {entry.status}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mt-4 pt-4 border-t border-gray-200">
+                        <div>
+                          <p className="text-gray-500 font-medium">Salary Amount</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(entry.salary_amount || 0)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Currency</p>
+                          <p className="font-semibold text-gray-900">{entry.salary_currency || 'USD'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Crypto Amount</p>
+                          <p className="font-semibold text-purple-600">{entry.amount} {entry.cryptocurrency}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Payment Date</p>
+                          <p className="font-semibold text-gray-900">{formatDate(entry.payment_date)}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4 pt-4 border-t border-gray-200">
+                        <div>
+                          <p className="text-gray-500 font-medium">Start Date</p>
+                          <p className="font-semibold text-gray-900">{formatDate(entry.start_date)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">Created At</p>
+                          <p className="font-semibold text-gray-900">{formatDate(entry.created_at)}</p>
+                        </div>
+                      </div>
+
+                      {entry.notes && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <p className="text-gray-500 font-medium text-sm">Notes</p>
+                          <p className="text-gray-700 text-sm mt-1 bg-gray-100 p-2 rounded-lg">{entry.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* Recent Payslips Summary */}
+            {payrollDetails.recent_payslips && payrollDetails.recent_payslips.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Payslips</h3>
+                <div className="space-y-3">
+                  {payrollDetails.recent_payslips.map((payslip, index) => (
+                    <div key={index} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Period</p>
+                          <p className="font-semibold text-gray-900">{payslip.period}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Amount</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(payslip.amount)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Date</p>
+                          <p className="font-semibold text-gray-900">{formatDate(payslip.date)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Status</p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            payslip.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                            payslip.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {payslip.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : !payrollLoading && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <DollarSign className="w-8 h-8 text-gray-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">No payroll data available</h4>
+            <p className="text-gray-500">This employee doesn't have any payroll information yet.</p>
           </div>
-
-          {payslipsError && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <p className="text-red-700 font-medium">Error loading payslips</p>
-              </div>
-              <p className="text-red-600 text-sm mt-1">{payslipsError}</p>
-            </div>
-          )}
-
-          {payslipsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-200 animate-pulse">
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-32"></div>
-                      <div className="h-3 bg-gray-200 rounded w-24"></div>
-                    </div>
-                    <div className="h-8 bg-gray-200 rounded w-20"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : payslips.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-gray-400" />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">No payslips found</h4>
-              <p className="text-gray-500">This employee doesn't have any payslips yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {payslips.map((payslip) => (
-                <div key={payslip.payslip_id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
-                  <div className="flex justify-between items-center md:flex-col md:items-start md:gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-semibold text-gray-900">
-                          {formatPayPeriod(payslip.pay_period_start, payslip.pay_period_end)}
-                        </h4>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(payslip.status)}`}>
-                          {payslip.status.charAt(0).toUpperCase() + payslip.status.slice(1)}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-500">Total Earnings</p>
-                          <p className="font-semibold text-gray-900">{formatCurrency(payslip.total_earnings)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Net Pay</p>
-                          <p className="font-semibold text-green-600">{formatCurrency(payslip.final_net_pay)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Deductions</p>
-                          <p className="font-semibold text-red-600">{formatCurrency(payslip.total_deductions)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Created</p>
-                          <p className="font-semibold text-gray-900">{formatDate(payslip.created_at)}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => handleViewPayslip(payslip.payslip_id)}
-                        className="flex items-center gap-2 px-3 py-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-medium transition-all duration-200"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View
-                      </button>
-                      <button 
-                        onClick={() => handleDownloadPayslip(payslip.payslip_id)}
-                        className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     );
   };
@@ -473,13 +493,13 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg bg-white/20 flex items-center justify-center text-xl font-bold">
                 {employee.profileImage ? (
-                  <img src={employee.profileImage} alt={employee.fullName} className="w-full h-full object-cover" />
+                  <img src={employee.profileImage} alt={employee.full_name || employee.fullName} className="w-full h-full object-cover" />
                 ) : (
-                  employee.fullName.split(' ').map(name => name.charAt(0)).join('').slice(0, 2)
+                  (employee.full_name || employee.fullName || '').split(' ').map(name => name.charAt(0)).join('').slice(0, 2)
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold mb-1 md:text-xl">{employee.fullName}</h1>
+                <h1 className="text-2xl font-bold mb-1 md:text-xl">{employee.full_name || employee.fullName}</h1>
                 <p className="text-white/80 font-medium">{employee.position}</p>
               </div>
             </div>
@@ -534,7 +554,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
             </div>
             
             <p className="text-gray-600 mb-6">
-              Are you sure you want to remove <span className="font-semibold text-gray-900">{employee.fullName}</span> from your team? 
+              Are you sure you want to remove <span className="font-semibold text-gray-900">{employee.full_name || employee.fullName}</span> from your team? 
               They will become available for other managers to assign.
             </p>
             
