@@ -18,8 +18,8 @@ const InputWithIcon = ({
   };
 
   return (
-    <div className="flex items-center rounded-lg p-3 w-full  h-12 bg-transparent relative border border-gray-700">
-      <span className="mr-2 mt-1 text-black border-r border-gray-300 pr-2">
+    <div className="flex items-center rounded-lg p-3 w-full h-12 bg-white relative border border-gray-300 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all duration-200 shadow-sm">
+      <span className="mr-3 text-gray-400 flex-shrink-0">
         {icon}
       </span>
       <input
@@ -27,12 +27,12 @@ const InputWithIcon = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="border-none outline-none flex-1 bg-transparent text-black w-full placeholder:text-gray-500"
+        className="border-none outline-none flex-1 bg-transparent text-gray-900 w-full placeholder:text-gray-500 text-sm"
       />
       {type === "password" && (
         <button 
           onClick={togglePasswordVisibility} 
-          className="bg-transparent border-none cursor-pointer text-white p-0 hover:opacity-70 transition-opacity"
+          className="bg-transparent border-none cursor-pointer text-gray-400 p-0 hover:text-gray-600 transition-colors flex-shrink-0"
         >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>

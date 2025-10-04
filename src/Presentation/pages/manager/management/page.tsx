@@ -244,96 +244,111 @@ const EmployeeManagement: React.FC = () => {
 
   return (
     <div className="w-full h-full rounded-xl p-6 bg-gray-100 animate-slideIn text-gray-900 border border-gray-200">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 m-0 leading-tight md:text-xl">Employee List</h1>
-      </div>
-
-      {/* Search and Add Employee */}
-      <div className="flex flex-row justify-between items-center mb-6 gap-3">
-        <div className="flex-1 min-w-100">
-          <InputWithIcon
-            icon={<SearchIcon />}
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-          />
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Employee List</h1>
         </div>
-        <button
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none rounded-lg px-6 py-3.5 text-sm font-semibold hover:from-purple-600 hover:to-purple-700 hover:-translate-y-0.5 hover:shadow-lg transition-all whitespace-nowrap flex-shrink-0"
-          onClick={handleAddEmployee}
-        >
-          Add Employee
-        </button>
-      </div>
 
-      {/* Employee List */}
-      <div className="flex flex-col gap-3">
-        {isLoadingEmployees ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border border-gray-200">
-            <p className="text-gray-500 text-base relative after:content-[''] after:inline-block after:w-5 after:h-5 after:border-2 after:border-gray-300 after:border-t-purple-500 after:rounded-full after:animate-spin after:ml-2 after:align-middle">
-              Loading employees...
-            </p>
+        {/* Search and Add Employee */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="flex-1">
+            <InputWithIcon
+              icon={<SearchIcon />}
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+            />
           </div>
-        ) : employeesError ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center bg-red-50 rounded-xl border border-red-200">
-            <p className="text-red-600 text-base font-medium mb-4">Error: {employeesError}</p>
-            <button
-              className="bg-red-600 text-white border-none rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-red-700 transition-colors"
-              onClick={() => setRefreshTrigger(prev => prev + 1)}
-            >
-              Retry
-            </button>
-          </div>
-        ) : filteredEmployees.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border-2 border-dashed border-gray-300 my-5">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {searchTerm ? 'No employees found matching your search' : 'No employees found'}
-            </h3>
-            {!searchTerm && (
-              <p className="text-gray-600 text-sm text-center mt-2">
-                Click "Add Employee" to get started
-              </p>
-            )}
-          </div>
-        ) : (
-          filteredEmployees.map((employee: ApiEmployee) => (
-            <div
-              key={employee.user_id}
-              className="flex items-center bg-white rounded-xl p-5 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 hover:border-purple-500 hover:shadow-md hover:-translate-y-0.5 transition-all"
-              onClick={() => handleEmployeeDetails(employee)}
-            >
-              <div className="flex items-center gap-4 w-full">
-                <img
-                  src={employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User'}
-                  alt={employee.full_name || employee.username}
-                  className="rounded-full w-14 h-14 object-cover border-2 border-gray-200 flex-shrink-0 hover:scale-105 transition-transform md:w-12 md:h-12"
-                />
-                <div className="flex-1 flex flex-col gap-2 min-w-0">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 m-0 overflow-hidden text-ellipsis whitespace-nowrap md:text-base">
-                        {employee.full_name || employee.username}
-                      </h3>
-                      <p className="text-sm text-gray-500 font-medium m-0 md:text-xs">
-                        Position: {employee.position || 'N/A'}
-                      </p>
-                    </div>
-                    <p className="text-xs text-green-800 bg-green-100 px-3 py-1 rounded-full font-medium uppercase tracking-wide m-0 flex-shrink-0 md:text-[11px]">
-                      STATUS: {employee.is_active ? 'ACTIVE' : 'INACTIVE'}
-                    </p>
+          <button
+            className="bg-purple-600 text-white border-none rounded-lg px-6 py-3 text-sm font-semibold hover:bg-purple-700 hover:shadow-lg transition-all duration-200 whitespace-nowrap flex-shrink-0"
+            onClick={handleAddEmployee}
+          >
+            Add Employee
+          </button>
+        </div>
+
+        {/* Employee List */}
+        <div className="space-y-4">
+          {isLoadingEmployees ? (
+            <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
+              <p className="text-gray-500 text-base">Loading employees...</p>
+            </div>
+          ) : employeesError ? (
+            <div className="flex flex-col items-center justify-center p-16 text-center bg-red-50 rounded-xl border border-red-200 shadow-sm">
+              <p className="text-red-600 text-base font-medium mb-4">Error: {employeesError}</p>
+              <button
+                className="bg-red-600 text-white border-none rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-red-700 transition-colors"
+                onClick={() => setRefreshTrigger(prev => prev + 1)}
+              >
+                Retry
+              </button>
+            </div>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border-2 border-dashed border-gray-300 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                {searchTerm ? 'No employees found matching your search' : 'No employees found'}
+              </h3>
+              {!searchTerm && (
+                <p className="text-gray-600 text-sm text-center mt-2">
+                  Click "Add Employee" to get started
+                </p>
+              )}
+            </div>
+          ) : (
+            filteredEmployees.map((employee: ApiEmployee) => (
+              <div
+                key={employee.user_id}
+                className="flex items-center bg-white rounded-xl p-6 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 hover:border-purple-300 hover:shadow-md transition-all duration-200"
+                onClick={() => handleEmployeeDetails(employee)}
+              >
+                <div className="flex items-center gap-4 w-full">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg font-semibold text-gray-700 flex-shrink-0">
+                    {employee.profileImage ? (
+                      <img 
+                        src={employee.profileImage} 
+                        alt={employee.full_name || employee.username} 
+                        className="w-full h-full object-cover rounded-full" 
+                      />
+                    ) : (
+                      (employee.full_name || employee.username || '').charAt(0).toUpperCase()
+                    )}
                   </div>
-                  <div className="flex justify-between items-center gap-4">
-                    <h5 className="text-sm text-purple-500 font-medium m-0 overflow-hidden text-ellipsis whitespace-nowrap flex-1 md:text-xs">
-                      {employee.department || 'N/A'}
-                    </h5>
+                  
+                  {/* Employee Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                          {employee.full_name || employee.username}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-1">
+                          Position: {employee.position || 'N/A'}
+                        </p>
+                        <p className="text-sm text-purple-600 font-medium">
+                          {employee.department || 'N/A'}
+                        </p>
+                      </div>
+                      
+                      {/* Status Badge */}
+                      <div className="flex-shrink-0">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
+                          employee.is_active 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {employee.is_active ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
-
-        )}
+            ))
+          )}
+        </div>
       </div>
 
       {/* Add Employee Modal */}

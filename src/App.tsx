@@ -25,11 +25,9 @@ import EmployeeHistory from './presentation/pages/employee/history/page';
 import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
-import { ManagerSessionsPage } from './presentation/pages/manager/profile/sessions/page';
 
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
-import WaitingApprovalPage from './presentation/pages/waiting-approval/page';
 import { container } from './di/container'; // Import the container
 import { EmoployeeSessionsPage } from './presentation/pages/employee/settings/sessions/page';
 
@@ -77,7 +75,7 @@ function App() {
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
               <Register />
             </div>
-          } />          <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
+          } />          
           <Route element={<ManagerLayout />}>
             <Route path="/home" element={
               <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">
@@ -95,7 +93,6 @@ function App() {
             <Route path="/invest" element={<Invest />} />
             <Route path="/payroll_summary" element={<PayrollSummary />} />
             <Route path="/tax_summary" element={<TaxSummary />} />
-            <Route path="/manager/sessions" element={<ManagerSessionsPage />} />
             <Route path="/compliance" element={<CompliancePage />} />
 
 
