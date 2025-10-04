@@ -137,14 +137,13 @@ const EmployeeHome = observer(() => {
       }
     }, [isWalletConnected, fetchWalletBalance]);
 
-  // Fetch RECEIVED transactions for employee
+  // Fetch all transactions for employee (no category filtering)
   useEffect(() => {
     fetchTransactionHistory({ 
-      category: 'RECEIVED',
       limit: 10,
       offset: 0
     });
-  }, [fetchTransactionHistory]);
+  }, []); // Remove fetchTransactionHistory from dependencies to prevent infinite loop
   
  
   const getNextMonthFirstDay = () => {
@@ -189,7 +188,7 @@ const EmployeeHome = observer(() => {
     };
 
     autoConvertBalance();
-  }, [ethBalance, conversionCurrency, isWalletConnected, convertCryptoToFiat, conversionResult]);
+  }, [ethBalance, conversionCurrency, isWalletConnected]); // Remove function dependencies to prevent infinite loops
 
   const toggleCurrency = () => {
     setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');

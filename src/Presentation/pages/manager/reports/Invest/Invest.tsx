@@ -1,6 +1,8 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface InvestmentHolding {
   symbol: string;
@@ -28,15 +30,6 @@ const Invest: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
-  const [expandedSections, setExpandedSections] = useState<{
-    holdings: boolean;
-    performance: boolean;
-    summary: boolean;
-  }>({
-    holdings: true,
-    performance: false,
-    summary: false,
-  });
 
   useEffect(() => {
     fetchPortfolioData();
@@ -110,57 +103,19 @@ const Invest: React.FC = () => {
     }
   };
 
-  const exportToExcel = async () => {
-    try {
-      setLoading(true);
-      
-      if (!portfolio) {
-        return;
-      }
-
-      const csvContent = [
-        ['Symbol', 'Name', 'Quantity', 'Current Value', 'Percentage'],
-        ...portfolio.holdings.map(holding => [
-          holding.symbol,
-          holding.name,
-          holding.quantity.toString(),
-          holding.current_value.toString(),
-          formatPercentage(holding.percentage_of_portfolio)
-        ]),
-        ['', '', 'Total Portfolio Value:', portfolio.total_value.toString(), '100%']
-      ].map(row => row.join(',')).join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `portfolio_report_${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-    } catch (error) {
-      console.error('CSV export error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const chartData = portfolio ? portfolio.holdings.map(holding => ({
     name: holding.symbol,
     value: holding.current_value,
-    percentage: holding.percentage_of_portfolio
+    percentage: holding.percentage_of_portfolio,
+    fill: '#8884d8'
   })) : [];
 
-  const toggleSection = (section: 'holdings' | 'performance' | 'summary') => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
 
   const formatCurrency = (amount: number): string => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -169,236 +124,282 @@ const Invest: React.FC = () => {
     }).format(Math.abs(amount));
   };
 
+  const exportToExcel = () => {
+    if (!portfolio) {
+      setError('No portfolio data to export');
+      return;
+    }
+
+    try {
+      // Prepare data for Excel export
+      const excelData = [
+        ['INVESTMENT PORTFOLIO'],
+        [`As of: ${new Date().toISOString().split('T')[0]}`],
+        ['Total Portfolio Value', portfolio.total_value],
+        ['Total Cost Basis', portfolio.total_cost_basis],
+        ['Total Unrealized G/L', portfolio.total_unrealized_gain_loss],
+        ['Cash Balance', portfolio.cash_balance],
+        [''],
+        ['HOLDINGS', ''],
+        ['Symbol', 'Name', 'Quantity', 'Current Value', 'Percentage'],
+        ...portfolio.holdings.map(holding => [
+          holding.symbol,
+          holding.name,
+          holding.quantity,
+          holding.current_value,
+          holding.percentage_of_portfolio
+        ])
+      ];
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 10 }, // Symbol
+        { wch: 20 }, // Name
+        { wch: 10 }, // Quantity
+        { wch: 15 }, // Current Value
+        { wch: 12 }  // Percentage
+      ];
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Investment Portfolio');
+
+      // Generate Excel file and save
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = `InvestmentPortfolio_${new Date().toISOString().split('T')[0]}.xlsx`;
+      saveAs(blob, fileName);
+      
+    } catch (err: any) {
+      setError(err.message || 'Failed to export to Excel');
+      console.error('Excel export error:', err);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      exportToExcel();
+    } catch (error) {
+      console.error('Failed to export to Excel:', error);
+    }
+  };
+
   const formatPercentage = (percentage: number): string => {
     return `${percentage.toFixed(2)}%`;
   };
 
-  const renderChartView = () => {
-    if (loading) {
-      return <div className="loading text-center py-10 text-gray-600 text-base">Loading portfolio data...</div>;
-    }
-
-    if (error) {
-      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
-    }
-
-    if (!portfolio || chartData.length === 0) {
-      return <div className="no-data text-center py-10 text-gray-600 text-base">No portfolio data available for chart view</div>;
-    }
-
-    return (
-      <div className="chart-view p-6 h-full overflow-y-auto">
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={chartData}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
-          </LineChart>
-        </ResponsiveContainer>
-        <div className="chart-summary bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Summary</h4>
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed">Your investment portfolio shows current holdings, performance, and total value.</p>
-          <div className="btn-container flex gap-3 flex-wrap md:flex-col">
-            <button className="close-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>Close</button>
-            <button className="download-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={exportToExcel}>Download Report</button>
-          </div>
+  const renderChartView = () => (
+    <div className="chart-view p-6 h-full overflow-y-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Overview</h4>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-      </div>
-    );
-  };
-
-  const renderTableView = () => {
-    if (loading) {
-      return <div className="loading text-center py-10 text-gray-600 text-base">Loading portfolio...</div>;
-    }
-
-    if (error) {
-      return <div className="error bg-red-50 text-red-600 py-5 px-6 border-l-4 border-red-600 text-center rounded-md mx-6 my-5">Error: {error}</div>;
-    }
-
-    if (!portfolio) {
-      return <div className="no-data text-center py-10 text-gray-600 text-base">No portfolio data available</div>;
-    }
-
-    return (
-      <div className="table-view flex flex-col h-full bg-white">
-        <div className="export-actions p-4 border-b border-gray-200 bg-white flex justify-end">
-          <button className="export-excel py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-emerald-600 transition-colors" onClick={exportToExcel}>📊 Export To Excel</button>
-        </div>
-
-        <div className="portfolio-sections flex-1 overflow-y-auto bg-gray-50">
-          <div className="section-group bg-white mb-[2px]">
-            <div 
-              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('holdings')}
-            >
-              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.holdings ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="section-title flex-1 text-lg text-gray-900">Investment Holdings</span>
-              <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(portfolio.total_value).slice(1)}</span>
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h4>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Total Portfolio Value</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(portfolio?.total_value || 0)}</span>
             </div>
-            
-            {expandedSections.holdings && (
-              <div className="section-content bg-gray-50 border-t border-gray-200">
-                {portfolio.holdings.map((holding: InvestmentHolding, index: number) => (
-                  <div key={index} className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                    <span className="item-name flex flex-col gap-1 text-gray-700">
-                      {holding.symbol} - {holding.name}
-                      <small className="item-details text-xs text-gray-400 font-normal">{holding.quantity} shares @ {formatPercentage(holding.percentage_of_portfolio)}</small>
-                    </span>
-                    <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">
-                      ${formatCurrency(holding.current_value).slice(1)}
-                      <small className={`gain-loss text-xs font-medium ${holding.unrealized_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {holding.unrealized_gain_loss >= 0 ? '+' : ''}
-                        ${formatCurrency(holding.unrealized_gain_loss).slice(1)}
-                      </small>
-                    </span>
-                  </div>
-                ))}
-                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
-                  <span>Total Holdings Value</span>
-                  <span>${formatCurrency(portfolio.total_value).slice(1)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="section-group bg-white mb-[2px]">
-            <div 
-              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('performance')}
-            >
-              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.performance ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="section-title flex-1 text-lg text-gray-900">Performance</span>
-              <span className="section-amount text-lg text-gray-900 font-bold">
-                {portfolio.total_unrealized_gain_loss >= 0 ? '+' : ''}
-                ${formatCurrency(portfolio.total_unrealized_gain_loss).slice(1)}
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Total Cost Basis</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(portfolio?.total_cost_basis || 0)}</span>
             </div>
-            
-            {expandedSections.performance && (
-              <div className="section-content bg-gray-50 border-t border-gray-200">
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Total Cost Basis</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_cost_basis).slice(1)}</span>
-                </div>
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Current Market Value</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_value).slice(1)}</span>
-                </div>
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Cash Balance</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
-                </div>
-                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
-                  <span>Total Unrealized Gain/Loss</span>
-                  <span className={portfolio.total_unrealized_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    {portfolio.total_unrealized_gain_loss >= 0 ? '+' : ''}
-                    ${formatCurrency(portfolio.total_unrealized_gain_loss).slice(1)}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="section-group bg-white mb-[2px]">
-            <div 
-              className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('summary')}
-            >
-              <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.summary ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="section-title flex-1 text-lg text-gray-900">Portfolio Summary</span>
-              <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Unrealized G/L</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(portfolio?.total_unrealized_gain_loss || 0)}</span>
             </div>
-            
-            {expandedSections.summary && (
-              <div className="section-content bg-gray-50 border-t border-gray-200">
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Total Investment Value</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.total_value).slice(1)}</span>
-                </div>
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Available Cash</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">${formatCurrency(portfolio.cash_balance).slice(1)}</span>
-                </div>
-                <div className="line-item flex justify-between items-start py-4 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                  <span className="item-name flex flex-col gap-1 text-gray-700">Number of Holdings</span>
-                  <span className="item-amount flex flex-col items-end gap-1 font-semibold text-gray-900">{portfolio.holdings.length}</span>
-                </div>
-                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
-                  <span>Total Portfolio Value</span>
-                  <span>${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="totals-section bg-white p-6 border-t-4 border-gray-200 mt-2">
-            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-              <span>Investment Holdings</span>
-              <span>${formatCurrency(portfolio.total_value).slice(1)}</span>
-            </div>
-            <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-              <span>Cash Balance</span>
-              <span>${formatCurrency(portfolio.cash_balance).slice(1)}</span>
-            </div>
-            <div className="total-line balance-check flex justify-between items-center py-4 mt-4 text-lg font-bold text-gray-900 border-t-2 border-gray-300 border-b-4 border-double border-gray-700">
-              <span>Total Portfolio Value</span>
-              <span>${formatCurrency(portfolio.total_value + portfolio.cash_balance).slice(1)}</span>
-            </div>
-            <div className="balance-status text-center text-emerald-600 text-base font-semibold mt-5 p-3 bg-emerald-100 rounded-lg border border-emerald-200">
-              ✓ Portfolio data loaded successfully
+            <div className="flex justify-between items-center py-2 bg-gray-50 rounded-lg p-3">
+              <span className="text-gray-700 font-medium">Cash Balance</span>
+              <span className="font-bold text-lg text-gray-900">{formatCurrency(portfolio?.cash_balance || 0)}</span>
             </div>
           </div>
         </div>
       </div>
-    );
-  };
+      
+      <div className="chart-summary bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Summary</h4>
+        {portfolio ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Your investment portfolio has a total value of <strong>{formatCurrency(portfolio.total_value)}</strong> 
+              with <strong>{portfolio.holdings.length}</strong> holdings and a cash balance of <strong>{formatCurrency(portfolio.cash_balance)}</strong>.
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              The portfolio shows an unrealized gain/loss of <strong>{formatCurrency(portfolio.total_unrealized_gain_loss)}</strong> 
+              based on a total cost basis of <strong>{formatCurrency(portfolio.total_cost_basis)}</strong>.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
+                ← Back
+              </button>
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportExcel}>
+                📄 Download Report
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Loading portfolio data...
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderTableView = () => (
+    <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        <button 
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+          onClick={handleExportExcel} 
+          disabled={loading}
+        >
+          Export to Excel
+        </button>
+        <button 
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          onClick={fetchPortfolioData}
+        >
+          Refresh
+        </button>
+      </div>
+
+      {/* Simple Investment Portfolio Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {/* Portfolio Metrics */}
+            <tr className="bg-blue-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">TOTAL PORTFOLIO VALUE</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(portfolio?.total_value || 0)}</td>
+            </tr>
+            
+            <tr className="bg-green-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">TOTAL COST BASIS</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(portfolio?.total_cost_basis || 0)}</td>
+            </tr>
+            
+            <tr className="bg-purple-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">UNREALIZED G/L</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(portfolio?.total_unrealized_gain_loss || 0)}</td>
+            </tr>
+            
+            <tr className="bg-yellow-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">CASH BALANCE</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(portfolio?.cash_balance || 0)}</td>
+            </tr>
+            
+            {/* Holdings */}
+            {portfolio?.holdings.slice(0, 5).map((holding, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">
+                  {holding.symbol} - {holding.name}
+                  <span className="text-xs text-gray-400 ml-2">({formatPercentage(holding.percentage_of_portfolio)})</span>
+                </td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(holding.current_value)}</td>
+              </tr>
+            ))}
+            
+            {portfolio && portfolio.holdings.length > 5 && (
+              <tr className="bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">... and {portfolio.holdings.length - 5} more holdings</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900"></td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Summary */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-green-800">
+          <span className="text-lg">✓</span>
+          <span className="font-medium">Portfolio data loaded successfully</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="invest-container flex flex-col w-full h-screen bg-white font-sans rounded-none border border-gray-200 shadow-md md:rounded-none">
-      <div className="invest-header bg-white p-6 border-b border-gray-200">
-        <div className="header-top mb-4">
-          <button className="back-btn bg-transparent border-none text-gray-500 text-sm flex items-center gap-2 py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all" onClick={() => navigate(-1)}>← Investment Portfolio</button>
-        </div>
-        <div className="header-content">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight md:text-xl">Investment Portfolio</h1>
-          <p className="text-base text-gray-500 mb-5 leading-snug">View your investment holdings, performance, and portfolio summary</p>
+    <div className="investment-portfolio-container w-full min-h-screen bg-white">
+      {/* Simple Header */}
+      <div className="bg-white border-b border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <button 
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            ← Back to Reports
+          </button>
+          <div className="flex gap-2">
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'table' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('table')}
+            >
+              Table View
+            </button>
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'chart' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('chart')}
+            >
+              Chart View
+            </button>
+          </div>
         </div>
         
-        <div className="view-tabs flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit md:w-full">
-          <button 
-            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
-            onClick={() => setActiveView('chart')}
-          >
-            Chart View
-          </button>
-          <button 
-            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
-            onClick={() => setActiveView('table')}
-          >
-            Table View
-          </button>
-        </div>
-        
-        <div className="report-period flex justify-between items-center text-sm text-gray-700">
-          <span>Portfolio Report</span>
-          <button className="filter-btn bg-transparent border border-gray-300 text-purple-600 text-sm flex items-center gap-1.5 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all">🔽 Filter</button>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Investment Portfolio</h1>
+        <p className="text-gray-600">
+          Portfolio Report | {new Date().toLocaleDateString()}
+        </p>
       </div>
 
-      <div className="invest-content flex-1 overflow-y-auto bg-gray-50">
-        {activeView === 'chart' ? renderChartView() : renderTableView()}
+      {/* Content */}
+      <div className="p-6">
+        {loading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading portfolio data...</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+            Error: {error}
+            <button className="ml-4 text-red-800 underline" onClick={() => setError(null)}>Dismiss</button>
+          </div>
+        )}
+        
+        {!loading && !error && (activeView === 'chart' ? renderChartView() : renderTableView())}
       </div>
     </div>
   );

@@ -158,15 +158,14 @@ const Home = observer(() => {
     }
   }, [isWalletConnected, fetchWalletBalance]);
 
-  // Fetch SENT transactions for manager
+  // Fetch all transactions for manager (no category filtering)
   useEffect(() => {
-    console.log('Fetching SENT transactions for manager...');
+    console.log('Fetching all transactions for manager...');
     fetchTransactionHistory({ 
-      category: 'SENT',
       limit: 10,
       offset: 0
     });
-  }, [fetchTransactionHistory]);
+  }, []); // Remove fetchTransactionHistory from dependencies to prevent infinite loop
 
   const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
@@ -203,7 +202,7 @@ const Home = observer(() => {
     };
 
     autoConvertBalance();
-  }, [ethBalance, conversionCurrency, isWalletConnected, convertCryptoToFiat, conversionResult]);
+  }, [ethBalance, conversionCurrency, isWalletConnected]); // Remove function dependencies to prevent infinite loops
 
   const toggleCurrency = () => {
     setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');

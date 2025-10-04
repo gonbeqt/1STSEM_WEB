@@ -25,7 +25,7 @@ const ManagerInvoicePage: React.FC = () => {
 
   useEffect(() => {
     reloadInvoices();
-  }, [reloadInvoices]);
+  }, []); // Remove reloadInvoices from dependencies to prevent infinite loop
 
   useEffect(() => {
     if (!invoices) return;

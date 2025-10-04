@@ -1,11 +1,14 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface BalanceSheetItem {
   name: string;
   amount: number;
   subItems?: BalanceSheetItem[];
+  category?: string;
 }
 
 interface BalanceSheetData {
@@ -16,6 +19,7 @@ interface BalanceSheetData {
   liabilities: BalanceSheetItem[];
   equity: BalanceSheetItem[];
 }
+
 
 const BalanceSheet: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +38,8 @@ const BalanceSheet: React.FC = () => {
     liabilities: false,
     equity: false,
   });
+
+
 
   useEffect(() => {
     generateBalanceSheet();
@@ -75,48 +81,63 @@ const BalanceSheet: React.FC = () => {
     }
   };
 
-  const exportToExcel = async () => {
-    setLoading(true);
-    try {
-      const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
-      const token = localStorage.getItem('token');
-      
-      const queryParams = balanceSheet?.balance_sheet_id ? `?balance_sheet_id=${balanceSheet.balance_sheet_id}` : '';
-      const response = await fetch(`${API_URL}/balance-sheet/export-excel/${queryParams}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-        },
-      });
+  const exportToExcel = () => {
+    if (!balanceSheet) {
+      setError('No balance sheet data to export');
+      return;
+    }
 
-      const data = await response.json();
+    try {
+      // Prepare data for Excel export
+      const excelData = [
+        ['BALANCE SHEET'],
+        [`As of: ${new Date(balanceSheet.as_of_date).toLocaleDateString()}`],
+        [`ID: ${balanceSheet.balance_sheet_id}`],
+        [''],
+        ['ASSETS', ''],
+        ['Current Assets', ''],
+        ...balanceSheetData.assets.current.map(item => [item.name, item.amount]),
+        ['Total Current Assets', calculateCurrentAssets()],
+        [''],
+        ['Non-Current Assets', ''],
+        ...balanceSheetData.assets.nonCurrent.map(item => [item.name, item.amount]),
+        ['Total Non-Current Assets', calculateNonCurrentAssets()],
+        ['TOTAL ASSETS', calculateTotalAssets()],
+        [''],
+        ['LIABILITIES', ''],
+        ...balanceSheetData.liabilities.map(item => [item.name, item.amount]),
+        ['TOTAL LIABILITIES', calculateTotalLiabilities()],
+        [''],
+        ['EQUITY', ''],
+        ...balanceSheetData.equity.map(item => [item.name, item.amount]),
+        ['TOTAL EQUITY', calculateTotalEquity()],
+        [''],
+        ['TOTAL LIABILITIES + EQUITY', calculateTotalLiabilities() + calculateTotalEquity()]
+      ];
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 30 }, // Account column
+        { wch: 15 }  // Amount column
+      ];
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Balance Sheet');
+
+      // Generate Excel file and save
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      if (response.ok && data.success && data.excel_data) {
-        const byteCharacters = atob(data.excel_data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: data.content_type });
-        
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } else {
-        setError(data.error || 'Failed to export to Excel');
-      }
+      const fileName = `BalanceSheet_${new Date().toISOString().split('T')[0]}.xlsx`;
+      saveAs(blob, fileName);
+      
     } catch (err: any) {
       setError(err.message || 'Failed to export to Excel');
       console.error('Excel export error:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -136,30 +157,52 @@ const BalanceSheet: React.FC = () => {
 
   const chartData = balanceSheet ? [
     { 
-      name: 'Current', 
-      assets: balanceSheet.assets?.total || 0, 
-      liabilities: balanceSheet.liabilities?.total || 0, 
-      equity: balanceSheet.equity?.total || 0
+      name: 'Assets', 
+      value: balanceSheet.totals?.total_assets || 0,
+      fill: '#8884d8'
+    },
+    { 
+      name: 'Liabilities', 
+      value: balanceSheet.totals?.total_liabilities || 0,
+      fill: '#82ca9d'
+    },
+    { 
+      name: 'Equity', 
+      value: balanceSheet.totals?.total_equity || 0,
+      fill: '#ffc658'
     }
   ] : [];
 
   const balanceSheetData = balanceSheet ? {
     assets: {
-      current: balanceSheet?.assets?.current_assets?.crypto_holdings ? 
-        Object.entries(balanceSheet.assets.current_assets.crypto_holdings).map(([symbol, holding]: [string, any]) => ({
-          name: `${symbol} Holdings`,
-          amount: holding.current_value || 0
-        })) : [],
+      current: [
+        ...(balanceSheet.assets?.current_assets?.crypto_holdings ? 
+          Object.entries(balanceSheet.assets.current_assets.crypto_holdings).map(([symbol, holding]: [string, any]) => ({
+            name: `${symbol} Holdings`,
+            amount: Number(holding.current_value) || 0,
+            category: 'crypto'
+          })) : []),
+        { name: 'Cash and Equivalents', amount: Number(balanceSheet.assets?.current_assets?.cash_and_equivalents) || 0 },
+        { name: 'Accounts Receivable', amount: Number(balanceSheet.assets?.current_assets?.accounts_receivable) || 0 },
+        { name: 'Inventory', amount: Number(balanceSheet.assets?.current_assets?.inventory) || 0 }
+      ],
       nonCurrent: [
-        { name: 'Other Assets', amount: balanceSheet.assets.total - balanceSheet.assets.current_assets.total }
+        { name: 'Property, Plant & Equipment', amount: Number(balanceSheet.assets?.non_current_assets?.property_plant_equipment) || 0 },
+        { name: 'Intangible Assets', amount: Number(balanceSheet.assets?.non_current_assets?.intangible_assets) || 0 },
+        { name: 'Long-term Investments', amount: Number(balanceSheet.assets?.non_current_assets?.long_term_investments) || 0 }
       ]
     },
-    liabilities: Object.entries(balanceSheet.liabilities.current_liabilities || {}).map(([name, amount]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      amount: typeof amount === 'number' ? amount : 0
-    })),
+    liabilities: [
+      { name: 'Accounts Payable', amount: Number(balanceSheet.liabilities?.current_liabilities?.accounts_payable) || 0 },
+      { name: 'Short-term Debt', amount: Number(balanceSheet.liabilities?.current_liabilities?.short_term_debt) || 0 },
+      { name: 'Accrued Expenses', amount: Number(balanceSheet.liabilities?.current_liabilities?.accrued_expenses) || 0 },
+      { name: 'Long-term Debt', amount: Number(balanceSheet.liabilities?.long_term_liabilities?.long_term_debt) || 0 },
+      { name: 'Deferred Tax Liabilities', amount: Number(balanceSheet.liabilities?.long_term_liabilities?.deferred_tax_liabilities) || 0 }
+    ],
     equity: [
-      { name: 'Retained Earnings', amount: balanceSheet.equity.retained_earnings }
+      { name: 'Retained Earnings', amount: Number(balanceSheet.equity?.retained_earnings) || 0 },
+      { name: 'Common Stock', amount: Number(balanceSheet.equity?.common_stock) || 0 },
+      { name: 'Additional Paid-in Capital', amount: Number(balanceSheet.equity?.additional_paid_in_capital) || 0 }
     ]
   } : {
     assets: {
@@ -178,6 +221,9 @@ const BalanceSheet: React.FC = () => {
   };
 
   const formatCurrency = (amount: number): string => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -209,9 +255,9 @@ const BalanceSheet: React.FC = () => {
     return balanceSheet?.totals?.total_equity || 0;
   };
 
-  const handleExportExcel = async () => {
+  const handleExportExcel = () => {
     try {
-      await exportToExcel();
+      exportToExcel();
     } catch (error) {
       console.error('Failed to export to Excel:', error);
     }
@@ -227,223 +273,243 @@ const BalanceSheet: React.FC = () => {
 
   const renderChartView = () => (
     <div className="chart-view p-6 h-full overflow-y-auto">
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={chartData}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="assets" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="liabilities" stroke="#82ca9d" />
-          <Line type="monotone" dataKey="equity" stroke="#ffc658" />
-        </LineChart>
-      </ResponsiveContainer>
-      <div className="chart-summary bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Summary</h4>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Financial Overview</h4>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h4>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Total Assets</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(calculateTotalAssets())}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Total Liabilities</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(calculateTotalLiabilities())}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Total Equity</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(calculateTotalEquity())}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 bg-gray-50 rounded-lg p-3">
+              <span className="text-gray-700 font-medium">Net Worth</span>
+              <span className="font-bold text-lg text-gray-900">{formatCurrency(calculateTotalEquity())}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="chart-summary bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Balance Sheet Summary</h4>
         {balanceSheet ? (
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-            Your balance sheet shows total assets of ${formatCurrency(balanceSheet.totals.total_assets).slice(1)} 
-            with a net worth of ${formatCurrency(balanceSheet.totals.total_equity).slice(1)}.
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Your balance sheet shows total assets of <strong>{formatCurrency(balanceSheet.totals.total_assets)}</strong> 
+              with a net worth of <strong>{formatCurrency(balanceSheet.totals.total_equity)}</strong>.
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              The company has <strong>{formatCurrency(balanceSheet.assets.current_assets.total)}</strong> in current assets 
+              and <strong>{formatCurrency(balanceSheet.assets.non_current_assets.total)}</strong> in non-current assets.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
+                ← Back
+              </button>
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportPdf}>
+                📄 Download Report
+              </button>
+            </div>
+          </div>
         ) : (
           <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-            Your financial performance shows a 15% increase in revenue compared to the previous period, with expenses growing by 8% overall.
+            Loading balance sheet data...
           </p>
         )}
-        <div className="btn-container flex gap-3 flex-wrap md:flex-col">
-          <button className="close-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>Close</button>
-          <button className="download-btn1 flex-1 min-w-[120px] py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportPdf}>Download Report</button>
-        </div>
       </div>
     </div>
   );
 
   const renderTableView = () => (
-    <div className="table-view flex flex-col h-full bg-white">
-      <div className="export-actions p-4 border-b border-gray-200 bg-white flex justify-end gap-3 md:flex-col">
-        <button className="export-excel py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:w-full md:justify-center" onClick={handleExportExcel} disabled={loading}>
-          📊 Export To Excel
+    <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        <button 
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+          onClick={handleExportExcel} 
+          disabled={loading}
+        >
+          Export to Excel
         </button>
-        <button className="py-2.5 px-4 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-200 hover:border-gray-400 transition-all md:w-full md:justify-center" onClick={handleRefresh} disabled={loading}>
-          🔄 Refresh
+        <button 
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          onClick={handleRefresh}
+        >
+          Refresh
         </button>
       </div>
 
-      {loading && <div className="loading text-center py-10 text-gray-600 text-base">Loading balance sheet...</div>}
-      {error && (
-        <div className="error bg-red-50 text-red-600 py-3 px-6 border-l-4 border-red-600 flex justify-between items-center">
-          Error: {error}
-          <button className="bg-transparent border-none text-red-600 underline text-sm cursor-pointer" onClick={clearError}>Dismiss</button>
-        </div>
-      )}
-
-      <div className="balance-sections flex-1 overflow-y-auto bg-gray-50">
-        <div className="section-group bg-white mb-[2px]">
-          <div 
-            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-            onClick={() => toggleSection('assets')}
-          >
-            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.assets ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-            <span className="section-title flex-1 text-lg text-gray-900">Assets</span>
-            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalAssets()).slice(1)}</span>
-          </div>
-          
-          {expandedSections.assets && (
-            <div className="section-content bg-gray-50 border-t border-gray-200">
-              <div className="subsection bg-white mb-[1px]">
-                <div className="subsection-header flex justify-between items-center p-4 bg-gray-50 text-gray-700 font-semibold text-base border-b border-gray-200">
-                  <span className="subsection-title">Current Assets</span>
-                  <span className="subsection-total text-gray-900 font-bold">${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
-                </div>
-                {balanceSheetData.assets.current.map((item, index) => (
-                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
-                    <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
-                  </div>
-                ))}
-                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
-                  <span>Total Current Assets</span>
-                  <span>${formatCurrency(calculateCurrentAssets()).slice(1)}</span>
-                </div>
-              </div>
-
-              <div className="subsection bg-white">
-                <div className="subsection-header flex justify-between items-center p-4 bg-gray-50 text-gray-700 font-semibold text-base border-b border-gray-200">
-                  <span className="subsection-title">Non-Current Assets</span>
-                  <span className="subsection-total text-gray-900 font-bold">${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
-                </div>
-                {balanceSheetData.assets.nonCurrent.map((item, index) => (
-                  <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-                    <span className="item-name flex-1 text-gray-700">{item.name}</span>
-                    <span className="item-amount font-semibold text-gray-900">
-                      {item.amount < 0 ? '-' : ''}${formatCurrency(item.amount).slice(1)}
-                    </span>
-                  </div>
-                ))}
-                <div className="subsection-total-line flex justify-between items-center p-4 text-[15px] font-bold text-gray-700 bg-gray-100 border-t border-gray-200">
-                  <span>Total Non-Current Assets</span>
-                  <span>${formatCurrency(calculateNonCurrentAssets()).slice(1)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="section-group bg-white mb-[2px]">
-          <div 
-            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-            onClick={() => toggleSection('liabilities')}
-          >
-            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.liabilities ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-            <span className="section-title flex-1 text-lg text-gray-900">Liabilities</span>
-            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
-          </div>
-          
-          {expandedSections.liabilities && (
-            <div className="section-content bg-gray-50 border-t border-gray-200">
-              {balanceSheetData.liabilities.map((item, index) => (
-                <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-                  <span className="item-name flex-1 text-gray-700">{item.name}</span>
-                  <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="section-group bg-white mb-[2px]">
-          <div 
-            className="section-header flex items-center p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors font-semibold border-b border-gray-100"
-            onClick={() => toggleSection('equity')}
-          >
-            <span className={`expand-arrow mr-4 text-xs text-gray-500 transition-transform w-3 text-center ${expandedSections.equity ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-            <span className="section-title flex-1 text-lg text-gray-900">Equity</span>
-            <span className="section-amount text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalEquity()).slice(1)}</span>
-          </div>
-          
-          {expandedSections.equity && (
-            <div className="section-content bg-gray-50 border-t border-gray-200">
-              {balanceSheetData.equity.map((item, index) => (
-                <div key={index} className="line-item flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-                  <span className="item-name flex-1 text-gray-700">{item.name}</span>
-                  <span className="item-amount font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="totals-section bg-white p-6 border-t-4 border-gray-200 mt-2">
-          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-            <span>Total Assets</span>
-            <span>${formatCurrency(calculateTotalAssets()).slice(1)}</span>
-          </div>
-          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-            <span>Total Liabilities</span>
-            <span>${formatCurrency(calculateTotalLiabilities()).slice(1)}</span>
-          </div>
-          <div className="total-line flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-            <span>Total Equity</span>
-            <span>${formatCurrency(calculateTotalEquity()).slice(1)}</span>
-          </div>
-          <div className="total-line balance-check flex justify-between items-center py-4 mt-4 text-lg font-bold text-gray-900 border-t-2 border-gray-300 border-b-4 border-double border-gray-700">
-            <span>Liabilities + Equity</span>
-            <span>${formatCurrency(calculateTotalLiabilities() + calculateTotalEquity()).slice(1)}</span>
-          </div>
-          <div className="balance-status text-center text-emerald-600 text-base font-semibold mt-5 p-3 bg-emerald-100 rounded-lg border border-emerald-200">
-            ✓ Balance Sheet is balanced
-          </div>
+      {/* Simple Balance Sheet Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {/* Assets Section */}
+            <tr className="bg-blue-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">ASSETS</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(calculateTotalAssets())}</td>
+            </tr>
+            
+            {/* Current Assets */}
+            <tr>
+              <td className="px-6 py-3 pl-12 text-sm text-gray-600">Current Assets</td>
+              <td className="px-6 py-3 text-right text-sm font-medium text-gray-900">{formatCurrency(calculateCurrentAssets())}</td>
+            </tr>
+            
+            {balanceSheetData.assets.current.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-16 text-sm text-gray-600">
+                  {(item as any).category === 'crypto' && <span className="mr-2">₿</span>}
+                  {item.name}
+                </td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+            
+            {/* Non-Current Assets */}
+            <tr>
+              <td className="px-6 py-3 pl-12 text-sm text-gray-600">Non-Current Assets</td>
+              <td className="px-6 py-3 text-right text-sm font-medium text-gray-900">{formatCurrency(calculateNonCurrentAssets())}</td>
+            </tr>
+            
+            {balanceSheetData.assets.nonCurrent.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-16 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+            
+            {/* Liabilities Section */}
+            <tr className="bg-red-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">LIABILITIES</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(calculateTotalLiabilities())}</td>
+            </tr>
+            
+            {balanceSheetData.liabilities.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+            
+            {/* Equity Section */}
+            <tr className="bg-green-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">EQUITY</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(calculateTotalEquity())}</td>
+            </tr>
+            
+            {balanceSheetData.equity.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+            
+            {/* Totals */}
+            <tr className="bg-gray-100 border-t-2 border-gray-300">
+              <td className="px-6 py-4 font-bold text-gray-900">TOTAL LIABILITIES + EQUITY</td>
+              <td className="px-6 py-4 text-right font-bold text-gray-900">{formatCurrency(calculateTotalLiabilities() + calculateTotalEquity())}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Balance Check */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-green-800">
+          <span className="text-lg">✓</span>
+          <span className="font-medium">Balance Sheet is balanced</span>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="balance-sheet-container flex flex-col w-full h-screen bg-white font-sans rounded-none border border-gray-200 shadow-md md:rounded-none">
-      <div className="balance-sheet-header bg-white p-6 border-b border-gray-200">
-        <div className="header-top mb-4">
-          <button className="back-btn bg-transparent border-none text-gray-500 text-sm flex items-center gap-2 py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all" onClick={() => navigate(-1)}>← Balance Sheet</button>
-        </div>
-        <div className="header-content">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight md:text-xl">Balance Sheet</h1>
-          <p className="text-base text-gray-500 mb-2 leading-snug">View your company's assets, liabilities, and equity</p>
-          {balanceSheet && (
-            <small className="text-sm text-gray-400 block mb-5">As of: {new Date(balanceSheet.as_of_date).toLocaleDateString()}</small>
-          )}
+    <div className="balance-sheet-container w-full min-h-screen bg-white">
+      {/* Simple Header */}
+      <div className="bg-white border-b border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <button 
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            ← Back to Reports
+          </button>
+          <div className="flex gap-2">
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'table' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('table')}
+            >
+              Table View
+            </button>
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'chart' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('chart')}
+            >
+              Chart View
+            </button>
+          </div>
         </div>
         
-        <div className="view-tabs flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit md:w-full">
-          <button 
-            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
-            onClick={() => setActiveView('chart')}
-          >
-            Chart View
-          </button>
-          <button 
-            className={`tab-btn py-2.5 px-5 bg-transparent text-gray-500 text-sm font-medium rounded-md hover:text-gray-700 transition-all ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : ''} md:flex-1 md:text-center`}
-            onClick={() => setActiveView('table')}
-          >
-            Table View
-          </button>
-        </div>
-        
-        <div className="report-period flex justify-between items-center text-sm text-gray-700">
-          <span>Daily Report</span>
-          <button className="filter-btn bg-transparent border border-gray-300 text-purple-600 text-sm flex items-center gap-1.5 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all">🔽 Filter</button>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Balance Sheet</h1>
+        {balanceSheet && (
+          <p className="text-gray-600">
+            As of: {new Date(balanceSheet.as_of_date).toLocaleDateString()} | 
+            ID: {balanceSheet.balance_sheet_id}
+          </p>
+        )}
       </div>
 
-      <div className="balance-sheet-content flex-1 overflow-y-auto bg-gray-50">
-        {activeView === 'chart' ? renderChartView() : renderTableView()}
+      {/* Content */}
+      <div className="p-6">
+        {loading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading balance sheet...</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+            Error: {error}
+            <button className="ml-4 text-red-800 underline" onClick={clearError}>Dismiss</button>
+          </div>
+        )}
+        
+        {!loading && !error && (activeView === 'chart' ? renderChartView() : renderTableView())}
       </div>
     </div>
   );

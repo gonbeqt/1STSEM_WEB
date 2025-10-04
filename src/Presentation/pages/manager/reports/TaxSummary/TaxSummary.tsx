@@ -1,6 +1,8 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface TaxSummaryItem {
   name: string;
@@ -26,15 +28,6 @@ const TaxSummary: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
-  const [expandedSections, setExpandedSections] = useState<{
-    gains: boolean;
-    losses: boolean;
-    analysis: boolean;
-  }>({
-    gains: true,
-    losses: false,
-    analysis: false,
-  });
 
   // Load tax report on component mount
   useEffect(() => {
@@ -53,7 +46,7 @@ const TaxSummary: React.FC = () => {
       const endDate = new Date().toISOString().split('T')[0]; // Today
       
       // Use the general tax analysis endpoint which is more stable
-      const response = await fetch(`${API_URL}/ai/tax-analysis/`, {
+      const response = await fetch(`${API_URL}/admin/tax-analysis/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,15 +134,18 @@ const TaxSummary: React.FC = () => {
   const chartData = taxReport ? [
     { 
       name: 'Gains', 
-      value: taxReport.total_gains || 0
+      value: taxReport.total_gains || 0,
+      fill: '#8884d8'
     },
     { 
       name: 'Losses', 
-      value: taxReport.total_losses || 0
+      value: taxReport.total_losses || 0,
+      fill: '#82ca9d'
     },
     { 
       name: 'Net P&L', 
-      value: taxReport.net_pnl || 0
+      value: taxReport.net_pnl || 0,
+      fill: '#ffc658'
     }
   ] : [];
 
@@ -172,20 +168,74 @@ const TaxSummary: React.FC = () => {
     analysis: []
   };
 
-  const toggleSection = (section: 'gains' | 'losses' | 'analysis') => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
 
   const formatCurrency = (amount: number): string => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(Math.abs(amount));
+  };
+
+  const exportToExcel = () => {
+    if (!taxReport) {
+      setError('No tax data to export');
+      return;
+    }
+
+    try {
+      // Prepare data for Excel export
+      const excelData = [
+        ['TAX SUMMARY'],
+        [`As of: ${new Date().toISOString().split('T')[0]}`],
+        ['Total Capital Gains', taxReport.total_gains || 0],
+        ['Total Capital Losses', taxReport.total_losses || 0],
+        ['Net P&L', taxReport.net_pnl || 0],
+        ['Total Income', taxReport.total_income || 0],
+        ['Total Expenses', taxReport.total_expenses || 0],
+        [''],
+        ['AI ANALYSIS', ''],
+        ['Compliance Status', taxReport.llm_analysis?.compliance_status || 'N/A'],
+        ['Risk Level', taxReport.llm_analysis?.risk_level || 'N/A'],
+        ['Recommendations', taxReport.llm_analysis?.recommendations?.join('; ') || 'N/A']
+      ];
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 25 }, // Metric column
+        { wch: 20 }  // Value column
+      ];
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Tax Summary');
+
+      // Generate Excel file and save
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = `TaxSummary_${new Date().toISOString().split('T')[0]}.xlsx`;
+      saveAs(blob, fileName);
+      
+    } catch (err: any) {
+      setError(err.message || 'Failed to export to Excel');
+      console.error('Excel export error:', err);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      exportToExcel();
+    } catch (error) {
+      console.error('Failed to export to Excel:', error);
+    }
   };
 
   const calculateTotalGains = (): number => {
@@ -200,288 +250,227 @@ const TaxSummary: React.FC = () => {
     return taxReport?.net_pnl || 0;
   };
 
-  const renderChartView = () => {
-    if (loading) {
-      return <div className="text-center py-10 text-gray-500 text-base">Loading tax data...</div>;
-    }
-
-    if (error) {
-      return (
-        <div className="bg-red-50 text-red-600 py-5 px-6 text-center border-l-4 border-red-600 mx-6 my-5 rounded-md">
-          <p>Error: {error}</p>
-          <button 
-            className="bg-red-600 text-white border-none py-2 px-4 rounded-md mt-3 hover:bg-red-700 transition-colors duration-200"
-            onClick={clearError}
-          >
-            Retry
-          </button>
+  const renderChartView = () => (
+    <div className="chart-view p-6 h-full overflow-y-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Tax Overview</h4>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-      );
-    }
-
-    if (!taxReport || chartData.length === 0) {
-      return <div className="text-center py-10 text-gray-500 text-base">No tax data available for chart view</div>;
-    }
-
-    return (
-      <div className="p-6 h-full overflow-y-auto">
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={chartData}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
-          </LineChart>
-        </ResponsiveContainer>
-        <div className="bg-white rounded-xl p-6 mt-6 border border-gray-200 shadow-sm">
-          <div className="summary-box">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">Tax Summary</h4>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-              Your tax performance summary shows capital gains and losses analysis for the current period.
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h4>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Capital Gains</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(taxReport?.total_gains || 0)}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Capital Losses</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(taxReport?.total_losses || 0)}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-600">Net P&L</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(taxReport?.net_pnl || 0)}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 bg-gray-50 rounded-lg p-3">
+              <span className="text-gray-700 font-medium">Compliance Status</span>
+              <span className="font-bold text-lg text-gray-900">{taxReport?.llm_analysis?.compliance_status || 'N/A'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="chart-summary bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Tax Summary</h4>
+        {taxReport ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Your tax summary shows capital gains of <strong>{formatCurrency(taxReport.total_gains)}</strong> 
+              and capital losses of <strong>{formatCurrency(taxReport.total_losses)}</strong> with a net P&L of <strong>{formatCurrency(taxReport.net_pnl)}</strong>.
             </p>
-            <div className="flex flex-wrap gap-3"> 
-              <button 
-                className="flex-1 min-w-[120px] bg-gray-50 border border-gray-300 text-gray-700 py-2.5 px-5 rounded-lg text-sm font-medium hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
-                onClick={() => navigate(-1)}
-              >
-                Close
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Compliance status is <strong>{taxReport.llm_analysis?.compliance_status || 'N/A'}</strong> 
+              with a risk level of <strong>{taxReport.llm_analysis?.risk_level || 'N/A'}</strong>.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
+                ← Back
               </button>
-              <button 
-                className="flex-1 min-w-[120px] bg-purple-600 border border-purple-600 text-white py-2.5 px-5 rounded-lg text-sm font-medium hover:bg-purple-700 hover:border-purple-700 transition-all duration-200"
-              >
-                Download Report
+              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportExcel}>
+                📄 Download Report
               </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Loading tax data...
+          </p>
+        )}
       </div>
-    );
-  };
+    </div>
+  );
 
-  const renderTableView = () => {
-    if (loading) {
-      return <div className="text-center py-10 text-gray-500 text-base">Loading tax summary...</div>;
-    }
+  const renderTableView = () => (
+    <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        <button 
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+          onClick={handleExportExcel} 
+          disabled={loading}
+        >
+          Export to Excel
+        </button>
+        <button 
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          onClick={handleRefresh}
+        >
+          Refresh
+        </button>
+      </div>
 
-    if (error) {
-      return (
-        <div className="bg-red-50 text-red-600 py-5 px-6 text-center border-l-4 border-red-600 mx-6 my-5 rounded-md">
-          <p>Error: {error}</p>
-          <button 
-            className="bg-red-600 text-white border-none py-2 px-4 rounded-md mt-3 hover:bg-red-700 transition-colors duration-200"
-            onClick={clearError}
-          >
-            Retry
-          </button>
-        </div>
-      );
-    }
-
-    if (!taxReport) {
-      return <div className="text-center py-10 text-gray-500 text-base">No tax data available. Please generate a tax report first.</div>;
-    }
-
-    return (
-      <div className="h-full flex flex-col bg-white">
-        <div className="p-4 border-b border-gray-200 bg-white flex justify-end gap-3 flex-shrink-0">
-          <button className="flex items-center gap-2 py-2.5 px-4 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors duration-200">
-            📊 Export To Excel
-          </button>
-          <button 
-            className="flex items-center gap-2 py-2.5 px-4 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 hover:border-gray-400 transition-all duration-200"
-            onClick={handleRefresh}
-          >
-            🔄 Refresh
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto bg-gray-50">
-          {/* Gains Section */}
-          <div className="bg-white mb-0.5">
-            <div 
-              className="flex items-center p-5 bg-white cursor-pointer hover:bg-gray-50 transition-colors duration-200 font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('gains')}
-            >
-              <span className={`mr-4 text-xs text-gray-500 transition-transform duration-200 ${expandedSections.gains ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="flex-1 text-lg text-gray-900">Capital Gains</span>
-              <span className="text-lg text-gray-900 font-bold">${formatCurrency(calculateTotalGains()).slice(1)}</span>
-            </div>
+      {/* Simple Tax Summary Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {/* Tax Metrics */}
+            <tr className="bg-green-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">CAPITAL GAINS</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(taxReport?.total_gains || 0)}</td>
+            </tr>
             
-            {expandedSections.gains && (
-              <div className="bg-gray-50 border-t border-gray-200">
-                {taxSummaryData.gains.map((item: TaxSummaryItem, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0">
-                    <span className="flex-1 text-gray-700">{item.name}</span>
-                    <span className="font-semibold text-gray-900">${formatCurrency(item.amount).slice(1)}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-center py-4 px-6 text-sm font-bold text-gray-700 bg-slate-100 border-t border-gray-200">
-                  <span>Total Capital Gains</span>
-                  <span>${formatCurrency(calculateTotalGains()).slice(1)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Losses Section */}
-          <div className="bg-white mb-0.5">
-            <div 
-              className="flex items-center p-5 bg-white cursor-pointer hover:bg-gray-50 transition-colors duration-200 font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('losses')}
-            >
-              <span className={`mr-4 text-xs text-gray-500 transition-transform duration-200 ${expandedSections.losses ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="flex-1 text-lg text-gray-900">Capital Losses</span>
-              <span className="text-lg text-gray-900 font-bold">-${formatCurrency(calculateTotalLosses()).slice(1)}</span>
-            </div>
+            <tr className="bg-red-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">CAPITAL LOSSES</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(taxReport?.total_losses || 0)}</td>
+            </tr>
             
-            {expandedSections.losses && (
-              <div className="bg-gray-50 border-t border-gray-200">
-                {taxSummaryData.losses.map((item: TaxSummaryItem, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0">
-                    <span className="flex-1 text-gray-700">{item.name}</span>
-                    <span className="font-semibold text-gray-900">-${formatCurrency(item.amount).slice(1)}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-center py-4 px-6 text-sm font-bold text-gray-700 bg-slate-100 border-t border-gray-200">
-                  <span>Total Capital Losses</span>
-                  <span>-${formatCurrency(calculateTotalLosses()).slice(1)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Analysis Section */}
-          <div className="bg-white mb-0.5">
-            <div 
-              className="flex items-center p-5 bg-white cursor-pointer hover:bg-gray-50 transition-colors duration-200 font-semibold border-b border-gray-100"
-              onClick={() => toggleSection('analysis')}
-            >
-              <span className={`mr-4 text-xs text-gray-500 transition-transform duration-200 ${expandedSections.analysis ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-              <span className="flex-1 text-lg text-gray-900">Tax Analysis</span>
-              <span className="text-lg text-gray-900 font-bold">
-                {calculateNetPnL() >= 0 ? '' : '-'}
-                ${formatCurrency(calculateNetPnL()).slice(1)}
-              </span>
-            </div>
+            <tr className="bg-blue-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">NET P&L</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(taxReport?.net_pnl || 0)}</td>
+            </tr>
             
-            {expandedSections.analysis && (
-              <div className="bg-gray-50 border-t border-gray-200">
-                {taxSummaryData.analysis.map((item: TaxSummaryItem, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-3 px-6 pl-14 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0">
-                    <span className="flex-1 text-gray-700">{item.name}</span>
-                    <span className="font-semibold text-gray-900">
-                      {item.amount >= 0 ? '' : '-'}
-                      ${formatCurrency(item.amount).slice(1)}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-center py-4 px-6 text-sm font-bold text-gray-700 bg-slate-100 border-t border-gray-200">
-                  <span>Net Profit/Loss</span>
-                  <span>
-                    {calculateNetPnL() >= 0 ? '' : '-'}
-                    ${formatCurrency(calculateNetPnL()).slice(1)}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Tax Summary Totals */}
-          <div className="bg-white p-6 border-t-4 border-gray-200 mt-2">
-            <div className="flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-              <span>Total Capital Gains</span>
-              <span>${formatCurrency(calculateTotalGains()).slice(1)}</span>
-            </div>
-            <div className="flex justify-between items-center py-3 text-base font-semibold text-gray-900 border-b border-gray-100 last:border-b-0">
-              <span>Total Capital Losses</span>
-              <span>-${formatCurrency(calculateTotalLosses()).slice(1)}</span>
-            </div>
-            <div className="flex justify-between items-center py-4 text-lg font-bold text-gray-900 border-t-2 border-b-4 border-gray-300 border-double mt-4">
-              <span>Net Profit/Loss</span>
-              <span>
-                {calculateNetPnL() >= 0 ? '' : '-'}
-                ${formatCurrency(calculateNetPnL()).slice(1)}
-              </span>
-            </div>
+            <tr className="bg-purple-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">TOTAL INCOME</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(taxReport?.total_income || 0)}</td>
+            </tr>
+            
+            <tr className="bg-yellow-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">TOTAL EXPENSES</td>
+              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(taxReport?.total_expenses || 0)}</td>
+            </tr>
+            
+            {/* AI Analysis */}
             {taxReport?.llm_analysis && (
-              <div className="bg-sky-50 border border-sky-300 rounded-lg p-4 my-5">
-                <h4 className="text-base font-semibold text-sky-900 mb-3">AI Tax Insights</h4>
-                <div className="insight-content">
-                  <p className="text-sm text-gray-900 mb-2"><strong>Compliance Status:</strong> {taxReport.llm_analysis.compliance_status}</p>
-                  <p className="text-sm text-gray-900 mb-2"><strong>Risk Level:</strong> {taxReport.llm_analysis.risk_level}</p>
-                  {taxReport.llm_analysis.recommendations && (
-                    <div className="mt-3">
-                      <strong className="text-sky-900 block mb-2">Recommendations:</strong>
-                      <ul className="list-disc pl-4">
-                        {taxReport.llm_analysis.recommendations.map((rec: string, index: number) => (
-                          <li key={index} className="text-sm text-gray-600 mb-1 leading-snug">{rec}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <>
+                <tr className="bg-gray-100 border-t-2 border-gray-300">
+                  <td className="px-6 py-4 font-bold text-gray-900">COMPLIANCE STATUS</td>
+                  <td className="px-6 py-4 text-right font-bold text-gray-900">{taxReport.llm_analysis.compliance_status || 'N/A'}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-6 py-4 font-bold text-gray-900">RISK LEVEL</td>
+                  <td className="px-6 py-4 text-right font-bold text-gray-900">{taxReport.llm_analysis.risk_level || 'N/A'}</td>
+                </tr>
+              </>
             )}
-            <div className="text-center text-emerald-600 text-base font-semibold mt-5 py-3 bg-emerald-100 rounded-lg border border-emerald-200">
-              ✓ Tax summary generated successfully
-            </div>
-          </div>
+          </tbody>
+        </table>
+      </div>
+      
+      {/* AI Recommendations */}
+      {taxReport?.llm_analysis?.recommendations && (
+        <div className="bg-sky-50 border border-sky-300 rounded-lg p-4">
+          <h4 className="text-base font-semibold text-sky-900 mb-3">AI Recommendations</h4>
+          <ul className="list-disc pl-4 space-y-1">
+            {taxReport.llm_analysis.recommendations.map((rec: string, index: number) => (
+              <li key={index} className="text-sm text-gray-600">{rec}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Summary */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-green-800">
+          <span className="text-lg">✓</span>
+          <span className="font-medium">Tax summary generated successfully</span>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
-    <div className="flex flex-col w-full h-screen bg-white font-sans border border-gray-200 rounded-xl shadow-md overflow-hidden box-border">
-      <div className="bg-white p-6 border-b border-gray-200 flex-shrink-0">
-        <div className="mb-4">
+    <div className="tax-summary-container w-full min-h-screen bg-white">
+      {/* Simple Header */}
+      <div className="bg-white border-b border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
           <button 
-            className="flex items-center gap-2 bg-transparent border-none text-gray-500 text-sm cursor-pointer py-2 px-3 rounded-md hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
             onClick={() => navigate(-1)}
           >
-            ← Tax Summary
+            ← Back to Reports
           </button>
-        </div>
-        <div className="mb-5">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">Tax Summary</h1>
-          <p className="text-base text-gray-500 leading-snug">View your tax gains, losses, and analysis for the current period</p>
+          <div className="flex gap-2">
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'table' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('table')}
+            >
+              Table View
+            </button>
+            <button 
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                activeView === 'chart' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('chart')}
+            >
+              Chart View
+            </button>
+          </div>
         </div>
         
-        <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit">
-          <button 
-            className={`py-2.5 px-5 text-sm font-medium rounded-md transition-all duration-200 ${activeView === 'chart' ? 'bg-white text-gray-900 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveView('chart')}
-          >
-            Chart View
-          </button>
-          <button 
-            className={`py-2.5 px-5 text-sm font-medium rounded-md transition-all duration-200 ${activeView === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveView('table')}
-          >
-            Table View
-          </button>
-        </div>
-        
-        <div className="flex justify-between items-center text-sm text-gray-700">
-          <span>Daily Report</span>
-          <button className="flex items-center gap-1.5 bg-transparent border border-gray-300 text-purple-600 py-1.5 px-3 rounded-md hover:bg-gray-50 hover:border-purple-600 transition-all duration-200">
-            🔽 Filter
-          </button>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Tax Summary</h1>
+        <p className="text-gray-600">
+          Daily Report | {new Date().toLocaleDateString()}
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50">
-        {activeView === 'chart' ? renderChartView() : renderTableView()}
+      {/* Content */}
+      <div className="p-6">
+        {loading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading tax summary...</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+            Error: {error}
+            <button className="ml-4 text-red-800 underline" onClick={clearError}>Dismiss</button>
+          </div>
+        )}
+        
+        {!loading && !error && (activeView === 'chart' ? renderChartView() : renderTableView())}
       </div>
     </div>
   );

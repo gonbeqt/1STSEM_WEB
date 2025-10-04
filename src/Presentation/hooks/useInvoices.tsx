@@ -24,17 +24,7 @@ export const useInvoices = (userId: string) => {
         };
 
         loadInvoices();
-
-        // Observe changes in the ViewModel
-        const disposer = () => {
-            setInvoices(invoiceViewModel.invoices);
-            setLoading(invoiceViewModel.loading);
-            setError(invoiceViewModel.error);
-        };
-        // This is a simplified observation. In a real MobX setup, you\'d use autorun or reaction.
-        // For now, we rely on the useEffect re-running if dependencies change.
-        return disposer;
-    }, [userId, invoiceViewModel]);
+    }, [userId]); // Remove invoiceViewModel from dependencies to prevent infinite loop
 
     return { invoices, loading, error, reloadInvoices: () => invoiceViewModel.loadUserInvoices(userId) };
 };
