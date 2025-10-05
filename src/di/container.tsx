@@ -94,6 +94,13 @@ import { PasswordResetRepositoryImpl } from '../data/repositoriesImpl/PasswordRe
 import { RequestPasswordResetUseCase } from '../domain/usecases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '../domain/usecases/ResetPasswordUseCase';
 import { PasswordResetViewModel } from '../domain/viewmodel/PasswordResetViewModel';
+import { EmployeeHistoryRepository } from '../domain/repositories/EmployeeHistoryRepository';
+import { EmployeeHistoryRepositoryImpl } from '../data/repositoriesImpl/EmployeeHistoryRepositoryImpl';
+import { GetEmployeeHistoryUseCase, GetEmployeeHistoryUseCaseImpl } from '../domain/usecases/GetEmployeeHistoryUseCase';
+import { EmployeeHistoryViewModel } from '../domain/viewmodel/EmployeeHistoryViewModel';
+
+
+
 
 
 
@@ -113,6 +120,8 @@ export interface Container {
   contractRepository: ContractRepository;
   emailVerificationRepository: EmailVerificationRepositoryImpl;
   passwordResetRepository: PasswordResetRepositoryImpl;
+  employeeHistoryRepository: EmployeeHistoryRepository;
+
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -137,6 +146,8 @@ export interface Container {
   getEmployeePayrollDetailsUseCase: GetEmployeePayrollDetailsUseCase;
   createRecurringPaymentUseCase: CreateRecurringPaymentUseCase;
   getPaymentScheduleUseCase: GetPaymentScheduleUseCase;
+  getEmployeeHistoryUseCase: GetEmployeeHistoryUseCase;
+  
   
   // Audit Contract Use Cases
   uploadContractUseCase: UploadContractUseCase;
@@ -184,8 +195,12 @@ export interface Container {
   auditContractViewModel: () => AuditContractViewModel;
   emailVerificationViewModel: () => EmailVerificationViewModel;
   passwordResetViewModel: () => PasswordResetViewModel;
+  employeeHistoryViewModel: () => EmployeeHistoryViewModel;
+
 
 }
+
+
 // ======= Create repository instances =======
 const userRepository = new UserRepositoryImpl();
 const walletRepository = new WalletRepositoryImpl();
@@ -201,6 +216,7 @@ const invoiceRepository = new InvoiceRepositoryImpl();
 const contractRepository = new ContractRepositoryImpl();
 const emailVerificationRepository = new EmailVerificationRepositoryImpl();
 const passwordResetRepository = new PasswordResetRepositoryImpl();
+const employeeHistoryRepository = new EmployeeHistoryRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -242,6 +258,7 @@ const processPayrollPaymentUseCase = new ProcessPayrollPaymentUseCase(payslipRep
 const getEmployeePayrollDetailsUseCase = new GetEmployeePayrollDetailsUseCase(payslipRepository);
 const createRecurringPaymentUseCase = new CreateRecurringPaymentUseCase(payslipRepository);
 const getPaymentScheduleUseCase = new GetPaymentScheduleUseCase(payslipRepository);
+const getEmployeeHistoryUseCase = new GetEmployeeHistoryUseCaseImpl(employeeHistoryRepository);
 
 // ======= Create report use case instances =======
 const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportRepository);
@@ -293,6 +310,7 @@ export const container: Container = {
   contractRepository,
   emailVerificationRepository,
   passwordResetRepository,
+  employeeHistoryRepository,
 
   registerUseCase,
   loginUseCase,
@@ -317,6 +335,7 @@ export const container: Container = {
   getEmployeePayrollDetailsUseCase,
   createRecurringPaymentUseCase,
   getPaymentScheduleUseCase,
+  getEmployeeHistoryUseCase,
 
   // Audit Contract Use Cases
   uploadContractUseCase,
@@ -405,6 +424,7 @@ export const container: Container = {
     requestPasswordResetUseCase,
     resetPasswordUseCase
   ),
+  employeeHistoryViewModel: () => new EmployeeHistoryViewModel(getEmployeeHistoryUseCase),
   forgotPasswordViewModel: function () {
     throw new Error('Function not implemented.');
   }

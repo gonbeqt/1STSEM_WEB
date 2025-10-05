@@ -25,6 +25,8 @@ import CompliancePage from './presentation/pages/manager/profile/compliance/page
 import EmployeeHome from './presentation/pages/employee/home/page';
 import EmployeePayslip from './presentation/pages/employee/payslip/page';
 import EmployeeHistory from './presentation/pages/employee/history/page';
+
+
 import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
@@ -112,6 +114,7 @@ function App() {
               </MiddlewareRoute>} />
             <Route path="/employee/payslip" element={<EmployeePayslip />} />
             <Route path="/employee/history" element={<EmployeeHistory />} />
+
             <Route path="/employee/settings" element={<EmployeeSettings />} />
             <Route path="/transaction_details" element={<TransactionDetails />} />
             <Route path="/employee/sessions"element={<EmoployeeSessionsPage />}/>
