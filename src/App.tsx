@@ -6,6 +6,7 @@ import SideNavbarEmployee from './presentation/components/SideNavbarEmployee';
 import Home from './presentation/pages/manager/home/page';
 import Login from './presentation/pages/login/page';
 import Register from './presentation/pages/register/page';
+import EmailVerification from './presentation/pages/email-verification/page';
 
 import PayslipDetailsPage from './presentation/pages/manager/invoice/page';
 import Reports from './presentation/pages/manager/reports/page';
@@ -75,7 +76,8 @@ function App() {
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
               <Register />
             </div>
-          } />          
+          } />
+          <Route path="/email-verification" element={<EmailVerification />} />          
           <Route element={<ManagerLayout />}>
             <Route path="/home" element={
               <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">

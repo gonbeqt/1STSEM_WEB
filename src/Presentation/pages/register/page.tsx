@@ -123,6 +123,13 @@ const Register = observer(() => {
   };
 
 
+  // ...existing code...
+  // Define the expected result type for register()
+  type RegisterResult = {
+    email_verification_required?: boolean;
+    [key: string]: any;
+  } | null | undefined;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -132,12 +139,21 @@ const Register = observer(() => {
     }
     
     const success = await viewModel.register();
+    console.log('Registration success:', success);
+    console.log('Form data after registration:', viewModel.formData);
+    
     if (success) {
-      navigate('/login', { 
-        state: { message: 'Registration successful! Please log in.' }
+      // FORCE EMAIL VERIFICATION REDIRECT - ALWAYS GO TO EMAIL VERIFICATION
+      console.log('FORCING redirect to email verification...');
+      navigate('/email-verification', { 
+        state: { 
+          email: formData.email,
+          message: 'Registration successful! Please verify your email to continue.'
+        }
       });
     }
   };
+// ...existing code...
 
   return (
     <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">

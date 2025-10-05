@@ -86,6 +86,10 @@ import { ListAuditsUseCase } from '../domain/usecases/ListAuditsUseCase';
 import { GetAuditDetailsUseCase } from '../domain/usecases/GetAuditDetailsUseCase';
 import { GetAuditStatisticsUseCase } from '../domain/usecases/GetAuditStatisticsUseCase';
 import { AuditContractViewModel } from '../domain/viewmodel/AuditContractViewModel';
+import { EmailVerificationRepositoryImpl } from '../data/repositoriesImpl/EmailVerificationRepositoryImpl';
+import { VerifyEmailUseCase } from '../domain/usecases/VerifyEmailUseCase';
+import { ResendVerificationUseCase } from '../domain/usecases/ResendVerificationUseCase';
+import { EmailVerificationViewModel } from '../domain/viewmodel/EmailVerificationViewModel';
 
 
 
@@ -102,10 +106,13 @@ export interface Container {
   businessDocumentRepository: BusinessDocumentRepository;
   invoiceRepository: InvoiceRepository;
   contractRepository: ContractRepository;
+  emailVerificationRepository: EmailVerificationRepositoryImpl;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
   logoutUseCase: LogoutUseCase;
+  verifyEmailUseCase: VerifyEmailUseCase;
+  resendVerificationUseCase: ResendVerificationUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
   getInvoicesUseCase: GetInvoicesUseCase;
 
@@ -167,6 +174,7 @@ export interface Container {
   payslipViewModel: () => PayslipViewModel;
   payrollViewModel: () => PayrollViewModel;
   auditContractViewModel: () => AuditContractViewModel;
+  emailVerificationViewModel: () => EmailVerificationViewModel;
 
 }
 // ======= Create repository instances =======
@@ -182,11 +190,14 @@ const payslipRepository = new PayslipRepositoryImpl();
 const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
 const invoiceRepository = new InvoiceRepositoryImpl();
 const contractRepository = new ContractRepositoryImpl();
+const emailVerificationRepository = new EmailVerificationRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
 const loginUseCase = new LoginUseCase(userRepository);
 const logoutUseCase = new LogoutUseCase(userRepository);
+const verifyEmailUseCase = new VerifyEmailUseCase(emailVerificationRepository);
+const resendVerificationUseCase = new ResendVerificationUseCase(emailVerificationRepository);
 const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(businessDocumentRepository);
 const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
 
@@ -268,10 +279,13 @@ export const container: Container = {
   businessDocumentRepository,
   invoiceRepository,
   contractRepository,
+  emailVerificationRepository,
 
   registerUseCase,
   loginUseCase,
   logoutUseCase,
+  verifyEmailUseCase,
+  resendVerificationUseCase,
   uploadBusinessDocumentsUseCase,
   getInvoicesUseCase,
 
@@ -367,5 +381,9 @@ export const container: Container = {
     listAuditsUseCase,
     getAuditDetailsUseCase,
     getAuditStatisticsUseCase
+  ),
+  emailVerificationViewModel: () => new EmailVerificationViewModel(
+    verifyEmailUseCase,
+    resendVerificationUseCase
   )
 };

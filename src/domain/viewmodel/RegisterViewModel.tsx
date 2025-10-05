@@ -13,6 +13,7 @@ interface RegisterState {
   userType: 'manager' | 'employee';
   isLoading: boolean;
   error: string | null;
+  email_verification_required: boolean;
 }
 
 export class RegisterViewModel {
@@ -27,7 +28,8 @@ export class RegisterViewModel {
     agreeToTerms: false,
     userType: 'manager',
     isLoading: false,
-    error: null
+    error: null,
+    email_verification_required: false
   };
 
   constructor(private registerUseCase: RegisterUseCase) {
@@ -102,7 +104,7 @@ export class RegisterViewModel {
       this.state.isLoading = true;
       this.state.error = null;
 
-      await this.registerUseCase.execute({
+      const response = await this.registerUseCase.execute({
         username: this.state.username,
         email: this.state.email,
         password: this.state.password,
@@ -112,6 +114,13 @@ export class RegisterViewModel {
         security_answer: this.state.security_answer,
         role: this.state.userType === 'manager' ? 'Manager' : 'Employee'
       });
+
+      console.log('Registration response:', response);
+
+      // Set email verification flag from response
+      this.state.email_verification_required = response.email_verification_required || false;
+      
+      console.log('Email verification required:', this.state.email_verification_required);
 
       return true;
     } catch (error) {
