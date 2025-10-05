@@ -90,6 +90,10 @@ import { EmailVerificationRepositoryImpl } from '../data/repositoriesImpl/EmailV
 import { VerifyEmailUseCase } from '../domain/usecases/VerifyEmailUseCase';
 import { ResendVerificationUseCase } from '../domain/usecases/ResendVerificationUseCase';
 import { EmailVerificationViewModel } from '../domain/viewmodel/EmailVerificationViewModel';
+import { PasswordResetRepositoryImpl } from '../data/repositoriesImpl/PasswordResetRepositoryImpl';
+import { RequestPasswordResetUseCase } from '../domain/usecases/RequestPasswordResetUseCase';
+import { ResetPasswordUseCase } from '../domain/usecases/ResetPasswordUseCase';
+import { PasswordResetViewModel } from '../domain/viewmodel/PasswordResetViewModel';
 
 
 
@@ -107,12 +111,15 @@ export interface Container {
   invoiceRepository: InvoiceRepository;
   contractRepository: ContractRepository;
   emailVerificationRepository: EmailVerificationRepositoryImpl;
+  passwordResetRepository: PasswordResetRepositoryImpl;
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
   logoutUseCase: LogoutUseCase;
   verifyEmailUseCase: VerifyEmailUseCase;
   resendVerificationUseCase: ResendVerificationUseCase;
+  requestPasswordResetUseCase: RequestPasswordResetUseCase;
+  resetPasswordUseCase: ResetPasswordUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
   getInvoicesUseCase: GetInvoicesUseCase;
 
@@ -175,6 +182,7 @@ export interface Container {
   payrollViewModel: () => PayrollViewModel;
   auditContractViewModel: () => AuditContractViewModel;
   emailVerificationViewModel: () => EmailVerificationViewModel;
+  passwordResetViewModel: () => PasswordResetViewModel;
 
 }
 // ======= Create repository instances =======
@@ -191,6 +199,7 @@ const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
 const invoiceRepository = new InvoiceRepositoryImpl();
 const contractRepository = new ContractRepositoryImpl();
 const emailVerificationRepository = new EmailVerificationRepositoryImpl();
+const passwordResetRepository = new PasswordResetRepositoryImpl();
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -198,6 +207,8 @@ const loginUseCase = new LoginUseCase(userRepository);
 const logoutUseCase = new LogoutUseCase(userRepository);
 const verifyEmailUseCase = new VerifyEmailUseCase(emailVerificationRepository);
 const resendVerificationUseCase = new ResendVerificationUseCase(emailVerificationRepository);
+const requestPasswordResetUseCase = new RequestPasswordResetUseCase(passwordResetRepository);
+const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetRepository);
 const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(businessDocumentRepository);
 const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
 
@@ -280,12 +291,15 @@ export const container: Container = {
   invoiceRepository,
   contractRepository,
   emailVerificationRepository,
+  passwordResetRepository,
 
   registerUseCase,
   loginUseCase,
   logoutUseCase,
   verifyEmailUseCase,
   resendVerificationUseCase,
+  requestPasswordResetUseCase,
+  resetPasswordUseCase,
   uploadBusinessDocumentsUseCase,
   getInvoicesUseCase,
 
@@ -385,5 +399,9 @@ export const container: Container = {
   emailVerificationViewModel: () => new EmailVerificationViewModel(
     verifyEmailUseCase,
     resendVerificationUseCase
+  ),
+  passwordResetViewModel: () => new PasswordResetViewModel(
+    requestPasswordResetUseCase,
+    resetPasswordUseCase
   )
 };

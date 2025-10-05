@@ -4,6 +4,7 @@ import { useLogin } from '../../hooks/useLogin';
 import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';
 import PasswordIcon from '../../components/icons/PasswordIcon';
+import { Link } from 'react-router-dom';
 
 const Login = observer(() => {
   const { login, isLoading, error } = useLogin();
@@ -56,6 +57,15 @@ const Login = observer(() => {
             />
           </div>
 
+          <div className="text-right">
+            <Link 
+              to="/forgot-password" 
+              className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
           {error && (
             <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
               {error}
@@ -73,12 +83,12 @@ const Login = observer(() => {
         
         <p className="text-center mt-6 text-gray-500">
           Don't have an account?{' '}
-          <a 
-            href="/register" 
+          <Link 
+            to="/register" 
             className="text-indigo-600 font-medium no-underline hover:underline"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
