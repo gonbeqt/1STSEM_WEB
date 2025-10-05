@@ -1,6 +1,7 @@
 import React from 'react';
 import { EmployeeHistoryDetails } from '../../domain/entities/EmployeeHistoryEntities';
-import { X, Hash, DollarSign, CreditCard, Calendar, FileText, CheckCircle, Clock, AlertCircle, ExternalLink } from 'lucide-react';
+import { X, Hash, DollarSign, CreditCard, Calendar, FileText, CheckCircle, Clock, AlertCircle, ExternalLink, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 interface PayrollEntryDetailsModalProps {
     details: EmployeeHistoryDetails | null;
@@ -8,6 +9,128 @@ interface PayrollEntryDetailsModalProps {
 }
 
 const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ details, onClose }) => {
+    const handleDownloadPDF = () => {
+        if (!details) return;
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let yPosition = 20;
+
+        // Title
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Payroll Entry Details', pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 15;
+        
+        // Add a line
+        doc.setLineWidth(0.5);
+        doc.line(20, yPosition, pageWidth - 20, yPosition);
+        yPosition += 10;
+
+        // Entry Information Section
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Entry Information', 20, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        const entryInfo = [
+            ['Entry ID:', details.payroll_entry.entry_id],
+            ['Status:', details.payroll_entry.status],
+            ['Amount:', `${details.payroll_entry.amount} ${details.payroll_entry.cryptocurrency}`],
+            ['USD Equivalent:', `$${details.payroll_entry.usd_equivalent.toFixed(2)}`],
+            ['Payment Method:', details.payroll_entry.payment_method],
+            ['Date:', new Date(details.payroll_entry.created_at).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })]
+        ];
+
+        entryInfo.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(value), 70, yPosition);
+            yPosition += 7;
+        });
+
+        // Transaction Details Section
+        if (details.transaction_details) {
+            yPosition += 5;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Transaction Details', 20, yPosition);
+            yPosition += 8;
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+
+            const hash = details.transaction_details.hash || 'N/A';
+            const gasFee = details.transaction_details.gas_fee || 'N/A';
+            const status = details.transaction_details.status || 'N/A';
+
+            // Transaction Hash
+            doc.setFont('helvetica', 'bold');
+            doc.text('Transaction Hash:', 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            const hashStr = String(hash);
+            if (hashStr.length > 50) {
+                const splitText = doc.splitTextToSize(hashStr, pageWidth - 90);
+                doc.text(splitText, 70, yPosition);
+                yPosition += splitText.length * 5;
+            } else {
+                doc.text(hashStr, 70, yPosition);
+                yPosition += 7;
+            }
+
+            // Gas Fee
+            doc.setFont('helvetica', 'bold');
+            doc.text('Gas Fee:', 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(gasFee), 70, yPosition);
+            yPosition += 7;
+
+            // Status
+            doc.setFont('helvetica', 'bold');
+            doc.text('Status:', 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(status), 70, yPosition);
+            yPosition += 7;
+        }
+
+        // Payslip Section
+        if (details.payslip) {
+            yPosition += 5;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Payslip', 20, yPosition);
+            yPosition += 8;
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(0, 0, 255);
+            doc.text('Payslip URL:', 20, yPosition);
+            const splitUrl = doc.splitTextToSize(details.payslip.file_url, pageWidth - 30);
+            doc.text(splitUrl, 20, yPosition + 5);
+            doc.setTextColor(0, 0, 0);
+        }
+
+        // Footer
+        yPosition = doc.internal.pageSize.getHeight() - 20;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, yPosition, { align: 'center' });
+
+        // Save the PDF
+        doc.save(`Payroll_Entry_${details.payroll_entry.entry_id}.pdf`);
+    };
+    
     if (!details) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -58,15 +181,12 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-                {/* Overlay */}
                 <div 
                     className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" 
                     onClick={onClose}
                 ></div>
 
-                {/* Modal */}
                 <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    {/* Header */}
                     <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -89,9 +209,7 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                         </div>
                     </div>
 
-                    {/* Content */}
                     <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-                        {/* Entry Information */}
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-4">
                                 <h4 className="text-lg font-bold text-gray-900">Entry Information</h4>
@@ -157,7 +275,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                             </div>
                         </div>
 
-                        {/* Transaction Details */}
                         {details.transaction_details && (
                             <div className="mb-6 pb-6 border-b border-gray-200">
                                 <h4 className="text-lg font-bold text-gray-900 mb-4">Transaction Details</h4>
@@ -198,7 +315,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                             </div>
                         )}
 
-                        {/* Payslip */}
                         {details.payslip && (
                             <div>
                                 <h4 className="text-lg font-bold text-gray-900 mb-4">Payslip</h4>
@@ -216,12 +332,19 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                        <button
+                            type="button"
+                            onClick={handleDownloadPDF}
+                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                            <Download className="w-4 h-4" />
+                            Download PDF
+                        </button>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Close
                         </button>
