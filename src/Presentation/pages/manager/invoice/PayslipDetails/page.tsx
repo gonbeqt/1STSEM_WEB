@@ -18,7 +18,7 @@ const PayslipDetailsPage: React.FC<PayslipDetailsPageProps> = ({ payslipId, onCl
         setLoading(true);
         // In a real implementation, you would fetch the specific payslip by ID
         // For now, we'll simulate this with a mock or API call
-        console.log('Fetching payslip details for ID:', payslipId);
+        
         
         // This would be replaced with actual API call
         // const response = await fetchPayslipById(payslipId);

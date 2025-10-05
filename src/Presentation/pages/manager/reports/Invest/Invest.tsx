@@ -53,7 +53,6 @@ const Invest: React.FC = () => {
 
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('text/html')) {
-        const htmlText = await response.text();
         throw new Error(`Server returned HTML error page (${response.status}). Portfolio endpoint may not be available.`);
       }
 

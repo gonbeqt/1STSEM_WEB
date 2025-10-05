@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+ 
 import { useInvoices } from '../../../hooks/useInvoices';
 import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
 
 const ManagerInvoicePage: React.FC = () => {
-  const navigate = useNavigate();
   const dummyUserId = "manager123";
   const { invoices, loading, error, reloadInvoices } = useInvoices(dummyUserId);
 
@@ -82,7 +81,6 @@ const ManagerInvoicePage: React.FC = () => {
   };
 
   const handleCreateInvoice = () => {
-    console.log('Create new invoice');
     // e.g., navigate('/invoices/create');
   };
 

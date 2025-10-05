@@ -12,7 +12,6 @@ export class UserRepositoryImpl implements UserRepository {
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
-    console.log('Token from localStorage for auth headers:', token);
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
@@ -38,9 +37,6 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async login(request: LoginRequest): Promise<LoginResponse> {
-    console.log('Login request data:', request);
-    console.log('API_URL:', this.API_URL);
-    console.log('Full Login URL:', `${this.API_URL}/auth/login/`);
     
     try {
       const response = await fetch(`${this.API_URL}/auth/login/`, {
@@ -52,27 +48,13 @@ export class UserRepositoryImpl implements UserRepository {
       });
 
       const data = await response.json();
-      console.log('Login response:', data);
-      console.log('Response status:', response.status);
-      console.log('Data type:', typeof data);
-      console.log('Data keys:', Object.keys(data));
       
       // Debug the entire API response structure
-      console.log('Full API response structure:', data);
-      console.log('Response keys:', Object.keys(data));
       
       // Debug user object specifically
       if (data.user) {
-        console.log('User object from API:', data.user);
-        console.log('User object keys:', Object.keys(data.user));
-        console.log('User role from API:', data.user.role);
       } else if (data.data) {
-        console.log('Data object from API:', data.data);
-        console.log('Data object keys:', Object.keys(data.data));
-        console.log('Role from data.role:', data.data.role);
       } else {
-        console.log('No user or data object found in response');
-        console.log('Available fields:', Object.keys(data));
       }
 
       if (!response.ok) {
@@ -89,7 +71,7 @@ export class UserRepositoryImpl implements UserRepository {
 
       // Transform the response to match expected frontend structure
       if (data.data && !data.user) {
-        console.log('Transforming API response structure...');
+        
         const transformedData = {
           success: data.success,
           message: data.message,
@@ -104,7 +86,7 @@ export class UserRepositoryImpl implements UserRepository {
           },
           session_token: data.data.token
         };
-        console.log('Transformed response:', transformedData);
+        
         return transformedData;
       }
 
@@ -120,9 +102,6 @@ export class UserRepositoryImpl implements UserRepository {
 
   async logout(request: LogoutRequest): Promise<LogoutResponse> {
     const headers = this.getAuthHeaders();
-    console.log('Logout request headers:', headers);
-    console.log('Logout request body:', request);
-    console.log('Logout URL:', `${this.API_URL}/auth/logout/`);
     
     const response = await fetch(`${this.API_URL}/auth/logout/`, {
       method: 'POST',
@@ -131,8 +110,6 @@ export class UserRepositoryImpl implements UserRepository {
     });
 
     const data = await response.json();
-    console.log('Logout response:', data);
-    console.log('Logout response status:', response.status);
 
     if (!response.ok) {
       console.error('Logout failed with status:', response.status);

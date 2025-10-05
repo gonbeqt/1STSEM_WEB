@@ -38,11 +38,9 @@ export const useEmployees = (): UseEmployeesReturn => {
   // Fetch employees function
   const fetchEmployees = useCallback(async () => {
     try {
-      console.log('Fetching employees...');
       const response = await getEmployeesByManager({});
       
       if (response.success) {
-        console.log('Employees fetched successfully:', response.employees);
         setEmployees(response.employees);
       } else {
         console.error('Failed to fetch employees:', response.error);

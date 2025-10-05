@@ -4,20 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-interface TaxSummaryItem {
-  name: string;
-  amount: number;
-  subItems?: TaxSummaryItem[];
-}
 
-interface TaxSummaryData {
-  assets: {
-    current: TaxSummaryItem[];
-    nonCurrent: TaxSummaryItem[];
-  };
-  liabilities: TaxSummaryItem[];
-  equity: TaxSummaryItem[];
-}
+
+
 
 const TaxSummary: React.FC = () => {
   const navigate = useNavigate();
@@ -149,25 +138,6 @@ const TaxSummary: React.FC = () => {
     }
   ] : [];
 
-  // Use real tax data only
-  const taxSummaryData = taxReport ? {
-    gains: [
-      { name: 'Total Capital Gains', amount: taxReport.total_gains || 0 }
-    ],
-    losses: [
-      { name: 'Total Capital Losses', amount: Math.abs(taxReport.total_losses || 0) }
-    ],
-    analysis: [
-      { name: 'Net P&L', amount: taxReport.net_pnl || 0 },
-      { name: 'Total Income', amount: taxReport.total_income || 0 },
-      { name: 'Total Expenses', amount: taxReport.total_expenses || 0 }
-    ]
-  } : {
-    gains: [],
-    losses: [],
-    analysis: []
-  };
-
 
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
@@ -238,17 +208,6 @@ const TaxSummary: React.FC = () => {
     }
   };
 
-  const calculateTotalGains = (): number => {
-    return taxReport?.total_gains || 0;
-  };
-
-  const calculateTotalLosses = (): number => {
-    return Math.abs(taxReport?.total_losses || 0);
-  };
-
-  const calculateNetPnL = (): number => {
-    return taxReport?.net_pnl || 0;
-  };
 
   const renderChartView = () => (
     <div className="chart-view p-6 h-full overflow-y-auto">

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuditDetailsViewModel } from '../../../../hooks/useAuditDetailsViewModel';
 import SideNavbar from '../../../../components/SideNavbar';

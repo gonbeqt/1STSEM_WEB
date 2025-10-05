@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, Eye, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, DollarSign, AlertTriangle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useEmployeePayrollDetails } from '../../../../hooks/useEmployeePayrollDetails';
 import { container } from '../../../../../di/container';

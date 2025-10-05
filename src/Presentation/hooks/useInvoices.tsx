@@ -24,7 +24,7 @@ export const useInvoices = (userId: string) => {
         };
 
         loadInvoices();
-    }, [userId]); // Remove invoiceViewModel from dependencies to prevent infinite loop
+    }, [userId]); // intentionally omit viewModel to avoid loop
 
     return { invoices, loading, error, reloadInvoices: () => invoiceViewModel.loadUserInvoices(userId) };
 };

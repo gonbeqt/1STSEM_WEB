@@ -115,12 +115,11 @@ export class RegisterViewModel {
         role: this.state.userType === 'manager' ? 'Manager' : 'Employee'
       });
 
-      console.log('Registration response:', response);
 
       // Set email verification flag from response
       this.state.email_verification_required = response.email_verification_required || false;
       
-      console.log('Email verification required:', this.state.email_verification_required);
+      
 
       return true;
     } catch (error) {

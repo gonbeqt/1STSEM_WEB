@@ -6,7 +6,6 @@ export class TransactionRepositoryImpl implements TransactionRepository {
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
-    console.log('🔑 Transaction API Auth Token:', token ? 'Present' : 'Missing');
     
     if (!token) {
       console.warn('⚠️ No authentication token found for transaction API');
@@ -32,7 +31,7 @@ export class TransactionRepositoryImpl implements TransactionRepository {
     // Use the correct endpoint that matches your backend
     const url = `${this.API_URL}/eth/history/?${queryParams.toString()}`;
     
-    console.log('🔍 Fetching all transaction history (no category filter):', { url });
+    
 
     const response = await fetch(url, {
       method: 'GET',
@@ -43,7 +42,6 @@ export class TransactionRepositoryImpl implements TransactionRepository {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       try {
         const data = await response.json();
-        console.log('Error response data:', data);
         
         // Ensure error message is always a string
         if (data.error && typeof data.error === 'string') {
@@ -54,7 +52,7 @@ export class TransactionRepositoryImpl implements TransactionRepository {
           errorMessage = data.detail;
         }
         
-        console.log('🚨 Transaction API Error:', errorMessage);
+        
         
         // Handle specific error cases
         if (response.status === 403) {
@@ -65,13 +63,12 @@ export class TransactionRepositoryImpl implements TransactionRepository {
           errorMessage = 'Authentication required. Please log in again.';
         }
       } catch (parseError) {
-        console.log('Could not parse error response:', parseError);
+        
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log('✅ Transaction history API success:', `${response.status} ${response.statusText}`);
     return data;
   }
 }

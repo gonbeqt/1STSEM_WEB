@@ -32,10 +32,8 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createPayslip(request: CreatePayslipRequest): Promise<CreatePayslipResponse> {
     try {
-      console.log('Creating payslip:', request);
 
       const headers = this.getAuthHeaders();
-      console.log('Using headers:', headers);
 
       const response = await axios.post(
         `${this.baseUrl}/payslips/create/`,
@@ -43,7 +41,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Payslip creation response:', response.data);
       return response.data as CreatePayslipResponse;
     } catch (error: any) {
       console.error('Payslip creation error:', error);
@@ -77,10 +74,8 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
     try {
-      console.log('Fetching user payslips:', { employee_id, status });
 
       const headers = this.getAuthHeaders();
-      console.log('Using headers:', headers);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -93,20 +88,20 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('User payslips response:', response.data);
+      
       
       // Handle the response format from the backend
       if (response.data.success && response.data.payslips) {
         return response.data.payslips as Payslip[];
       } else {
-        console.warn('Backend returned unsuccessful response, using mock data');
+        
         return this.getMockPayslips(employee_id, status);
       }
     } catch (error: any) {
       console.error('Error fetching user payslips:', error);
 
       // If there's an error, fall back to mock data for development
-      console.warn('Backend error occurred, falling back to mock data for development');
+      
       return this.getMockPayslips(employee_id, status);
 
       // Uncomment the lines below if you want to throw errors instead of using mock data
@@ -212,7 +207,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      console.log('Creating payroll entry:', request);
       const headers = this.getAuthHeaders();
       
       const response = await axios.post(
@@ -221,7 +215,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Payroll entry creation response:', response.data);
+      
       
       // Backend returns the payroll entry data directly
       return response.data as CreatePayrollEntryResponse;
@@ -243,7 +237,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createSinglePayrollEntry(request: CreateSinglePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      console.log('Creating single payroll entry:', request);
       const headers = this.getAuthHeaders();
       
       const response = await axios.post(
@@ -252,7 +245,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Single payroll entry creation response:', response.data);
+      
       
       // Backend returns the payroll entry data directly
       return response.data as CreatePayrollEntryResponse;
@@ -272,7 +265,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async processPayrollPayment(request: ProcessPayrollPaymentRequest): Promise<ProcessPayrollPaymentResponse> {
     try {
-      console.log('Processing payroll payment:', request);
       const headers = this.getAuthHeaders();
       
       const response = await axios.post(
@@ -281,7 +273,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Payroll payment processing response:', response.data);
+      
       return response.data as ProcessPayrollPaymentResponse;
     } catch (error: any) {
       console.error('Payroll payment processing error:', error);
@@ -307,7 +299,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createRecurringPayment(request: CreateRecurringPaymentRequest): Promise<CreateRecurringPaymentResponse> {
     try {
-      console.log('Creating recurring payment:', request);
       const headers = this.getAuthHeaders();
       
       const response = await axios.post(
@@ -316,7 +307,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Recurring payment creation response:', response.data);
+      
       return response.data as CreateRecurringPaymentResponse;
     } catch (error: any) {
       console.error('Recurring payment creation error:', error);
@@ -342,7 +333,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async getPaymentSchedule(request: GetPaymentScheduleRequest): Promise<GetPaymentScheduleResponse> {
     try {
-      console.log('Getting payment schedule:', request);
       const headers = this.getAuthHeaders();
       
       const params = new URLSearchParams();
@@ -353,7 +343,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Payment schedule response:', response.data);
+      
       return response.data as GetPaymentScheduleResponse;
     } catch (error: any) {
       console.error('Payment schedule error:', error);
@@ -379,7 +369,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async getEmployeePayrollDetails(request: GetEmployeePayrollDetailsRequest): Promise<GetEmployeePayrollDetailsResponse> {
     try {
-      console.log('Getting employee payroll details:', request);
       const headers = this.getAuthHeaders();
       
       const params = new URLSearchParams();
@@ -390,7 +379,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
         { headers }
       );
 
-      console.log('Employee payroll details response:', response.data);
+      
       return response.data as GetEmployeePayrollDetailsResponse;
     } catch (error: any) {
       console.error('Employee payroll details error:', error);

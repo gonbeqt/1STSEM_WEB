@@ -6,24 +6,7 @@ import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import {
-  Bell,
-  ChevronRight,
-  TrendingUpIcon,
-  ClipboardList,
-  ChartBarIncreasing,
-  Users,
-  Loader2,
-  Wifi,
-  Clock,
-  TrendingDown,
-  RotateCcw,
-  Send,
-  DollarSign,
-  FileText,
-  TrendingUp,
-  RefreshCw,
-} from 'lucide-react';
+import { Bell, Loader2, Wifi, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
@@ -167,7 +150,6 @@ const Home = observer(() => {
 
   // Fetch all transactions for manager (no category filtering)
   useEffect(() => {
-    console.log('Fetching all transactions for manager...');
     fetchTransactionHistory({ 
       limit: 10,
       offset: 0
@@ -230,12 +212,10 @@ const Home = observer(() => {
       handleOpenWalletModal('connect');
       return;
     }
-    console.log("handleSendPayroll called");
     setIsPayrollModalOpen(true);
   };
 
   const handleAuditContract = () => {
-    console.log("handleAuditContract called. Setting isAuditContractModalOpen to true.");
     setIsAuditContractModalOpen(true);
   }
 
@@ -248,7 +228,6 @@ const Home = observer(() => {
   }
 
   const handleProcessPayroll = (data: any) => {
-    console.log('Processing payroll:', data);
     alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
   };
 
@@ -439,14 +418,13 @@ const Home = observer(() => {
       {/* Recent Transactions */}
       <div className="flex justify-between items-center px-5 my-6 bg-transparent">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 m-0">Recent Transactions</h2>
           <p className="text-sm text-gray-600 mt-1">Showing all transactions</p>
         </div>
         <div className="flex items-center gap-2">
            <button 
              className="flex items-center gap-2 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700 hover:bg-indigo-50 px-3 py-2 rounded-lg"
              onClick={() => {
-               console.log('Refreshing transactions...');
                fetchTransactionHistory({ 
                  limit: 10,
                  offset: 0

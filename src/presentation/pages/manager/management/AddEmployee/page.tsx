@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { container } from '../../../../../di/container';
 import { useEmployeeViewModel } from '../../../../../domain/viewmodel/EmployeeViewModel';
 import { AddEmployeeRequest, AddEmployeeResponse } from '../../../../../domain/repositories/EmployeeRepository';
-import { ArrowLeft, MoveLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface AddEmployeeData {
   email: string;
@@ -89,13 +89,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
         phone: formData.phone || undefined
       };
 
-      console.log('Adding employee to team:', request);
-      
       const response = await addEmployee(request);
 
       if (response.success && response.employee) {
-        console.log('Employee added to team successfully:', response.employee);
-        
         setFormData({
           email: '',
           position: '',

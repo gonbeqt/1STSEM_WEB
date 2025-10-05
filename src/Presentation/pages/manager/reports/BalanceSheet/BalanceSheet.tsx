@@ -1,24 +1,12 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-interface BalanceSheetItem {
-  name: string;
-  amount: number;
-  subItems?: BalanceSheetItem[];
-  category?: string;
-}
 
-interface BalanceSheetData {
-  assets: {
-    current: BalanceSheetItem[];
-    nonCurrent: BalanceSheetItem[];
-  };
-  liabilities: BalanceSheetItem[];
-  equity: BalanceSheetItem[];
-}
+
+
 
 
 const BalanceSheet: React.FC = () => {
@@ -29,15 +17,6 @@ const BalanceSheet: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
-  const [expandedSections, setExpandedSections] = useState<{
-    assets: boolean;
-    liabilities: boolean;
-    equity: boolean;
-  }>({
-    assets: true,
-    liabilities: false,
-    equity: false,
-  });
 
 
 
@@ -141,9 +120,7 @@ const BalanceSheet: React.FC = () => {
     }
   };
 
-  const exportToPdf = async () => {
-    console.log('PDF export - implementation needed');
-  };
+  
 
   const clearError = () => {
     setError(null);
@@ -213,12 +190,6 @@ const BalanceSheet: React.FC = () => {
     equity: []
   };
 
-  const toggleSection = (section: 'assets' | 'liabilities' | 'equity') => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
 
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
@@ -264,7 +235,7 @@ const BalanceSheet: React.FC = () => {
   };
 
   const handleExportPdf = async () => {
-    console.log('PDF export - implementation needed');
+    // PDF export - implementation needed
   };
 
   const handleRefresh = async () => {

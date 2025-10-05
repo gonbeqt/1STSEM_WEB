@@ -42,7 +42,7 @@ export class SessionRepositoryImpl implements SessionRepository {
             body: JSON.stringify({ sid })
             
         });
-        console.log('Revoke Session Response Status:', response);
+        
         if (!response.ok) {
             const errorBody = await response.text();
             console.error('Failed to revoke session:', response.status, response.statusText, errorBody);

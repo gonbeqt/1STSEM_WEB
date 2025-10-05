@@ -279,7 +279,6 @@ export class AddressBookViewModel {
       if (response.success && response.data) {
         const entry = response.data;
         this.state.investmentData.recipientAddress = address;
-        console.log(`Resolved address ${address} to ${entry.name}`);
         return entry;
       }
     } catch (error) {

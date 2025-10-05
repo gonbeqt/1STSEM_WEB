@@ -4,10 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-interface CashFlowActivity {
-  name: string;
-  amount: number;
-}
+ 
 
 interface CashFlowSection {
   cash_receipts: Record<string, number> & { total: number };

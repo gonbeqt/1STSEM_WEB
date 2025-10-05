@@ -5,7 +5,7 @@ import { X, AlertCircle, Info, CheckCircle, Loader2 } from 'lucide-react';
 import { container } from '../../../../../../di/container';
 import { usePayrollViewModel } from '../../../../../../domain/viewmodel/PayrollViewModel';
 import { useEmployeeViewModel } from '../../../../../../domain/viewmodel/EmployeeViewModel';
-import { CreatePayrollEntryRequest, PayrollEmployee as PayrollEmployeeEntity } from '../../../../../../domain/entities/PayrollEntities';
+import { PayrollEmployee as PayrollEmployeeEntity } from '../../../../../../domain/entities/PayrollEntities';
 import { Employee as ApiEmployee } from '../../../../../../domain/repositories/EmployeeRepository';
 
 interface PayrollEmployeeUI {
@@ -35,7 +35,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   
-  const { createPayrollEntry, processPayrollPayment, isLoading, error, success, clearMessages } = usePayrollViewModel(
+  const {  error,  clearMessages } = usePayrollViewModel(
     container.createPayrollEntryUseCase,
     container.processPayrollPaymentUseCase
   );
@@ -43,7 +43,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
   const [employees, setEmployees] = useState<PayrollEmployeeUI[]>([]);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(false);
   
-  const { getEmployeesByManager, isLoading: isLoadingEmployeesFromAPI } = useEmployeeViewModel(
+  const { getEmployeesByManager } = useEmployeeViewModel(
     container.addEmployeeUseCase,
     container.getEmployeesByManagerUseCase,
     container.removeEmployeeFromTeamUseCase
@@ -173,7 +173,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           notes: `Payroll processed for ${payrollType} - ${employee.employee_name}`
         };
 
-        console.log('🔄 Sending payroll request for employee:', employee.employee_name, payrollRequest);
+        
         
         try {
           // Call the repository directly for individual payroll entries

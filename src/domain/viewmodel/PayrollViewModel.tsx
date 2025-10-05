@@ -27,12 +27,12 @@ export const usePayrollViewModel = (
       setIsLoading(true);
       clearMessages();
       
-      console.log('🔄 Creating payroll entry:', request);
+      
       const response = await createPayrollEntryUseCase.execute(request);
       
       if (response.success) {
         setSuccess(response.message || 'Payroll entry created successfully!');
-        console.log('✅ Payroll entry created:', response);
+        
       } else {
         setError(response.error || 'Failed to create payroll entry');
         console.error('❌ Payroll entry creation failed:', response);
@@ -58,12 +58,12 @@ export const usePayrollViewModel = (
       setIsLoading(true);
       clearMessages();
       
-      console.log('🔄 Processing payroll payment:', request);
+      
       const response = await processPayrollPaymentUseCase.execute(request);
       
       if (response.success) {
         setSuccess(response.message || 'Payroll payment processed successfully!');
-        console.log('✅ Payroll payment processed:', response);
+        
       } else {
         setError(response.error || 'Failed to process payroll payment');
         console.error('❌ Payroll payment processing failed:', response);
@@ -102,11 +102,11 @@ export class PayrollViewModel {
 
   async createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryUseCaseResponse> {
     try {
-      console.log('🔄 Creating payroll entry:', request);
+      
       const response = await this.createPayrollEntryUseCase.execute(request);
       
       if (response.success) {
-        console.log('✅ Payroll entry created:', response);
+        
       } else {
         console.error('❌ Payroll entry creation failed:', response);
       }
@@ -125,11 +125,11 @@ export class PayrollViewModel {
 
   async processPayrollPayment(request: ProcessPayrollPaymentRequest): Promise<ProcessPayrollPaymentResponse> {
     try {
-      console.log('🔄 Processing payroll payment:', request);
+      
       const response = await this.processPayrollPaymentUseCase.execute(request);
       
       if (response.success) {
-        console.log('✅ Payroll payment processed:', response);
+        
       } else {
         console.error('❌ Payroll payment processing failed:', response);
       }

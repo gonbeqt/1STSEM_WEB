@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import{ useEffect, useState } from 'react';
+ 
 import useEmployeeHistory from './../../../hooks/useEmployeeHistory';
 import { PayrollEntry } from '../../../../domain/entities/EmployeeHistoryEntities';
 import PayrollEntryDetailsModal from '../../../components/PayrollEntryDetailsModal';
@@ -8,7 +8,7 @@ import { Loader2, TrendingUp, CheckCircle, Clock, XCircle, DollarSign, FileText,
 const EmployeeHistoryPage = () => {
     const token = localStorage.getItem('token');
     const { history, loading, error, getHistory, getDetails, details } = useEmployeeHistory(token);
-    const navigate = useNavigate();
+    
     const [selectedEntry, setSelectedEntry] = useState<PayrollEntry | null>(null);
 
     useEffect(() => {

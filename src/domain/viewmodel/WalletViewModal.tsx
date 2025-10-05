@@ -85,13 +85,11 @@ export class WalletViewModel {
     
     if (walletAddress && walletConnected === 'true') {
       this.state.walletAddress = walletAddress;
-      console.log('Wallet state initialized from localStorage:', walletAddress);
       
       // Also check if we have a stored balance
       const storedBalance = localStorage.getItem('ethBalance');
       if (storedBalance) {
         this.state.ethBalance = parseFloat(storedBalance);
-        console.log('ETH balance restored from localStorage:', this.state.ethBalance);
       }
     }
   }
@@ -172,8 +170,6 @@ export class WalletViewModel {
       localStorage.setItem('walletAddress', response.data.wallet_address);
       localStorage.setItem('privateKey', walletData.privateKey);
       localStorage.setItem('walletConnected', 'true');
-      
-      console.log('Private key stored in localStorage during wallet connection');
   
       this.clearForm();
       // After successful connection, fetch the balance
@@ -334,10 +330,8 @@ export class WalletViewModel {
     await this.fetchExchangeRates();
 
     const response = await this.getWalletBalanceUseCase.execute(token);
-    console.log('Fetch Wallet Balance API Response:', response);
     if (response.success && response.data) {
       const walletData = response.data;
-      console.log('Wallet Data:', walletData);
       
       this.state.walletAddress = walletData.wallet_address;
       this.state.ethBalance = parseFloat(walletData.balance_eth);
@@ -346,11 +340,7 @@ export class WalletViewModel {
       localStorage.setItem('walletAddress', walletData.wallet_address);
       localStorage.setItem('ethBalance', this.state.ethBalance.toString());
       localStorage.setItem('walletConnected', 'true');
-      
-      console.log('Updated Wallet Balance:', this.state.ethBalance);
-      console.log('Updated Wallet Address:', this.state.walletAddress);
     } else {
-      console.log('No wallet data found in response or response is malformed.', response);
       this.state.fetchBalanceError = 'No wallet data found or invalid response';
     }
   } catch (error) {
@@ -370,19 +360,11 @@ export class WalletViewModel {
     const walletAddress = localStorage.getItem('walletAddress');
     const walletConnected = localStorage.getItem('walletConnected');
 
-    console.log('Checking wallet connection on page load:', {
-      walletAddress,
-      walletConnected,
-      hasToken: !!token
-    });
-
     if (walletAddress && walletConnected === 'true' && token) {
-      console.log('Wallet connection found, setting address and fetching balance');
       this.state.walletAddress = walletAddress;
       // Try to fetch balance
       await this.fetchWalletBalance(token);
     } else {
-      console.log('No wallet connection found in localStorage');
     }
   };
 

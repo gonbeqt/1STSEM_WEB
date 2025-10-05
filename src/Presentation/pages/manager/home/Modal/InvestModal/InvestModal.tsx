@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X, Send, Wallet, AlertCircle, CheckCircle, User, Building, Search, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { useWallet } from '../../../../../../presentation/hooks/useWallet';

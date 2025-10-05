@@ -79,11 +79,9 @@ const EmployeeManagement: React.FC = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        console.log('Fetching employees...');
         const response = await getEmployeesByManager({});
 
         if (response.success) {
-          console.log('Employees fetched successfully:', response.employees);
           setEmployees(response.employees);
         } else {
           console.error('Failed to fetch employees:', response.error);
@@ -196,7 +194,6 @@ const EmployeeManagement: React.FC = () => {
   };
 
   const handleEditEmployee = () => {
-    console.log('Edit employee:', selectedEmployee?.fullName);
     setShowEmployeeDetailModal(false);
     setIsAddEmployeeModal(true);
   };
@@ -204,7 +201,6 @@ const EmployeeManagement: React.FC = () => {
   const handleDeleteEmployee = async () => {
     if (!selectedEmployee) return;
     
-    console.log('Remove employee from team:', selectedEmployee.fullName);
     const confirmMessage = `Are you sure you want to remove ${selectedEmployee.fullName} from your team? They will become available for other managers to assign.`;
     
     if (window.confirm(confirmMessage)) {
@@ -214,7 +210,6 @@ const EmployeeManagement: React.FC = () => {
         });
         
         if (response.success) {
-          console.log('Employee removed successfully:', response.message);
           // Refresh the employee list
           setRefreshTrigger(prev => prev + 1);
           handleCloseModal();
@@ -238,7 +233,6 @@ const EmployeeManagement: React.FC = () => {
   });
 
   const handleAddEmployeeSubmit = (newEmployee: AddEmployeeResponse['employee']) => {
-    console.log('New employee added successfully:', newEmployee);
     setRefreshTrigger(prev => prev + 1);
   };
 

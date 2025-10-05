@@ -14,7 +14,6 @@ export const useEmployeePayrollDetails = (
   const fetchEmployeePayrollDetails = useCallback(async (employeeId: string) => {
     // Prevent duplicate calls for the same employee
     if (currentEmployeeId === employeeId && (isLoading || payrollDetails)) {
-      console.log('🚫 Skipping duplicate call for employee:', employeeId);
       return { success: true, employee_payroll: payrollDetails };
     }
 
@@ -23,7 +22,7 @@ export const useEmployeePayrollDetails = (
       setIsLoading(true);
       setError(null);
       
-      console.log('🔄 Fetching payroll details for employee:', employeeId);
+      
       const response = await getEmployeePayrollDetailsUseCase.execute({ employee_id: employeeId });
       
       if (response.success) {
@@ -54,9 +53,7 @@ export const useEmployeePayrollDetails = (
         setPayrollDetails(payrollData);
         
         if (payrollData) {
-          console.log('✅ Employee payroll details processed:', payrollData);
         } else {
-          console.log('✅ API successful - No payroll data found for employee:', employeeId);
         }
         setError(null); // Clear any previous errors
       } else {

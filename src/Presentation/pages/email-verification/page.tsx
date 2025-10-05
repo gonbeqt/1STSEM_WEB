@@ -7,7 +7,7 @@ import { Mail, Shield, AlertCircle, CheckCircle, ArrowLeft, RefreshCw } from 'lu
 const EmailVerification = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { formData, setEmail, setCode, clearError, clearSuccess, verifyEmail, resendVerificationEmail } = useEmailVerification();
+  const { formData, setEmail, setCode, clearError, verifyEmail, resendVerificationEmail } = useEmailVerification();
   
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 

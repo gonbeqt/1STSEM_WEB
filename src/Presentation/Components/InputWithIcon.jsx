@@ -13,7 +13,6 @@ const InputWithIcon = ({
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
-    console.log('Toggling password visibility');
     setShowPassword(!showPassword);
   };
 

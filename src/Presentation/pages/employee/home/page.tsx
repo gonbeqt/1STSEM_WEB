@@ -1,7 +1,7 @@
 // src/Presentation/pages/employee/home/page.tsx
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Bell, RotateCcw, Loader2, Wifi, ChevronRight, Clock, TrendingDown } from 'lucide-react';
+import { Bell, Loader2, Wifi, ChevronRight } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import WalletModal from '../../../components/WalletModal';
@@ -130,7 +130,7 @@ const EmployeeHome = observer(() => {
       limit: 10,
       offset: 0
     });
-  }, []); // Remove fetchTransactionHistory from dependencies to prevent infinite loop
+  }, []); // intentionally empty: prevent infinite loop
   
  
   const getNextMonthFirstDay = () => {
@@ -175,7 +175,7 @@ const EmployeeHome = observer(() => {
     };
 
     autoConvertBalance();
-  }, [ethBalance, conversionCurrency, isWalletConnected]); // Remove function dependencies to prevent infinite loops
+  }, [ethBalance, conversionCurrency, isWalletConnected]); // intentionally omit fn deps to avoid loop
 
   const toggleCurrency = () => {
     setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');
@@ -326,7 +326,7 @@ const EmployeeHome = observer(() => {
       {/* Recent Transactions */}
       <div className="flex justify-between items-center px-5 my-6 bg-transparent">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 m-0">Recent Transactions</h2>
           <p className="text-sm text-gray-600 mt-1">Showing all recent transactions</p>
         </div>
         <div 

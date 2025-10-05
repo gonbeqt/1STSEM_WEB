@@ -60,7 +60,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSendPayment = () => {
-    console.log('Sending payment:', paymentData);
     alert('Payment sent successfully!');
     handleClose();
   };

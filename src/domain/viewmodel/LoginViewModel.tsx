@@ -4,7 +4,7 @@ import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
 import { WalletViewModel } from './WalletViewModal';
 import { LoginResponse } from '../entities/LoginResponse'; // Added this import
-import { isManager } from '../../utils/userRoleUtils';
+ 
 
 interface LoginState {
   email: string;
@@ -72,7 +72,7 @@ export class LoginViewModel {
         device_id: 'web'
       });
 
-      console.log('Login response in ViewModel:', response);
+      
 
       // Check if response exists and is not null/undefined
       if (!response || response === null || response === undefined) {
@@ -92,14 +92,9 @@ export class LoginViewModel {
       }
 
       // Log the full user object to debug role issue
-      console.log('Full user object:', response.user);
-      console.log('User role:', response.user.role);
-      console.log('User object keys:', Object.keys(response.user));
 
   
       // Log role information for debugging
-      console.log('Final user role after processing:', response.user.role);
-      console.log('Is manager check:', isManager(response.user));
 
       if (!response.session_token) {
         console.error('No session_token in response:', response);

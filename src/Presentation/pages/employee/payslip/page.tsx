@@ -26,7 +26,6 @@ const EmployeePayslip: React.FC<PayslipProps> = ({ onBack, payslipData }) => {
 
   const handleDownloadPDF = () => {
     // Implement PDF download logic here
-    console.log('Downloading PDF...');
     // You would typically generate and download the PDF here
   };
 

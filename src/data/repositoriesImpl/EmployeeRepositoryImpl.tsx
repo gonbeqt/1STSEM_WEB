@@ -16,10 +16,9 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
   }
   async addEmployee(request: AddEmployeeRequest): Promise<AddEmployeeResponse> {
     try {
-      console.log('Making API call to add employee:', request);
+
 
       const headers = this.getAuthHeaders();
-      console.log('Using headers:', headers);
 
       const response = await axios.post(
         `${this.baseUrl}/auth/employees/add/`,
@@ -27,7 +26,6 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
         { headers }
       );
 
-      console.log('API Response:', response.data);
       return response.data as AddEmployeeResponse;
     } catch (error: any) {
       console.error('API Error:', error);
@@ -95,10 +93,8 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
 
   async removeEmployeeFromTeam(request: RemoveEmployeeFromTeamRequest): Promise<RemoveEmployeeFromTeamResponse> {
     try {
-      console.log('Making API call to remove employee from team:', request);
 
       const headers = this.getAuthHeaders();
-      console.log('Using headers:', headers);
 
       // Convert username to email format for the API
       const requestData = {
@@ -111,7 +107,6 @@ export class EmployeeRepositoryImpl implements EmployeeRepository {
         { headers }
       );
 
-      console.log('API Response:', response.data);
       return response.data as RemoveEmployeeFromTeamResponse;
     } catch (error: any) {
       console.error('API Error:', error);

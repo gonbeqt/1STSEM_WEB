@@ -11,7 +11,6 @@ export class WalletRepositoryImpl implements WalletRepository {
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
-    console.log('Token:', token);
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
@@ -26,7 +25,6 @@ export class WalletRepositoryImpl implements WalletRepository {
     });
 
     const data = await response.json();
-    console.log('Connect Wallet Response:', data);
     if (!response.ok) {
       throw new Error(data.error || 'Failed to connect wallet');
     }
@@ -75,8 +73,6 @@ export class WalletRepositoryImpl implements WalletRepository {
     };
 
     const url = `${this.API_URL}/wallets/send_eth/`;
-    console.log('Sending ETH to URL:', url);
-    console.log('Request data:', backendRequest);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -84,10 +80,9 @@ export class WalletRepositoryImpl implements WalletRepository {
       body: JSON.stringify(backendRequest),
     });
     
-    console.log('Send ETH response status:', response.status);
+    
 
     const data: SendEthResponse = await response.json();
-    console.log('Send ETH response data:', data);
 
     if (!response.ok) {
       console.error('Send ETH failed:', {

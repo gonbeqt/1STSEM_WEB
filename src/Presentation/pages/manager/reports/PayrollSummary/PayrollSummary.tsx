@@ -107,31 +107,7 @@ const PayrollSummary: React.FC = () => {
     fill: '#8884d8'
   })) : [];
 
-  const getDepartmentSummary = () => {
-    if (!payrollData) return [];
-    
-    const deptMap = new Map<string, { count: number; totalPay: number; employees: string[] }>();
-    
-    payrollData.payslips.forEach(payslip => {
-      const dept = payslip.department || 'General';
-      const existing = deptMap.get(dept) || { count: 0, totalPay: 0, employees: [] };
-      
-      existing.count += 1;
-      existing.totalPay += payslip.final_net_pay || 0;
-      if (payslip.employee_name && !existing.employees.includes(payslip.employee_name)) {
-        existing.employees.push(payslip.employee_name);
-      }
-      
-      deptMap.set(dept, existing);
-    });
-    
-    return Array.from(deptMap.entries()).map(([dept, data]) => ({
-      name: dept,
-      employeeCount: data.employees.length,
-      totalPay: data.totalPay,
-      avgPay: data.totalPay / data.employees.length
-    }));
-  };
+
 
 
   const formatCurrency = (amount: number): string => {
@@ -212,17 +188,7 @@ const PayrollSummary: React.FC = () => {
     }
   };
 
-  const calculateTotalPayroll = (): number => {
-    return payrollData?.totalPayroll || 0;
-  };
 
-  const calculateTotalEmployees = (): number => {
-    return payrollData?.totalEmployees || 0;
-  };
-
-  const calculateAverageSalary = (): number => {
-    return payrollData?.averageSalary || 0;
-  };
 
   const calculateTotalDeductions = (): number => {
     return payrollData?.payslips.reduce((total, payslip) => total + (payslip.total_deductions || 0), 0) || 0;

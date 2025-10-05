@@ -33,12 +33,6 @@ export const useTransactionHistory = () => {
 
       const response = await getTransactionHistoryUseCase.execute(defaultRequest);
       
-      console.log('✅ Transaction history loaded successfully:', {
-        message: response.message,
-        transactionCount: response.data.transactions?.length || 0,
-        pagination: response.data.pagination
-      });
-      
       setTransactions(response.data.transactions);
       setPagination(response.data.pagination);
 

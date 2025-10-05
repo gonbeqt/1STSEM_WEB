@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Invoice, InvoiceItem } from "../../../../../domain/entities/InvoiceEntities";
 import { container } from "../../../../../di/container";
-import { X, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { CheckCircle, AlertCircle, Clock } from "lucide-react";
 import jsPDF from "jspdf";
 
 interface InvoiceDetailsProps {

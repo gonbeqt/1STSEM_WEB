@@ -26,8 +26,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     const getUniqueVulnerabilities = (vulnerabilities: any[]) => {
         if (!vulnerabilities || vulnerabilities.length === 0) return [];
         
-        console.log('Original vulnerabilities count:', vulnerabilities.length);
-        console.log('Original vulnerabilities:', vulnerabilities);
+        
         
         // Use a Set to track seen combinations and filter out exact duplicates
         const seen = new Set();
@@ -39,10 +38,10 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 description: vuln.description?.trim() || ''
             });
             
-            console.log(`Vuln ${index}:`, key);
+            
             
             if (seen.has(key)) {
-                console.log(`Duplicate found at index ${index}`);
+                
                 return false;
             }
             
@@ -50,7 +49,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             return true;
         });
 
-        console.log('Unique vulnerabilities count:', uniqueVulns.length);
+        
         
         // Sort by severity priority
         const sorted = uniqueVulns.sort((a, b) => {
@@ -73,7 +72,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             return aSeverity - bSeverity;
         });
         
-        console.log('Final sorted vulnerabilities:', sorted);
+        
         return sorted;
     };
 
@@ -113,12 +112,12 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             setCurrentStep(2);
             setIsLoading(true);
             try {
-                console.log('Starting file upload...');
+                
                 const uploadRes = await auditViewModel.uploadFile(selectedFile);
-                console.log('Upload response:', uploadRes);
+                
                 setUploadResponse(uploadRes);
                 if (uploadRes?.success && uploadRes.contract_data) {
-                    console.log('Starting contract audit...');
+                    
                     const auditRes = await auditViewModel.auditContract({
                         contract_code: uploadRes.contract_data.contract_code,
                         contract_name: contractName,
@@ -126,7 +125,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                         filename: selectedFile.name,
                         file_size: selectedFile.size
                     });
-                    console.log('Audit response:', auditRes);
+                    
                     setAuditResponse(auditRes);
                     if (auditRes.success) {
                         setCurrentStep(3);

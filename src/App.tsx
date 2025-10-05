@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 
 import SideNavbar from './presentation/components/SideNavbar';
@@ -28,7 +27,6 @@ import EmployeeHistory from './presentation/pages/employee/history/page';
 
 
 import EmployeeSettings from './presentation/pages/employee/settings/page';
-import TransactionDetails from './presentation/pages/employee/home/TransactionDetails/TransactionDetails';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
 
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
@@ -57,18 +55,7 @@ const EmployeeLayout = () => (
 function App() {
   const walletViewModel = container.walletViewModel();
 
-  // Auto-reconnect wallet on app load
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    
-    if (token && user) {
-      console.log('User is logged in, checking wallet connection...');
-      walletViewModel.checkWalletConnection(token);
-    } else {
-      console.log('User not logged in, skipping wallet reconnection');
-    }
-  }, [walletViewModel]);
+  // Auto-reconnect wallet on app load (handled within hooks/viewmodels as needed)
 
   return (
     <WalletViewModelProvider value={walletViewModel}>
@@ -116,7 +103,6 @@ function App() {
             <Route path="/employee/history" element={<EmployeeHistory />} />
 
             <Route path="/employee/settings" element={<EmployeeSettings />} />
-            <Route path="/transaction_details" element={<TransactionDetails />} />
 
           </Route>
         </Routes>
