@@ -1,9 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import InputWithIcon from '../../components/InputWithIcon';
-import EmailIcon from '../../components/icons/EmailIcon';
-import PasswordIcon from '../../components/icons/PasswordIcon';
 import { useNavigate } from 'react-router-dom';
-import { RegisterViewModel } from '../../../domain/viewmodel/RegisterViewModel';
 import { observer } from 'mobx-react-lite';
 import { container } from '../../../di/container';
 import { User, Lock, Mail, UserCheck, AlertCircle } from 'lucide-react';

@@ -355,7 +355,8 @@ export const container: Container = {
     removeEmployeeFromTeamUseCase
   ),
   businessDocumentViewModel: () => new BusinessDocumentViewModel(
-    uploadBusinessDocumentsUseCase
+    uploadBusinessDocumentsUseCase,
+    businessDocumentRepository
   ),
   invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase),
   payslipViewModel: () => new PayslipViewModel(createPayslipUseCase),

@@ -25,7 +25,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
   // Use address book functionality
   const addressBookViewModel = useAddressBook();
   const {
-    entries = [],
     isLoading = false,
     error,
     successMessage: addressBookSuccessMessage,
