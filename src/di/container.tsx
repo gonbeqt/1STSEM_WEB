@@ -98,6 +98,7 @@ import { PasswordResetViewModel } from '../domain/viewmodel/PasswordResetViewMod
 
 
 export interface Container {
+  forgotPasswordViewModel(): any;
   userRepository: UserRepositoryImpl;
   walletRepository: WalletRepositoryImpl;
   sessionRepository: SessionRepositoryImpl;
@@ -316,7 +317,7 @@ export const container: Container = {
   getEmployeePayrollDetailsUseCase,
   createRecurringPaymentUseCase,
   getPaymentScheduleUseCase,
-  
+
   // Audit Contract Use Cases
   uploadContractUseCase,
   auditContractUseCase,
@@ -403,5 +404,8 @@ export const container: Container = {
   passwordResetViewModel: () => new PasswordResetViewModel(
     requestPasswordResetUseCase,
     resetPasswordUseCase
-  )
+  ),
+  forgotPasswordViewModel: function () {
+    throw new Error('Function not implemented.');
+  }
 };

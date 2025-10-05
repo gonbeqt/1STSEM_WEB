@@ -1,142 +1,107 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+// ...existing code...
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { container } from '../../../di/container';
 import { observer } from 'mobx-react-lite';
-import { usePasswordReset } from '../../hooks/usePasswordReset';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 const ForgotPassword = observer(() => {
   const navigate = useNavigate();
-  const { formData, setEmail, clearError, clearSuccess, requestPasswordReset } = usePasswordReset();
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const viewModel: any = useMemo(() => {
+    try { return container.forgotPasswordViewModel(); } catch { return null; }
+  }, []);
 
-  const validateEmail = (email: string): string => {
-    if (!email) return 'Email is required';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email address';
-    return '';
-  };
+  const initialEmail = viewModel?.formData?.email ?? '';
+  const [email, setEmail] = useState<string>(initialEmail);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleEmailChange = (value: string) => {
-    // Clear validation error
-    setValidationErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.email;
-      return newErrors;
-    });
-
-    setEmail(value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate email
-    const emailError = validateEmail(formData.email);
-    if (emailError) {
-      setValidationErrors({ email: emailError });
+    setError(null);
+    setSuccess(null);
+
+    if (!email.trim()) {
+      setError('Please enter your email');
       return;
     }
 
-    const success = await requestPasswordReset();
-    if (success) {
-      // Clear any existing errors
-      clearError();
+    try {
+      setLoading(true);
+
+      if (viewModel && typeof viewModel.requestPasswordReset === 'function') {
+        const res = await viewModel.requestPasswordReset(email.trim());
+        if (res && (res.success || res === true)) {
+          setSuccess(res.message || 'Verification code sent. Check your email.');
+          navigate('/password-reset', { state: { email: email.trim() } });
+          return;
+        } else {
+          throw new Error(res?.error || (Array.isArray(res?.errors) ? res.errors.join(', ') : 'Failed to request code'));
+        }
+      }
+
+      const API_URL = process.env.REACT_APP_API_BASE_URL ?? '';
+      const resp = await fetch(`${API_URL}/auth/password-reset-request/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.success) {
+        throw new Error(data.errors ? (Array.isArray(data.errors) ? data.errors.join(', ') : data.errors) : (data.error || 'Failed to request verification code'));
+      }
+      setSuccess(data.message || 'Verification code sent. Check your email.');
+      navigate('/reset-password', { state: { email: email.trim() } });
+    } catch (err: any) {
+      setError(err?.message || 'Failed to request verification code');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBackToLogin = () => {
-    navigate('/login');
-  };
-
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">
-      <div className="w-full max-w-md mx-auto p-8 text-gray-900 bg-white rounded-2xl shadow-xl animate-[slideIn_0.4s_ease-out]">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Mail className="w-8 h-8 text-blue-600" />
+    <div className="flex items-center justify-center min-h-screen p-5 bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-purple-50">
+            <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
           </div>
-          <h1 className="mb-3 text-3xl font-bold text-blue-800">
-            Forgot Password?
-          </h1>
-          <p className="text-center text-gray-600 text-base">
-            No worries! Enter your email address and we'll send you a reset link.
-          </p>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Forgot Password</h1>
+            <p className="text-sm text-gray-600">Enter your email to receive a verification code to reset your password.</p>
+          </div>
         </div>
 
-        {/* Success Message */}
-        {formData.success && formData.message && (
-          <div className="mb-6 text-green-600 text-sm bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{formData.message}</span>
-          </div>
-        )}
+        <form onSubmit={handleRequestOtp} className="space-y-4">
+          <label className="text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            required
+          />
 
-        {/* Error Message */}
-        {formData.error && (
-          <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{formData.error}</span>
-          </div>
-        )}
+          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
+          {success && <div className="text-sm text-green-700 bg-green-50 p-2 rounded">{success}</div>}
 
-        {/* Forgot Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* Email Input */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <input
-                id="email"
-                type="email"
-                placeholder="Enter your email address"
-                value={formData.email}
-                onChange={(e) => handleEmailChange(e.target.value)}
-                className="w-full p-4 pl-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-                disabled={formData.isLoading}
-              />
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            </div>
-            {validationErrors.email && (
-              <div className="flex items-center gap-1 mt-2 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.email}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-700 border-none rounded-xl text-white text-base font-semibold cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            disabled={formData.isLoading}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-60"
           >
-            {formData.isLoading ? 'Sending...' : 'Send Reset Link'}
+            {loading && <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>}
+            {loading ? 'Requesting...' : 'Send verification code'}
           </button>
 
-          {/* Back to Login */}
-          <div className="text-center pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={handleBackToLogin}
-              className="inline-flex items-center gap-2 text-gray-600 text-sm hover:text-gray-800 transition-colors duration-200"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Login
-            </button>
+          <div className="text-sm text-center text-gray-600">
+            Remembered your password? <button type="button" onClick={() => navigate('/login')} className="text-purple-600 font-medium">Sign in</button>
           </div>
         </form>
-
-        {/* Help Text */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> Check your email inbox and spam folder for the password reset link. 
-            The link will expire in 1 hour for security reasons.
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -1,245 +1,139 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { observer } from 'mobx-react-lite';
-import { usePasswordReset } from '../../hooks/usePasswordReset';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+// ...existing code...
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const ResetPassword = observer(() => {
+const PasswordReset = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { 
-    formData, 
-    setToken, 
-    setNewPassword, 
-    setConfirmPassword, 
-    clearError, 
-    clearSuccess, 
-    resetPassword 
-  } = usePasswordReset();
-  
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const initialEmail = (location.state as any)?.email || '';
+  const [email, setEmail] = useState(initialEmail);
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  // Get token from URL parameters
-  useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      setToken(token);
-    } else {
-      // If no token in URL, redirect to forgot password
-      navigate('/forgot-password');
-    }
-  }, [searchParams, setToken, navigate]);
-
-  const validatePassword = (password: string): string => {
-    if (!password) return 'Password is required';
-    if (password.length < 8) return 'Password must be at least 8 characters';
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
-    return '';
+  const validateInputs = (): string | null => {
+    if (!email.trim()) return 'Email is required';
+    if (!/^\d{4,6}$/.test(otp)) return 'Enter a valid verification code';
+    if (newPassword.length < 8) return 'Password must be at least 8 characters';
+    return null;
   };
 
-  const validateConfirmPassword = (password: string, confirmPassword: string): string => {
-    if (!confirmPassword) return 'Please confirm your password';
-    if (password !== confirmPassword) return 'Passwords do not match';
-    return '';
-  };
-
-  const handlePasswordChange = (value: string) => {
-    // Clear validation errors
-    setValidationErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.newPassword;
-      delete newErrors.confirmPassword;
-      return newErrors;
-    });
-
-    setNewPassword(value);
-    
-    // Re-validate confirm password if it exists
-    if (formData.confirmPassword) {
-      const confirmError = validateConfirmPassword(value, formData.confirmPassword);
-      if (confirmError) {
-        setValidationErrors(prev => ({ ...prev, confirmPassword: confirmError }));
-      }
-    }
-  };
-
-  const handleConfirmPasswordChange = (value: string) => {
-    // Clear validation error
-    setValidationErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.confirmPassword;
-      return newErrors;
-    });
-
-    setConfirmPassword(value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate passwords
-    const passwordError = validatePassword(formData.newPassword);
-    const confirmPasswordError = validateConfirmPassword(formData.newPassword, formData.confirmPassword);
-    
-    const errors: Record<string, string> = {};
-    if (passwordError) errors.newPassword = passwordError;
-    if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
-    
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    setError(null);
+    setSuccess(null);
+
+    const clientError = validateInputs();
+    if (clientError) {
+      setError(clientError);
       return;
     }
 
-    const success = await resetPassword();
-    if (success) {
-      // Redirect to login with success message
-      navigate('/login', {
-        state: { 
-          message: 'Password reset successfully! You can now log in with your new password.'
-        }
+    const API_URL = process.env.REACT_APP_API_BASE_URL ?? '';
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/auth/password-reset/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.trim(), otp, new_password: newPassword }),
       });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.errors?.join?.(', ') || data.error || 'Password reset failed');
+      }
+      setSuccess(data.message || 'Password reset successful. Redirecting to login...');
+      setTimeout(() => navigate('/login', { state: { message: data.message } }), 1200);
+    } catch (err: any) {
+      setError(err.message || 'Password reset failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBackToLogin = () => {
-    navigate('/login');
-  };
-
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">
-      <div className="w-full max-w-md mx-auto p-8 text-gray-900 bg-white rounded-2xl shadow-xl animate-[slideIn_0.4s_ease-out]">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-green-600" />
+    <div className="flex items-center justify-center min-h-screen p-5 bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-50">
+            <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11v2h12v-2c0-1.657-1.343-3-3-3s-3 1.343-3 3z" />
+            </svg>
           </div>
-          <h1 className="mb-3 text-3xl font-bold text-green-800">
-            Reset Password
-          </h1>
-          <p className="text-center text-gray-600 text-base">
-            Enter your new password below
-          </p>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Reset Password</h1>
+            <p className="text-sm text-gray-600">Enter the verification code sent to your email and choose a new password.</p>
+          </div>
         </div>
 
-        {/* Success Message */}
-        {formData.success && formData.message && (
-          <div className="mb-6 text-green-600 text-sm bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{formData.message}</span>
-          </div>
-        )}
+        <form onSubmit={handleReset} className="space-y-4">
+          <label className="text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+            required
+          />
 
-        {/* Error Message */}
-        {formData.error && (
-          <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{formData.error}</span>
-          </div>
-        )}
+          <label className="text-sm font-medium text-gray-700">Verification code</label>
+          <input
+            type="text"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+            placeholder="Enter code"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+            inputMode="numeric"
+            required
+          />
 
-        {/* Reset Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* New Password Input */}
-          <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              New Password
-            </label>
-            <div className="relative">
-              <input
-                id="newPassword"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your new password"
-                value={formData.newPassword}
-                onChange={(e) => handlePasswordChange(e.target.value)}
-                className="w-full p-4 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
-                disabled={formData.isLoading}
-              />
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {validationErrors.newPassword && (
-              <div className="flex items-center gap-1 mt-2 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.newPassword}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Confirm Password Input */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm New Password
-            </label>
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your new password"
-                value={formData.confirmPassword}
-                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
-                className="w-full p-4 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
-                disabled={formData.isLoading}
-              />
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {validationErrors.confirmPassword && (
-              <div className="flex items-center gap-1 mt-2 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.confirmPassword}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="w-full p-4 bg-gradient-to-r from-green-600 to-green-700 border-none rounded-xl text-white text-base font-semibold cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-green-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            disabled={formData.isLoading}
-          >
-            {formData.isLoading ? 'Resetting...' : 'Reset Password'}
-          </button>
-
-          {/* Back to Login */}
-          <div className="text-center pt-4 border-t border-gray-200">
+          <label className="text-sm font-medium text-gray-700">New password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password (min 8 chars)"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+              required
+            />
             <button
               type="button"
-              onClick={handleBackToLogin}
-              className="inline-flex items-center gap-2 text-gray-600 text-sm hover:text-gray-800 transition-colors duration-200"
+              onClick={() => setShowPassword(s => !s)}
+              className="absolute right-2 top-2 text-sm text-gray-600"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Login
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+
+          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
+          {success && <div className="text-sm text-green-700 bg-green-50 p-2 rounded">{success}</div>}
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+            >
+              {loading && <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>}
+              {loading ? 'Resetting...' : 'Reset password'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="flex-1 px-4 py-3 border rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Back
             </button>
           </div>
         </form>
-
-        {/* Help Text */}
-        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-800">
-            <strong>Password Requirements:</strong> At least 8 characters with uppercase, lowercase, and numbers.
-          </p>
-        </div>
       </div>
     </div>
   );
-});
+};
 
-export default ResetPassword;
+export default PasswordReset;
