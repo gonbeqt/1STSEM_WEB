@@ -62,25 +62,13 @@ const EmployeeHome = observer(() => {
     }
   };
 
-  const getTransactionIcon = (transaction: any) => {
-    if (transaction.status === 'pending') {
-      return <Clock className="w-5 h-5 text-yellow-600" />;
-    }
-    return <TrendingDown className="w-5 h-5 text-red-600" />;
-  };
+
 
   const getTransactionName = (transaction: any): string => {
-    // Use counterparty name if available
-    if (transaction.counterparty_name) {
-      return `${transaction.transaction_category === 'SENT' ? 'Sent to' : 'Received from'} ${transaction.counterparty_name}`;
-    }
-    
-    // Use category description from backend
     if (transaction.category_description) {
       return transaction.category_description;
     }
     
-    // Fallback to transaction category
     const categoryLabels: Record<string, string> = {
       'SENT': 'Sent ETH',
       'RECEIVED': 'Received ETH',
@@ -103,7 +91,6 @@ const EmployeeHome = observer(() => {
       amount: displayAmount,
       type: transaction.status === 'confirmed' ? 'inflow' : 'pending',
       date: formatTransactionDate(transaction.created_at),
-      icon: getTransactionIcon(transaction),
       hash: transaction.transaction_hash,
       token_symbol: 'ETH',
       // Enhanced data from new backend
@@ -216,9 +203,6 @@ const EmployeeHome = observer(() => {
         <div className="flex gap-3">
           <button className="bg-gray-100 border-none rounded-xl p-3 text-gray-800 cursor-pointer transition-colors duration-200 hover:bg-gray-200">
             <Bell size={20} />
-          </button>
-          <button className="bg-gray-100 border-none rounded-xl p-3 text-gray-800 cursor-pointer transition-colors duration-200 hover:bg-gray-200">
-            <RotateCcw size={20} />
           </button>
         </div>
       </div>
@@ -343,7 +327,7 @@ const EmployeeHome = observer(() => {
       <div className="flex justify-between items-center px-5 my-6 bg-transparent">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 m-0 text-black">Recent Transactions</h2>
-          <p className="text-sm text-gray-600 mt-1">Showing RECEIVED transactions only</p>
+          <p className="text-sm text-gray-600 mt-1">Showing all recent transactions</p>
         </div>
         <div 
           className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
@@ -387,11 +371,6 @@ const EmployeeHome = observer(() => {
             {transactionData.map((transaction, index) => (
               <div key={index} className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    transaction.type === 'outflow' ? 'bg-red-100' : 'bg-yellow-100'
-                  }`}>
-                    {transaction.icon}
-                  </div>
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
                   </div>

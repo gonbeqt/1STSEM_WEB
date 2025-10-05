@@ -52,7 +52,7 @@ const EmployeeHistoryPage = () => {
 
     if (loading && !history) {
         return (
-            <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
+            <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 w-full">
                 <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
                     <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
                     <p className="text-gray-600 font-medium">Loading your payroll history...</p>
