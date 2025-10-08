@@ -55,6 +55,15 @@ export interface Payslip {
   issued_at: string;
   payment_processed: boolean;
   pdf_generated: boolean;
+  gross_amount?: number;
+  net_amount?: number;
+  tax_breakdown?: Record<string, number>;
+  tax_deductions?: Record<string, number>;
+  total_tax_deducted?: number;
+  tax_rates_applied?: Record<string, number>;
+  tax_config_source?: string;
+  pdf_generated_at?: string;
+  sent_at?: string;
 }
 
 export interface CreatePayslipResponse {

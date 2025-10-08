@@ -27,35 +27,6 @@ interface DetailedEmployee {
   profileImage?: string;
 }
 
-interface PayrollData {
-  currentPeriod: {
-    gross: number;
-    netPay: number;
-    yearToDate: number;
-    deductions: {
-      federal: number;
-      stateTax: number;
-      medicare: number;
-      socialSecurity: number;
-      dental: number;
-    };
-  };
-  paymentHistory: Array<{
-    date: string;
-    amount: number;
-    period: string;
-    payDate: string;
-  }>;
-}
-
-interface Document {
-  id: string;
-  name: string;
-  type: string;
-  uploadedDate: string;
-  status: 'Active' | 'Expired' | 'Pending';
-}
-
 const EmployeeManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddEmployeeModal, setIsAddEmployeeModal] = useState(false);
@@ -101,65 +72,6 @@ const EmployeeManagement: React.FC = () => {
   };
 
   
-
-  const samplePayrollData: PayrollData = {
-    currentPeriod: {
-      gross: 3500.00,
-      netPay: 2650.00,
-      yearToDate: 42000.00,
-      deductions: {
-        federal: 420.00,
-        stateTax: 150.00,
-        medicare: 50.75,
-        socialSecurity: 217.00,
-        dental: 12.25,
-      },
-    },
-    paymentHistory: [
-      {
-        date: '2023-05-31',
-        amount: 3350.00,
-        period: 'May 2023',
-        payDate: 'May 31, 2023',
-      },
-      {
-        date: '2023-05-15',
-        amount: 3250.00,
-        period: 'May 2023',
-        payDate: 'May 15, 2023',
-      },
-      {
-        date: '2023-04-30',
-        amount: 3350.00,
-        period: 'Apr 2023',
-        payDate: 'Apr 30, 2023',
-      },
-    ],
-  };
-
-  const sampleDocuments: Document[] = [
-    {
-      id: '1',
-      name: 'Employment Contract',
-      type: 'PDF',
-      uploadedDate: '2023-01-15',
-      status: 'Active',
-    },
-    {
-      id: '2',
-      name: 'NDA Agreement',
-      type: 'PDF',
-      uploadedDate: '2023-02-01',
-      status: 'Active',
-    },
-    {
-      id: '3',
-      name: 'Tax Forms',
-      type: 'PDF',
-      uploadedDate: '2023-10-01',
-      status: 'Active',
-    },
-  ];
 
   const handleEmployeeDetails = (employee: ApiEmployee) => {
     const detailed: DetailedEmployee = {
@@ -357,8 +269,6 @@ const EmployeeManagement: React.FC = () => {
         <EmployeeDetailModal
           isOpen={showEmployeeDetailModal}
           employee={selectedApiEmployee}
-          payrollData={samplePayrollData}
-          documents={sampleDocuments}
           onClose={handleCloseModal}
           onEdit={handleEditEmployee}
           onDelete={handleDeleteEmployee}

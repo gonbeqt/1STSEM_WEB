@@ -84,7 +84,7 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
       // Use the correct payslips endpoint
       const response = await axios.get(
-        `${this.baseUrl}/payslips/list/?${params.toString()}`,
+        `${this.baseUrl}/manager/payslips/list/?${params.toString()}`,
         { headers }
       );
 
@@ -103,21 +103,6 @@ export class PayslipRepositoryImpl implements PayslipRepository {
       // If there's an error, fall back to mock data for development
       
       return this.getMockPayslips(employee_id, status);
-
-      // Uncomment the lines below if you want to throw errors instead of using mock data
-      /*
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        throw new Error(error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`);
-      } else if (error.request) {
-        console.error('Network error:', error.request);
-        throw new Error('Network error. Please check your internet connection.');
-      } else {
-        console.error('Unknown error:', error.message);
-        throw new Error(error.message || 'An unexpected error occurred');
-      }
-      */
     }
   }
 
