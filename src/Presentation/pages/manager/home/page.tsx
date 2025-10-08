@@ -262,7 +262,34 @@ const Home = observer(() => {
   }
 
   const handleProcessPayroll = (data: any) => {
-    alert(`Payroll processed successfully for ${data.employees.length} employees. Total: ₱${data.total.toLocaleString()}`);
+    const totalValue = Number(data?.total) || 0;
+    const formattedTotal = totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    if (data?.action === 'process') {
+      const successCount = data?.processSummary?.successCount ?? 0;
+      const failedCount = data?.processSummary?.errorCount ?? 0;
+      const successText = `Processed payroll for ${successCount} employee${successCount === 1 ? '' : 's'}.`;
+      const failureText = failedCount
+        ? ` ${failedCount} payment${failedCount === 1 ? '' : 's'} failed to complete.`
+        : '';
+
+      alert(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
+      return;
+    }
+
+    if (data?.action === 'create') {
+      const createdCount = data?.creationSummary?.successCount ?? (data?.employees?.length || 0);
+      const failedCount = data?.creationSummary?.errorCount ?? 0;
+      const successText = `Created payroll entries for ${createdCount} employee${createdCount === 1 ? '' : 's'}.`;
+      const failureText = failedCount
+        ? ` ${failedCount} entry${failedCount === 1 ? '' : 'ies'} failed to create.`
+        : '';
+
+      alert(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
+      return;
+    }
+
+    alert(`Payroll action completed. Total scheduled amount: $${formattedTotal} USD.`);
   };
 
   const copyToClipboard = () => {

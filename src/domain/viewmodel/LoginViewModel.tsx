@@ -1,5 +1,5 @@
 // src/domain/models/LoginViewModel.tsx
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
 import { WalletViewModel } from './WalletViewModal';
@@ -32,12 +32,14 @@ export class LoginViewModel {
     private logoutUseCase: LogoutUseCase,
     private getWalletViewModel: () => WalletViewModel
   ) {
-    makeAutoObservable(this);
-    
+    makeAutoObservable(this, {}, { autoBind: true });
+
     // Initialize login status based on existing tokens
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    this.state.isLoggedIn = !!(token && user);
+    runInAction(() => {
+      this.state.isLoggedIn = !!(token && user);
+    });
   }
 
   private checkLoginStatus = () => {
@@ -60,10 +62,13 @@ export class LoginViewModel {
     this.state.logoutError = null;
   };
 
-    login = async (): Promise<LoginResponse | null> => {
-    try {
+  login = async (): Promise<LoginResponse | null> => {
+    runInAction(() => {
       this.state.isLoading = true;
       this.state.error = null;
+    });
+
+    try {
 
       const response = await this.loginUseCase.execute({
         email: this.state.email,
@@ -103,45 +108,53 @@ export class LoginViewModel {
 
       localStorage.setItem('token', response.session_token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
-      this.state.isLoggedIn = true;
-      
-      // Clear form after successful login
-      this.state.email = '';
-      this.state.password = '';
+
+      runInAction(() => {
+        this.state.isLoggedIn = true;
+        this.state.email = '';
+        this.state.password = '';
+      });
 
       return response;
     } catch (error) {
-      this.state.error = error instanceof Error ? error.message : 'Login failed';
-      this.state.isLoggedIn = false;
+      runInAction(() => {
+        this.state.error = error instanceof Error ? error.message : 'Login failed';
+        this.state.isLoggedIn = false;
+      });
       return null;
     } finally {
-      this.state.isLoading = false;
+      runInAction(() => {
+        this.state.isLoading = false;
+      });
     }
   };
 
   logout = async (): Promise<boolean> => {
     try {
-      this.state.isLoggingOut = true;
-      this.state.logoutError = null;
+      runInAction(() => {
+        this.state.isLoggingOut = true;
+        this.state.logoutError = null;
+      });
       await this.logoutUseCase.execute({});
-      
-      this.state.isLoggedIn = false;
+      runInAction(() => {
+        this.state.isLoggedIn = false;
+        this.state.email = '';
+        this.state.password = '';
+        this.clearErrors();
+      });
       this.getWalletViewModel().resetWalletState();
-      
-      // Clear any other application state if needed
-      this.state.email = '';
-      this.state.password = '';
-      this.clearErrors();
 
       return true;
     } catch (error) {
-      this.state.logoutError = error instanceof Error ? error.message : 'Logout failed';
-      // Even if logout fails, update local state since localStorage was cleared in use case
-      this.state.isLoggedIn = false;
+      runInAction(() => {
+        this.state.logoutError = error instanceof Error ? error.message : 'Logout failed';
+        this.state.isLoggedIn = false;
+      });
       return false;
     } finally {
-      this.state.isLoggingOut = false;
+      runInAction(() => {
+        this.state.isLoggingOut = false;
+      });
     }
   };
 
