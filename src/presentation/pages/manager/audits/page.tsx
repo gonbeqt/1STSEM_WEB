@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideNavbar from '../../../components/SideNavbar';
+import ManagerNavbar from '../../../components/ManagerNavbar';
 import { container } from '../../../../di/container';
 import { AuditContractResponse, UploadContractResponse, Vulnerability } from '../../../../domain/entities/ContractEntities';
 
@@ -211,8 +212,7 @@ const AuditSolidityContract: React.FC = () => {
         setIsAnalyzing(true);
         setAnalysisStage('uploading');
         setCompletedStageCount(0);
-        setFailedStageIndex(null);
-        setUploadResponse(null);
+    setUploadResponse(null);
         setAuditResponse(null);
 
         let completedStages = 0;
@@ -278,79 +278,81 @@ const AuditSolidityContract: React.FC = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             <SideNavbar />
-            <main className="flex-1 flex justify-center items-start p-0 pt-8 md:p-4">
-                <div className="w-full max-w-lg bg-gradient-to-br from-indigo-500 to-purple-700 rounded-2xl p-8 shadow-2xl text-white relative">
-                    <div className="flex justify-between items-center mb-2">
-                        <h1 className="text-2xl font-semibold m-0">Audit Solidity Contract</h1>
-                        <button 
-                            className="bg-transparent border-none text-white text-2xl cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-                            onClick={handleClose}
-                        >
-                            ×
-                        </button>
-                    </div>
-                    
-                    <p className="m-0 mb-8 text-base opacity-90">Secure your smart contracts with AI-powered analysis.</p>
+            <div className="flex-1 flex flex-col min-h-screen">
+                <ManagerNavbar />
+                <main className="flex-1 flex justify-center items-start p-0 pt-8 md:p-4 overflow-y-auto">
+                    <div className="w-full max-w-lg bg-gradient-to-br from-indigo-500 to-purple-700 rounded-2xl p-8 shadow-2xl text-white relative">
+                        <div className="flex justify-between items-center mb-2">
+                            <h1 className="text-2xl font-semibold m-0">Audit Solidity Contract</h1>
+                            <button
+                                className="bg-transparent border-none text-white text-2xl cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                                onClick={handleClose}
+                            >
+                                ×
+                            </button>
+                        </div>
 
-                    <div className="flex justify-between items-center mb-12 relative md:flex-row flex-col gap-4">
-                        {steps.map((step, index) => (
-                            <div key={step.number} className="flex md:flex-col flex-row items-center md:w-auto w-full">
-                                <div className={`w-10 h-10 rounded-full bg-white/30 flex items-center justify-center font-bold mb-2 md:mb-2 md:mr-0 mr-3 border-2 ${step.active ? 'bg-white text-indigo-500 border-white' : currentStep > step.number ? 'bg-green-500 text-white border-transparent' : 'border-transparent'} transition-all duration-300`}>
-                                    {currentStep > step.number ? '✓' : step.number}
-                                </div>
-                                <span className={`text-sm text-center ${step.active ? 'opacity-100 font-semibold' : 'opacity-80'} transition-opacity duration-300`}>
-                                    {step.title}
-                                </span>
-                                {index < steps.length - 1 && (
-                                    <div className={`hidden md:block absolute top-5 left-1/2 right-[-50%] h-0.5 ${currentStep > step.number ? 'bg-green-500' : 'bg-white/30'} z-[-1]`}></div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                        <p className="m-0 mb-8 text-base opacity-90">Secure your smart contracts with AI-powered analysis.</p>
 
-                    {currentStep === 1 && (
-                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md">
-                            <div className="mb-6">
-                                <label htmlFor="contractName" className="block mb-2 font-semibold text-gray-800">Contract Name</label>
-                                <input
-                                    type="text"
-                                    id="contractName"
-                                    className="w-full p-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-colors"
-                                    placeholder="e.g., MyERC20Token"
-                                    value={contractName}
-                                    onChange={(e) => setContractName(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block mb-2 font-semibold text-gray-800">Upload Contract File</label>
-                                <div 
-                                    className={`border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all ${isDragActive ? 'border-indigo-500 bg-indigo-50/50' : 'bg-gray-100'} hover:border-indigo-500 hover:bg-indigo-50/50`}
-                                    onDragEnter={handleDrag}
-                                    onDragLeave={handleDrag}
-                                    onDragOver={handleDrag}
-                                    onDrop={handleDrop}
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <div className="mb-4 text-indigo-500">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2"/>
-                                            <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2"/>
-                                            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2"/>
-                                            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2"/>
-                                            <polyline points="10,9 9,9 8,9" stroke="currentColor" strokeWidth="2"/>
-                                        </svg>
+                        <div className="flex justify-between items-center mb-12 relative md:flex-row flex-col gap-4">
+                            {steps.map((step, index) => (
+                                <div key={step.number} className="flex md:flex-col flex-row items-center md:w-auto w-full">
+                                    <div className={`w-10 h-10 rounded-full bg-white/30 flex items-center justify-center font-bold mb-2 md:mb-2 md:mr-0 mr-3 border-2 ${step.active ? 'bg-white text-indigo-500 border-white' : currentStep > step.number ? 'bg-green-500 text-white border-transparent' : 'border-transparent'} transition-all duration-300`}>
+                                        {currentStep > step.number ? '✓' : step.number}
                                     </div>
-                                    <h3 className="m-0 mb-2 text-lg text-gray-800">Drag & Drop or Click to Upload</h3>
-                                    <p className="m-0 text-gray-500 text-sm">Solidity (.sol) files, max 1MB</p>
+                                    <span className={`text-sm text-center ${step.active ? 'opacity-100 font-semibold' : 'opacity-80'} transition-opacity duration-300`}>
+                                        {step.title}
+                                    </span>
+                                    {index < steps.length - 1 && (
+                                        <div className={`hidden md:block absolute top-5 left-1/2 right-[-50%] h-0.5 ${currentStep > step.number ? 'bg-green-500' : 'bg-white/30'} z-[-1]`}></div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {currentStep === 1 && (
+                            <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md">
+                                <div className="mb-6">
+                                    <label htmlFor="contractName" className="block mb-2 font-semibold text-gray-800">Contract Name</label>
                                     <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        multiple
-                                        accept=".sol"
-                                        onChange={handleFileInput}
-                                        className="hidden"
+                                        type="text"
+                                        id="contractName"
+                                        className="w-full p-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-colors"
+                                        placeholder="e.g., MyERC20Token"
+                                        value={contractName}
+                                        onChange={(e) => setContractName(e.target.value)}
                                     />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block mb-2 font-semibold text-gray-800">Upload Contract File</label>
+                                    <div
+                                        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-gray-50'}`}
+                                        onDragLeave={handleDrag}
+                                        onDragOver={handleDrag}
+                                        onDrop={handleDrop}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <div className="mb-4 text-indigo-500">
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2"/>
+                                                <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2"/>
+                                                <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2"/>
+                                                <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2"/>
+                                                <polyline points="10,9 9,9 8,9" stroke="currentColor" strokeWidth="2"/>
+                                            </svg>
+                                        </div>
+                                        <h3 className="m-0 mb-2 text-lg text-gray-800">Drag & Drop or Click to Upload</h3>
+                                        <p className="m-0 text-gray-500 text-sm">Solidity (.sol) files, max 1MB</p>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            multiple
+                                            accept=".sol"
+                                            onChange={handleFileInput}
+                                            className="hidden"
+                                        />
+                                    </div>
                                 </div>
 
                                 {uploadedFiles.length > 0 && (
@@ -372,141 +374,138 @@ const AuditSolidityContract: React.FC = () => {
                                         ))}
                                     </div>
                                 )}
-                            </div>
 
-                            <button 
-                                className="w-full bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                                onClick={handleStartAnalysis}
-                                disabled={isAnalyzing || !contractName.trim() || uploadedFiles.length === 0}
-                            >
-                                {isAnalyzing ? 'Preparing...' : 'Start Analysis'}
-                            </button>
-                        </div>
-                    )}
-
-                    {currentStep === 2 && (
-                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md">
-                            {analysisStage === 'failed' ? (
-                                <div className="flex flex-col items-center text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl font-bold mb-6">
-                                        !
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-3 m-0">AI Analysis Failed</h3>
-                                    <p className="text-sm text-gray-600 mb-6 m-0 max-w-sm">
-                                        {analysisError || 'Something went wrong while processing your contract. Please review the file and try again.'}
-                                    </p>
-                                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
-                                        <button
-                                            className="px-5 py-2 rounded-lg font-semibold bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none shadow-sm hover:shadow-md transition"
-                                            onClick={handleRetryAnalysis}
-                                        >
-                                            Try Again
-                                        </button>
-                                        <button
-                                            className="px-5 py-2 rounded-lg font-semibold text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition"
-                                            onClick={() => setCurrentStep(1)}
-                                        >
-                                            Back to Setup
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center text-center py-4">
-                                    <div className="w-16 h-16 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6"></div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2 m-0">Analyzing Smart Contract</h3>
-                                    <p className="text-sm text-gray-600 mb-8 m-0 max-w-md">
-                                        AI is scanning your Solidity contract for vulnerabilities, risky patterns, and optimization opportunities.
-                                    </p>
-                                    <div className="w-full space-y-4 text-left">
-                                        {analysisLoadingSteps.map((step, index) => {
-                                            const isCompleted = completedStageCount > index;
-                                            const isActive = !isCompleted && index === completedStageCount;
-                                            const indicatorBase = 'w-10 h-10 flex items-center justify-center rounded-full border-2 font-semibold';
-                                            const textBase = 'flex-1';
-                                            const indicatorClass = isCompleted
-                                                ? 'bg-emerald-100 text-emerald-600 border-emerald-200'
-                                                : isActive
-                                                    ? 'bg-indigo-100 text-indigo-600 border-indigo-200 animate-pulse'
-                                                    : 'bg-gray-100 text-gray-400 border-gray-200';
-                                            const textClass = isCompleted
-                                                ? 'text-gray-900'
-                                                : isActive
-                                                    ? 'text-indigo-600'
-                                                    : 'text-gray-500';
-
-                                            return (
-                                                <div key={step.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                                    <div className={`${indicatorBase} ${indicatorClass}`}>
-                                                        {isCompleted ? '✓' : index + 1}
-                                                    </div>
-                                                    <div className={`${textBase}`}>
-                                                        <p className={`m-0 text-sm font-semibold ${textClass}`}>{step.title}</p>
-                                                        <p className="m-0 mt-1 text-xs text-gray-500">{step.description}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {currentStep === 3 && (
-                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md text-center">
-                            <h3 className="m-0 mb-2 text-xl text-green-500">Analysis Complete!</h3>
-                            <p className="m-0 mb-8 text-gray-500">Your smart contract has been successfully analyzed. Review the results below.</p>
-                            <div className="bg-gray-100 rounded-lg p-6 mb-8">
-                                <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                    <span className="font-semibold text-gray-800">Contract Name:</span>
-                                    <span className="text-gray-500">{contractName}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                    <span className="font-semibold text-gray-800">Files Analyzed:</span>
-                                    <span className="text-gray-500">{uploadedFiles.length}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                    <span className="font-semibold text-gray-800">Risk Level:</span>
-                                    <span className="text-yellow-500 font-semibold">Medium</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                    <span className="font-semibold text-gray-800">Vulnerabilities Found:</span>
-                                    <span className="text-gray-500">3</span>
-                                </div>
-                            </div>
-                            <button 
-                                className="bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 px-8 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
-                                onClick={() => setCurrentStep(4)}
-                            >
-                                View Assessment
-                            </button>
-                        </div>
-                    )}
-
-                    {currentStep === 4 && (
-                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md text-center">
-                            <h3 className="m-0 mb-2 text-xl text-gray-800">Security Assessment</h3>
-                            <div className="py-8">
-                                <div className="w-20 h-20 bg-green-500 text-white text-3xl rounded-full flex items-center justify-center mx-auto mb-6">✓</div>
-                                <h4 className="m-0 mb-2 text-xl text-gray-800">Audit Complete</h4>
-                                <p className="m-0 mb-8 text-gray-500">Your smart contract audit has been completed and saved to your dashboard.</p>
-                                <button 
-                                    className="bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 px-8 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
-                                    onClick={() => navigate('/audits')}
+                                <button
+                                    className="w-full bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                    onClick={handleStartAnalysis}
+                                    disabled={isAnalyzing || !contractName.trim() || uploadedFiles.length === 0}
                                 >
-                                    View in Dashboard
+                                    {isAnalyzing ? 'Preparing...' : 'Start Analysis'}
                                 </button>
                             </div>
-                        </div>
-                    )}
-                </div>
-            </main>
+                        )}
+
+                        {currentStep === 2 && (
+                            <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md">
+                                {analysisStage === 'failed' ? (
+                                    <div className="flex flex-col items-center text-center py-8">
+                                        <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl font-bold mb-6">
+                                            !
+                                        </div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-3 m-0">AI Analysis Failed</h3>
+                                        <p className="text-sm text-gray-600 mb-6 m-0 max-w-sm">
+                                            {analysisError || 'Something went wrong while processing your contract. Please review the file and try again.'}
+                                        </p>
+                                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
+                                            <button
+                                                className="px-5 py-2 rounded-lg font-semibold bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none shadow-sm hover:shadow-md transition"
+                                                onClick={handleRetryAnalysis}
+                                            >
+                                                Try Again
+                                            </button>
+                                            <button
+                                                className="px-5 py-2 rounded-lg font-semibold text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition"
+                                                onClick={() => setCurrentStep(1)}
+                                            >
+                                                Back to Setup
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center text-center py-4">
+                                        <div className="w-16 h-16 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6"></div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-2 m-0">Analyzing Smart Contract</h3>
+                                        <p className="text-sm text-gray-600 mb-8 m-0 max-w-md">
+                                            AI is scanning your Solidity contract for vulnerabilities, risky patterns, and optimization opportunities.
+                                        </p>
+                                        <div className="w-full space-y-4 text-left">
+                                            {analysisLoadingSteps.map((step, index) => {
+                                                const isCompleted = completedStageCount > index;
+                                                const isActive = !isCompleted && index === completedStageCount;
+                                                const indicatorBase = 'w-10 h-10 flex items-center justify-center rounded-full border-2 font-semibold';
+                                                const textBase = 'flex-1';
+                                                const indicatorClass = isCompleted
+                                                    ? 'bg-emerald-100 text-emerald-600 border-emerald-200'
+                                                    : isActive
+                                                        ? 'bg-indigo-100 text-indigo-600 border-indigo-200 animate-pulse'
+                                                        : 'bg-gray-100 text-gray-400 border-gray-200';
+                                                const textClass = isCompleted
+                                                    ? 'text-gray-900'
+                                                    : isActive
+                                                        ? 'text-indigo-600'
+                                                        : 'text-gray-500';
+
+                                                return (
+                                                    <div key={step.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                                        <div className={`${indicatorBase} ${indicatorClass}`}>
+                                                            {isCompleted ? '✓' : index + 1}
+                                                        </div>
+                                                        <div className={`${textBase}`}>
+                                                            <p className={`m-0 text-sm font-semibold ${textClass}`}>{step.title}</p>
+                                                            <p className="m-0 mt-1 text-xs text-gray-500">{step.description}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {currentStep === 3 && (
+                            <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md text-center">
+                                <h3 className="m-0 mb-2 text-xl text-green-500">Analysis Complete!</h3>
+                                <p className="m-0 mb-8 text-gray-500">Your smart contract has been successfully analyzed. Review the results below.</p>
+                                <div className="bg-gray-100 rounded-lg p-6 mb-8">
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-semibold text-gray-800">Contract Name:</span>
+                                        <span className="text-gray-500">{contractName}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-semibold text-gray-800">Files Analyzed:</span>
+                                        <span className="text-gray-500">{uploadedFiles.length}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-semibold text-gray-800">Risk Level:</span>
+                                        <span className="text-yellow-500 font-semibold">Medium</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                                        <span className="font-semibold text-gray-800">Vulnerabilities Found:</span>
+                                        <span className="text-gray-500">3</span>
+                                    </div>
+                                </div>
+                                <button
+                                    className="bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 px-8 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                                    onClick={() => setCurrentStep(4)}
+                                >
+                                    View Assessment
+                                </button>
+                            </div>
+                        )}
+
+                        {currentStep === 4 && (
+                            <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md text-center">
+                                <h3 className="m-0 mb-2 text-xl text-gray-800">Security Assessment</h3>
+                                <div className="py-8">
+                                    <div className="w-20 h-20 bg-green-500 text-white text-3xl rounded-full flex items-center justify-center mx-auto mb-6">✓</div>
+                                    <h4 className="m-0 mb-2 text-xl text-gray-800">Audit Complete</h4>
+                                    <p className="m-0 mb-8 text-gray-500">Your smart contract audit has been completed and saved to your dashboard.</p>
+                                    <button
+                                        className="bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 px-8 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                                        onClick={() => navigate('/audits')}
+                                    >
+                                        View in Dashboard
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 };
 
 export default AuditSolidityContract;
 
-function setFailedStageIndex(arg0: null) {
-    throw new Error('Function not implemented.');
-}

@@ -6,12 +6,13 @@ import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import { Bell, Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical } from 'lucide-react';
+import { Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
+import ManagerNavbar from '../../../components/ManagerNavbar';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -309,31 +310,7 @@ const Home = observer(() => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-sm font-medium">M</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">"Hi, Manager"</h1>
-              <p className="text-sm text-gray-500">How are you today?</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Bell className="w-5 h-5 text-gray-600" />
-            </button>
-            <button 
-              onClick={() => fetchTransactionHistory({ limit: 10, offset: 0 })}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <RefreshCw className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <ManagerNavbar />
 
       <div className="max-w-6xl mx-auto px-6 py-6">
         {/* Connected Wallet Card */}

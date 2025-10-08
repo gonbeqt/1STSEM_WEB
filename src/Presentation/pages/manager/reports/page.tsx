@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ManagerNavbar from '../../../components/ManagerNavbar';
 
 interface Period {
   id: string;
@@ -205,6 +206,7 @@ const Reports: React.FC = () => {
   return (
     <div className="flex flex-col w-full h-screen bg-white font-sans p-6 border border-gray-200 rounded-xl shadow-md overflow-y-auto space-y-8 md:p-4 sm:p-3">
       <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight md:text-2xl sm:text-xl">Reports</h1>
+      <ManagerNavbar />
 
       {/* Report Categories */}
       <div className="flex flex-wrap gap-3 mb-6 md:flex-row">

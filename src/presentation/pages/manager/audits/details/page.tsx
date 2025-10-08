@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuditDetailsViewModel } from '../../../../hooks/useAuditDetailsViewModel';
 import SideNavbar from '../../../../components/SideNavbar';
+import ManagerNavbar from '../../../../components/ManagerNavbar';
 
 const AuditDetailsPage = () => {
     const { auditId } = useParams<{ auditId: string }>();
@@ -19,9 +20,11 @@ const AuditDetailsPage = () => {
     }
 
     return (
-        <div className="flex">
+        <div className="flex min-h-screen bg-gray-100">
             <SideNavbar />
-            <main className="flex-1 p-8">
+            <div className="flex-1 flex flex-col">
+                <ManagerNavbar />
+                <main className="flex-1 p-8 overflow-y-auto">
                 <header className="flex justify-between items-center mb-8">
                     <h1 className="m-0 text-2xl font-bold">{audit.contract_name}</h1>
                     <span className={`px-2 py-1 rounded-full text-sm font-semibold text-white bg-${audit.status.toLowerCase()}`}>
@@ -65,7 +68,8 @@ const AuditDetailsPage = () => {
                         </div>
                     ))}
                 </section>
-            </main>
+                </main>
+            </div>
         </div>
     );
 };

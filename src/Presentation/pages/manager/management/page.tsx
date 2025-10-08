@@ -6,7 +6,8 @@ import EmployeeDetailModal from './EmployeeDetailModal/EmployeeDetailModal';
 import { container } from '../../../../di/container';
 import { useEmployeeViewModel } from '../../../../domain/viewmodel/EmployeeViewModel';
 import { Employee as ApiEmployee, AddEmployeeResponse } from '../../../../domain/repositories/EmployeeRepository';
-
+import ManagerNavbar from '../../../components/ManagerNavbar';
+ 
 interface DetailedEmployee {
   id: string;
   fullName: string;
@@ -149,7 +150,9 @@ const EmployeeManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full rounded-xl p-6 bg-gray-100 animate-slideIn text-gray-900 border border-gray-200">
+    <div className="w-full h-full rounded-xl bg-gray-100 animate-slideIn text-gray-900 border border-gray-200">
+            <ManagerNavbar />
+      
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">

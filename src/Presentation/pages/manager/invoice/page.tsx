@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
- import EthereumIcon from '../../../components/icons/EthereumIcon';
- 
+import ManagerNavbar from '../../../components/ManagerNavbar';
+
 import { useInvoices } from '../../../hooks/useInvoices';
 import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
 
 const ManagerInvoicePage: React.FC = () => {
   const userData = localStorage.getItem('user');
-      const user = userData ? JSON.parse(userData) : null; 
-      const { invoices, loading, error, reloadInvoices } = useInvoices(user?.id);
+  const user = userData ? JSON.parse(userData) : null;
+  const { invoices, loading, error, reloadInvoices } = useInvoices(user?.id);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [displayedInvoices, setDisplayedInvoices] = useState<Invoice[]>([]);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -24,7 +24,8 @@ const ManagerInvoicePage: React.FC = () => {
 
   useEffect(() => {
     reloadInvoices();
-  }, []); // Remove reloadInvoices from dependencies to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally omit reloadInvoices from deps to avoid loop
 
   useEffect(() => {
     if (!invoices) return;
@@ -70,44 +71,40 @@ const ManagerInvoicePage: React.FC = () => {
   };
 
   const handleCreateInvoice = () => {
-    // e.g., navigate('/invoices/create');
+    // Placeholder for navigation or modal trigger
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col w-full min-h-screen bg-gray-100 font-sans p-6 gap-6 md:p-4 sm:p-3 xs:p-2">
+  const renderContent = () => {
+    if (loading) {
+      return (
         <div className="bg-white rounded-2xl shadow-md border border-gray-200">
           <div className="flex flex-col items-center justify-center p-16 min-h-[400px] text-center">
             <div className="w-12 h-12 border-4 border-gray-100 border-t-purple-500 rounded-full animate-spin mb-6"></div>
             <p className="text-gray-500 text-base font-medium">Loading invoices...</p>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (error) {
-    return (
-      <div className="flex flex-col w-full min-h-screen bg-gray-100 font-sans p-6 gap-6 md:p-4 sm:p-3 xs:p-2">
+    if (error) {
+      return (
         <div className="bg-white rounded-2xl shadow-md border border-gray-200">
           <div className="flex flex-col items-center justify-center p-16 min-h-[400px] text-center">
             <AlertCircle size={48} className="text-red-500 mb-6" />
             <h3 className="text-xl font-semibold text-gray-800 mb-3">Something went wrong</h3>
             <p className="text-gray-500 text-sm mb-6 max-w-md">Error: {error}</p>
-            <button 
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-6 py-3 rounded-lg text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2" 
+            <button
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-6 py-3 rounded-lg text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
               onClick={reloadInvoices}
             >
               Try Again
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  return (
-    <div className="flex flex-col w-full min-h-screen bg-gray-100 font-sans p-6 gap-6 md:p-4 sm:p-3 xs:p-2">
+    return (
       <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
         {/* Header */}
         <div className="p-8 pb-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-700 text-white">
@@ -151,7 +148,7 @@ const ManagerInvoicePage: React.FC = () => {
                 }
               </p>
               {!searchTerm && (
-                <button 
+                <button
                   className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-6 py-3 rounded-xl text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
                   onClick={handleCreateInvoice}
                 >
@@ -162,15 +159,15 @@ const ManagerInvoicePage: React.FC = () => {
             </div>
           ) : (
             displayedInvoices.map((invoice: Invoice) => (
-              <div 
-                key={invoice._id} 
+              <div
+                key={invoice._id}
                 className="relative border-2 border-gray-100 rounded-2xl p-6 mb-4 bg-white cursor-pointer transition-all hover:border-indigo-100 hover:shadow-2xl hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-[-2px] animate-fadeIn before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-indigo-500 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                 tabIndex={0}
               >
                 <div className="flex justify-between items-start mb-5 gap-6 sm:flex-col sm:gap-4 sm:mb-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-bold text-gray-900 m-0 mb-3 leading-tight break-words sm:text-base hover:text-purple-500 transition-colors">
-                      {invoice.client_name || `Client for Invoice ${invoice.client_name}`}
+                      {invoice.client_name || `Client for Invoice ${invoice.invoice_id}`}
                     </h3>
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[13px] text-purple-500 font-semibold uppercase tracking-wide">{invoice.invoice_id}</span>
@@ -192,7 +189,7 @@ const ManagerInvoicePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-5 py-2.5 rounded-lg text-[13px] font-semibold uppercase tracking-wide hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2 sm:w-full sm:mt-3 sm:py-3"
                   onClick={() => handleViewDetails(invoice._id)}
                 >
@@ -203,17 +200,27 @@ const ManagerInvoicePage: React.FC = () => {
           )}
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-100">
+      <ManagerNavbar />
+
+      <div className="flex flex-col w-full font-sans p-6 gap-6 md:p-4 sm:p-3 xs:p-2">
+        {renderContent()}
+      </div>
 
       {selectedInvoiceId && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={handleCloseModal}
         >
-          <div 
+          <div
             className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
               onClick={handleCloseModal}
             >
