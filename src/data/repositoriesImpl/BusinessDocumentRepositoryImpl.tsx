@@ -2,10 +2,18 @@ import { BusinessDocument } from "../../domain/entities/BusinessDocumentEntities
 import { BusinessDocumentRepository } from "../../domain/repositories/BusinessDocumentRepository";
 
 export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepository {
+    private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
+
+    private getAuthHeader(): HeadersInit {
+        const token = localStorage.getItem('token');
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
     
     async uploadBusinessDocuments(documents: BusinessDocument): Promise<any> {
         const token = localStorage.getItem('token');
-        const API_URL = process.env.REACT_APP_API_BASE_URL;
+        if (!token) {
+            throw new Error('Not authenticated. Please log in to upload documents.');
+        }
 
         // Upload each document individually using the new compliance endpoint
         const uploadPromises = [];
@@ -17,12 +25,10 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             dtiFormData.append('document_type', 'business_registration');
             
             uploadPromises.push(
-                fetch(`${API_URL}/documents/submit/`, {
+                fetch(`${this.API_URL}/documents/submit/`, {
                     method: 'POST',
                     body: dtiFormData,
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: this.getAuthHeader()
                 })
             );
         }
@@ -34,12 +40,10 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             form2303Data.append('document_type', 'tax_id');
             
             uploadPromises.push(
-                fetch(`${API_URL}/documents/submit/`, {
+                fetch(`${this.API_URL}/documents/submit/`, {
                     method: 'POST',
                     body: form2303Data,
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: this.getAuthHeader()
                 })
             );
         }
@@ -51,12 +55,10 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             managerIdData.append('document_type', 'company_license');
             
             uploadPromises.push(
-                fetch(`${API_URL}/documents/submit/`, {
+                fetch(`${this.API_URL}/documents/submit/`, {
                     method: 'POST',
                     body: managerIdData,
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: this.getAuthHeader()
                 })
             );
         }
@@ -77,20 +79,22 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
                 results: results
             };
         } catch (error: any) {
-            throw new Error(error.message || 'Failed to upload business documents');
+            throw new Error(error?.message || 'Failed to upload business documents');
         }
     }
 
 
     async getUserDocuments(): Promise<any> {
         const token = localStorage.getItem('token');
-        const API_URL = process.env.REACT_APP_API_BASE_URL;
+        if (!token) {
+            throw new Error('Not authenticated. Please log in to view your documents.');
+        }
 
-        const response = await fetch(`${API_URL}/documents/my-documents/`, {
+        const response = await fetch(`${this.API_URL}/documents/my-documents/`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                ...this.getAuthHeader(),
+                'Accept': 'application/json'
             }
         });
 
@@ -105,13 +109,15 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
 
     async submitDocumentsForApproval(): Promise<any> {
         const token = localStorage.getItem('token');
-        const API_URL = process.env.REACT_APP_API_BASE_URL;
+        if (!token) {
+            throw new Error('Not authenticated. Please log in to submit documents for approval.');
+        }
 
-        const response = await fetch(`${API_URL}/documents/submit/`, {
+        const response = await fetch(`${this.API_URL}/documents/submit/`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                ...this.getAuthHeader(),
+                'Accept': 'application/json'
             }
         });
 

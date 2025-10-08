@@ -1,12 +1,72 @@
-import React, { useState, useRef } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideNavbar from '../../../components/SideNavbar';
+import { container } from '../../../../di/container';
+import { AuditContractResponse, UploadContractResponse, Vulnerability } from '../../../../domain/entities/ContractEntities';
 
 interface UploadedFile {
     file: File;
     name: string;
     size: string;
 }
+
+type AnalysisStage = 'idle' | 'uploading' | 'auditing' | 'complete' | 'failed';
+
+const dedupeVulnerabilities = (vulnerabilities?: Vulnerability[]) => {
+    if (!vulnerabilities || vulnerabilities.length === 0) {
+        return [];
+    }
+
+    const seen = new Set<string>();
+    return vulnerabilities.filter((vulnerability) => {
+        const key = JSON.stringify({
+            title: vulnerability.title?.trim() || '',
+            severity: vulnerability.severity?.toString().trim().toUpperCase() || '',
+            description: vulnerability.description?.trim() || ''
+        });
+
+        if (seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+};
+
+const getSeverityBadgeClass = (severity?: string) => {
+    const normalized = severity?.toUpperCase();
+
+    switch (normalized) {
+        case 'CRITICAL':
+            return 'bg-red-100 text-red-700 border-red-200';
+        case 'HIGH':
+            return 'bg-orange-100 text-orange-700 border-orange-200';
+        case 'MEDIUM':
+            return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+        case 'LOW':
+            return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        default:
+            return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+};
+
+const getRiskBadgeClass = (risk?: string) => {
+    const normalized = risk?.toUpperCase();
+
+    switch (normalized) {
+        case 'CRITICAL':
+            return 'text-red-600';
+        case 'HIGH':
+            return 'text-orange-600';
+        case 'MEDIUM':
+            return 'text-yellow-600';
+        case 'LOW':
+            return 'text-emerald-600';
+        default:
+            return 'text-gray-600';
+    }
+};
 
 const AuditSolidityContract: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -15,6 +75,19 @@ const AuditSolidityContract: React.FC = () => {
     const [isDragActive, setIsDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
+    const auditViewModel = useMemo(() => container.auditContractViewModel(), []);
+
+    const [analysisStage, setAnalysisStage] = useState<AnalysisStage>('idle');
+    const [completedStageCount, setCompletedStageCount] = useState(0);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisError, setAnalysisError] = useState<string | null>(null);
+    const [uploadResponse, setUploadResponse] = useState<UploadContractResponse | null>(null);
+    const [auditResponse, setAuditResponse] = useState<AuditContractResponse | null>(null);
+
+    const uniqueVulnerabilities = useMemo(
+        () => dedupeVulnerabilities(auditResponse?.vulnerabilities),
+        [auditResponse]
+    );
 
     const steps = [
         { number: 1, title: 'Contract Set up', active: currentStep === 1 },
@@ -22,6 +95,30 @@ const AuditSolidityContract: React.FC = () => {
         { number: 3, title: 'Audit Result', active: currentStep === 3 },
         { number: 4, title: 'Assessment', active: currentStep === 4 },
     ];
+
+    const analysisLoadingSteps = [
+        {
+            title: 'Uploading contract file',
+            description: 'Preparing your Solidity contract for scanning.'
+        },
+        {
+            title: 'Running AI vulnerability scan',
+            description: 'Identifying risky patterns and misconfigurations.'
+        },
+        {
+            title: 'Generating audit report',
+            description: 'Summarizing findings and recommended fixes.'
+        }
+    ];
+
+    const resetAnalysisState = () => {
+        setAnalysisStage('idle');
+        setCompletedStageCount(0);
+        setIsAnalyzing(false);
+        setAnalysisError(null);
+        setUploadResponse(null);
+        setAuditResponse(null);
+    };
 
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes';
@@ -52,17 +149,28 @@ const AuditSolidityContract: React.FC = () => {
     };
 
     const handleFiles = (files: FileList) => {
-        const validFiles = Array.from(files).filter(file => 
-            file.name.endsWith('.sol') && file.size <= 1024 * 1024 // 1MB limit
+        const validFiles = Array.from(files).filter(file =>
+            file.name.toLowerCase().endsWith('.sol') && file.size <= 1024 * 1024 // 1MB limit
         );
 
-        const newFiles: UploadedFile[] = validFiles.map(file => ({
-            file,
-            name: file.name,
-            size: formatFileSize(file.size)
-        }));
+        if (validFiles.length === 0) {
+            return;
+        }
 
-        setUploadedFiles(prev => [...prev, ...newFiles]);
+        const primaryFile = validFiles[0];
+        const preparedFile: UploadedFile = {
+            file: primaryFile,
+            name: primaryFile.name,
+            size: formatFileSize(primaryFile.size)
+        };
+
+        setUploadedFiles([preparedFile]);
+        resetAnalysisState();
+
+        if (!contractName.trim()) {
+            const suggestedName = primaryFile.name.replace(/\.[^.]+$/, '');
+            setContractName(suggestedName);
+        }
     };
 
     const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,25 +181,97 @@ const AuditSolidityContract: React.FC = () => {
 
     const removeFile = (index: number) => {
         setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+        resetAnalysisState();
+        setCurrentStep(1);
     };
 
     const handleStartAnalysis = async () => {
-        if (!contractName.trim() || uploadedFiles.length === 0) {
-            alert('Please provide a contract name and upload at least one file.');
+        if (isAnalyzing) {
             return;
         }
 
-        // setIsAnalyzing(true);
-        setCurrentStep(2);
+        if (!contractName.trim()) {
+            alert('Please provide a contract name before starting the analysis.');
+            return;
+        }
 
-        // Simulate analysis process
-        setTimeout(() => {
+        if (uploadedFiles.length === 0) {
+            alert('Please upload a Solidity contract file to analyze.');
+            return;
+        }
+
+        const activeFile = uploadedFiles[0]?.file;
+        if (!activeFile) {
+            alert('The selected file could not be read. Please upload it again.');
+            return;
+        }
+
+        setCurrentStep(2);
+        setAnalysisError(null);
+        setIsAnalyzing(true);
+        setAnalysisStage('uploading');
+        setCompletedStageCount(0);
+        setFailedStageIndex(null);
+        setUploadResponse(null);
+        setAuditResponse(null);
+
+        let completedStages = 0;
+
+        try {
+            const uploadRes: UploadContractResponse = await auditViewModel.uploadFile(activeFile);
+            setUploadResponse(uploadRes);
+
+            if (!uploadRes.success || !uploadRes.contract_data) {
+                throw new Error(uploadRes.error || 'Failed to upload the contract file.');
+            }
+
+            completedStages = 1;
+            setCompletedStageCount(completedStages);
+            setAnalysisStage('auditing');
+
+            const fallbackName = contractName.trim() || uploadRes.contract_data.suggested_name || activeFile.name.replace(/\.[^.]+$/, '');
+            const auditRes: AuditContractResponse = await auditViewModel.auditContract({
+                contract_code: uploadRes.contract_data.contract_code,
+                contract_name: fallbackName,
+                upload_method: uploadRes.contract_data.upload_method || 'file',
+                filename: uploadRes.contract_data.filename || activeFile.name,
+                file_size: uploadRes.contract_data.file_size ?? activeFile.size
+            });
+
+            setAuditResponse(auditRes);
+
+            if (!auditRes.success || !auditRes.audit) {
+                throw new Error(auditRes.error || 'AI analysis did not return a valid response.');
+            }
+
+            completedStages = analysisLoadingSteps.length;
+            setCompletedStageCount(completedStages);
+            setAnalysisStage('complete');
             setCurrentStep(3);
-            // setIsAnalyzing(false);
-        }, 3000);
+        } catch (error: any) {
+            console.error('Error during AI analysis:', error);
+            const message = error instanceof Error ? error.message : 'Failed to complete AI analysis.';
+            setAnalysisError(message);
+            setAnalysisStage('failed');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleRetryAnalysis = () => {
+        setAnalysisStage('idle');
+        setCompletedStageCount(0);
+        setAnalysisError(null);
+        setAuditResponse(null);
+        setUploadResponse(null);
+        setCurrentStep(1);
     };
 
     const handleClose = () => {
+        resetAnalysisState();
+        setUploadedFiles([]);
+        setContractName('');
+        setCurrentStep(1);
         navigate('/audits');
     };
 
@@ -197,20 +377,78 @@ const AuditSolidityContract: React.FC = () => {
                             <button 
                                 className="w-full bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none py-3 rounded-lg text-base font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                 onClick={handleStartAnalysis}
-                                disabled={!contractName.trim() || uploadedFiles.length === 0}
+                                disabled={isAnalyzing || !contractName.trim() || uploadedFiles.length === 0}
                             >
-                                Start Analysis
+                                {isAnalyzing ? 'Preparing...' : 'Start Analysis'}
                             </button>
                         </div>
                     )}
 
                     {currentStep === 2 && (
-                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md text-center">
-                            <div className="py-8">
-                                <div className="w-16 h-16 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6"></div>
-                                <h3 className="m-0 mb-2 text-xl text-gray-800">Analyzing Smart Contract</h3>
-                                <p className="m-0 text-gray-500">AI is examining your contract for potential vulnerabilities...</p>
-                            </div>
+                        <div className="bg-white rounded-xl p-6 text-gray-800 shadow-md">
+                            {analysisStage === 'failed' ? (
+                                <div className="flex flex-col items-center text-center py-8">
+                                    <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl font-bold mb-6">
+                                        !
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-3 m-0">AI Analysis Failed</h3>
+                                    <p className="text-sm text-gray-600 mb-6 m-0 max-w-sm">
+                                        {analysisError || 'Something went wrong while processing your contract. Please review the file and try again.'}
+                                    </p>
+                                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
+                                        <button
+                                            className="px-5 py-2 rounded-lg font-semibold bg-gradient-to-br from-indigo-500 to-purple-700 text-white border-none shadow-sm hover:shadow-md transition"
+                                            onClick={handleRetryAnalysis}
+                                        >
+                                            Try Again
+                                        </button>
+                                        <button
+                                            className="px-5 py-2 rounded-lg font-semibold text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition"
+                                            onClick={() => setCurrentStep(1)}
+                                        >
+                                            Back to Setup
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center text-center py-4">
+                                    <div className="w-16 h-16 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6"></div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2 m-0">Analyzing Smart Contract</h3>
+                                    <p className="text-sm text-gray-600 mb-8 m-0 max-w-md">
+                                        AI is scanning your Solidity contract for vulnerabilities, risky patterns, and optimization opportunities.
+                                    </p>
+                                    <div className="w-full space-y-4 text-left">
+                                        {analysisLoadingSteps.map((step, index) => {
+                                            const isCompleted = completedStageCount > index;
+                                            const isActive = !isCompleted && index === completedStageCount;
+                                            const indicatorBase = 'w-10 h-10 flex items-center justify-center rounded-full border-2 font-semibold';
+                                            const textBase = 'flex-1';
+                                            const indicatorClass = isCompleted
+                                                ? 'bg-emerald-100 text-emerald-600 border-emerald-200'
+                                                : isActive
+                                                    ? 'bg-indigo-100 text-indigo-600 border-indigo-200 animate-pulse'
+                                                    : 'bg-gray-100 text-gray-400 border-gray-200';
+                                            const textClass = isCompleted
+                                                ? 'text-gray-900'
+                                                : isActive
+                                                    ? 'text-indigo-600'
+                                                    : 'text-gray-500';
+
+                                            return (
+                                                <div key={step.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                                    <div className={`${indicatorBase} ${indicatorClass}`}>
+                                                        {isCompleted ? '✓' : index + 1}
+                                                    </div>
+                                                    <div className={`${textBase}`}>
+                                                        <p className={`m-0 text-sm font-semibold ${textClass}`}>{step.title}</p>
+                                                        <p className="m-0 mt-1 text-xs text-gray-500">{step.description}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -268,3 +506,7 @@ const AuditSolidityContract: React.FC = () => {
 };
 
 export default AuditSolidityContract;
+
+function setFailedStageIndex(arg0: null) {
+    throw new Error('Function not implemented.');
+}

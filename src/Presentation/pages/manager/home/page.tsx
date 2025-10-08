@@ -50,8 +50,13 @@ const Home = observer(() => {
     transactions, 
     isLoading: isLoadingTransactions, 
     error: transactionError, 
-    fetchTransactionHistory
+    fetchTransactionHistory,
+    pagination
   } = useEnhancedTransactionHistory();
+
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
+  const [transactionSearch, setTransactionSearch] = useState('');
   
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -118,6 +123,8 @@ const Home = observer(() => {
       icon: getTransactionIcon(transaction),
       hash: transaction.transaction_hash,
       token_symbol: 'ETH',
+      from_address: transaction.from_address,
+      to_address: transaction.to_address,
       // Enhanced data from new backend
       counterparty_name: transaction.counterparty_name,
       counterparty_role: transaction.counterparty_role,
@@ -149,13 +156,39 @@ const Home = observer(() => {
     }
   }, [isWalletConnected, fetchWalletBalance]);
 
-  // Fetch all transactions for manager (no category filtering)
+  // Fetch the 5 most recent transactions for manager on load
   useEffect(() => {
     fetchTransactionHistory({ 
-      limit: 10,
+      limit: 5,
       offset: 0
     });
-  }, []); // Remove fetchTransactionHistory from dependencies to prevent infinite loop
+  }, []); // intentionally run once on mount
+
+  const fetchAllTransactions = async () => {
+    // Determine a sensible limit: use pagination.total if available, otherwise a large fallback
+    const limit = pagination?.total && pagination.total > 0 ? pagination.total : 10000;
+    await fetchTransactionHistory({ limit, offset: 0 });
+  };
+
+  const openTransactionsModal = async () => {
+    if (isLoadingTransactions) return;
+    setIsTransactionsModalOpen(true);
+    try {
+      await fetchAllTransactions();
+    } catch (err) {
+      console.error('Failed to load all transactions for modal:', err);
+    }
+  };
+
+  const closeTransactionsModal = async () => {
+    setIsTransactionsModalOpen(false);
+    // restore recent 5 transactions on close
+    try {
+      await fetchTransactionHistory({ limit: 5, offset: 0 });
+    } catch (err) {
+      console.error('Failed to restore recent transactions:', err);
+    }
+  };
 
   const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
@@ -486,14 +519,14 @@ const Home = observer(() => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-              <p className="text-sm text-gray-500">Showing all transactions</p>
+              <p className="text-sm text-gray-500">{showAllTransactions ? 'Showing all transactions' : 'Showing 5 most recent'}</p>
             </div>
             <button 
-              onClick={() => fetchTransactionHistory({ limit: 10, offset: 0 })}
+              onClick={openTransactionsModal}
               className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
             >
               <RefreshCw className="w-4 h-4" />
-              See All →
+              View all
             </button>
           </div>
 
@@ -513,11 +546,12 @@ const Home = observer(() => {
                 <p className="text-xs text-gray-500 mt-1">Total transactions loaded: {transactions.length}</p>
               </div>
             ) : (
-              transactionData.map((tx, index) => (
+              // Limit to 5 when not showing all
+              transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
                 <div 
                   key={index} 
                   className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${
-                    index !== transactionData.length - 1 ? 'border-b border-gray-100' : ''
+                    index !== arr.length - 1 ? 'border-b border-gray-100' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -542,6 +576,94 @@ const Home = observer(() => {
             )}
           </div>
         </div>
+
+        {/* Transactions Modal */}
+        {isTransactionsModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-gray-100 gap-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold">All Transactions</h3>
+                  <p className="text-sm text-gray-500">Search by wallet address or hash</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={transactionSearch}
+                    onChange={(e) => setTransactionSearch(e.target.value)}
+                    placeholder="Search address or hash"
+                    className="px-3 py-2 border border-gray-200 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                  <button onClick={() => { setTransactionSearch(''); }} className="text-sm text-gray-500">Clear</button>
+                  <button onClick={closeTransactionsModal} className="text-sm text-gray-600 hover:text-gray-800">Close</button>
+                </div>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto">
+                {isLoadingTransactions ? (
+                  <div className="flex items-center gap-3 p-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                    <span className="text-sm text-gray-600">Loading transactions...</span>
+                  </div>
+                ) : transactionData.length === 0 ? (
+                  <div className="p-4">
+                    <p className="text-sm text-gray-600">No transactions found</p>
+                  </div>
+                ) : (
+                  // filter transactions by wallet address (from/to) when a search is provided
+                  transactions
+                    .filter((transaction: any) => {
+                      const q = transactionSearch.trim().toLowerCase();
+                      if (!q) return true;
+                      const from = (transaction.counterparty_name || transaction.transaction_hash || '').toString().toLowerCase();
+                      const to = (transaction.transaction_hash || '').toString().toLowerCase();
+                      const rawFrom = (transaction.from_address || '').toString().toLowerCase();
+                      const rawTo = (transaction.to_address || '').toString().toLowerCase();
+                      return from.includes(q) || to.includes(q) || rawFrom.includes(q) || rawTo.includes(q);
+                    })
+                    .map((transaction: any, idx: number) => {
+                      // Map to display format as in transactionData
+                      const displayAmount = typeof transaction.amount_eth === 'string' 
+                        ? parseFloat(transaction.amount_eth) || 0
+                        : Number(transaction.amount_eth) || 0;
+                      const tx = {
+                        name: getTransactionName(transaction),
+                        amount: displayAmount,
+                        type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
+                        date: formatTransactionDate(transaction.created_at),
+                        icon: getTransactionIcon(transaction),
+                        hash: transaction.transaction_hash,
+                        token_symbol: 'ETH',
+                        counterparty_name: transaction.counterparty_name,
+                        counterparty_role: transaction.counterparty_role,
+                        category: transaction.transaction_category,
+                        ai_analysis: transaction.ai_analysis,
+                        explorer_url: transaction.explorer_url
+                      };
+                      return (
+                        <div key={idx} className={`flex items-center justify-between p-4 border-b border-gray-100`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'}`}>
+                              {tx.icon}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{tx.name}</p>
+                              <p className="text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-semibold ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
+                              {tx.type === 'outflow' ? '-' : '+'}{(tx.amount || 0).toFixed(4)} {tx.token_symbol}
+                            </p>
+                            <p className="text-sm text-gray-500">{tx.date}</p>
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Revenue vs Expenses Section */}
         <div>

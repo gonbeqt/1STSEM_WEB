@@ -17,7 +17,8 @@ const CompliancePage: React.FC = observer(() => {
     const [managerId, setManagerId] = useState<File | null>(null);
 
 
-    const businessDocumentViewModel = container.businessDocumentViewModel();
+    // Memoize view model to keep a stable reference across renders
+    const [businessDocumentViewModel] = useState(() => container.businessDocumentViewModel());
     const {
         isLoading,
         error,
@@ -36,13 +37,14 @@ const CompliancePage: React.FC = observer(() => {
         } catch (error) {
             console.error('Error loading user documents:', error);
         }
-    }, [businessDocumentViewModel]);
+    }, []);
 
     // Load compliance status on component mount
     useEffect(() => {
         // Load user documents to show current status
         loadUserDocuments();
-    }, [loadUserDocuments]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -83,7 +85,6 @@ const CompliancePage: React.FC = observer(() => {
         }
     };
 
-
     const handleSubmitForApproval = async () => {
         try {
             await businessDocumentViewModel.submitDocumentsForApproval();
@@ -96,174 +97,169 @@ const CompliancePage: React.FC = observer(() => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto my-8 p-8 bg-gray-50 rounded-lg shadow-sm">
-            <h1 className="text-2xl text-gray-800 text-center mb-6">Compliance & Business Documents</h1>
-            
-            {/* Document Status Display */}
-            {userDocuments && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Document Status</h3>
-                    <p><strong>Documents Uploaded:</strong> {userDocuments.documents?.length || 0}</p>
-                    <p><strong>Submission Status:</strong> {userDocuments.documents_submitted ? 'Submitted' : 'Not Submitted'}</p>
-                    <p><strong>Approval Status:</strong> {userDocuments.admin_approval_status || 'pending'}</p>
-                    {userDocuments.submitted_at && (
-                        <p><strong>Submitted:</strong> {new Date(userDocuments.submitted_at).toLocaleDateString()}</p>
-                    )}
-                    {userDocuments.admin_approval_status === 'approved' && (
-                        <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded text-green-800">
-                            ✅ Your business documents have been approved. You cannot upload additional documents.
+        <div className="max-w-6xl mx-auto my-8 px-4">
+                    <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Compliance & Business Documents</h1>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Left: Status Card */}
+                        <div className="col-span-1">
+                            <div className="sticky top-8 bg-white border border-gray-100 rounded-lg shadow-sm p-6">
+                                <h3 className="text-lg font-semibold mb-3">Document Status</h3>
+
+                                {!userDocuments ? (
+                                    <p className="text-sm text-gray-500">No documents found. Upload required documents to proceed.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-600">Uploaded</span>
+                                            <span className="text-sm font-medium text-gray-900">{userDocuments.documents?.length || 0}</span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-600">Submission</span>
+                                            <span className={`text-sm font-medium ${userDocuments.documents_submitted ? 'text-yellow-600' : 'text-gray-700'}`}>
+                                                {userDocuments.documents_submitted ? 'Submitted' : 'Not Submitted'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-600">Approval</span>
+                                            <span className={`text-sm font-medium ${userDocuments.admin_approval_status === 'approved' ? 'text-green-600' : userDocuments.admin_approval_status === 'rejected' ? 'text-red-600' : 'text-gray-700'}`}>
+                                                {userDocuments.admin_approval_status || 'pending'}
+                                            </span>
+                                        </div>
+
+                                        {userDocuments.submitted_at && (
+                                            <div className="text-sm text-gray-500">Submitted: {new Date(userDocuments.submitted_at).toLocaleString()}</div>
+                                        )}
+
+                                        {userDocuments.admin_approval_status === 'approved' && (
+                                            <div className="mt-3 p-3 bg-green-50 border border-green-100 rounded text-green-800 text-sm">
+                                                ✅ Your business documents are approved. Uploading is disabled.
+                                            </div>
+                                        )}
+
+                                        {/* Action */}
+                                        {userDocuments.documents && userDocuments.documents.length > 0 && !userDocuments.documents_submitted && (
+                                            <button
+                                                onClick={handleSubmitForApproval}
+                                                disabled={isLoading}
+                                                className="mt-4 w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-60"
+                                            >
+                                                {isLoading ? 'Submitting...' : 'Submit for Approval'}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Uploaded documents list */}
+                            <div className="mt-4 bg-white border border-gray-100 rounded-lg shadow-sm p-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-3">Uploaded Documents</h4>
+                                {userDocuments && userDocuments.documents && userDocuments.documents.length > 0 ? (
+                                    <ul className="space-y-2">
+                                        {userDocuments.documents.map((doc: any, idx: number) => (
+                                            <li key={idx} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-600">DOC</div>
+                                                    <div>
+                                                        <div className="text-sm font-medium">{doc.name || doc.document_type || `Document ${idx + 1}`}</div>
+                                                        <div className="text-xs text-gray-500">{doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleString() : 'Uploaded'}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm font-medium text-gray-700">{doc.status || 'pending'}</div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-gray-500">No uploaded documents yet.</p>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
-            )}
 
-            {/* Error and Success Messages */}
-            {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                    <p>{error}</p>
-                    <button onClick={clearError} className="mt-2 text-red-600 underline">Dismiss</button>
-                </div>
-            )}
+                        {/* Right: Upload Form */}
+                        <div className="col-span-2">
+                            <div className="bg-white border border-gray-100 rounded-lg shadow-sm p-6">
+                                <h2 className="text-xl font-semibold mb-2">Upload Business Documents</h2>
+                                <p className="text-sm text-gray-500 mb-4">Upload the required documents below. Each file must be under 10MB.</p>
 
-            {successMessage && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                    <p>{successMessage}</p>
-                    <button onClick={clearSuccessMessage} className="mt-2 text-green-600 underline">Dismiss</button>
-                </div>
-            )}
+                                {error && (
+                                    <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded text-red-700">{error} <button onClick={clearError} className="ml-3 text-sm underline">Dismiss</button></div>
+                                )}
+                                {successMessage && (
+                                    <div className="mb-4 p-3 bg-green-50 border border-green-100 rounded text-green-700">{successMessage} <button onClick={clearSuccessMessage} className="ml-3 text-sm underline">Dismiss</button></div>
+                                )}
 
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessName} onChange={(e) => setBusinessName(e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessType} onChange={(e) => setBusinessType(e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessRegistrationNumber} onChange={(e) => setBusinessRegistrationNumber(e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Business Email</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessEmail} onChange={(e) => setBusinessEmail(e.target.value)} type="email" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Business Phone</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessPhone} onChange={(e) => setBusinessPhone(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                            <input className="w-full p-3 border border-gray-200 rounded" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} />
+                                        </div>
+                                    </div>
 
-            {/* Submit Documents for Approval */}
-            {userDocuments && userDocuments.documents && userDocuments.documents.length > 0 && !userDocuments.documents_submitted && (
-                <div className="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Submit Documents for Approval</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                        You have uploaded {userDocuments.documents.length} document(s). Submit them for admin approval.
-                    </p>
-                    <button
-                        onClick={handleSubmitForApproval}
-                        disabled={isLoading}
-                        className="bg-yellow-600 text-white py-2 px-4 rounded text-sm font-semibold hover:bg-yellow-700 disabled:opacity-50"
-                    >
-                        {isLoading ? 'Submitting...' : 'Submit for Approval'}
-                    </button>
-                </div>
-            )}
+                                    {/* File Inputs */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <label className="block p-3 border border-dashed rounded text-center cursor-pointer hover:bg-gray-50">
+                                            <div className="text-sm font-medium text-gray-700">DTI Business Registration</div>
+                                            <div className="text-xs text-gray-500 mt-2">PDF, JPG, PNG, DOC (Max 10MB)</div>
+                                            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="sr-only" id="dtiDocument" onChange={(e) => setDtiDocument(e.target.files ? e.target.files[0] : null)} />
+                                            {dtiDocument && <div className="mt-2 text-xs text-gray-600">Selected: {dtiDocument.name}</div>}
+                                        </label>
 
-            {/* Original Business Documents Form */}
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-                <h2 className="text-xl font-semibold mb-4">Upload Business Documents</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                    Upload all required business documents. Each document will be uploaded individually to the compliance system.
-                </p>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="businessName" className="block mb-2 text-gray-600 font-bold">Business Name:</label>
-                    <input
-                        type="text"
-                        id="businessName"
-                        value={businessName}
-                        onChange={(e) => setBusinessName(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
+                                        <label className="block p-3 border border-dashed rounded text-center cursor-pointer hover:bg-gray-50">
+                                            <div className="text-sm font-medium text-gray-700">BIR Form 2303</div>
+                                            <div className="text-xs text-gray-500 mt-2">PDF, JPG, PNG, DOC (Max 10MB)</div>
+                                            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="sr-only" id="form2303" onChange={(e) => setForm2303(e.target.files ? e.target.files[0] : null)} />
+                                            {form2303 && <div className="mt-2 text-xs text-gray-600">Selected: {form2303.name}</div>}
+                                        </label>
+
+                                        <label className="block p-3 border border-dashed rounded text-center cursor-pointer hover:bg-gray-50">
+                                            <div className="text-sm font-medium text-gray-700">Manager ID</div>
+                                            <div className="text-xs text-gray-500 mt-2">PDF, JPG, PNG, DOC (Max 10MB)</div>
+                                            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="sr-only" id="managerId" onChange={(e) => setManagerId(e.target.files ? e.target.files[0] : null)} />
+                                            {managerId && <div className="mt-2 text-xs text-gray-600">Selected: {managerId.name}</div>}
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center gap-3 pt-4">
+                                        <button type="submit" disabled={isLoading || (userDocuments && userDocuments.admin_approval_status === 'approved')} className="inline-flex items-center gap-2 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:opacity-50">
+                                            {isLoading ? 'Uploading...' : 'Upload Documents'}
+                                        </button>
+
+                                        <button type="button" onClick={() => { setBusinessName(''); setBusinessType(''); setBusinessRegistrationNumber(''); setBusinessAddress(''); setBusinessPhone(''); setBusinessEmail(''); setDtiDocument(null); setForm2303(null); setManagerId(null); }} className="py-2 px-4 border rounded-md bg-white hover:bg-gray-50">Clear</button>
+
+                                        {userDocuments && userDocuments.admin_approval_status === 'approved' && (
+                                            <div className="ml-auto text-sm text-green-700 font-medium">Approved ✓</div>
+                                        )}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="businessType" className="block mb-2 text-gray-600 font-bold">Business Type:</label>
-                    <input
-                        type="text"
-                        id="businessType"
-                        value={businessType}
-                        onChange={(e) => setBusinessType(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="businessRegistrationNumber" className="block mb-2 text-gray-600 font-bold">Business Registration Number:</label>
-                    <input
-                        type="text"
-                        id="businessRegistrationNumber"
-                        value={businessRegistrationNumber}
-                        onChange={(e) => setBusinessRegistrationNumber(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="businessAddress" className="block mb-2 text-gray-600 font-bold">Business Address:</label>
-                    <input
-                        type="text"
-                        id="businessAddress"
-                        value={businessAddress}
-                        onChange={(e) => setBusinessAddress(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="businessPhone" className="block mb-2 text-gray-600 font-bold">Business Phone Number:</label>
-                    <input
-                        type="text"
-                        id="businessPhone"
-                        value={businessPhone}
-                        onChange={(e) => setBusinessPhone(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="businessEmail" className="block mb-2 text-gray-600 font-bold">Business Email Address:</label>
-                    <input
-                        type="email"
-                        id="businessEmail"
-                        value={businessEmail}
-                        onChange={(e) => setBusinessEmail(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="dtiDocument" className="block mb-2 text-gray-600 font-bold">DTI Business Registration Document (PDF, JPG, JPEG, PNG, DOC, DOCX - Max 10MB):</label>
-                    <input
-                        type="file"
-                        id="dtiDocument"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        onChange={(e) => setDtiDocument(e.target.files ? e.target.files[0] : null)}
-                        required
-                        className="w-full p-2 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="form2303" className="block mb-2 text-gray-600 font-bold">BIR Form 2303 (PDF, JPG, JPEG, PNG, DOC, DOCX - Max 10MB):</label>
-                    <input
-                        type="file"
-                        id="form2303"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        onChange={(e) => setForm2303(e.target.files ? e.target.files[0] : null)}
-                        required
-                        className="w-full p-2 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="managerId" className="block mb-2 text-gray-600 font-bold">Manager's Government ID (PDF, JPG, JPEG, PNG - Max 10MB):</label>
-                    <input
-                        type="file"
-                        id="managerId"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setManagerId(e.target.files ? e.target.files[0] : null)}
-                        required
-                        className="w-full p-2 border border-gray-300 rounded text-base"
-                    />
-                </div>
-                <button 
-                    type="submit" 
-                    disabled={isLoading}
-                    className="w-full p-4 bg-blue-600 text-white border-none rounded text-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                    {isLoading ? 'Uploading Documents...' : 'Upload All Business Documents'}
-                </button>
-            </form>
-            </div>
-        </div>
-    );
+
+            );
 });
 
 export default CompliancePage;

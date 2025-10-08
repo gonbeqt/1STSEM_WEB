@@ -397,8 +397,9 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 return (
                     <div className="flex flex-col items-center justify-center text-center min-h-[300px]">
                         <div className="max-w-md">
-                            <div className="mb-8">
-                                <div className="w-15 h-15 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+                            <div className="mb-8" role="status" aria-live="polite" aria-busy={isLoading}>
+                                <div className="w-16 h-16 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto" />
+                                <span className="sr-only">Analyzing contract…</span>
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-3 m-0">Analyzing Contract with AI</h3>
