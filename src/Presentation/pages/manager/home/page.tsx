@@ -6,7 +6,7 @@ import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import { Bell, Loader2, Wifi, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical } from 'lucide-react';
+import { Bell, Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
@@ -387,7 +387,7 @@ const Home = observer(() => {
                           </>
                         ) : (
                           <>
-                            <Wifi className="w-4 h-4" />
+                          
                             <span className="text-sm font-medium">Disconnect Wallet</span>
                           </>
                         )}
@@ -416,8 +416,7 @@ const Home = observer(() => {
               <div className="mb-4">
                 <div className="inline-flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-3">
                   <div className="flex items-center gap-1.5">
-                    <Wifi className="w-3.5 h-3.5 text-green-400" />
-                    <span className="text-xs font-medium text-white">Connected Wallet</span>
+                    <span className="text-xs font-medium text-green">Connected Wallet</span>
                   </div>
                 </div>
                 
@@ -442,7 +441,10 @@ const Home = observer(() => {
                     <span className="text-2xl font-bold">Loading...</span>
                   </div>
                 ) : ethBalance !== null ? (
-                  <h2 className="text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
+                  <div className="flex items-center gap-3">
+                    <EthereumIcon className="w-8 h-8 text-white" />
+                    <h2 className="text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
+                  </div>
                 ) : (
                   <h2 className="text-5xl font-bold">0.000000 ETH</h2>
                 )}

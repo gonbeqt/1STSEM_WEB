@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
+ import EthereumIcon from '../../../components/icons/EthereumIcon';
  
 import { useInvoices } from '../../../hooks/useInvoices';
 import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
 
 const ManagerInvoicePage: React.FC = () => {
-  const dummyUserId = "manager123";
-  const { invoices, loading, error, reloadInvoices } = useInvoices(dummyUserId);
-
+  const userData = localStorage.getItem('user');
+      const user = userData ? JSON.parse(userData) : null; 
+      const { invoices, loading, error, reloadInvoices } = useInvoices(user?.id);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
+  const [displayedInvoices, setDisplayedInvoices] = useState<Invoice[]>([]);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
 
   const handleViewDetails = (invoice_id: string) => {
@@ -29,22 +29,17 @@ const ManagerInvoicePage: React.FC = () => {
   useEffect(() => {
     if (!invoices) return;
 
-    let filtered = invoices;
-
     if (searchTerm) {
-      filtered = filtered.filter(invoice =>
+      const filtered = invoices.filter(invoice =>
         (invoice.client_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (invoice._id?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (invoice.description?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
+      setDisplayedInvoices(filtered);
+    } else {
+      setDisplayedInvoices(invoices);
     }
-
-    if (activeTab !== 'all') {
-      filtered = filtered.filter(invoice => invoice.status === activeTab);
-    }
-
-    setFilteredInvoices(filtered);
-  }, [invoices, searchTerm, activeTab]);
+  }, [invoices, searchTerm]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -72,12 +67,6 @@ const ManagerInvoicePage: React.FC = () => {
       month: 'short',
       day: 'numeric'
     });
-  };
-
-  const getTabCount = (status: string): number => {
-    if (!invoices) return 0;
-    if (status === 'all') return invoices.length;
-    return invoices.filter(invoice => invoice.status === status).length;
   };
 
   const handleCreateInvoice = () => {
@@ -145,38 +134,23 @@ const ManagerInvoicePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex bg-gray-50 p-2 m-8 rounded-xl gap-1 w-fit md:mx-5 sm:mx-4 sm:w-[calc(100%-2rem)] sm:overflow-x-auto">
-          {['all', 'paid', 'pending', 'overdue'].map(status => (
-            <button
-              key={status}
-              className={`px-5 py-3 text-sm font-semibold text-gray-500 bg-transparent rounded-lg transition-all whitespace-nowrap ${activeTab === status ? 'text-purple-500 bg-white shadow-sm' : 'hover:text-gray-600 hover:bg-purple-50/50'} focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2`}
-              onClick={() => setActiveTab(status)}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)} ({getTabCount(status)})
-            </button>
-          ))}
-        </div>
-
         {/* Invoice List */}
         <div className="p-8 bg-white min-h-[400px]">
-          {filteredInvoices.length === 0 ? (
+          {displayedInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-16 text-center min-h-[300px] text-gray-500">
               <div className="mb-6 text-gray-300">
                 <FileText size={64} />
               </div>
               <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                {searchTerm || activeTab !== 'all' ? 'No matching invoices found' : 'No invoices yet'}
+                {searchTerm ? 'No matching invoices found' : 'No invoices yet'}
               </h3>
               <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
                 {searchTerm
                   ? `No invoices match your search for "${searchTerm}". Try adjusting your search terms.`
-                  : activeTab !== 'all'
-                  ? `No ${activeTab} invoices found. Invoices will appear here when their status matches this filter.`
                   : 'Create your first invoice to get started with managing your billing and payments.'
                 }
               </p>
-              {!searchTerm && activeTab === 'all' && (
+              {!searchTerm && (
                 <button 
                   className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-6 py-3 rounded-xl text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
                   onClick={handleCreateInvoice}
@@ -187,7 +161,7 @@ const ManagerInvoicePage: React.FC = () => {
               )}
             </div>
           ) : (
-            filteredInvoices.map((invoice: Invoice) => (
+            displayedInvoices.map((invoice: Invoice) => (
               <div 
                 key={invoice._id} 
                 className="relative border-2 border-gray-100 rounded-2xl p-6 mb-4 bg-white cursor-pointer transition-all hover:border-indigo-100 hover:shadow-2xl hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-[-2px] animate-fadeIn before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-indigo-500 before:opacity-0 hover:before:opacity-100 before:transition-opacity"

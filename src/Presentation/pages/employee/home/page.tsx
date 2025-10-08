@@ -1,7 +1,7 @@
 // src/Presentation/pages/employee/home/page.tsx
 import  { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Bell, Loader2, Wifi, ChevronRight } from 'lucide-react';
+import { Bell, Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import WalletModal from '../../../components/WalletModal';
@@ -12,6 +12,7 @@ type WalletModalInitialView = 'connect' | 'send';
 const EmployeeHome = observer(() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
@@ -117,12 +118,19 @@ const EmployeeHome = observer(() => {
     }
   }, [successMessage, clearSuccessMessage]);
   
-    // Fetch wallet balance when connected
-    useEffect(() => {
-      if (isWalletConnected) {
-        fetchWalletBalance();
-      }
-    }, [isWalletConnected, fetchWalletBalance]);
+  // Fetch wallet balance when connected
+  useEffect(() => {
+    if (isWalletConnected) {
+      fetchWalletBalance();
+    }
+  }, [isWalletConnected, fetchWalletBalance]);
+
+  // Close menu when wallet disconnects
+  useEffect(() => {
+    if (!isWalletConnected && isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [isWalletConnected, isMenuOpen]);
 
   // Fetch all transactions for employee (no category filtering)
   useEffect(() => {
@@ -153,6 +161,13 @@ const EmployeeHome = observer(() => {
         // Refresh transactions after disconnecting
         fetchTransactionHistory();
       }
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress);
+      alert('Address copied to clipboard!');
     }
   };
 
@@ -208,99 +223,139 @@ const EmployeeHome = observer(() => {
       </div>
 
       {/* Wallet Balance Card */}
-       <div className="mx-5 my-5 bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 rounded-2xl p-6 text-white relative flex-shrink-0">
-        <div className="flex justify-between items-center mb-5">
-          <div className="flex items-center gap-2">
-            <span className="text-lg opacity-90 font-medium text-white">Current Wallet</span>
-            {isWalletConnected && (
-              <div className="flex items-center gap-1 bg-green-500 bg-opacity-20 px-2 py-1 rounded-full">
-                <Wifi className="w-3 h-3 text-green-400" />
-                <span className="text-xs text-green-400 font-medium">Connected</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            {!isWalletConnected ? (
+      <div className="mx-5 my-5 bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl relative">
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-sm font-medium text-purple-100">Current Wallet</span>
+          {isWalletConnected && (
+            <div className="relative">
               <button
-                className="bg-white bg-opacity-20 border border-white border-opacity-30 text-white px-6 py-4 rounded-full text-base font-medium cursor-pointer backdrop-blur-sm hover:bg-white hover:bg-opacity-40 transition-all"
-                onClick={() => handleOpenWalletModal('connect')}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-1 hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
               >
-                Connect Wallet
+                <MoreVertical className="w-5 h-5" />
               </button>
-            ) : isWalletConnected ? (
-              <button
-                className="bg-red-500 bg-opacity-80 border border-red-400 border-opacity-50 text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer backdrop-blur-sm hover:bg-red-600 hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleDisconnectWallet}
-                disabled={isConnecting}
-              >
-                {isConnecting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
-                    Disconnecting...
-                  </>
-                ) : (
-                  'Disconnect'
-                )}
-              </button>
-            ) : null}
-          </div>
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <EthereumIcon className="w-6 h-6 fill-white text-white" />
-            <span className="text-3xl font-bold text-white">
-              {isFetchingBalance ? (
-                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-              ) : ethBalance !== null ? (
-                `${ethBalance.toFixed(4)} ETH`
-              ) : (
-                <span className="text-white"> 0 ETH</span>
+              {isMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        fetchWalletBalance();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span className="text-sm font-medium">Refresh Balance</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await handleDisconnectWallet();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
+                      disabled={isConnecting}
+                    >
+                      {isConnecting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm font-medium">Disconnecting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium">Disconnect Wallet</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
               )}
-            </span>
-          </div>
-          
-          {/* Auto-converted balance display */}
-          {isWalletConnected && ethBalance && ethBalance > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="text-base opacity-90 font-medium">
-                {isAutoConverting ? (
-                  <span className="text-sm text-gray-400 flex items-center gap-2">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Converting...
-                  </span>
-                ) : convertedBalance !== null ? (
-                  <span className="text-sm text-white">
-                    Converted to {conversionCurrency}: {conversionCurrency === 'USD' ? '$' : '₱'}{convertedBalance.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="text-sm text-gray-400">Loading conversion...</span>
-                )}
-              </div>
-              <button
-                onClick={toggleCurrency}
-                className="text-xs bg-white bg-opacity-20 text-white px-2 py-1 rounded-full hover:bg-opacity-30 transition-all"
-              >
-                Show {conversionCurrency === 'USD' ? 'PHP' : 'USD'}
-              </button>
             </div>
           )}
-          
-          <div className="text-base opacity-90 font-medium">
-            {isFetchingBalance ? (
-              <span className="text-sm text-gray-400">Fetching...</span>
-            ) : fetchBalanceError ? (
-              <span className="text-sm text-red-400">Error fetching balance</span>
-            ) : walletAddress ? (
-              <span className="text-sm font-mono">
-                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-              </span>
-            ) : (
-              <span className="text-white">Wallet Not Connected</span>
-            )}
-          </div>
         </div>
+
+        {!isWalletConnected ? (
+          <div className="text-center py-8">
+            <h3 className="text-xl font-semibold mb-4">Wallet Not Connected</h3>
+            <button
+              className="bg-white text-purple-700 px-8 py-3 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all"
+              onClick={() => handleOpenWalletModal('connect')}
+            >
+              Connect Wallet
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-4">
+              <div className="inline-flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-medium text-green">Connected Wallet</span>
+                </div>
+              </div>
+
+              {walletAddress && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={copyToClipboard}
+                    className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-opacity-30 transition-all"
+                  >
+                    <span className="text-sm font-mono">{walletAddress.substring(0, 6)}...{walletAddress.substring(walletAddress.length - 4)}</span>
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              {isFetchingBalance ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span className="text-2xl font-bold">Loading...</span>
+                </div>
+              ) : ethBalance !== null ? (
+                <div className="flex items-center gap-3">
+                  <EthereumIcon className="w-8 h-8 text-white" />
+                  <h2 className="text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
+                </div>
+              ) : (
+                <h2 className="text-5xl font-bold">0.000000 ETH</h2>
+              )}
+            </div>
+
+            {ethBalance && ethBalance > 0 && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-purple-100">Converted to {conversionCurrency}</p>
+                  {isAutoConverting ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-lg font-semibold">Converting...</span>
+                    </div>
+                  ) : convertedBalance !== null ? (
+                    <p className="text-xl font-semibold">
+                      {conversionCurrency === 'PHP' ? '₱' : '$'}{convertedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  ) : (
+                    <p className="text-lg text-purple-200">Loading...</p>
+                  )}
+                </div>
+
+                <button
+                  onClick={toggleCurrency}
+                  className="flex items-center gap-1 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-2 rounded-full hover:bg-opacity-30 transition-all"
+                >
+                  <span className="text-sm font-medium">{conversionCurrency}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {fetchBalanceError && (
+              <p className="text-sm text-red-300 mt-2">{fetchBalanceError}</p>
+            )}
+          </>
+        )}
       </div>
 
 
