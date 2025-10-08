@@ -84,7 +84,7 @@ const SideNavbarEmployee = () => {
             }
             onClick={handleNavClick}
           >
-            <Home className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            <Home className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
             {isExpanded && <span className="opacity-100 transition-opacity duration-300">Home</span>}
           </NavLink>
         </li>
@@ -99,7 +99,7 @@ const SideNavbarEmployee = () => {
             }
             onClick={handleNavClick}
           >
-            <History className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            <History className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
             {isExpanded && <span className="opacity-100 transition-opacity duration-300">History</span>}
           </NavLink>
         </li>
@@ -114,7 +114,7 @@ const SideNavbarEmployee = () => {
             }
             onClick={handleNavClick}
           >
-            <Settings className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 stroke-black`} />
+            <Settings className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
             {isExpanded && <span className="opacity-100 transition-opacity duration-300">Settings</span>}
           </NavLink>
         </li>
@@ -124,8 +124,8 @@ const SideNavbarEmployee = () => {
         onClick={handleLogout} 
         className="bg-transparent border-none text-black text-base flex items-center p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none"
       >
-        <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0`} />
-        {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
+        <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
+            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
       </button>
     </div>
   );

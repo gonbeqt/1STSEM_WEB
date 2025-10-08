@@ -37,7 +37,7 @@ import { container } from './di/container'; // Import the container
 const ManagerLayout = () => (
   <div className="flex min-h-screen bg-gray-50">
     <SideNavbar />
-    <main className="flex-grow flex flex-col items-start justify-start p-11 pr-12 pb-8 pl-4 bg-gray-50">
+    <main className="flex-grow flex flex-col items-start justify-start   bg-gray-50">
       <Outlet />
     </main>
   </div>
@@ -46,7 +46,7 @@ const ManagerLayout = () => (
 const EmployeeLayout = () => (
   <div className="flex min-h-screen bg-gray-50">
     <SideNavbarEmployee />
-    <main className="flex-grow flex flex-col items-start justify-start p-11 pr-12 pb-8 pl-4 bg-gray-50">
+    <main className="flex-grow flex flex-col items-start justify-startbg-gray-50">
       <Outlet />
     </main>
   </div>
