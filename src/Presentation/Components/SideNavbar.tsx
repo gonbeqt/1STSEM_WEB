@@ -150,10 +150,10 @@ const SideNavbar = () => {
         </li>
       </ul>
       
-      <div className="bg-gray-100 mt-auto pt-2 rounded-lg">
+      <div className="mb-4 p-0">
         <button 
           onClick={handleLogout} 
-          className="bg-transparent border-none text-gray-700 text-base flex items-center p-3 cursor-pointer w-full rounded-lg transition-colors hover:bg-red-100 hover:text-red-600 focus:outline-none"
+          className="text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-red-500 w-full "
         >
           <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
             {isExpanded && <span className="opacity-100 transition-opacity duration-300">Logout</span>}

@@ -54,6 +54,9 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
       setCompany('');
       setCategory('');
       setDescription('');
+      // close the modal on success and reset send step
+      setSendStep('form');
+      onClose();
     } else {
       console.error('Failed to send ETH');
     }
