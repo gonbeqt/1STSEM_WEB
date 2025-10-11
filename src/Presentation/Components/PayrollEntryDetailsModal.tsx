@@ -323,11 +323,11 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                         )}
                     </div>
 
-                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center">
                         <button
                             type="button"
                             onClick={handleDownloadPDF}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full sm:w-auto"
                         >
                             <Download className="w-4 h-4" />
                             Download PDF
@@ -335,7 +335,7 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto"
                         >
                             Close
                         </button>

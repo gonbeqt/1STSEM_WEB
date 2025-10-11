@@ -484,10 +484,10 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         </div>
 
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 mx-6 mt-4 rounded-2xl text-white shadow-lg">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg bg-white/20 flex items-center justify-center text-xl font-bold">
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 sm:p-6 mx-4 sm:mx-6 mt-4 rounded-xl sm:rounded-2xl text-white shadow-lg">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg bg-white/20 flex items-center justify-center text-lg sm:text-xl font-bold">
                 {employee.profileImage ? (
                   <img src={employee.profileImage} alt={employee.full_name || employee.fullName} className="w-full h-full object-cover" />
                 ) : (
@@ -495,15 +495,15 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold mb-1 md:text-xl">{employee.full_name || employee.fullName}</h1>
-                <p className="text-white/80 font-medium">{employee.position}</p>
+                <h1 className="text-xl sm:text-2xl font-bold mb-1">{employee.full_name || employee.fullName}</h1>
+                <p className="text-sm sm:text-base text-white/80 font-medium">{employee.position}</p>
               </div>
             </div>
             
-            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 self-stretch sm:self-auto">
+            <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 self-stretch sm:self-auto">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-sm font-semibold">{employee.status}</span>
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="text-xs sm:text-sm font-semibold">{employee.status}</span>
               </div>
             </div>
           </div>
