@@ -7,6 +7,7 @@ import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransac
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
+import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -304,9 +305,9 @@ const EmployeeHome = observer(() => {
 
               <div className="mb-4">
                 {isFetchingBalance ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-2xl font-bold">Loading...</span>
+                  <div className="flex items-center gap-3">
+                    <SkeletonCircle className="h-12 w-12 bg-white/20 from-white/20 via-white/40 to-white/20" />
+                    <Skeleton className="h-10 w-48 bg-white/20 from-white/20 via-white/40 to-white/20" />
                   </div>
                 ) : ethBalance !== null ? (
                   <div className="flex items-center gap-3">
@@ -323,10 +324,7 @@ const EmployeeHome = observer(() => {
                   <div>
                     <p className="text-sm text-purple-100">Converted to {conversionCurrency}</p>
                     {isAutoConverting ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-lg font-semibold">Converting...</span>
-                      </div>
+                      <Skeleton className="h-6 w-32 bg-white/20 from-white/20 via-white/40 to-white/20" />
                     ) : convertedBalance !== null ? (
                       <p className="text-xl font-semibold">
                         {conversionCurrency === 'PHP' ? '₱' : '$'}{convertedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -391,13 +389,19 @@ const EmployeeHome = observer(() => {
 
         <div className="mb-8 sm:mx-5 rounded-xl overflow-hidden min-h-[200px]">
           {isLoadingTransactions ? (
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
-              <div className="flex items-center gap-4">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">Loading transactions...</div>
+            <div className="space-y-3">
+              {[...Array(4)].map((_, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+                  <div className="flex items-start sm:items-center gap-4 w-full">
+                    <SkeletonCircle className="h-10 w-10 bg-gray-100" />
+                    <div className="flex flex-col gap-2 flex-1">
+                      <SkeletonText className="w-48 max-w-full" />
+                      <SkeletonText className="w-32 max-w-full h-3" />
+                    </div>
+                  </div>
+                  <SkeletonText className="w-24 h-4" />
                 </div>
-              </div>
+              ))}
             </div>
           ) : transactionError ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">

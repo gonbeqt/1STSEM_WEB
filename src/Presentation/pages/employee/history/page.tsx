@@ -4,6 +4,7 @@ import { PayrollEntry } from '../../../../domain/entities/EmployeeHistoryEntitie
 import PayrollEntryDetailsModal from '../../../components/PayrollEntryDetailsModal';
 import { Loader2, TrendingUp, CheckCircle, Clock, XCircle, DollarSign, FileText, Eye } from 'lucide-react';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
+import Skeleton, { SkeletonText } from '../../../components/Skeleton';
 
 const EmployeeHistoryPage = () => {
     const token = localStorage.getItem('token');
@@ -52,10 +53,33 @@ const EmployeeHistoryPage = () => {
 
     if (loading && !history) {
         return (
-            <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 w-full">
-                <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-                    <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600 font-medium">Loading your payroll history...</p>
+            <div className="min-h-screen w-full bg-gray-50">
+                <EmployeeNavbar />
+                <div className="max-w-6xl mx-auto p-6 space-y-6">
+                    <div className="space-y-3">
+                        <SkeletonText className="h-8 w-48" />
+                        <SkeletonText className="h-4 w-64" />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-1 space-y-6">
+                            <Skeleton className="h-40 rounded-lg" />
+                            <div className="space-y-4">
+                                {[...Array(3)].map((_, idx) => (
+                                    <Skeleton key={idx} className="h-20 rounded-lg" />
+                                ))}
+                            </div>
+                            <Skeleton className="h-28 rounded-lg" />
+                        </div>
+                        <div className="lg:col-span-2 space-y-4">
+                            <Skeleton className="h-14 rounded-lg" />
+                            <div className="space-y-3">
+                                {[...Array(4)].map((_, idx) => (
+                                    <Skeleton key={idx} className="h-16 rounded-lg" />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

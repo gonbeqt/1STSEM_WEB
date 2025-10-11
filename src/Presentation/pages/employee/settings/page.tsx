@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
+import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 
 interface MenuItem {
   icon: string;
@@ -101,13 +102,12 @@ const EmployeeSettings: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-gray-200 shadow-sm">
-            <div className="w-16 h-16 rounded-full mr-4 bg-gray-300 flex items-center justify-center text-gray-600 text-2xl font-bold">
-              ?
-            </div>
-            <div className="user-info flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-gray-700 truncate mb-1">Loading...</h2>
-              <span className="text-sm text-gray-600 block truncate">Please wait</span>
+          <div className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-white border border-gray-200 shadow-sm">
+            <SkeletonCircle className="h-16 w-16 mr-4" />
+            <div className="user-info flex-1 min-w-0 space-y-2">
+              <SkeletonText className="h-5 w-40" />
+              <SkeletonText className="h-4 w-32" />
+              <Skeleton className="h-3 w-48" />
             </div>
           </div>
         )}

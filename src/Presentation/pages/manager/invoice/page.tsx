@@ -6,6 +6,7 @@ import { useInvoices } from '../../../hooks/useInvoices';
 import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
 import InputWithIcon from '../../../components/InputWithIcon';
+import Skeleton, { SkeletonText } from '../../../components/Skeleton';
 
 const ManagerInvoicePage: React.FC = () => {
   const userData = localStorage.getItem('user');
@@ -78,10 +79,25 @@ const ManagerInvoicePage: React.FC = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200">
-          <div className="flex flex-col items-center justify-center p-16 min-h-[400px] text-center">
-            <div className="w-12 h-12 border-4 border-gray-100 border-t-purple-500 rounded-full animate-spin mb-6"></div>
-            <p className="text-gray-500 text-base font-medium">Loading invoices...</p>
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-full" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className="border-2 border-gray-100 rounded-2xl p-6 bg-white shadow-sm">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 md:gap-6 mb-4">
+                  <div className="flex-1 space-y-3">
+                    <SkeletonText className="h-5 w-48" />
+                    <SkeletonText className="h-3 w-40" />
+                    <SkeletonText className="h-3 w-full" />
+                  </div>
+                  <div className="flex flex-col gap-3 md:items-end w-full md:w-48">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-7 w-28" />
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-full md:w-40" />
+              </div>
+            ))}
           </div>
         </div>
       );

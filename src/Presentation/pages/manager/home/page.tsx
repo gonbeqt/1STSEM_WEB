@@ -13,6 +13,7 @@ import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import ManagerNavbar from '../../../components/ManagerNavbar';
+import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -418,9 +419,9 @@ const Home = observer(() => {
               {/* Balance */}
               <div className="mb-4">
                 {isFetchingBalance ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-xl sm:text-2xl font-bold">Loading...</span>
+                  <div className="flex items-center gap-3">
+                    <SkeletonCircle className="h-12 w-12 bg-white/20 from-white/20 via-white/40 to-white/20" />
+                    <Skeleton className="h-10 w-48 bg-white/20 from-white/20 via-white/40 to-white/20" />
                   </div>
                 ) : ethBalance !== null ? (
                   <div className="flex items-center gap-3 flex-wrap">
@@ -438,10 +439,7 @@ const Home = observer(() => {
                   <div>
                     <p className="text-sm text-purple-100">Converted to {conversionCurrency}</p>
                     {isAutoConverting ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-lg font-semibold">Converting...</span>
-                      </div>
+                      <Skeleton className="h-6 w-32 bg-white/20 from-white/20 via-white/40 to-white/20" />
                     ) : convertedBalance !== null ? (
                       <p className="text-xl font-semibold">
                         {conversionCurrency === 'PHP' ? '₱' : '$'}{convertedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -543,9 +541,22 @@ const Home = observer(() => {
 
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             {isLoadingTransactions ? (
-              <div className="flex items-center gap-3 p-4">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                <span className="text-sm text-gray-600">Loading transactions...</span>
+              <div className="space-y-4 p-4">
+                {[...Array(4)].map((_, idx) => (
+                  <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <SkeletonCircle className="h-10 w-10 bg-gray-100" />
+                      <div className="flex flex-col gap-2 w-full">
+                        <SkeletonText className="w-48 max-w-full" />
+                        <SkeletonText className="w-32 max-w-full h-3" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
+                      <SkeletonText className="w-24 h-4" />
+                      <SkeletonText className="w-20 h-3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : transactionError ? (
               <div className="p-4">
@@ -609,9 +620,22 @@ const Home = observer(() => {
               </div>
               <div className="max-h-[60vh] overflow-y-auto">
                 {isLoadingTransactions ? (
-                  <div className="flex items-center gap-3 p-4">
-                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                    <span className="text-sm text-gray-600">Loading transactions...</span>
+                  <div className="space-y-4 p-4">
+                    {[...Array(6)].map((_, idx) => (
+                      <div key={idx} className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                          <SkeletonCircle className="h-10 w-10" />
+                          <div className="flex flex-col gap-2 w-48 max-w-full">
+                            <SkeletonText className="w-full" />
+                            <SkeletonText className="w-32 h-3" />
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 w-32">
+                          <SkeletonText className="w-full h-4" />
+                          <SkeletonText className="w-24 h-3" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : transactionData.length === 0 ? (
                   <div className="p-4">

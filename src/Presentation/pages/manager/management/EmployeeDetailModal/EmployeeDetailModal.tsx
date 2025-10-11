@@ -1,6 +1,7 @@
 import { ArrowLeft, DollarSign, AlertTriangle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { usePayslips } from '../../../../hooks/usePayslips';
+import Skeleton, { SkeletonText } from '../../../../components/Skeleton';
 
 interface Employee { 
   employee_id: string;
@@ -268,10 +269,32 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     return (
       <div className="space-y-6">
         {payslipsLoading && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
-              <p className="text-blue-700 font-medium">Loading payslips...</p>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <SkeletonText className="h-5 w-40" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, idx) => (
+                <div key={idx} className="space-y-2">
+                  <SkeletonText className="h-3 w-32" />
+                  <Skeleton className="h-6 w-28" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              {[...Array(2)].map((_, rowIdx) => (
+                <div key={rowIdx} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((__, colIdx) => (
+                      <div key={colIdx} className="space-y-2">
+                        <SkeletonText className="h-3 w-24" />
+                        <Skeleton className="h-5 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
