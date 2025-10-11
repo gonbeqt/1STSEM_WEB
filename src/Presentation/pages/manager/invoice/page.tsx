@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
+import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus, SearchIcon } from 'lucide-react';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 
 import { useInvoices } from '../../../hooks/useInvoices';
 import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
+import InputWithIcon from '../../../components/InputWithIcon';
 
 const ManagerInvoicePage: React.FC = () => {
   const userData = localStorage.getItem('user');
@@ -105,34 +106,23 @@ const ManagerInvoicePage: React.FC = () => {
     }
 
     return (
-      <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div className="p-8 pb-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-700 text-white">
-          <h2 className="text-3xl font-bold m-0 mb-5 tracking-tight md:text-2xl sm:text-xl">Invoice Manager</h2>
-          <div className="flex items-start gap-3 p-4 bg-white/10 border border-white/20 rounded-xl backdrop-blur-md">
-            <FileText className="text-white/90 flex-shrink-0 mt-0.5" size={18} />
-            <span className="text-white/95 text-sm font-normal leading-relaxed">
-              Manage and track all your invoices in one place. Monitor payment status and client information.
-            </span>
-          </div>
-        </div>
+      <div className="overflow-hidden">
+
 
         {/* Search */}
-        <div className="p-8 border-b border-gray-100 bg-gray-50">
-          <div className="relative flex items-center">
-            <Search className="absolute left-4 text-gray-400 z-10" size={18} />
-            <input
-              type="text"
-              placeholder="Search invoices by client name, ID, or description..."
-              className="w-full p-3.5 pl-12 border-2 border-gray-200 rounded-xl text-[15px] bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder:text-gray-400"
+        <div className="mb-6">
+          <div className="flex-1">
+            <InputWithIcon
+              icon={<SearchIcon />}
+              placeholder="Search invoice..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
         {/* Invoice List */}
-        <div className="p-8 bg-white min-h-[400px]">
+        <div >
           {displayedInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-16 text-center min-h-[300px] text-gray-500">
               <div className="mb-6 text-gray-300">
@@ -204,11 +194,18 @@ const ManagerInvoicePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100">
+    <div className="min-h-screen w-full bg-gray-50">
       <ManagerNavbar />
 
-      <div className="flex flex-col w-full font-sans p-6 gap-6 md:p-4 sm:p-3 xs:p-2">
-        {renderContent()}
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
+          <p className="text-sm text-gray-500">Manage and track all your invoices in one place.</p>
+        </div>
+
+        <div className="flex flex-col w-full font-sans gap-6 md:p-0 sm:p-0">
+          {renderContent()}
+        </div>
       </div>
 
       {selectedInvoiceId && (

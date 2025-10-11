@@ -54,7 +54,6 @@ const ManagerNavbar: React.FC = () => {
             <span className="text-indigo-600 text-sm font-semibold">{initials}</span>
           </div>
           <div className="leading-tight">
-            <p className="text-xs uppercase tracking-wide text-indigo-500 font-semibold">Welcome back</p>
             <h1 className="text-lg font-semibold text-gray-900">Hi, {displayName}</h1>
             <p className="text-xs text-gray-500">How are you today?</p>
           </div>

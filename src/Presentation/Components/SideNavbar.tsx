@@ -78,7 +78,7 @@ const SideNavbar = () => {
           <NavLink 
             to="/home" 
             className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 hover:translate-x-1 ${
+              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
                 isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -93,7 +93,7 @@ const SideNavbar = () => {
           <NavLink 
             to="/management" 
             className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 hover:translate-x-1 ${
+              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
                 isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -108,7 +108,7 @@ const SideNavbar = () => {
           <NavLink 
             to="/invoice" 
             className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 hover:translate-x-1 ${
+              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
                 isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -123,7 +123,7 @@ const SideNavbar = () => {
           <NavLink 
             to="/reports" 
             className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 hover:translate-x-1 ${
+              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
                 isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -138,7 +138,7 @@ const SideNavbar = () => {
           <NavLink 
             to="/settings" 
             className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 hover:translate-x-1 ${
+              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
                 isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }

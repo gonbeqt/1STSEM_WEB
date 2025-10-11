@@ -20,10 +20,12 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
   const [company, setCompany] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [sendStep, setSendStep] = useState<'form' | 'summary'>('form');
 
   useEffect(() => {
     if (isOpen) {
       setCurrentView(initialView);
+      setSendStep('form');
       if (isWalletConnected) {
         fetchWalletBalance();
       }
@@ -66,7 +68,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-5"
       onClick={handleBackdropClick}
     >
@@ -99,7 +101,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
         </div>
 
         {/* View Tabs (only shown when wallet is connected) */}
-        
+
 
         {/* Content */}
         <div className="px-6 pb-6">
@@ -124,90 +126,167 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
           )}
 
           {currentView === 'send' && isWalletConnected && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="recipient" className="text-black text-sm font-medium">Recipient Address:</label>
-                <input
-                  id="recipient"
-                  type="text"
-                  placeholder="0x..."
-                  value={recipientAddress}
-                  onChange={(e) => setRecipientAddress(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                />
-              </div>
+            <div>
+              {sendStep === 'form' ? (
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Form column (full width) */}
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label htmlFor="recipient" className="text-black text-sm font-medium">Recipient Address</label>
+                      <input
+                        id="recipient"
+                        type="text"
+                        placeholder="0x..."
+                        value={recipientAddress}
+                        onChange={(e) => setRecipientAddress(e.target.value)}
+                        className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
+                      />
+                    </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="amount" className="text-black text-sm font-medium">Amount (ETH):</label>
-                <input
-                  id="amount"
-                  type="number"
-                  step="0.0001"
-                  placeholder="0.0"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                />
-              </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="amount" className="text-black text-sm font-medium">Amount (ETH)</label>
+                        <input
+                          id="amount"
+                          type="number"
+                          step="0.0001"
+                          placeholder="0.0"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
+                        />
+                      </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="company" className="text-black text-sm font-medium">Company:</label>
-                <input
-                  id="company"
-                  type="text"
-                  placeholder="Company Name"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                />
-              </div>
+                      <div>
+                        <label htmlFor="company" className="text-black text-sm font-medium">Company</label>
+                        <input
+                          id="company"
+                          type="text"
+                          placeholder="Company Name"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
+                        />
+                      </div>
+                    </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="category" className="text-black text-sm font-medium">Category:</label>
-                <input
-                  id="category"
-                  type="text"
-                  placeholder="Transaction Category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                />
-              </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="category" className="text-black text-sm font-medium">Category</label>
+                        <input
+                          id="category"
+                          type="text"
+                          placeholder="Transaction Category"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
+                        />
+                      </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="description" className="text-black text-sm font-medium">Description:</label>
-                <input
-                  id="description"
-                  type="text"
-                  placeholder="Transaction Description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl p-4 text-black text-sm transition-all placeholder:text-gray-600 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                />
-              </div>
+                      <div>
+                        <label htmlFor="description" className="text-black text-sm font-medium">Description</label>
+                        <input
+                          id="description"
+                          type="text"
+                          placeholder="Transaction Description"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
+                        />
+                      </div>
+                    </div>
 
-              {sendEthError && (
-                <p className="text-red-500 text-sm m-0 p-3 bg-red-100 rounded-lg border border-red-200">
-                  {sendEthError}
-                </p>
+
+
+
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        onClick={() => setSendStep('summary')}
+                        className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-all bg-gradient-to-br from-purple-600 to-purple-700 text-white ${(!recipientAddress || !amount) ? 'opacity-60 cursor-not-allowed' : 'hover:from-purple-700 hover:to-purple-800 hover:-translate-y-0.5'}`}
+                        disabled={!recipientAddress || !amount}
+                      >
+                        Next
+                      </button>
+
+                      <button
+                        onClick={onClose}
+                        className="px-4 py-3 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full">
+
+                  {/* Summary column */}
+                  <section className=" bg-gray-50 border border-gray-100 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Payment Summary</h4>
+                    <div className="text-sm text-gray-600 space-y-3">
+                      <div>
+                        <div className="text-xs text-gray-500">Recipient</div>
+                        <div className="text-sm text-gray-900 truncate">{recipientAddress || '—'}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-xs text-gray-500">Company</div>
+                        <div className="text-sm text-gray-900">{company || '—'}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-xs text-gray-500">Category</div>
+                        <div className="text-sm text-gray-900">{category || '—'}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-xs text-gray-500">Amount (ETH)</div>
+                        <div className="text-lg font-semibold text-gray-900">{amount || '0.0'} ETH</div>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-100">
+                        <div className="text-xs text-gray-500">Estimated Gas</div>
+                        <div className="text-sm text-gray-900">0.003 ETH</div>
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-100">
+                        <div className="text-xs text-gray-500">Total</div>
+                        <div className="text-lg font-bold text-gray-900">{(parseFloat(amount || '0') + 0.003).toFixed(6)} ETH</div>
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-3">
+                        <button
+                          onClick={() => setSendStep('form')}
+                          className="px-4 py-3 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                        >
+                          Back
+                        </button>
+
+                        <button
+                          onClick={handleSendEth}
+                          className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-all bg-gradient-to-br from-purple-600 to-purple-700 text-white ${isSendingEth ? 'opacity-60 cursor-not-allowed' : 'hover:from-purple-700 hover:to-purple-800 hover:-translate-y-0.5'}`}
+                          disabled={isSendingEth}
+                        >
+                          {isSendingEth ? 'Sending...' : 'Send ETH'}
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {successMessage && (
+                        <div className="mt-1 w-full">
+                          <p className="text-green-700 text-sm m-0 p-3 bg-green-50 rounded-md border border-green-100 text-ellipsis ">{successMessage}</p>
+                        </div>
+                      
+                      )}
+                      {sendEthError && (
+                        <div className="mt-1 w-full">
+                          <p className="text-red-600 text-sm m-0 p-3 bg-red-50 rounded-md border border-red-100">{sendEthError}</p>
+                        </div>
+                      )}
+
+                    </div>
+                  </section>
+                </div>
               )}
-              
-              {successMessage && (
-                <p className="text-green-500 text-sm m-0 p-3 bg-green-100 rounded-lg border border-green-200">
-                  {successMessage}
-                </p>
-              )}
-
-              <button
-                onClick={handleSendEth}
-                className={`flex items-center justify-center gap-2 w-full bg-purple-600 text-white border-none rounded-xl p-4 text-base font-semibold cursor-pointer transition-all mt-2 ${
-                  isSendingEth ? 'opacity-60 cursor-not-allowed' : 'hover:bg-purple-700 hover:-translate-y-px'
-                }`}
-                disabled={isSendingEth}
-              >
-                {isSendingEth ? 'Sending...' : 'Send ETH'}
-                <Send className="w-5 h-5" />
-              </button>
             </div>
           )}
 

@@ -130,127 +130,142 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
-        <div className="bg-white rounded-xl w-[90%] max-w-[500px] max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000] px-4">
+        <div className="bg-white rounded-xl w-full max-w-[760px] max-h-[90vh] overflow-hidden shadow-2xl">
           {/* Header */}
-          <div className="flex items-center p-6 pb-4 border-b border-gray-200 relative">
-            <button 
-              className="bg-transparent border-none text-2xl text-gray-500 p-0 mr-4 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100  transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 relative">
+            <div className="flex items-center gap-4">
+              
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 m-0">Add Employee to Team</h2>
+                <p className="text-sm text-gray-500 mt-1">Invite an existing user to your team by their registered email.</p>
+              </div>
+            </div>
+
+            <button
               onClick={handleClose}
               disabled={isLoading}
+              className="p-2 rounded-md text-gray-500 hover:bg-gray-100 transition-colors"
+              aria-label="Close"
             >
-              <ArrowLeft/>
+              Close
             </button>
-            <h2 className="text-lg font-semibold text-gray-900 m-0">Add Employee to Team</h2>
           </div>
 
           {/* Body */}
-          <div className="p-6 max-h-[400px] overflow-y-auto">
-            <div className="flex flex-col gap-5">
-              {/* Email Field */}
-              <div className="flex flex-col gap-1.5 text-black bg-white">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">Employee Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${validationErrors.email ? 'border-red-600' : ''}`}
-                  placeholder="Enter existing employee's email"
-                  disabled={isLoading}
-                />
-                {validationErrors.email && (
-                  <span className="text-red-600 text-xs mt-1">{validationErrors.email}</span>
-                )}
+          <div className="p-6 max-h-[560px] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left column */}
+              <div className="flex flex-col gap-5">
+                {/* Email Field */}
+                <div className="flex flex-col gap-1.5 text-black bg-white">
+                  <label htmlFor="email" className="text-sm font-medium text-gray-700">Employee Email *</label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={`w-full p-3 pl-4 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${validationErrors.email ? 'border-red-600' : ''}`}
+                      placeholder="Enter existing employee's email"
+                      disabled={isLoading}
+                    />
+                    <span className="absolute right-3 top-3 text-sm text-gray-400">@</span>
+                  </div>
+                  {validationErrors.email && (
+                    <span className="text-red-600 text-xs mt-1">{validationErrors.email}</span>
+                  )}
+                </div>
+
+                {/* Full Name Field */}
+                <div className="flex flex-col gap-1.5 text-black bg-white">
+                  <label htmlFor="full_name" className="text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    placeholder="Optional: Update employee's full name"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {/* Position Field */}
+                <div className="flex flex-col gap-1.5 text-black bg-white">
+                  <label htmlFor="position" className="text-sm font-medium text-gray-700">Position</label>
+                  <input
+                    type="text"
+                    id="position"
+                    name="position"
+                    value={formData.position}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    placeholder="Optional: Specify position"
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
 
-              {/* Full Name Field */}
-              <div className="flex flex-col gap-1.5 text-black bg-white">
-                <label htmlFor="full_name" className="text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  id="full_name"
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  placeholder="Optional: Update employee's full name"
-                  disabled={isLoading}
-                />
-              </div>
+              {/* Right column */}
+              <div className="flex flex-col gap-5">
+                {/* Department Field */}
+                <div className="flex flex-col gap-1.5 text-black bg-white">
+                  <label htmlFor="department" className="text-sm font-medium text-gray-700">Department</label>
+                  <select
+                    id="department"
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 pr-10 appearance-none cursor-pointer"
+                    disabled={isLoading}
+                  >
+                    <option value="">Select Department</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Operations">Operations</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Customer Service">Customer Service</option>
+                  </select>
+                </div>
 
-              {/* Position Field */}
-              <div className="flex flex-col gap-1.5 text-black bg-white">
-                <label htmlFor="position" className="text-sm font-medium text-gray-700">Position</label>
-                <input
-                  type="text"
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  placeholder="Optional: Specify position"
-                  disabled={isLoading}
-                />
-              </div>
+                {/* Phone Field */}
+                <div className="flex flex-col gap-1.5 text-black bg-white">
+                  <label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    placeholder="Optional: Add phone number"
+                    disabled={isLoading}
+                  />
+                </div>
 
-              {/* Department Field */}
-              <div className="flex flex-col gap-1.5 text-black bg-white">
-                <label htmlFor="department" className="text-sm font-medium text-gray-700">Department</label>
-                <select
-                  id="department"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276,9 12,15 18,9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_12px_center] bg-[length:16px] pr-10 appearance-none cursor-pointer"
-                  disabled={isLoading}
-                >
-                  <option value="">Select Department</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Operations">Operations</option>
-                  <option value="HR">HR</option>
-                  <option value="IT">IT</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Customer Service">Customer Service</option>
-                </select>
-              </div>
-
-              {/* Phone Field */}
-              <div className="flex flex-col gap-1.5 text-black bg-white">
-                <label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm text-black bg-white transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  placeholder="Optional: Add phone number"
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Info Box */}
-              <div className="bg-gray-100 p-3 rounded-lg text-sm text-gray-700 border-l-4 border-purple-500 mt-4">
-                <strong>Note:</strong> This will add an existing employee to your team. 
-                The employee must already be registered in the system.
+                <div className="bg-gray-100 p-3 rounded-lg text-sm text-gray-700 border-l-4 border-purple-500 mt-auto">
+                  <strong>Note:</strong> This will add an existing employee to your team. The employee must already be registered in the system.
+                </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between items-center p-4 pt-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex justify-end items-center p-4 pt-4 border-t border-gray-200 bg-gray-50 gap-3">
             <button 
-              className="bg-white text-gray-500 border border-gray-300 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleClose}
               disabled={isLoading}
             >
               Cancel
             </button>
             <button 
-              className={`bg-purple-500 text-white border-none px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed relative min-w-[100px] ${isLoading ? 'after:content-[\'\'] after:absolute after:w-4 after:h-4 after:border-2 after:border-t-white after:border-transparent after:rounded-full after:animate-spin after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2' : ''}`}
+              className={`bg-purple-500 text-white border-none px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed relative min-w-[120px] ${isLoading ? 'after:content-[\'\'] after:absolute after:w-4 after:h-4 after:border-2 after:border-t-white after:border-transparent after:rounded-full after:animate-spin after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2' : ''}`}
               onClick={handleSubmit}
               disabled={isLoading}
             >

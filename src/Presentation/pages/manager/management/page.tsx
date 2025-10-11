@@ -150,13 +150,14 @@ const EmployeeManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full rounded-xl bg-gray-100 animate-slideIn text-gray-900 border border-gray-200">
+    <div className="min-h-screen w-full bg-gray-50">
             <ManagerNavbar />
       
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Employee List</h1>
+          <p className="text-sm text-gray-500">Manage and track all your employees in one place.</p>
         </div>
 
         {/* Search and Add Employee */}

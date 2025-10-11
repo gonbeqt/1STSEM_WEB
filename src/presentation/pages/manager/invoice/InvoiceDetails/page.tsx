@@ -17,8 +17,11 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
   useEffect(() => {
     const fetchInvoiceDetails = async () => {
       try {
+        const userData = localStorage.getItem("user");
+              const user = userData ? JSON.parse(userData) : null;
+
         const invoiceViewModel = container.invoiceViewModel();
-        await invoiceViewModel.loadUserInvoices("dummyUserId");
+        await invoiceViewModel.loadUserInvoices(user?._id || '');
         const foundInvoice = invoiceViewModel.invoices.find((inv: Invoice) => inv._id === invoiceId);
         if (foundInvoice) {
           setInvoice(foundInvoice);

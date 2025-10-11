@@ -204,9 +204,14 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-screen bg-white font-sans p-6 border border-gray-200 rounded-xl shadow-md overflow-y-auto space-y-8 md:p-4 sm:p-3">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight md:text-2xl sm:text-xl">Reports</h1>
-      <ManagerNavbar />
+    <div className="min-h-screen w-full bg-gray-50">
+            <ManagerNavbar />
+      <div className="max-w-6xl mx-auto p-6">
+
+      <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports</h1>
+          <p className="text-sm text-gray-500">Manage and track all your reports in one place.</p>
+        </div>
 
       {/* Report Categories */}
       <div className="flex flex-wrap gap-3 mb-6 md:flex-row">
@@ -319,6 +324,7 @@ const Reports: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

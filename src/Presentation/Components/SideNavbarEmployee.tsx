@@ -78,7 +78,7 @@ const SideNavbarEmployee = () => {
           <NavLink 
             to="/employee/home" 
             className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
                 isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -93,7 +93,7 @@ const SideNavbarEmployee = () => {
           <NavLink 
             to="/employee/history" 
             className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
                 isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }
@@ -108,7 +108,7 @@ const SideNavbarEmployee = () => {
           <NavLink 
             to="/employee/settings" 
             className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 hover:translate-x-1 ${
+              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
                 isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
               } ${!isExpanded ? 'justify-center' : ''}`
             }

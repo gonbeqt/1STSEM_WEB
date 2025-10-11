@@ -16,7 +16,7 @@ import ManagerNavbar from '../../../components/ManagerNavbar';
 
 type WalletModalInitialView = 'connect' | 'send';
 
-const Home = observer(() => {                                                   
+const Home = observer(() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -25,7 +25,7 @@ const Home = observer(() => {
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
   const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
   const [conversionCurrency, setConversionCurrency] = useState<string>('USD');
@@ -47,10 +47,10 @@ const Home = observer(() => {
     conversionResult,
     checkWalletConnection
   } = useWallet();
-  const { 
-    transactions, 
-    isLoading: isLoadingTransactions, 
-    error: transactionError, 
+  const {
+    transactions,
+    isLoading: isLoadingTransactions,
+    error: transactionError,
     fetchTransactionHistory,
     pagination
   } = useEnhancedTransactionHistory();
@@ -58,7 +58,7 @@ const Home = observer(() => {
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [transactionSearch, setTransactionSearch] = useState('');
-  
+
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -92,12 +92,12 @@ const Home = observer(() => {
     if (transaction.counterparty_name) {
       return `${transaction.transaction_category === 'SENT' ? 'Sent to' : 'Received from'} ${transaction.counterparty_name}`;
     }
-    
+
     // Use category description from backend
     if (transaction.category_description) {
       return transaction.category_description;
     }
-    
+
     // Fallback to transaction category
     const categoryLabels: Record<string, string> = {
       'SENT': 'Sent ETH',
@@ -105,17 +105,17 @@ const Home = observer(() => {
       'TRANSFER': 'Internal Transfer',
       'EXTERNAL': 'External Transaction'
     };
-    
+
     return categoryLabels[transaction.transaction_category] || 'ETH Transaction';
   };
 
   // Convert API transactions to display format
   const transactionData = transactions.map(transaction => {
     // Use the new amount_eth field from the updated backend and ensure it's a number
-    const displayAmount = typeof transaction.amount_eth === 'string' 
+    const displayAmount = typeof transaction.amount_eth === 'string'
       ? parseFloat(transaction.amount_eth) || 0
       : Number(transaction.amount_eth) || 0;
-    
+
     return {
       name: getTransactionName(transaction),
       amount: displayAmount,
@@ -159,7 +159,7 @@ const Home = observer(() => {
 
   // Fetch the 5 most recent transactions for manager on load
   useEffect(() => {
-    fetchTransactionHistory({ 
+    fetchTransactionHistory({
       limit: 5,
       offset: 0
     });
@@ -312,31 +312,36 @@ const Home = observer(() => {
 
       <ManagerNavbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
+
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
+                <p className="text-sm text-gray-500">Overview of your organization — balances, recent activity, and quick actions.</p>
+        </div>
         {/* Connected Wallet Card */}
         <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl mb-6 relative">
-          {/* Header */}
+
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-medium text-purple-100">
               Current Wallet
             </span>
             {isWalletConnected && (
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="p-1 hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
                 >
                   <MoreVertical className="w-5 h-5" />
                 </button>
-                
+
                 {isMenuOpen && (
                   <>
                     {/* Backdrop to close menu when clicking outside */}
-                    <div 
-                      className="fixed inset-0 z-10" 
+                    <div
+                      className="fixed inset-0 z-10"
                       onClick={() => setIsMenuOpen(false)}
                     />
-                    
+
                     {/* Dropdown Menu */}
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 overflow-hidden">
                       <button
@@ -364,7 +369,7 @@ const Home = observer(() => {
                           </>
                         ) : (
                           <>
-                          
+
                             <span className="text-sm font-medium">Disconnect Wallet</span>
                           </>
                         )}
@@ -396,10 +401,10 @@ const Home = observer(() => {
                     <span className="text-xs font-medium text-green">Connected Wallet</span>
                   </div>
                 </div>
-                
+
                 {walletAddress && (
                   <div className="flex items-center gap-2">
-                    <button 
+                    <button
                       onClick={copyToClipboard}
                       className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-opacity-30 transition-all"
                     >
@@ -445,9 +450,9 @@ const Home = observer(() => {
                       <p className="text-lg text-purple-200">Loading...</p>
                     )}
                   </div>
-                  
+
                   {/* Currency Toggle */}
-                  <button 
+                  <button
                     onClick={toggleCurrency}
                     className="flex items-center gap-1 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-2 rounded-full hover:bg-opacity-30 transition-all"
                   >
@@ -468,7 +473,7 @@ const Home = observer(() => {
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-5 gap-4">
-            <button 
+            <button
               onClick={handleSendPayment}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
             >
@@ -478,7 +483,7 @@ const Home = observer(() => {
               <span className="text-sm font-medium text-gray-700 text-center">Send Payment</span>
             </button>
 
-            <button 
+            <button
               onClick={handleSendPayroll}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
             >
@@ -488,7 +493,7 @@ const Home = observer(() => {
               <span className="text-sm font-medium text-gray-700 text-center">Send Payroll</span>
             </button>
 
-            <button 
+            <button
               onClick={handleAuditContract}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
             >
@@ -498,7 +503,7 @@ const Home = observer(() => {
               <span className="text-sm font-medium text-gray-700 text-center">Audit Contract</span>
             </button>
 
-            <button 
+            <button
               onClick={handleGenerateReport}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
             >
@@ -508,7 +513,7 @@ const Home = observer(() => {
               <span className="text-sm font-medium text-gray-700 text-center">Generate Report</span>
             </button>
 
-            <button 
+            <button
               onClick={handleInvestment}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
             >
@@ -527,7 +532,7 @@ const Home = observer(() => {
               <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
               <p className="text-sm text-gray-500">{showAllTransactions ? 'Showing all transactions' : 'Showing 5 most recent'}</p>
             </div>
-            <button 
+            <button
               onClick={openTransactionsModal}
               className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
             >
@@ -554,16 +559,14 @@ const Home = observer(() => {
             ) : (
               // Limit to 5 when not showing all
               transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
-                <div 
-                  key={index} 
-                  className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${
-                    index !== arr.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
+                <div
+                  key={index}
+                  className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${index !== arr.length - 1 ? 'border-b border-gray-100' : ''
+                    }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'
+                      }`}>
                       {tx.icon}
                     </div>
                     <div>
@@ -628,7 +631,7 @@ const Home = observer(() => {
                     })
                     .map((transaction: any, idx: number) => {
                       // Map to display format as in transactionData
-                      const displayAmount = typeof transaction.amount_eth === 'string' 
+                      const displayAmount = typeof transaction.amount_eth === 'string'
                         ? parseFloat(transaction.amount_eth) || 0
                         : Number(transaction.amount_eth) || 0;
                       const tx = {
@@ -671,41 +674,7 @@ const Home = observer(() => {
           </div>
         )}
 
-        {/* Revenue vs Expenses Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Revenue vs Expenses</h3>
-            <select className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 cursor-pointer hover:border-gray-300 transition-colors">
-              <option>Last 6 months</option>
-              <option>Last 3 months</option>
-              <option>Last month</option>
-            </select>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <div className="flex justify-around mb-6">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-green-50 rounded-full mb-2">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Revenue</p>
-                <p className="text-2xl font-bold text-green-600">₱7,120</p>
-              </div>
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-red-50 rounded-full mb-2">
-                  <TrendingDown className="w-6 h-6 text-red-600" />
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Expenses</p>
-                <p className="text-2xl font-bold text-red-600">₱4,200</p>
-              </div>
-            </div>
-
-            {/* Chart Component */}
-            <div className="rounded-xl overflow-hidden">
-              <Charts />
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       {/* All Modals */}
@@ -735,7 +704,7 @@ const Home = observer(() => {
         isOpen={isGenerateReportModalOpen}
         onClose={() => setIsGenerateReportModalOpen(false)}
       />
-      
+
       <InvestModal
         isOpen={isInvestModalOpen}
         onClose={() => setIsInvestModalOpen(false)}
