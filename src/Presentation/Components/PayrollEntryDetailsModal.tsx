@@ -42,7 +42,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
             ['Status:', details.payroll_entry.status],
             ['Amount:', `${details.payroll_entry.amount} ${details.payroll_entry.cryptocurrency}`],
             ['USD Equivalent:', `$${details.payroll_entry.usd_equivalent.toFixed(2)}`],
-            ['Payment Method:', details.payroll_entry.payment_method],
             ['Date:', new Date(details.payroll_entry.created_at).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -263,15 +262,7 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                                     </p>
                                 </div>
 
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 md:col-span-2">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <CreditCard className="w-4 h-4 text-gray-500" />
-                                        <span className="text-xs font-medium text-gray-600">Payment Method</span>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-900">
-                                        {details.payroll_entry.payment_method}
-                                    </p>
-                                </div>
+                                
                             </div>
                         </div>
 

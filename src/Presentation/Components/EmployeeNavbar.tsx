@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Bell } from 'lucide-react';
 
-const ManagerNavbar: React.FC = () => {
+const EmployeeNavbar: React.FC = () => {
 
   const managerProfile = useMemo(() => {
     try {
@@ -64,4 +64,4 @@ const ManagerNavbar: React.FC = () => {
   );
 };
 
-export default ManagerNavbar;
+export default EmployeeNavbar;

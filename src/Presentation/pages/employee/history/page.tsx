@@ -4,6 +4,7 @@ import useEmployeeHistory from './../../../hooks/useEmployeeHistory';
 import { PayrollEntry } from '../../../../domain/entities/EmployeeHistoryEntities';
 import PayrollEntryDetailsModal from '../../../components/PayrollEntryDetailsModal';
 import { Loader2, TrendingUp, CheckCircle, Clock, XCircle, DollarSign, FileText, Eye } from 'lucide-react';
+import EmployeeNavbar from '../../../components/EmployeeNavbar';
 
 const EmployeeHistoryPage = () => {
     const token = localStorage.getItem('token');
@@ -92,8 +93,10 @@ const EmployeeHistoryPage = () => {
     }
 
     return (
-        <div className="min-h-screen w-full bg-gray-50 p-6">
-            <div className="w-full mx-auto">
+        <div className="min-h-screen w-full bg-gray-50 ">
+                  <EmployeeNavbar />
+            
+            <div className="max-w-6xl mx-auto p-6">
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">Payroll History</h1>

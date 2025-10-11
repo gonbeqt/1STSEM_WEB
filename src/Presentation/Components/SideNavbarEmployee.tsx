@@ -47,7 +47,7 @@ const SideNavbarEmployee = () => {
 
   return (
     <div
-      className={`${isExpanded ? 'w-52' : 'w-16'} h-screen bg-white bg-opacity-10 text-white p-4 m-1 flex flex-col sticky top-2 rounded-xl border border-white border-opacity-30 backdrop-blur-lg transition-all duration-300 shadow-lg overflow-hidden`}
+      className={`${isExpanded ? 'w-52' : 'w-16'} h-screen bg-white text-gray-800 p-4 flex flex-col sticky top-0 transition-all duration-300 shadow-sm overflow-hidden`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

@@ -316,7 +316,7 @@ const Home = observer(() => {
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
-                <p className="text-sm text-gray-500">Overview of your organization — balances, recent activity, and quick actions.</p>
+          <p className="text-sm text-gray-500">Overview of your organization — balances, recent activity, and quick actions.</p>
         </div>
         {/* Connected Wallet Card */}
         <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl mb-6 relative">
