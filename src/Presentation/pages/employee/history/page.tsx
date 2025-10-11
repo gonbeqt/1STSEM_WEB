@@ -1,5 +1,4 @@
 import{ useEffect, useState } from 'react';
- 
 import useEmployeeHistory from './../../../hooks/useEmployeeHistory';
 import { PayrollEntry } from '../../../../domain/entities/EmployeeHistoryEntities';
 import PayrollEntryDetailsModal from '../../../components/PayrollEntryDetailsModal';

@@ -209,7 +209,7 @@ const EmployeeHome = observer(() => {
       <EmployeeNavbar />
 
 
-      <div className="max-w-6xl mx-auto p-6">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
           <p className="text-sm text-gray-500">Your personal dashboard — balances, upcoming payouts, and recent activity.</p>
@@ -217,8 +217,8 @@ const EmployeeHome = observer(() => {
 
 
 
-        {/* Wallet Balance Card */}
-        <div className="mx-5 my-5 bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl relative">
+  {/* Wallet Balance Card */}
+  <div className="my-5 sm:mx-5 bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl relative">
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-medium text-purple-100">Current Wallet</span>
             {isWalletConnected && (
@@ -354,8 +354,8 @@ const EmployeeHome = observer(() => {
         </div>
 
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 mb-8">
+  {/* Action Buttons */}
+  <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1 bg-gray-100 border border-gray-200 rounded-2xl p-4 text-gray-800 flex items-center gap-3 transition-colors duration-200 hover:bg-gray-200">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-purple-500">📤</div>
             <div className="text-left">
@@ -374,23 +374,24 @@ const EmployeeHome = observer(() => {
         </div>
 
         {/* Recent Transactions */}
-        <div className="flex justify-between items-center px-5 my-6 bg-transparent">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-0 sm:px-5 my-6 bg-transparent">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 m-0">Recent Transactions</h2>
             <p className="text-sm text-gray-600 mt-1">Showing all recent transactions</p>
           </div>
-          <div
-            className="flex items-center gap-1 text-indigo-600 text-sm font-medium cursor-pointer transition-colors hover:text-indigo-700"
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-indigo-600 text-sm font-medium self-start sm:self-center transition-colors hover:text-indigo-700"
             onClick={refreshTransactions}
           >
             <span>Refresh</span>
             <ChevronRight className="w-4 h-4" />
-          </div>
+          </button>
         </div>
 
-        <div className="mx-5 mb-8 rounded-xl overflow-hidden min-h-[200px]">
+        <div className="mb-8 sm:mx-5 rounded-xl overflow-hidden min-h-[200px]">
           {isLoadingTransactions ? (
-            <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
               <div className="flex items-center gap-4">
                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                 <div className="flex-1">
@@ -399,7 +400,7 @@ const EmployeeHome = observer(() => {
               </div>
             </div>
           ) : transactionError ? (
-            <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="text-sm font-medium text-gray-900">Error loading transactions</div>
@@ -408,7 +409,7 @@ const EmployeeHome = observer(() => {
               </div>
             </div>
           ) : transactionData.length === 0 ? (
-            <div className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="text-sm font-medium text-gray-900">No transactions found</div>
@@ -419,13 +420,13 @@ const EmployeeHome = observer(() => {
           ) : (
             <div className="space-y-2">
               {transactionData.map((transaction, index) => (
-                <div key={index} className="flex justify-between items-center p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
-                  <div className="flex items-center gap-4 flex-1">
+                <div key={index} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+                  <div className="flex items-start sm:items-center gap-4 flex-1 w-full">
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
                       <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
                     </div>
                   </div>
-                  <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap ${transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
+                  <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap sm:text-right ${transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
                     }`}>
                     {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
                     {(transaction.amount || 0).toFixed(4)} {transaction.token_symbol || 'ETH'}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 
 import SideNavbar from './presentation/components/SideNavbar';
@@ -22,7 +23,6 @@ import Invest from './presentation/pages/manager/reports/Invest/Invest';
 import PayrollSummary from './presentation/pages/manager/reports/PayrollSummary/PayrollSummary';
 import CompliancePage from './presentation/pages/manager/profile/compliance/page';
 import EmployeeHome from './presentation/pages/employee/home/page';
-import EmployeePayslip from './presentation/pages/employee/payslip/page';
 import EmployeeHistory from './presentation/pages/employee/history/page';
 
 
@@ -37,20 +37,28 @@ import { container } from './di/container'; // Import the container
 const ManagerLayout = () => (
   <div className="flex min-h-screen bg-gray-50">
     <SideNavbar />
-    <main className="flex-grow flex flex-col items-start justify-start   bg-gray-50">
+    <main className="flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 lg:pl-64 transition-all duration-300">
       <Outlet />
     </main>
   </div>
 );
 
-const EmployeeLayout = () => (
-  <div className="flex min-h-screen bg-gray-50">
-    <SideNavbarEmployee />
-    <main className="flex-grow flex flex-col items-start justify-start   bg-gray-50">
-      <Outlet />
-    </main>
-  </div>
-);
+const EmployeeLayout = () => {
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <SideNavbarEmployee onExpansionChange={setIsSidebarExpanded} />
+      <main
+        className={`flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 transition-all duration-300 ${
+          isSidebarExpanded ? 'lg:pl-52' : 'lg:pl-16'
+        }`}
+      >
+        <Outlet />
+      </main>
+    </div>
+  );
+};
 
 function App() {
   const walletViewModel = container.walletViewModel();
@@ -99,7 +107,6 @@ function App() {
               <MiddlewareRoute isAuthenticated={true} role="employee" requiredRole="employee">
                 <EmployeeHome />
               </MiddlewareRoute>} />
-            <Route path="/employee/payslip" element={<EmployeePayslip />} />
             <Route path="/employee/history" element={<EmployeeHistory />} />
 
             <Route path="/employee/settings" element={<EmployeeSettings />} />

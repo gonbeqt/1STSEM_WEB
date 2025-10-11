@@ -1,11 +1,15 @@
 // src/Presentation/Components/SideNavbarEmployee.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, History, Settings, LogOut } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 
-const SideNavbarEmployee = () => {
+type SideNavbarEmployeeProps = {
+  onExpansionChange?: (isExpanded: boolean) => void;
+};
+
+const SideNavbarEmployee: React.FC<SideNavbarEmployeeProps> = ({ onExpansionChange }) => {
   const navigate = useNavigate();
   const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
   const [isExpanded, setIsExpanded] = useState(false);
@@ -45,9 +49,24 @@ const SideNavbarEmployee = () => {
     setIsPermanentlyExpanded(true);
   };
 
+  const navItems = useMemo(
+    () => [
+      { to: '/employee/home', label: 'Home', Icon: Home },
+      { to: '/employee/history', label: 'History', Icon: History },
+      { to: '/employee/settings', label: 'Settings', Icon: Settings },
+    ],
+    []
+  );
+
+  useEffect(() => {
+    onExpansionChange?.(isExpanded || isPermanentlyExpanded);
+  }, [isExpanded, isPermanentlyExpanded, onExpansionChange]);
+
+  const widthClass = isExpanded ? 'lg:w-52' : 'lg:w-16';
+
   return (
     <div
-      className={`${isExpanded ? 'w-52' : 'w-16'} h-screen bg-white text-gray-800 p-4 flex flex-col sticky top-0 transition-all duration-300 shadow-sm overflow-hidden`}
+      className={`${widthClass} w-0 hidden lg:flex fixed left-0 top-0 h-screen bg-white text-gray-800 p-4 flex-col transition-all duration-300 shadow-sm overflow-hidden z-40`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -73,59 +92,35 @@ const SideNavbarEmployee = () => {
         )}
       </div>
 
-      <ul className="list-none p-0 flex-grow m-0">
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/employee/home" 
-            className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
-                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <Home className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Home</span>}
-          </NavLink>
-        </li>
-        
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/employee/history" 
-            className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
-                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <History className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">History</span>}
-          </NavLink>
-        </li>
-        
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/employee/settings" 
-            className={({ isActive }) => 
-              `text-black no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20  ${
-                isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <Settings className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Settings</span>}
-          </NavLink>
-        </li>
+      <ul className="list-none p-0 flex-grow m-0 space-y-3">
+        {navItems.map(({ to, label, Icon }) => (
+          <li key={to} className="p-0">
+            <NavLink
+              to={to}
+              className={({ isActive }) =>
+                `text-black no-underline text-base flex items-center ${isExpanded ? 'justify-start gap-3' : 'justify-center'} p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 ${
+                  isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
+                }`
+              }
+              onClick={handleNavClick}
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
+                  {isExpanded && <span className="opacity-100 transition-opacity duration-300">{label}</span>}
+                </>
+              )}
+            </NavLink>
+          </li>
+        ))}
       </ul>
 
       <button 
         onClick={handleLogout} 
-        className="bg-transparent border-none text-black text-base flex items-center p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none"
+        className={`bg-transparent border-none text-black text-base flex items-center ${isExpanded ? 'gap-3 justify-start' : 'justify-center'} p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none`}
       >
-        <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
+        <LogOut className="w-6 h-6 flex-shrink-0 stroke-gray-700" />
+        {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
       </button>
     </div>
   );
