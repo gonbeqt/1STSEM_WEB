@@ -107,11 +107,9 @@ const ManagerInvoicePage: React.FC = () => {
 
     return (
       <div className="overflow-hidden">
-
-
         {/* Search */}
         <div className="mb-6">
-          <div className="flex-1">
+          <div className="w-full">
             <InputWithIcon
               icon={<SearchIcon />}
               placeholder="Search invoice..."
@@ -122,7 +120,7 @@ const ManagerInvoicePage: React.FC = () => {
         </div>
 
         {/* Invoice List */}
-        <div >
+        <div className="space-y-4">
           {displayedInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-16 text-center min-h-[300px] text-gray-500">
               <div className="mb-6 text-gray-300">
@@ -151,27 +149,27 @@ const ManagerInvoicePage: React.FC = () => {
             displayedInvoices.map((invoice: Invoice) => (
               <div
                 key={invoice._id}
-                className="relative border-2 border-gray-100 rounded-2xl p-6 mb-4 bg-white cursor-pointer transition-all hover:border-indigo-100 hover:shadow-2xl hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-[-2px] animate-fadeIn before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-indigo-500 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                className="relative border-2 border-gray-100 rounded-2xl p-6 bg-white cursor-pointer transition-all hover:border-indigo-100 hover:shadow-2xl hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-[-2px] animate-fadeIn before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-indigo-500 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                 tabIndex={0}
               >
-                <div className="flex justify-between items-start mb-5 gap-6 sm:flex-col sm:gap-4 sm:mb-4">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-5 gap-4 md:gap-6">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-bold text-gray-900 m-0 mb-3 leading-tight break-words sm:text-base hover:text-purple-500 transition-colors">
                       {invoice.client_name || `Client for Invoice ${invoice.invoice_id}`}
                     </h3>
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[13px] text-purple-500 font-semibold uppercase tracking-wide">{invoice.invoice_id}</span>
-                      <span className="text-[13px] text-gray-500 font-medium">Created: {formatDate(invoice.createdAt)}</span>
+                      <span className="text-[13px] text-gray-500 font-medium">Created: {formatDate(invoice.created_at)}</span>
                       {invoice.description && (
                         <p className="text-[13px] text-gray-400 font-normal m-0 mt-1 leading-relaxed">{invoice.description}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-start sm:justify-between sm:w-full">
-                    <div className="text-xl font-extrabold text-gray-900 tracking-tight sm:text-lg hover:text-purple-500 transition-colors">
+                  <div className="flex flex-col md:items-end gap-3 md:w-auto md:text-right">
+                    <div className="text-xl font-extrabold text-gray-900 tracking-tight md:text-lg hover:text-purple-500 transition-colors">
                       {formatAmount(invoice.total_amount, invoice.currency)}
                     </div>
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide ${invoice.status === 'paid' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-300' : invoice.status === 'pending' ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-400' : 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300'}`}>
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide ${invoice.status === 'paid' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-300' : invoice.status === 'pending' ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-400' : 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300'}`}>
                       <span className={`status-icon ${invoice.status === 'paid' ? 'text-green-500' : invoice.status === 'pending' ? 'text-amber-500' : 'text-red-500'}`}>
                         {getStatusIcon(invoice.status)}
                       </span>
@@ -180,7 +178,7 @@ const ManagerInvoicePage: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-5 py-2.5 rounded-lg text-[13px] font-semibold uppercase tracking-wide hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2 sm:w-full sm:mt-3 sm:py-3"
+                  className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-5 py-3 rounded-lg text-[13px] font-semibold uppercase tracking-wide hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
                   onClick={() => handleViewDetails(invoice._id)}
                 >
                   View Details
@@ -197,13 +195,13 @@ const ManagerInvoicePage: React.FC = () => {
     <div className="min-h-screen w-full bg-gray-50">
       <ManagerNavbar />
 
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
           <p className="text-sm text-gray-500">Manage and track all your invoices in one place.</p>
         </div>
 
-        <div className="flex flex-col w-full font-sans gap-6 md:p-0 sm:p-0">
+        <div className="flex flex-col w-full font-sans gap-6">
           {renderContent()}
         </div>
       </div>

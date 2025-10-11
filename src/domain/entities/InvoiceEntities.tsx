@@ -11,8 +11,8 @@ export interface Invoice {
     status: string;
     total_amount: number;
     currency: string;
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
     invoice_id:string;
     invoice_number:string;
     client_name?: string;

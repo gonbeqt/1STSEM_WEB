@@ -47,7 +47,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
     doc.text(`Invoice #${invoice.invoice_number || invoice._id}`, 14, 20);
 
     doc.setFontSize(12);
-    doc.text(`Issued: ${new Date(invoice.createdAt).toLocaleDateString()}`, 14, 30);
+    doc.text(`Issued: ${new Date(invoice.created_at).toLocaleDateString()}`, 14, 30);
     doc.text(`Status: ${invoice.status}`, 14, 40);
 
     doc.text("Bill To:", 14, 55);
@@ -179,7 +179,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
           <div>
             <div className="mb-1">
               <h2 className="text-xl font-bold mb-1">Invoice #{invoice.invoice_number || invoice._id}</h2>
-              <p className="text-gray-500 text-sm">Issued {new Date(invoice.createdAt).toLocaleDateString()}</p>
+              <p className="text-gray-500 text-sm">Issued {new Date(invoice.created_at).toLocaleDateString()}</p>
             </div>
           </div>
           <div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { container } from '../../../../../di/container';
 import { useEmployeeViewModel } from '../../../../../domain/viewmodel/EmployeeViewModel';
 import { AddEmployeeRequest, AddEmployeeResponse } from '../../../../../domain/repositories/EmployeeRepository';
-import { ArrowLeft } from 'lucide-react';
 
 interface AddEmployeeData {
   email: string;
@@ -130,11 +129,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000] px-4">
-        <div className="bg-white rounded-xl w-full max-w-[760px] max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000] px-4 py-6 sm:py-0">
+        <div className="bg-white rounded-xl w-full max-w-[760px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 relative">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 pb-4 border-b border-gray-200 relative">
+            <div className="flex items-start sm:items-center gap-4">
               
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 m-0">Add Employee to Team</h2>
@@ -145,7 +144,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
             <button
               onClick={handleClose}
               disabled={isLoading}
-              className="p-2 rounded-md text-gray-500 hover:bg-gray-100 transition-colors"
+              className="self-stretch sm:self-auto px-4 py-2 rounded-md text-gray-500 bg-gray-100 sm:bg-transparent hover:bg-gray-100 transition-colors"
               aria-label="Close"
             >
               Close
@@ -154,7 +153,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
 
           {/* Body */}
           <div className="p-6 max-h-[560px] overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Left column */}
               <div className="flex flex-col gap-5">
                 {/* Email Field */}
@@ -256,16 +255,16 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end items-center p-4 pt-4 border-t border-gray-200 bg-gray-50 gap-3">
+          <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center p-4 pt-4 border-t border-gray-200 bg-gray-50 gap-3">
             <button 
-              className="bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleClose}
               disabled={isLoading}
             >
               Cancel
             </button>
             <button 
-              className={`bg-purple-500 text-white border-none px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed relative min-w-[120px] ${isLoading ? 'after:content-[\'\'] after:absolute after:w-4 after:h-4 after:border-2 after:border-t-white after:border-transparent after:rounded-full after:animate-spin after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2' : ''}`}
+              className={`w-full sm:w-auto bg-purple-500 text-white border-none px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed relative min-w-[120px] ${isLoading ? 'after:content-[\'\'] after:absolute after:w-4 after:h-4 after:border-2 after:border-t-white after:border-transparent after:rounded-full after:animate-spin after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2' : ''}`}
               onClick={handleSubmit}
               disabled={isLoading}
             >
