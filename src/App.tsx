@@ -34,14 +34,20 @@ import MiddlewareRoute from './middleware/AuthMiddleware';
 import { container } from './di/container'; // Import the container
 
 
-const ManagerLayout = () => (
-  <div className="flex min-h-screen bg-gray-50">
-    <SideNavbar />
-    <main className="flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 lg:pl-64 transition-all duration-300">
-      <Outlet />
-    </main>
-  </div>
-);
+const ManagerLayout = () => {
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <SideNavbar onExpansionChange={setIsSidebarExpanded} />
+      <main
+        className={`flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 transition-all duration-300 ${isSidebarExpanded ? 'lg:pl-52' : 'lg:pl-16'
+          }`}
+      >        <Outlet />
+      </main>
+    </div>
+  );
+};
 
 const EmployeeLayout = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -50,9 +56,8 @@ const EmployeeLayout = () => {
     <div className="flex min-h-screen bg-gray-50">
       <SideNavbarEmployee onExpansionChange={setIsSidebarExpanded} />
       <main
-        className={`flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 transition-all duration-300 ${
-          isSidebarExpanded ? 'lg:pl-52' : 'lg:pl-16'
-        }`}
+        className={`flex-grow flex flex-col items-start justify-start bg-gray-50 w-full pl-0 transition-all duration-300 ${isSidebarExpanded ? 'lg:pl-52' : 'lg:pl-16'
+          }`}
       >
         <Outlet />
       </main>
@@ -78,7 +83,7 @@ function App() {
           } />
           <Route path="/email-verification" element={<EmailVerification />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />          
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ManagerLayout />}>
             <Route path="/home" element={
               <MiddlewareRoute isAuthenticated={true} role="manager" requiredRole="manager">

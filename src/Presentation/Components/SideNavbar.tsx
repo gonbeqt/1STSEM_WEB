@@ -1,15 +1,22 @@
 // src/Presentation/Components/SideNavbar.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Home, Users, FileText, BarChart2, Settings, LogOut } from 'lucide-react';
+import { Home, Users, FileText, BarChart2, Settings, LogOut, X } from 'lucide-react';
 
-const SideNavbar = () => {
+type SideNavbarProps = {
+  onExpansionChange?: (isExpanded: boolean) => void;
+};
+
+
+const SideNavbar: React.FC<SideNavbarProps> = ({  onExpansionChange }) => {
   const navigate = useNavigate();
   const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false);
+
+ 
 
   useEffect(() => {
     if (!loginViewModel.isLoggedIn) {
@@ -45,9 +52,26 @@ const SideNavbar = () => {
     setIsPermanentlyExpanded(true);
   };
 
+ const navItems = useMemo(
+    () => [
+      { to: '/home', label: 'Home', Icon: Home },
+      { to: '/management', label: 'Management', Icon: Users },
+      { to: '/invoice', label: 'Invoice', Icon: FileText },
+      { to: '/reports', label: 'Reports', Icon: BarChart2 },
+      { to: '/settings', label: 'Settings', Icon: Settings },
+    ],
+    []
+  );
+    const widthClass = isExpanded ? 'lg:w-52' : 'lg:w-16';
+
+  useEffect(() => {
+    onExpansionChange?.(isExpanded || isPermanentlyExpanded);
+  }, [isExpanded, isPermanentlyExpanded, onExpansionChange]);
+
   return (
     <div 
-      className={`${isExpanded ? 'w-52' : 'w-16'} h-screen bg-white text-gray-800 p-4 flex flex-col sticky top-0 transition-all duration-300 shadow-sm overflow-hidden`}
+          className={`${widthClass} w-0 hidden lg:flex fixed left-0 top-0 h-screen bg-white text-gray-800 p-4 flex-col transition-all duration-300 shadow-sm overflow-hidden z-40`}
+
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
