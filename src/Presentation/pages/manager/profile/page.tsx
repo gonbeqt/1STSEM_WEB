@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
+import ManagerNavbar from '../../../components/ManagerNavbar';
 
 interface MenuItem {
   icon: string;
@@ -77,7 +78,12 @@ const Profile: React.FC = () => {
         .icon.document::before { content: "📄"; }
         .icon.help::before { content: "❓"; }
       `}</style>
-      <div className="sidebar flex flex-col w-full min-h-screen bg-gray-50 font-sans p-6 gap-6 xl:p-5 md:p-4 sm:w-full sm:min-h-fit sm:max-h-screen ">
+      
+      <div className="min-h-screen w-full bg-gray-50">
+      <ManagerNavbar />
+          
+        <div className="p-6">
+
         {user ? (
           <div 
             className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg transition-all duration-300 hover:shadow-xl "
@@ -161,6 +167,7 @@ const Profile: React.FC = () => {
             ))}
           </div>
         </nav>
+      </div>
       </div>
     </>
   );

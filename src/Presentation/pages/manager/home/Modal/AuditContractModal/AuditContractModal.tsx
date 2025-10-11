@@ -614,7 +614,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                     {currentStep < 4 && (
                         <button 
                             onClick={handleNext} 
-                            className={`inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0 ${
+                            className={`mb-6 inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0 ${
                                 (currentStep === 1 && (!selectedFile || !contractName)) || isLoading ? 'opacity-50 cursor-not-allowed transform-none shadow-none' : ''
                             }`}
                             disabled={(currentStep === 1 && (!selectedFile || !contractName)) || isLoading}

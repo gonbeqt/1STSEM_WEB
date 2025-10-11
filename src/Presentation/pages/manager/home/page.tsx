@@ -313,7 +313,7 @@ const Home = observer(() => {
       <ManagerNavbar />
 
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
           <p className="text-sm text-gray-500">Overview of your organization — balances, recent activity, and quick actions.</p>
@@ -321,11 +321,11 @@ const Home = observer(() => {
         {/* Connected Wallet Card */}
         <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl mb-6 relative">
 
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
             <span className="text-sm font-medium text-purple-100">
               Current Wallet
             </span>
-            {isWalletConnected && (
+                {isWalletConnected && (
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -403,7 +403,7 @@ const Home = observer(() => {
                 </div>
 
                 {walletAddress && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <button
                       onClick={copyToClipboard}
                       className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-opacity-30 transition-all"
@@ -420,21 +420,21 @@ const Home = observer(() => {
                 {isFetchingBalance ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-2xl font-bold">Loading...</span>
+                    <span className="text-xl sm:text-2xl font-bold">Loading...</span>
                   </div>
                 ) : ethBalance !== null ? (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <EthereumIcon className="w-8 h-8 text-white" />
-                    <h2 className="text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
+                    <h2 className="text-3xl sm:text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
                   </div>
                 ) : (
-                  <h2 className="text-5xl font-bold">0.000000 ETH</h2>
+                  <h2 className="text-3xl sm:text-5xl font-bold">0.000000 ETH</h2>
                 )}
               </div>
 
               {/* Converted Balance */}
               {ethBalance && ethBalance > 0 && (
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
                     <p className="text-sm text-purple-100">Converted to {conversionCurrency}</p>
                     {isAutoConverting ? (
@@ -472,7 +472,7 @@ const Home = observer(() => {
         {/* Quick Actions */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             <button
               onClick={handleSendPayment}
               className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
@@ -561,24 +561,24 @@ const Home = observer(() => {
               transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${index !== arr.length - 1 ? 'border-b border-gray-100' : ''
+                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-gray-50 transition-colors ${index !== arr.length - 1 ? 'border-b border-gray-100' : ''
                     }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 mb-3 sm:mb-0">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'
                       }`}>
                       {tx.icon}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{tx.name}</p>
-                      <p className="text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
+                      <p className="font-medium text-gray-900 text-sm sm:text-base">{tx.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-semibold ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
+                    <p className={`font-semibold text-sm sm:text-base ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
                       {tx.type === 'outflow' ? '-' : '+'}{(tx.amount || 0).toFixed(4)} {tx.token_symbol}
                     </p>
-                    <p className="text-sm text-gray-500">{tx.date}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{tx.date}</p>
                   </div>
                 </div>
               ))

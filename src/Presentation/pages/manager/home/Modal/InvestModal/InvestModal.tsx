@@ -185,7 +185,7 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             {currentView === 'sendeth' && (
               <button
@@ -241,7 +241,7 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                   </div>
                   <button
                     onClick={handleStartAdd}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors flex items-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors flex items-center gap-2 justify-center"
                   >
                     <Plus className="w-5 h-5" />
                     Add Entry
@@ -339,11 +339,11 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                         />
                       </div>
                     </div>
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
                       <button
                         onClick={editingEntry ? handleUpdateEntry : handleAddEntry}
                         disabled={isLoading}
-                        className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2 justify-center"
                       >
                         {isLoading ? (
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -354,7 +354,7 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                       </button>
                       <button
                         onClick={editingEntry ? handleCancelEdit : handleCancelAdd}
-                        className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                        className="w-full sm:w-auto px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
                       >
                         Cancel
                       </button>
@@ -377,7 +377,7 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                     filteredEntries.map((entry) => (
                       <div
                         key={entry.address}
-                        className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
@@ -394,23 +394,23 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                             <p className="text-sm text-gray-500 mt-1">{entry.notes}</p>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
                           <button
                             onClick={() => handleSelectEntryForInvestment(entry)}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                            className="w-full sm:w-auto px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 justify-center"
                           >
                             <Send className="w-4 h-4" />
                             Send ETH
                           </button>
                           <button
                             onClick={() => handleStartEdit(entry)}
-                            className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            className="w-full sm:w-auto p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center justify-center"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteEntry(entry.address)}
-                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="w-full sm:w-auto p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -545,11 +545,11 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                     />
                     </div>
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
                       <button
                         onClick={handleSendEth}
                         disabled={isSendingEth || !recipientAddress || !amount}
-                        className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2 justify-center"
                       >
                         {isSendingEth ? (
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -560,7 +560,7 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                       </button>
                       <button
                         onClick={() => setCurrentView('addressbook')}
-                        className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                        className="w-full sm:w-auto px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
                       >
                         Back to Address Book
                       </button>
