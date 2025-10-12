@@ -261,3 +261,83 @@ export interface TaxAnalysisResponse {
   };
   error?: string;
 }
+
+export type RiskAnalysisPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+
+export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface RiskAnalysisAlert {
+  id?: string;
+  title: string;
+  description?: string;
+  severity: RiskSeverity;
+  recommendation?: string;
+  category?: string;
+  metric_change?: string;
+}
+
+export interface RiskAnalysisMetrics {
+  [metric: string]: number | string | null | undefined;
+}
+
+export interface RiskAnalysisOverview {
+  analysis_id?: string;
+  period_type: RiskAnalysisPeriod;
+  generated_at?: string;
+  summary?: string;
+  ai_overview?: string;
+  key_findings?: string[];
+  risk_score?: number;
+  risk_level?: RiskSeverity;
+  liquidity_risk?: number;
+  cash_flow_risk?: number;
+  compliance_risk?: number;
+  alerts?: RiskAnalysisAlert[];
+  recommendations?: string[];
+  action_items?: string[];
+  metrics?: RiskAnalysisMetrics;
+  metadata?: Record<string, any>;
+}
+
+export interface RiskAnalysisGenerateRequest {
+  date?: string;
+  start_date?: string;
+  year?: number;
+  month?: number;
+  quarter?: number;
+}
+
+export interface RiskAnalysisResponse {
+  success: boolean;
+  period_type: RiskAnalysisPeriod;
+  risk_analysis: RiskAnalysisOverview;
+  message?: string;
+  error?: string;
+}
+
+export interface RiskAnalysisHistoryEntry {
+  analysis_id: string;
+  period_type: RiskAnalysisPeriod;
+  generated_at: string;
+  risk_level?: RiskSeverity;
+  risk_score?: number;
+  summary?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface RiskAnalysisHistoryParams {
+  period_type?: RiskAnalysisPeriod;
+  limit?: number;
+  date?: string;
+  start_date?: string;
+  year?: number;
+  month?: number;
+  quarter?: number;
+}
+
+export interface RiskAnalysisHistoryResponse {
+  success: boolean;
+  risk_analyses: RiskAnalysisHistoryEntry[];
+  count: number;
+  error?: string;
+}

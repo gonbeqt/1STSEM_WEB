@@ -4,16 +4,19 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, History, Settings, LogOut } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
+import { observer } from 'mobx-react-lite';
+import LogoutConfirmModal from './LogoutConfirmModal';
 
 type SideNavbarEmployeeProps = {
   onExpansionChange?: (isExpanded: boolean) => void;
 };
 
-const SideNavbarEmployee: React.FC<SideNavbarEmployeeProps> = ({ onExpansionChange }) => {
+const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpansionChange }) => {
   const navigate = useNavigate();
   const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     if (!loginViewModel.isLoggedIn) {
@@ -22,9 +25,20 @@ const SideNavbarEmployee: React.FC<SideNavbarEmployeeProps> = ({ onExpansionChan
     }
   }, [loginViewModel.isLoggedIn, navigate]);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleCancelLogout = () => {
+    if (!loginViewModel.isLoggingOut) {
+      setShowLogoutModal(false);
+    }
+  };
+
+  const handleConfirmLogout = async () => {
     const success = await loginViewModel.logout();
     if (success) {
+      setShowLogoutModal(false);
       navigate('/login');
     }
   };
@@ -116,14 +130,22 @@ const SideNavbarEmployee: React.FC<SideNavbarEmployeeProps> = ({ onExpansionChan
       </ul>
 
       <button 
-        onClick={handleLogout} 
+        onClick={handleLogoutClick} 
         className={`bg-transparent border-none text-black text-base flex items-center ${isExpanded ? 'gap-3 justify-start' : 'justify-center'} p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none`}
       >
         <LogOut className="w-6 h-6 flex-shrink-0 stroke-gray-700" />
         {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}
       </button>
+
+      <LogoutConfirmModal
+        open={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+        isProcessing={loginViewModel.isLoggingOut}
+        errorMessage={loginViewModel.logoutError}
+      />
     </div>
   );
 };
 
-export default SideNavbarEmployee;
+export default observer(SideNavbarEmployeeComponent);

@@ -153,7 +153,7 @@ const EmployeeManagement: React.FC = () => {
     <div className="min-h-screen w-full bg-gray-50">
             <ManagerNavbar />
       
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="w-full mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Employee List</h1>

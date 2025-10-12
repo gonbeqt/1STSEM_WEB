@@ -45,7 +45,7 @@ const EmployeeNavbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div className="w-full mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
             <span className="text-indigo-600 text-sm font-semibold">{initials}</span>

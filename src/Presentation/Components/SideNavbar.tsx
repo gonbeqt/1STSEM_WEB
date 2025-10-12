@@ -3,18 +3,21 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Home, Users, FileText, BarChart2, Settings, LogOut, X } from 'lucide-react';
+import { Home, Users, FileText, BarChart2, Settings, LogOut } from 'lucide-react';
+import { observer } from 'mobx-react-lite';
+import LogoutConfirmModal from './LogoutConfirmModal';
 
 type SideNavbarProps = {
   onExpansionChange?: (isExpanded: boolean) => void;
 };
 
 
-const SideNavbar: React.FC<SideNavbarProps> = ({  onExpansionChange }) => {
+const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) => {
   const navigate = useNavigate();
   const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPermanentlyExpanded, setIsPermanentlyExpanded] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
  
 
@@ -25,9 +28,20 @@ const SideNavbar: React.FC<SideNavbarProps> = ({  onExpansionChange }) => {
     }
   }, [loginViewModel.isLoggedIn, navigate]);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleCancelLogout = () => {
+    if (!loginViewModel.isLoggingOut) {
+      setShowLogoutModal(false);
+    }
+  };
+
+  const handleConfirmLogout = async () => {
     const success = await loginViewModel.logout();
     if (success) {
+      setShowLogoutModal(false);
       navigate('/login');
     }
   };
@@ -176,15 +190,23 @@ const SideNavbar: React.FC<SideNavbarProps> = ({  onExpansionChange }) => {
       
       <div className="mb-4 p-0">
         <button 
-          onClick={handleLogout} 
+          onClick={handleLogoutClick} 
           className="text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-red-500 w-full "
         >
           <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
             {isExpanded && <span className="opacity-100 transition-opacity duration-300">Logout</span>}
         </button>
       </div>
+
+      <LogoutConfirmModal
+        open={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+        isProcessing={loginViewModel.isLoggingOut}
+        errorMessage={loginViewModel.logoutError}
+      />
     </div>
   );
 };
 
-export default SideNavbar;
+export default observer(SideNavbarComponent);

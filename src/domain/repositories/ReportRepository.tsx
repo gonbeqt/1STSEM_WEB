@@ -13,7 +13,12 @@ import {
   ExportReportResponse,
   ListReportsResponse,
   TaxAnalysisRequest,
-  TaxAnalysisResponse
+  TaxAnalysisResponse,
+  RiskAnalysisGenerateRequest,
+  RiskAnalysisHistoryParams,
+  RiskAnalysisHistoryResponse,
+  RiskAnalysisResponse,
+  RiskAnalysisPeriod
 } from '../entities/ReportEntities';
 
 export interface ReportRepository {
@@ -39,4 +44,13 @@ export interface ReportRepository {
   generateTaxAnalysisMonthly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse>;
   generateTaxAnalysisYearly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse>;
   generateTaxAnalysisCustom(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse>;
+
+  // AI Risk Analysis Operations
+  generateRiskAnalysisDaily(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse>;
+  generateRiskAnalysisWeekly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse>;
+  generateRiskAnalysisMonthly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse>;
+  generateRiskAnalysisQuarterly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse>;
+  generateRiskAnalysisYearly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse>;
+  getRiskAnalysisHistory(userId: string, params?: RiskAnalysisHistoryParams): Promise<RiskAnalysisHistoryResponse>;
+  getLatestRiskAnalysis(userId: string, periodType?: RiskAnalysisPeriod): Promise<RiskAnalysisResponse>;
 }

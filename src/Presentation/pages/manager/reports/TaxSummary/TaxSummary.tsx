@@ -35,7 +35,7 @@ const TaxSummary: React.FC = () => {
       const endDate = new Date().toISOString().split('T')[0]; // Today
       
       // Use the general tax analysis endpoint which is more stable
-      const response = await fetch(`${API_URL}/admin/tax-analysis/`, {
+      const response = await fetch(`${API_URL}/ai/tax-analysis/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

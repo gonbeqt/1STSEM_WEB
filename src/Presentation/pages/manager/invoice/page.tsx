@@ -211,7 +211,7 @@ const ManagerInvoicePage: React.FC = () => {
     <div className="min-h-screen w-full bg-gray-50">
       <ManagerNavbar />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <div className="w-full mx-auto px-4 sm:px-6 py-6">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
           <p className="text-sm text-gray-500">Manage and track all your invoices in one place.</p>

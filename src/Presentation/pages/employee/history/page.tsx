@@ -119,7 +119,7 @@ const EmployeeHistoryPage = () => {
         <div className="min-h-screen w-full bg-gray-50 ">
                   <EmployeeNavbar />
             
-            <div className="max-w-6xl mx-auto p-6">
+            <div className="w-full mx-auto p-6">
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">Payroll History</h1>

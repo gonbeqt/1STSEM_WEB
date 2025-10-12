@@ -10,7 +10,7 @@ export class ContractRepositoryImpl implements ContractRepository {
         formData.append('contract_file', file);
 
         try {
-            const response = await axios.post<UploadContractResponse>(`${API_URL}/admin/upload-contract/`, formData, {
+            const response = await axios.post<UploadContractResponse>(`${API_URL}/ai/upload-contract/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`,

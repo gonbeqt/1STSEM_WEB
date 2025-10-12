@@ -38,6 +38,15 @@ import {
   GenerateTaxAnalysisYearlyUseCase,
   GenerateTaxAnalysisCustomUseCase
 } from '../domain/usecases/ReportUseCases';
+import {
+  GenerateDailyRiskAnalysisUseCase,
+  GenerateWeeklyRiskAnalysisUseCase,
+  GenerateMonthlyRiskAnalysisUseCase,
+  GenerateQuarterlyRiskAnalysisUseCase,
+  GenerateYearlyRiskAnalysisUseCase,
+  GetRiskAnalysisHistoryUseCase,
+  GetLatestRiskAnalysisUseCase
+} from '../domain/usecases/RiskAnalysisUseCases';
 import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
 import { PayslipRepository } from '../domain/repositories/PayslipRepository';
 import { CreatePayslipUseCase } from '../domain/usecases/CreatePayslipUseCase';
@@ -98,6 +107,7 @@ import { EmployeeHistoryRepository } from '../domain/repositories/EmployeeHistor
 import { EmployeeHistoryRepositoryImpl } from '../data/repositoriesImpl/EmployeeHistoryRepositoryImpl';
 import { GetEmployeeHistoryUseCase, GetEmployeeHistoryUseCaseImpl } from '../domain/usecases/GetEmployeeHistoryUseCase';
 import { EmployeeHistoryViewModel } from '../domain/viewmodel/EmployeeHistoryViewModel';
+import { RiskAnalysisViewModel } from '../domain/viewmodel/RiskAnalysisViewModel';
 
 
 
@@ -172,6 +182,13 @@ export interface Container {
   generateTaxAnalysisMonthlyUseCase: GenerateTaxAnalysisMonthlyUseCase;
   generateTaxAnalysisYearlyUseCase: GenerateTaxAnalysisYearlyUseCase;
   generateTaxAnalysisCustomUseCase: GenerateTaxAnalysisCustomUseCase;
+  generateDailyRiskAnalysisUseCase: GenerateDailyRiskAnalysisUseCase;
+  generateWeeklyRiskAnalysisUseCase: GenerateWeeklyRiskAnalysisUseCase;
+  generateMonthlyRiskAnalysisUseCase: GenerateMonthlyRiskAnalysisUseCase;
+  generateQuarterlyRiskAnalysisUseCase: GenerateQuarterlyRiskAnalysisUseCase;
+  generateYearlyRiskAnalysisUseCase: GenerateYearlyRiskAnalysisUseCase;
+  getRiskAnalysisHistoryUseCase: GetRiskAnalysisHistoryUseCase;
+  getLatestRiskAnalysisUseCase: GetLatestRiskAnalysisUseCase;
 
   listSessionsUseCase: ListSessionsUseCase;
   revokeSessionUseCase: RevokeSessionUseCase;
@@ -196,6 +213,7 @@ export interface Container {
   emailVerificationViewModel: () => EmailVerificationViewModel;
   passwordResetViewModel: () => PasswordResetViewModel;
   employeeHistoryViewModel: () => EmployeeHistoryViewModel;
+  riskAnalysisViewModel: () => RiskAnalysisViewModel;
 
 
 }
@@ -276,6 +294,13 @@ const generateTaxAnalysisWeeklyUseCase = new GenerateTaxAnalysisWeeklyUseCase(re
 const generateTaxAnalysisMonthlyUseCase = new GenerateTaxAnalysisMonthlyUseCase(reportRepository);
 const generateTaxAnalysisYearlyUseCase = new GenerateTaxAnalysisYearlyUseCase(reportRepository);
 const generateTaxAnalysisCustomUseCase = new GenerateTaxAnalysisCustomUseCase(reportRepository);
+const generateDailyRiskAnalysisUseCase = new GenerateDailyRiskAnalysisUseCase(reportRepository);
+const generateWeeklyRiskAnalysisUseCase = new GenerateWeeklyRiskAnalysisUseCase(reportRepository);
+const generateMonthlyRiskAnalysisUseCase = new GenerateMonthlyRiskAnalysisUseCase(reportRepository);
+const generateQuarterlyRiskAnalysisUseCase = new GenerateQuarterlyRiskAnalysisUseCase(reportRepository);
+const generateYearlyRiskAnalysisUseCase = new GenerateYearlyRiskAnalysisUseCase(reportRepository);
+const getRiskAnalysisHistoryUseCase = new GetRiskAnalysisHistoryUseCase(reportRepository);
+const getLatestRiskAnalysisUseCase = new GetLatestRiskAnalysisUseCase(reportRepository);
 
 const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
 const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
@@ -360,6 +385,13 @@ export const container: Container = {
   generateTaxAnalysisMonthlyUseCase,
   generateTaxAnalysisYearlyUseCase,
   generateTaxAnalysisCustomUseCase,
+  generateDailyRiskAnalysisUseCase,
+  generateWeeklyRiskAnalysisUseCase,
+  generateMonthlyRiskAnalysisUseCase,
+  generateQuarterlyRiskAnalysisUseCase,
+  generateYearlyRiskAnalysisUseCase,
+  getRiskAnalysisHistoryUseCase,
+  getLatestRiskAnalysisUseCase,
 
   listSessionsUseCase,
   revokeSessionUseCase,
@@ -425,6 +457,15 @@ export const container: Container = {
     resetPasswordUseCase
   ),
   employeeHistoryViewModel: () => new EmployeeHistoryViewModel(getEmployeeHistoryUseCase),
+  riskAnalysisViewModel: () => new RiskAnalysisViewModel(
+    generateDailyRiskAnalysisUseCase,
+    generateWeeklyRiskAnalysisUseCase,
+    generateMonthlyRiskAnalysisUseCase,
+    generateQuarterlyRiskAnalysisUseCase,
+    generateYearlyRiskAnalysisUseCase,
+    getRiskAnalysisHistoryUseCase,
+    getLatestRiskAnalysisUseCase
+  ),
   forgotPasswordViewModel: function () {
     throw new Error('Function not implemented.');
   }

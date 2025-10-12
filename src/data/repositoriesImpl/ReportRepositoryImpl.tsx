@@ -11,11 +11,16 @@ import {
   ExportReportResponse,
   ListReportsResponse,
   TaxAnalysisRequest,
-  TaxAnalysisResponse
+  TaxAnalysisResponse,
+  RiskAnalysisGenerateRequest,
+  RiskAnalysisHistoryParams,
+  RiskAnalysisHistoryResponse,
+  RiskAnalysisResponse,
+  RiskAnalysisPeriod
 } from '../../domain/entities/ReportEntities';
 
 export class ReportRepositoryImpl implements ReportRepository {
-  private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
+  private readonly API_URL = process.env.REACT_APP_API_BASE_URL ?? '';
 
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('token');
@@ -342,6 +347,135 @@ export class ReportRepositoryImpl implements ReportRepository {
     } catch (error) {
       console.error('Custom tax analysis error:', error);
       throw error;
+    }
+  }
+
+  private async postRiskAnalysis(
+    endpoint: string,
+    payload: RiskAnalysisGenerateRequest,
+    defaultError: string
+  ): Promise<RiskAnalysisResponse> {
+    try {
+      const response = await fetch(`${this.API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(payload ?? {}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || data.message || defaultError);
+      }
+
+      return data;
+    } catch (error) {
+      console.error(`${defaultError}:`, error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(defaultError);
+    }
+  }
+
+  async generateRiskAnalysisDaily(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse> {
+    return this.postRiskAnalysis('/admin/ai/risk-analysis/daily/', request, 'Failed to generate daily risk analysis');
+  }
+
+  async generateRiskAnalysisWeekly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse> {
+    return this.postRiskAnalysis('/admin/ai/risk-analysis/weekly/', request, 'Failed to generate weekly risk analysis');
+  }
+
+  async generateRiskAnalysisMonthly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse> {
+    return this.postRiskAnalysis('/admin/ai/risk-analysis/monthly/', request, 'Failed to generate monthly risk analysis');
+  }
+
+  async generateRiskAnalysisQuarterly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse> {
+    return this.postRiskAnalysis('/admin/ai/risk-analysis/quarterly/', request, 'Failed to generate quarterly risk analysis');
+  }
+
+  async generateRiskAnalysisYearly(request: RiskAnalysisGenerateRequest): Promise<RiskAnalysisResponse> {
+    return this.postRiskAnalysis('/admin/ai/risk-analysis/yearly/', request, 'Failed to generate yearly risk analysis');
+  }
+
+  async getRiskAnalysisHistory(userId: string, params: RiskAnalysisHistoryParams = {}): Promise<RiskAnalysisHistoryResponse> {
+    try {
+      const query = new URLSearchParams();
+
+      if (params.period_type) {
+        query.append('period_type', params.period_type);
+      }
+      if (typeof params.limit === 'number') {
+        query.append('limit', params.limit.toString());
+      }
+      if (params.date) {
+        query.append('date', params.date);
+      }
+      if (params.start_date) {
+        query.append('start_date', params.start_date);
+      }
+      if (typeof params.year === 'number') {
+        query.append('year', params.year.toString());
+      }
+      if (typeof params.month === 'number') {
+        query.append('month', params.month.toString());
+      }
+      if (typeof params.quarter === 'number') {
+        query.append('quarter', params.quarter.toString());
+      }
+
+      const queryString = query.toString();
+      const url = `${this.API_URL}/admin/ai/risk-analysis/history/${userId}/${queryString ? `?${queryString}` : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || 'Failed to fetch risk analysis history');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Risk analysis history error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to fetch risk analysis history');
+    }
+  }
+
+  async getLatestRiskAnalysis(userId: string, periodType?: RiskAnalysisPeriod): Promise<RiskAnalysisResponse> {
+    try {
+      const query = new URLSearchParams();
+      if (periodType) {
+        query.append('period_type', periodType);
+      }
+
+      const queryString = query.toString();
+      const url = `${this.API_URL}/admin/ai/risk-analysis/latest/${userId}/${queryString ? `?${queryString}` : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || 'Failed to fetch latest risk analysis');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Latest risk analysis error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to fetch latest risk analysis');
     }
   }
 }
