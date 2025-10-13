@@ -4,12 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { container } from '../../../di/container';
 import { User, Lock, Mail, UserCheck, AlertCircle } from 'lucide-react';
+import TermsAndConditonsModal from '../../components/TermsAndConditonsModal';
 
 const Register = observer(() => {
   const navigate = useNavigate();
   const viewModel = useMemo(() => container.registerViewModel(), []);
   const { formData } = viewModel;
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isTermsModalOpen, setTermsModalOpen] = useState(false);
+
+  const handleOpenTermsModal = () => {
+    setTermsModalOpen(true);
+  };
+
+  const handleTermsAccept = () => {
+    viewModel.setAgreeToTerms(true);
+    setTermsModalOpen(false);
+  };
+
+  const handleTermsClose = () => {
+    setTermsModalOpen(false);
+  };
 
   // Validation helper functions
   const validateField = (name: string, value: string): string => {
@@ -148,227 +163,240 @@ const Register = observer(() => {
 // ...existing code...
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">
-      <div className="w-full max-w-md mx-auto p-8 text-gray-900 bg-white rounded-2xl shadow-xl animate-[slideIn_0.4s_ease-out]">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="mb-3 text-3xl font-bold text-purple-800">
-            Create Account
-          </h1>
-          <p className="text-center text-gray-600 text-base">
-            Sign up and simplify crypto bookkeeping and invoicing.
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {formData.error && (
-          <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-            {formData.error}
-          </div>
-        )}
-
-        {/* User Type Toggle */}
-        <div className="flex gap-3 mb-6">
-          <button
-            type="button"
-            className={`flex-1 p-4 border-2 rounded-xl cursor-pointer flex items-center justify-center gap-3 text-sm font-medium transition-all duration-200 ${
-              formData.userType === 'manager'
-                ? 'border-purple-500 bg-purple-50 text-purple-700 font-semibold shadow-sm'
-                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
-            }`}
-            onClick={() => viewModel.setUserType('manager')}
-          >
-            <User className="w-5 h-5" />
-            Manager
-          </button>
-          <button
-            type="button"
-            className={`flex-1 p-4 border-2 rounded-xl cursor-pointer flex items-center justify-center gap-3 text-sm font-medium transition-all duration-200 ${
-              formData.userType === 'employee'
-                ? 'border-purple-500 bg-purple-50 text-purple-700 font-semibold shadow-sm'
-                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
-            }`}
-            onClick={() => viewModel.setUserType('employee')}
-          >
-            <UserCheck className="w-5 h-5" />
-            Employee
-          </button>
-        </div>
-
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          
-          {/* First Name Field */}
-          <div>
-            <InputWithIcon
-              icon={<User className="w-5 h-5 text-gray-400" />}
-              type="text"
-              placeholder="First Name"
-              value={formData.first_name}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('first_name', e.target.value)}
-            />
-            {validationErrors.first_name && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.first_name}</span>
-              </div>
-            )}
+    <>
+      <div className="flex justify-center items-center min-h-screen p-5 box-border bg-gray-50">
+        <div className="w-full max-w-md mx-auto p-8 text-gray-900 bg-white rounded-2xl shadow-xl animate-[slideIn_0.4s_ease-out]">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="mb-3 text-3xl font-bold text-purple-800">
+              Create Account
+            </h1>
+            <p className="text-center text-gray-600 text-base">
+              Sign up and simplify crypto bookkeeping and invoicing.
+            </p>
           </div>
 
-          {/* Last Name Field */}
-          <div>
-            <InputWithIcon
-              icon={<User className="w-5 h-5 text-gray-400" />}
-              type="text"
-              placeholder="Last Name"
-              value={formData.last_name}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('last_name', e.target.value)}
-            />
-            {validationErrors.last_name && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.last_name}</span>
-              </div>
-            )}
-          </div>
+          {/* Error Message */}
+          {formData.error && (
+            <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+              {formData.error}
+            </div>
+          )}
 
-          {/* Username Field */}
-          <div>
-            <InputWithIcon
-              icon={<User className="w-5 h-5 text-gray-400" />}
-              type="text"
-              placeholder="Username"
-              value={formData.username}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('username', e.target.value)}
-            />
-            {validationErrors.username && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.username}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <InputWithIcon
-              icon={<Mail className="w-5 h-5 text-gray-400" />}
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('email', e.target.value)}
-            />
-            {validationErrors.email && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.email}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Password Field */}
-          <div>
-            <InputWithIcon
-              icon={<Lock className="w-5 h-5 text-gray-400" />}
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('password', e.target.value)}
-            />
-            {validationErrors.password && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.password}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Confirm Password Field */}
-          <div>
-            <InputWithIcon
-              icon={<Lock className="w-5 h-5 text-gray-400" />}
-              type="password"
-              placeholder="Confirm Password"
-              value={formData.password_confirm}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('password_confirm', e.target.value)}
-            />
-            {validationErrors.password_confirm && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.password_confirm}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Security Answer Field */}
-          <div>
-            <InputWithIcon
-              icon={<Mail className="w-5 h-5 text-gray-400" />}
-              type="text"
-              placeholder="Security Answer (e.g., My favorite pet is Max)"
-              value={formData.security_answer}
-              onChange={(e: { target: { value: string; }; }) => handleFieldChange('security_answer', e.target.value)}
-            />
-            {validationErrors.security_answer && (
-              <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{validationErrors.security_answer}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Terms and Conditions Checkbox */}
-          <div className="flex items-start gap-3 my-6">
-            <input
-              type="checkbox"
-              id="terms"
-              className="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
-              checked={formData.agreeToTerms}
-              onChange={(e) => viewModel.setAgreeToTerms(e.target.checked)}
-            />
-            <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
-              I agree to the{' '}
-              <a 
-                href="/terms" 
-                className="text-purple-600 no-underline hover:underline font-medium"
-              >
-                Terms and Conditions
-              </a>
-              {' '}and{' '}
-              <a 
-                href="/privacy" 
-                className="text-purple-600 no-underline hover:underline font-medium"
-              >
-                Privacy Policy
-              </a>
-              .
-            </label>
-          </div>
-
-          {/* Sign Up Button */}
-          <button 
-            type="submit" 
-            className="w-full p-4 bg-gradient-to-r from-purple-600 to-purple-700 border-none rounded-xl text-white text-base font-semibold cursor-pointer mb-6 transition-all duration-200 hover:shadow-lg hover:shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            disabled={formData.isLoading}
-          >
-            {formData.isLoading ? 'Signing up...' : 'Sign Up'}
-          </button>
-
-          {/* Login Link */}
-          <p className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <a 
-              href="/login" 
-              className="text-purple-600 no-underline font-medium hover:underline"
+          {/* User Type Toggle */}
+          <div className="flex gap-3 mb-6">
+            <button
+              type="button"
+              className={`flex-1 p-4 border-2 rounded-xl cursor-pointer flex items-center justify-center gap-3 text-sm font-medium transition-all duration-200 ${
+                formData.userType === 'manager'
+                  ? 'border-purple-500 bg-purple-50 text-purple-700 font-semibold shadow-sm'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+              }`}
+              onClick={() => viewModel.setUserType('manager')}
             >
-              Log in
-            </a>
-          </p>
-        </form>
+              <User className="w-5 h-5" />
+              Manager
+            </button>
+            <button
+              type="button"
+              className={`flex-1 p-4 border-2 rounded-xl cursor-pointer flex items-center justify-center gap-3 text-sm font-medium transition-all duration-200 ${
+                formData.userType === 'employee'
+                  ? 'border-purple-500 bg-purple-50 text-purple-700 font-semibold shadow-sm'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+              }`}
+              onClick={() => viewModel.setUserType('employee')}
+            >
+              <UserCheck className="w-5 h-5" />
+              Employee
+            </button>
+          </div>
+
+          {/* Registration Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {/* First Name Field */}
+            <div>
+              <InputWithIcon
+                icon={<User className="w-5 h-5 text-gray-400" />}
+                type="text"
+                placeholder="First Name"
+                value={formData.first_name}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('first_name', e.target.value)}
+              />
+              {validationErrors.first_name && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.first_name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Last Name Field */}
+            <div>
+              <InputWithIcon
+                icon={<User className="w-5 h-5 text-gray-400" />}
+                type="text"
+                placeholder="Last Name"
+                value={formData.last_name}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('last_name', e.target.value)}
+              />
+              {validationErrors.last_name && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.last_name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Username Field */}
+            <div>
+              <InputWithIcon
+                icon={<User className="w-5 h-5 text-gray-400" />}
+                type="text"
+                placeholder="Username"
+                value={formData.username}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('username', e.target.value)}
+              />
+              {validationErrors.username && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.username}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <InputWithIcon
+                icon={<Mail className="w-5 h-5 text-gray-400" />}
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('email', e.target.value)}
+              />
+              {validationErrors.email && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.email}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <InputWithIcon
+                icon={<Lock className="w-5 h-5 text-gray-400" />}
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('password', e.target.value)}
+              />
+              {validationErrors.password && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.password}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <InputWithIcon
+                icon={<Lock className="w-5 h-5 text-gray-400" />}
+                type="password"
+                placeholder="Confirm Password"
+                value={formData.password_confirm}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('password_confirm', e.target.value)}
+              />
+              {validationErrors.password_confirm && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.password_confirm}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Security Answer Field */}
+            <div>
+              <InputWithIcon
+                icon={<Mail className="w-5 h-5 text-gray-400" />}
+                type="text"
+                placeholder="Security Answer (e.g., My favorite pet is Max)"
+                value={formData.security_answer}
+                onChange={(e: { target: { value: string; }; }) => handleFieldChange('security_answer', e.target.value)}
+              />
+              {validationErrors.security_answer && (
+                <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.security_answer}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Terms and Conditions Checkbox */}
+            <div className="flex items-start gap-3 my-6">
+              <input
+                type="checkbox"
+                id="terms"
+                readOnly
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOpenTermsModal();
+                }}
+                className="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer"
+                checked={formData.agreeToTerms}
+              />
+              <p className="text-sm text-gray-600 leading-relaxed">
+                I agree to the{" "}
+                <button
+                  type="button"
+                  onClick={handleOpenTermsModal}
+                  className="text-purple-600 font-medium hover:underline"
+                >
+                  Terms and Conditions
+                </button>{" "}
+                and{" "}
+                <button
+                  type="button"
+                  onClick={handleOpenTermsModal}
+                  className="text-purple-600 font-medium hover:underline"
+                >
+                  Privacy Policy
+                </button>
+                .
+              </p>
+            </div>
+
+            {/* Sign Up Button */}
+            <button 
+              type="submit" 
+              className="w-full p-4 bg-gradient-to-r from-purple-600 to-purple-700 border-none rounded-xl text-white text-base font-semibold cursor-pointer mb-6 transition-all duration-200 hover:shadow-lg hover:shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              disabled={formData.isLoading}
+            >
+              {formData.isLoading ? 'Signing up...' : 'Sign Up'}
+            </button>
+
+            {/* Login Link */}
+            <p className="text-center text-sm text-gray-600">
+              Already have an account?{' '}
+              <a 
+                href="/login" 
+                className="text-purple-600 no-underline font-medium hover:underline"
+              >
+                Log in
+              </a>
+            </p>
+          </form>
+        </div>
       </div>
-    </div>
+
+      <TermsAndConditonsModal
+        isOpen={isTermsModalOpen}
+        onClose={handleTermsClose}
+        onAccept={handleTermsAccept}
+      />
+    </>
   );
 });
 
-export default Register
+export default Register;

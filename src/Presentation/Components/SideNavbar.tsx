@@ -6,6 +6,8 @@ import { container } from '../../di/container';
 import { Home, Users, FileText, BarChart2, Settings, LogOut } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import LogoutConfirmModal from './LogoutConfirmModal';
+// use a runtime URL for the logo to avoid TypeScript needing image module declarations
+const CryphoriaLogo = '/assets/cryphoria-logo.png';
 
 type SideNavbarProps = {
   onExpansionChange?: (isExpanded: boolean) => void;
@@ -89,12 +91,23 @@ const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) =
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="text-center mb-10 relative h-10 flex items-center justify-center">
+      <div
+        className={`mb-10 relative h-10 flex items-center ${
+          isExpanded ? 'justify-start' : 'justify-center'
+        }`}
+      >
         {isExpanded && (
           <>
-            <h2 className="m-0 text-lg text-gray-900 font-bold">LOGO</h2>
+            <div className="flex items-center gap-2">
+              <img
+                src={CryphoriaLogo}
+                alt="Cryphoria logo"
+                className="h-9 w-9 object-contain"
+              />
+              <span className="text-lg font-bold text-purple-600">Cryphoria</span>
+            </div>
             {isPermanentlyExpanded && (
-              <button 
+              <button
                 className="absolute -top-2 -right-2 bg-gray-200 border-none text-gray-700 w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-gray-300"
                 onClick={handleCloseClick}
                 aria-label="Collapse sidebar"
@@ -105,87 +118,37 @@ const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) =
           </>
         )}
         {!isExpanded && (
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer transition-colors text-gray-800 hover:bg-gray-300">
-            L
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center cursor-pointer transition-colors hover:bg-gray-300">
+            <img
+              src={CryphoriaLogo}
+              alt="Cryphoria logo"
+              className="h-8 w-8 object-contain"
+            />
           </div>
         )}
       </div>
       
       <ul className="list-none p-0 flex-grow m-0">
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/home" 
-            className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
-                isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <Home className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Home</span>}
-          </NavLink>
-        </li>
-        
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/management" 
-            className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
-                isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <Users className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Management</span>}
-          </NavLink>
-        </li>
-        
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/invoice" 
-            className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
-                isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <FileText className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Invoice</span>}
-          </NavLink>
-        </li>
-        
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/reports" 
-            className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
-                isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <BarChart2 className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Reports</span>}
-          </NavLink>
-        </li>
-      
-        <li className="mb-4 p-0">
-          <NavLink 
-            to="/settings" 
-            className={({ isActive }) => 
-              `text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-100 ${
-                isActive ? 'bg-purple-600 font-bold shadow-sm text-white' : ''
-              } ${!isExpanded ? 'justify-center' : ''}`
-            }
-            onClick={handleNavClick}
-          >
-            <Settings className={`w-5 h-5 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Settings</span>}
-          </NavLink>
-        </li>
+        {navItems.map(({ to, label, Icon }) => (
+          <li key={to} className="mb-4 p-0">
+            <NavLink
+              to={to}
+              className={({ isActive }) =>
+                `no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-50 ${
+                  isExpanded ? 'justify-start' : 'justify-center'
+                } ${
+                  isActive
+                    ? 'bg-purple-600/10 text-purple-600 font-semibold border border-purple-200'
+                    : 'text-gray-700'
+                }`
+              }
+              onClick={handleNavClick}
+            >
+              <Icon className={`w-5 h-5 ${isExpanded ? 'mr-3' : ''}`} />
+              {isExpanded && <span className="opacity-100 transition-opacity duration-300">{label}</span>}
+            </NavLink>
+          </li>
+        ))}
       </ul>
       
       <div className="mb-4 p-0">

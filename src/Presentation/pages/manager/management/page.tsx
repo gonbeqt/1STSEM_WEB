@@ -156,8 +156,7 @@ const EmployeeManagement: React.FC = () => {
       <div className="w-full mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Employee List</h1>
-          <p className="text-sm text-gray-500">Manage and track all your employees in one place.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Employee Management</h1>
         </div>
 
         {/* Search and Add Employee */}
@@ -196,15 +195,17 @@ const EmployeeManagement: React.FC = () => {
               </button>
             </div>
           ) : filteredEmployees.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border-2 border-dashed border-gray-300 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                {searchTerm ? 'No employees found matching your search' : 'No employees found'}
-              </h3>
-              {!searchTerm && (
-                <p className="text-gray-600 text-sm text-center mt-2">
-                  Click "Add Employee" to get started
-                </p>
-              )}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10">
+              <div className="rounded-3xl border border-dashed border-purple-200 bg-purple-50/60 px-10 py-14 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {searchTerm ? 'No employees found matching your search' : 'No employees found'}
+                </h3>
+                {!searchTerm && (
+                  <p className="text-sm text-gray-500 mt-3">
+                    Click “Add Employee” to get started.
+                  </p>
+                )}
+              </div>
             </div>
           ) : (
             filteredEmployees.map((employee: ApiEmployee) => (
@@ -269,14 +270,14 @@ const EmployeeManagement: React.FC = () => {
       />
 
       {/* Employee Detail Modal */}
-      {selectedApiEmployee && (
+      {selectedApiEmployee && selectedEmployee && (
         <EmployeeDetailModal
           isOpen={showEmployeeDetailModal}
           employee={selectedApiEmployee}
           onClose={handleCloseModal}
           onEdit={handleEditEmployee}
           onDelete={handleDeleteEmployee}
-          onRemoveFromTeam={handleDeleteEmployee}
+          onRemoveFromTeam={() => { void handleDeleteEmployee(); }}
         />
       )}
     </div>

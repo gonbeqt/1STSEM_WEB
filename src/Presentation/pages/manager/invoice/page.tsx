@@ -138,28 +138,21 @@ const ManagerInvoicePage: React.FC = () => {
         {/* Invoice List */}
         <div className="space-y-4">
           {displayedInvoices.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center min-h-[300px] text-gray-500">
-              <div className="mb-6 text-gray-300">
-                <FileText size={64} />
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10">
+              <div className="rounded-3xl border border-dashed border-purple-200 bg-purple-50/60 px-10 py-14 text-center flex flex-col items-center gap-4">
+                <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-600/10 text-purple-600">
+                  <FileText size={36} />
+                </span>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  {searchTerm ? 'No matching invoices found' : 'No invoices yet'}
+                </h3>
+                <p className="text-sm text-gray-500 max-w-md">
+                  {searchTerm
+                    ? `No invoices match your search for “${searchTerm}”. Try broadening your keywords.`
+                    : 'Create your first invoice to start tracking your billing and payments with Cryphoria.'}
+                </p>
+                
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                {searchTerm ? 'No matching invoices found' : 'No invoices yet'}
-              </h3>
-              <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
-                {searchTerm
-                  ? `No invoices match your search for "${searchTerm}". Try adjusting your search terms.`
-                  : 'Create your first invoice to get started with managing your billing and payments.'
-                }
-              </p>
-              {!searchTerm && (
-                <button
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-none px-6 py-3 rounded-xl text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 hover:-translate-y-0.5 hover:shadow-lg transition-all focus:outline focus:outline-2 focus:outline-purple-500 focus:outline-offset-2"
-                  onClick={handleCreateInvoice}
-                >
-                  <Plus size={18} />
-                  Create First Invoice
-                </button>
-              )}
             </div>
           ) : (
             displayedInvoices.map((invoice: Invoice) => (
@@ -214,7 +207,6 @@ const ManagerInvoicePage: React.FC = () => {
       <div className="w-full mx-auto px-4 sm:px-6 py-6">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
-          <p className="text-sm text-gray-500">Manage and track all your invoices in one place.</p>
         </div>
 
         <div className="flex flex-col w-full font-sans gap-6">

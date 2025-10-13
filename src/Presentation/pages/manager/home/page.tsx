@@ -1,12 +1,12 @@
 // src/Presentation/pages/manager/home/page.tsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import Charts from '../../../components/Charts';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import { Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical } from 'lucide-react';
+import { Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical, ChevronRight, Plug } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
@@ -14,6 +14,8 @@ import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
+// Use a runtime string path for the background image so TypeScript doesn't need a module for .png files
+const WalletCardBg = '/assets/wallet_bg.png';
 
 type WalletModalInitialView = 'connect' | 'send';
 
@@ -302,7 +304,7 @@ const Home = observer(() => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-100">
       {/* Success Message */}
       {successMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
@@ -313,103 +315,135 @@ const Home = observer(() => {
 
       <ManagerNavbar />
 
-
       <div className="w-full mx-auto px-4 sm:px-6 py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
-          <p className="text-sm text-gray-500">Overview of your organization — balances, recent activity, and quick actions.</p>
+         <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
         </div>
-        {/* Connected Wallet Card */}
-        <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-6 text-white shadow-xl mb-6 relative">
 
+    
+        {/* Connected Wallet Card */}
+        <div
+          className="rounded-3xl p-6 text-white shadow-xl mb-6 relative bg-cover bg-center bg-no-repeat overflow-hidden"
+          style={{
+            backgroundColor: '#8b5cf6',
+            backgroundImage: `linear-gradient(135deg, rgba(168,85,247,0.92), rgba(91,33,182,0.88)), url(${WalletCardBg})`,
+            backgroundBlendMode: 'overlay, normal',
+          }}
+        >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
             <span className="text-sm font-medium text-purple-100">
-              Current Wallet
+              Current Balance
             </span>
-                {isWalletConnected && (
-              <div className="relative">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="p-1 hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
-                >
-                  <MoreVertical className="w-5 h-5" />
-                </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-1 hover:bg-white/20 rounded-full transition-all"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
 
-                {isMenuOpen && (
-                  <>
-                    {/* Backdrop to close menu when clicking outside */}
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsMenuOpen(false)}
-                    />
-
-                    {/* Dropdown Menu */}
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 overflow-hidden">
+              {isMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg z-20 overflow-hidden">
+                    {!isWalletConnected ? (
                       <button
                         onClick={() => {
-                          fetchWalletBalance();
+                          handleOpenWalletModal('connect');
                           setIsMenuOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-purple-600 hover:bg-purple-50 transition-colors text-left font-semibold"
                       >
-                        <RefreshCw className="w-4 h-4" />
-                        <span className="text-sm font-medium">Refresh Balance</span>
+                        <Plug className="w-4 h-4" />
+                        <span className="text-sm">Connect Wallet</span>
                       </button>
-                      <button
-                        onClick={() => {
-                          handleDisconnectWallet();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
-                        disabled={isConnecting}
-                      >
-                        {isConnecting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm font-medium">Disconnecting...</span>
-                          </>
-                        ) : (
-                          <>
-
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            fetchWalletBalance();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          <span className="text-sm font-medium">Refresh Balance</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDisconnectWallet();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
+                          disabled={isConnecting}
+                        >
+                          {isConnecting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-sm font-medium">Disconnecting...</span>
+                            </>
+                          ) : (
                             <span className="text-sm font-medium">Disconnect Wallet</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Main Content */}
           {!isWalletConnected ? (
-            <div className="text-center py-8">
-              <h3 className="text-xl font-semibold mb-4">Wallet Not Connected</h3>
-              <button
-                className="bg-white text-purple-700 px-8 py-3 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all"
-                onClick={() => handleOpenWalletModal('connect')}
-              >
-                Connect Wallet
-              </button>
-            </div>
+            <>
+              <div className="mb-4 flex flex-col items-start gap-2">
+                <span className="text-lg font-semibold text-white/90">No connected wallet</span>
+                <p className="text-sm text-purple-100/80">
+                  Connect a wallet to see live balances and manage transactions.
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <EthereumIcon className="w-8 h-8 text-white fill-white" />
+                  <h2 className="text-3xl sm:text-5xl font-bold">0.000000 ETH</h2>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm text-purple-100">Converted to {conversionCurrency}</p>
+                  <p className="text-xl font-semibold">
+                    {conversionCurrency === 'PHP' ? '₱' : '$'}0.00
+                  </p>
+                </div>
+                <button
+                  onClick={toggleCurrency}
+                  className="flex items-center gap-1 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-2 rounded-full hover:bg-opacity-30 transition-all"
+                >
+                  <span className="text-sm font-medium">{conversionCurrency}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+
+          
+            </>
           ) : (
             <>
-              {/* Connected Badge & Address */}
-              <div className="mb-4">
-                <div className="inline-flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium text-green">Connected Wallet</span>
-                  </div>
-                </div>
-
+              <div className="mb-4 flex flex-col items-start gap-3">
+                <span className="text-l font-semibold text-white/90">Metamask</span>
                 {walletAddress && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <button
                       onClick={copyToClipboard}
-                      className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-opacity-30 transition-all"
+                      className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-opacity-30 transition-all"
                     >
-                      <span className="text-sm font-mono">{walletAddress.substring(0, 6)}...{walletAddress.substring(walletAddress.length - 4)}</span>
+                      <span className="text-sm font-mono">
+                        {walletAddress.substring(0, 6)}...{walletAddress.substring(walletAddress.length - 4)}
+                      </span>
                       <Copy className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -425,7 +459,7 @@ const Home = observer(() => {
                   </div>
                 ) : ethBalance !== null ? (
                   <div className="flex items-center gap-3 flex-wrap">
-                    <EthereumIcon className="w-8 h-8 text-white" />
+                    <EthereumIcon className="w-8 h-8 text-white fill-white" />
                     <h2 className="text-3xl sm:text-5xl font-bold">{ethBalance.toFixed(6)} ETH</h2>
                   </div>
                 ) : (
@@ -473,50 +507,50 @@ const Home = observer(() => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             <button
               onClick={handleSendPayment}
-              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
+              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl border border-gray-100 transition-colors duration-200 group hover:border-purple-300"
             >
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <Send className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-600/10 group-hover:bg-purple-600/20 transition-colors">
+                <Send className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-gray-700 text-center">Send Payment</span>
             </button>
 
             <button
               onClick={handleSendPayroll}
-              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
+              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl border border-gray-100 transition-colors duration-200 group hover:border-purple-300"
             >
-              <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center group-hover:bg-yellow-100 transition-colors">
-                <DollarSign className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-600/10 group-hover:bg-purple-600/20 transition-colors">
+                <DollarSign className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-gray-700 text-center">Send Payroll</span>
             </button>
 
             <button
               onClick={handleAuditContract}
-              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
+              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl border border-gray-100 transition-colors duration-200 group hover:border-purple-300"
             >
-              <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                <ClipboardList className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-600/10 group-hover:bg-purple-600/20 transition-colors">
+                <ClipboardList className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-gray-700 text-center">Audit Contract</span>
             </button>
 
             <button
               onClick={handleGenerateReport}
-              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
+              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl border border-gray-100 transition-colors duration-200 group hover:border-purple-300"
             >
-              <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center group-hover:bg-teal-100 transition-colors">
-                <FileText className="w-6 h-6 text-teal-600" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-600/10 group-hover:bg-purple-600/20 transition-colors">
+                <FileText className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-gray-700 text-center">Generate Report</span>
             </button>
 
             <button
               onClick={handleInvestment}
-              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl hover:shadow-md transition-all duration-200 ease-out transform hover:-translate-y-0.5 border border-gray-100 group"
+              className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl border border-gray-100 transition-colors duration-200 group hover:border-purple-300"
             >
-              <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                <TrendingUp className="w-6 h-6 text-pink-600" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-600/10 group-hover:bg-purple-600/20 transition-colors">
+                <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-gray-700 text-center">Invest Smart</span>
             </button>
@@ -525,23 +559,21 @@ const Home = observer(() => {
 
         {/* Recent Transactions */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-              <p className="text-sm text-gray-500">{showAllTransactions ? 'Showing all transactions' : 'Showing 5 most recent'}</p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
             <button
               onClick={openTransactionsModal}
-              className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
+              className="text-sm font-semibold text-purple-600 hover:text-purple-700 inline-flex items-center gap-1 transition-colors"
             >
-              <RefreshCw className="w-4 h-4" />
+              <MoreVertical className="w-4 h-4 rotate-90" />
               View all
             </button>
           </div>
+          <p className="text-sm text-gray-500 mb-4">Showing 5 most recent</p>
 
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             {isLoadingTransactions ? (
-              <div className="space-y-4 p-4">
+              <div className="space-y-4 p-6">
                 {[...Array(4)].map((_, idx) => (
                   <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -559,35 +591,47 @@ const Home = observer(() => {
                 ))}
               </div>
             ) : transactionError ? (
-              <div className="p-4">
+              <div className="p-6">
                 <p className="text-sm text-red-600">Error loading transactions: {transactionError}</p>
               </div>
             ) : transactionData.length === 0 ? (
-              <div className="p-4">
-                <p className="text-sm text-gray-600">No transactions found</p>
-                <p className="text-xs text-gray-500 mt-1">Total transactions loaded: {transactions.length}</p>
+              <div className="p-6">
+                <div className="rounded-3xl border border-dashed border-purple-200 bg-purple-50/40 px-6 py-10 text-center">
+                  <h4 className="text-base font-semibold text-gray-900 mb-2">No transactions found</h4>
+                  <p className="text-sm text-gray-500">Total transactions loaded: {transactions.length}</p>
+                </div>
               </div>
             ) : (
-              // Limit to 5 when not showing all
               transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
                 <div
                   key={index}
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-gray-50 transition-colors ${index !== arr.length - 1 ? 'border-b border-gray-100' : ''
-                    }`}
+                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 transition-colors ${
+                    index !== arr.length - 1 ? 'border-b border-gray-100' : ''
+                  } hover:bg-purple-50/30`}
                 >
-                  <div className="flex items-center gap-3 mb-3 sm:mb-0">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'
-                      }`}>
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                        tx.type === 'outflow' ? 'bg-red-50 text-red-600' : 'bg-purple-100 text-purple-600'
+                      }`}
+                    >
                       {tx.icon}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm sm:text-base">{tx.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        {tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-semibold text-sm sm:text-base ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
-                      {tx.type === 'outflow' ? '-' : '+'}{(tx.amount || 0).toFixed(4)} {tx.token_symbol}
+                  <div className="mt-3 sm:mt-0 text-left sm:text-right">
+                    <p
+                      className={`font-semibold text-sm sm:text-base ${
+                        tx.type === 'outflow' ? 'text-red-600' : 'text-purple-600'
+                      }`}
+                    >
+                      {tx.type === 'outflow' ? '-' : '+'}
+                      {(tx.amount || 0).toFixed(4)} {tx.token_symbol}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500">{tx.date}</p>
                   </div>

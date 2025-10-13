@@ -230,7 +230,6 @@ const ReportsComponent: React.FC = () => {
       <div className="w-full mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports</h1>
-          <p className="text-sm text-gray-500">Manage and track all your reports in one place.</p>
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 md:flex-row">
