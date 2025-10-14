@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Home, Users, FileText, BarChart2, Settings, LogOut } from 'lucide-react';
+import { Home, Users, FileText, BarChart2, Settings, LogOut, X } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import LogoutConfirmModal from './LogoutConfirmModal';
 // use a runtime URL for the logo to avoid TypeScript needing image module declarations
@@ -108,11 +108,13 @@ const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) =
             </div>
             {isPermanentlyExpanded && (
               <button
-                className="absolute -top-2 -right-2 bg-gray-200 border-none text-gray-700 w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-gray-300"
                 onClick={handleCloseClick}
+                title="Collapse sidebar"
                 aria-label="Collapse sidebar"
+                className="absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-300"
               >
-                ×
+                <X className="w-4 h-4" aria-hidden />
+                <span className="sr-only">Collapse sidebar</span>
               </button>
             )}
           </>

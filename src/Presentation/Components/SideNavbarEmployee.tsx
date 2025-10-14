@@ -1,7 +1,7 @@
 // src/Presentation/Components/SideNavbarEmployee.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, History, Settings, LogOut } from 'lucide-react';
+import { Home, History, Settings, LogOut, X } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { observer } from 'mobx-react-lite';
@@ -98,44 +98,50 @@ const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpa
             </div>
             {isPermanentlyExpanded && (
               <button
-                className="absolute -top-2 -right-2 bg-gray-200 border-none text-gray-700 w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-gray-300"
                 onClick={handleCloseClick}
+                title="Collapse sidebar"
                 aria-label="Collapse sidebar"
+                className="absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-300"
               >
-                ×
+                <X className="w-4 h-4" aria-hidden />
+                <span className="sr-only">Collapse sidebar</span>
               </button>
             )}
           </>
         )}
         {!isExpanded && (
-          <div className="w-8 h-8 bg-black bg-opacity-20 rounded-full flex items-center justify-center font-bold cursor-pointer transition-colors text-black hover:bg-black hover:bg-opacity-30">
-            L
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center cursor-pointer transition-colors hover:bg-gray-300">
+            <img
+              src={CryphoriaLogo}
+              alt="Cryphoria logo"
+              className="h-8 w-8 object-contain"
+            />
           </div>
         )}
       </div>
 
-      <ul className="list-none p-0 flex-grow m-0 space-y-3">
-        {navItems.map(({ to, label, Icon }) => (
-          <li key={to} className="p-0">
-            <NavLink
-              to={to}
-              className={({ isActive }) =>
-                `text-black no-underline text-base flex items-center ${isExpanded ? 'justify-start gap-3' : 'justify-center'} p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-500 hover:bg-opacity-20 ${
-                  isActive ? 'bg-purple-600 bg-opacity-80 font-bold shadow-lg text-white' : ''
-                }`
-              }
-              onClick={handleNavClick}
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-                  {isExpanded && <span className="opacity-100 transition-opacity duration-300">{label}</span>}
-                </>
-              )}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
+      <ul className="list-none p-0 flex-grow m-0">
+             {navItems.map(({ to, label, Icon }) => (
+               <li key={to} className="mb-4 p-0">
+                 <NavLink
+                   to={to}
+                   className={({ isActive }) =>
+                     `no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-purple-50 ${
+                       isExpanded ? 'justify-start' : 'justify-center'
+                     } ${
+                       isActive
+                         ? 'bg-purple-600/10 text-purple-600 font-semibold border border-purple-200'
+                         : 'text-gray-700'
+                     }`
+                   }
+                   onClick={handleNavClick}
+                 >
+                   <Icon className={`w-5 h-5 ${isExpanded ? 'mr-3' : ''}`} />
+                   {isExpanded && <span className="opacity-100 transition-opacity duration-300">{label}</span>}
+                 </NavLink>
+               </li>
+             ))}
+           </ul>
 
       <button 
         onClick={handleLogoutClick} 
