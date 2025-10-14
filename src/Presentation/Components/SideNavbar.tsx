@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Home, Users, FileText, BarChart2, Settings, LogOut, X } from 'lucide-react';
+import { Home, Users, FileText, BarChart2, Settings, LogOut, X, User } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import LogoutConfirmModal from './LogoutConfirmModal';
 // use a runtime URL for the logo to avoid TypeScript needing image module declarations
@@ -74,7 +74,7 @@ const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) =
       { to: '/management', label: 'Management', Icon: Users },
       { to: '/invoice', label: 'Invoice', Icon: FileText },
       { to: '/reports', label: 'Reports', Icon: BarChart2 },
-      { to: '/settings', label: 'Settings', Icon: Settings },
+      { to: '/settings', label: 'User Profile', Icon: User },
     ],
     []
   );

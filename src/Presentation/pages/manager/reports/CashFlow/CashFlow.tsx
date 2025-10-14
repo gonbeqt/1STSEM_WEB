@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -230,11 +231,19 @@ const CashFlow: React.FC = () => {
               while investing and financing activities resulted in <strong>{formatCurrency(cashFlowData.investing_activities.net_cash_flow)}</strong> and <strong>{formatCurrency(cashFlowData.financing_activities.net_cash_flow)}</strong> respectively.
             </p>
             <div className="flex gap-3 flex-wrap">
-              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
-                ← Back
+              <button
+                className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all flex items-center gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
               </button>
-              <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportExcel}>
-                📄 Download Report
+              <button
+                className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all flex items-center gap-2"
+                onClick={handleExportExcel}
+              >
+                <Download className="w-4 h-4" />
+                <span>Download Report</span>
               </button>
             </div>
           </div>
@@ -330,13 +339,14 @@ const CashFlow: React.FC = () => {
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
             onClick={() => navigate(-1)}
           >
-            ← Back to Reports
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Reports</span>
           </button>
           <div className="flex gap-2">
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeView === 'table' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-purple-600 text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('table')}
@@ -344,9 +354,9 @@ const CashFlow: React.FC = () => {
               Table View
             </button>
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeView === 'chart' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-purple-600 text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('chart')}
