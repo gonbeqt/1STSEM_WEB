@@ -6,6 +6,7 @@ import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { observer } from 'mobx-react-lite';
 import LogoutConfirmModal from './LogoutConfirmModal';
+const CryphoriaLogo = '/assets/cryphoria-logo.png';
 
 type SideNavbarEmployeeProps = {
   onExpansionChange?: (isExpanded: boolean) => void;
@@ -87,10 +88,17 @@ const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpa
       <div className="text-center mb-10 relative h-10 flex items-center justify-center">
         {isExpanded && (
           <>
-            <h2 className="m-0 text-lg text-black font-bold">LOGO</h2>
+            <div className="flex items-center gap-2">
+              <img
+                src={CryphoriaLogo}
+                alt="Cryphoria logo"
+                className="h-9 w-9 object-contain"
+              />
+              <span className="text-lg font-bold text-purple-600">Cryphoria</span>
+            </div>
             {isPermanentlyExpanded && (
               <button
-                className="absolute -top-2 -right-2 bg-black bg-opacity-20 border-none text-black w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-black hover:bg-opacity-30"
+                className="absolute -top-2 -right-2 bg-gray-200 border-none text-gray-700 w-6 h-6 rounded-full cursor-pointer text-base flex items-center justify-center transition-colors hover:bg-gray-300"
                 onClick={handleCloseClick}
                 aria-label="Collapse sidebar"
               >

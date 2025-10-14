@@ -663,7 +663,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <div className="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
               <div className="w-3 h-3 bg-white rounded-sm"></div>
             </div>
             <h2 className="text-lg font-semibold text-gray-900 m-0">Process Payroll</h2>
@@ -797,7 +797,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
                 type="button"
                 onClick={handleProcessManualEntry}
                 disabled={processStatus === 'processing'}
-                className="sm:w-auto px-3 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="sm:w-auto px-3 py-2 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 {manualProcessingStatus === 'processing' ? 'Processing…' : 'Process Entry'}
               </button>

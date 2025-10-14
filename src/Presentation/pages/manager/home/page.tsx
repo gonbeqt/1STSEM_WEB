@@ -11,6 +11,7 @@ import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
+import RecentTransactionDetails from '../../../components/RecentTransactionDetails';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
@@ -61,6 +62,8 @@ const Home = observer(() => {
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [transactionSearch, setTransactionSearch] = useState('');
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
 
   const formatTransactionDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -172,6 +175,16 @@ const Home = observer(() => {
     // Determine a sensible limit: use pagination.total if available, otherwise a large fallback
     const limit = pagination?.total && pagination.total > 0 ? pagination.total : 10000;
     await fetchTransactionHistory({ limit, offset: 0 });
+  };
+
+  const openTransactionDetails = (tx: any) => {
+    setSelectedTransaction(tx);
+    setIsTransactionDetailsOpen(true);
+  };
+
+  const closeTransactionDetails = () => {
+    setSelectedTransaction(null);
+    setIsTransactionDetailsOpen(false);
   };
 
   const openTransactionsModal = async () => {
@@ -605,7 +618,11 @@ const Home = observer(() => {
               transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
                 <div
                   key={index}
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 transition-colors ${
+                  onClick={() => openTransactionDetails(tx)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTransactionDetails(tx); }}
+                  className={`cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 transition-colors ${
                     index !== arr.length - 1 ? 'border-b border-gray-100' : ''
                   } hover:bg-purple-50/30`}
                 >
@@ -746,6 +763,11 @@ const Home = observer(() => {
       </div>
 
       {/* All Modals */}
+      <RecentTransactionDetails
+        isOpen={isTransactionDetailsOpen}
+        transaction={selectedTransaction}
+        onClose={closeTransactionDetails}
+      />
       <WalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}

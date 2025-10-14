@@ -1,5 +1,5 @@
 import{ useEffect, useState } from 'react';
-import useEmployeeHistory from './../../../hooks/useEmployeeHistory';
+import useEmployeeHistory from '../../../hooks/useEmployeeHistory';
 import { PayrollEntry } from '../../../../domain/entities/EmployeeHistoryEntities';
 import PayrollEntryDetailsModal from '../../../components/PayrollEntryDetailsModal';
 import { Loader2, TrendingUp, CheckCircle, Clock, XCircle, DollarSign, FileText, Eye } from 'lucide-react';

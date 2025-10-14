@@ -19,6 +19,9 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async register(request: RegisterRequest): Promise<RegisterResponse> {
+    // Debug: log outgoing register request
+    console.debug('register request body:', request);
+
     const response = await fetch(`${this.API_URL}/auth/register/`, {
       method: 'POST',
       headers: {
@@ -29,8 +32,13 @@ export class UserRepositoryImpl implements UserRepository {
 
     const data = await response.json();
 
+    // Debug: log response status and body for troubleshooting
+    console.debug('register response status:', response.status, 'body:', data);
+
     if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+      // Provide more context in the thrown error
+      const errMsg = data?.message || data?.errors?.[0] || 'Registration failed';
+      throw new Error(errMsg);
     }
 
     return data;

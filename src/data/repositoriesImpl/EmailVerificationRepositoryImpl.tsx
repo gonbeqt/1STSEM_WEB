@@ -6,6 +6,8 @@ export class EmailVerificationRepositoryImpl implements EmailVerificationReposit
 
   async verifyEmail(request: VerifyEmailRequest): Promise<VerifyEmailResponse> {
     try {
+      // Debug: log outgoing request body
+      console.debug('verifyEmail request body:', request);
       const response = await fetch(`${this.API_URL}/auth/verify-email/`, {
         method: 'POST',
         headers: {
@@ -40,6 +42,8 @@ export class EmailVerificationRepositoryImpl implements EmailVerificationReposit
 
   async resendVerificationEmail(request: ResendVerificationRequest): Promise<ResendVerificationResponse> {
     try {
+      // Debug: log outgoing request body
+      console.debug('resendVerificationEmail request body:', request);
       const response = await fetch(`${this.API_URL}/auth/resend-verification/`, {
         method: 'POST',
         headers: {

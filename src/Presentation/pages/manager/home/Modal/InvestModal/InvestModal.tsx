@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X, Send, Wallet, AlertCircle, CheckCircle, User, Building, Search, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
-import { useWallet } from '../../../../../../presentation/hooks/useWallet';
-import { useAddressBook } from '../../../../../../presentation/hooks/useAddressBook';
+import { useWallet } from '../../../../../hooks/useWallet';
+import { useAddressBook } from '../../../../../hooks/useAddressBook';
 import { AddressBookEntry } from '../../../../../../domain/entities/AddressBookEntities';
 
 interface InvestModalProps {
