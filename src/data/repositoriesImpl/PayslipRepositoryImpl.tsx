@@ -13,35 +13,22 @@ import {
   GetEmployeePayrollDetailsRequest,
   GetEmployeePayrollDetailsResponse
 } from "../../domain/entities/PayrollEntities";
-import axios from 'axios';
+import apiService from '../api';
 
 export class PayslipRepositoryImpl implements PayslipRepository {
   private baseUrl: string = process.env.REACT_APP_API_BASE_URL || '';
   
-  private getAuthHeaders(): { [key: string]: string } {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('Authentication token not found');
-    }
-
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-  }
+  // Auth handled by ApiService interceptors
 
   async createPayslip(request: CreatePayslipRequest): Promise<CreatePayslipResponse> {
     try {
 
-      const headers = this.getAuthHeaders();
-
-      const response = await axios.post(
+      const data = await apiService.post<CreatePayslipResponse>(
         `${this.baseUrl}/payslips/create/`,
-        request,
-        { headers }
+        request
       );
 
-      return response.data as CreatePayslipResponse;
+      return data as CreatePayslipResponse;
     } catch (error: any) {
       console.error('Payslip creation error:', error);
 
@@ -75,24 +62,19 @@ export class PayslipRepositoryImpl implements PayslipRepository {
   async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
     try {
 
-      const headers = this.getAuthHeaders();
-
       // Build query parameters
       const params = new URLSearchParams();
       if (employee_id) params.append('employee_id', employee_id);
       if (status) params.append('status', status);
 
       // Use the correct payslips endpoint
-      const response = await axios.get(
-        `${this.baseUrl}/manager/payslips/list/?${params.toString()}`,
-        { headers }
+      const data = await apiService.get<any>(
+        `${this.baseUrl}/manager/payslips/list/?${params.toString()}`
       );
 
-      
-      
       // Handle the response format from the backend
-      if (response.data.success && response.data.payslips) {
-        return response.data.payslips as Payslip[];
+      if (data.success && data.payslips) {
+        return data.payslips as Payslip[];
       } else {
         
         return this.getMockPayslips(employee_id, status);
@@ -192,18 +174,13 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
-      const response = await axios.post(
+      const data = await apiService.post<CreatePayrollEntryResponse>(
         `${this.baseUrl}/payroll/create/`,
-        request,
-        { headers }
+        request
       );
 
-      
-      
       // Backend returns the payroll entry data directly
-      return response.data as CreatePayrollEntryResponse;
+      return data as CreatePayrollEntryResponse;
     } catch (error: any) {
       console.error('Payroll entry creation error:', error);
       
@@ -222,18 +199,13 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createSinglePayrollEntry(request: CreateSinglePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
-      const response = await axios.post(
+      const data = await apiService.post<CreatePayrollEntryResponse>(
         `${this.baseUrl}/payroll/create/`,
-        request,
-        { headers }
+        request
       );
 
-      
-      
       // Backend returns the payroll entry data directly
-      return response.data as CreatePayrollEntryResponse;
+      return data as CreatePayrollEntryResponse;
     } catch (error: any) {
       console.error('Single payroll entry creation error:', error);
       
@@ -250,16 +222,12 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async processPayrollPayment(request: ProcessPayrollPaymentRequest): Promise<ProcessPayrollPaymentResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
-      const response = await axios.post(
+      const data = await apiService.post<ProcessPayrollPaymentResponse>(
         `${this.baseUrl}/payroll/process/`,
-        request,
-        { headers }
+        request
       );
 
-      
-      return response.data as ProcessPayrollPaymentResponse;
+      return data as ProcessPayrollPaymentResponse;
     } catch (error: any) {
       console.error('Payroll payment processing error:', error);
       
@@ -284,16 +252,12 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async createRecurringPayment(request: CreateRecurringPaymentRequest): Promise<CreateRecurringPaymentResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
-      const response = await axios.post(
+      const data = await apiService.post<CreateRecurringPaymentResponse>(
         `${this.baseUrl}/payroll/recurring/create/`,
-        request,
-        { headers }
+        request
       );
 
-      
-      return response.data as CreateRecurringPaymentResponse;
+      return data as CreateRecurringPaymentResponse;
     } catch (error: any) {
       console.error('Recurring payment creation error:', error);
       
@@ -318,18 +282,13 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async getPaymentSchedule(request: GetPaymentScheduleRequest): Promise<GetPaymentScheduleResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
       const params = new URLSearchParams();
       if (request.days) params.append('days', request.days.toString());
-      
-      const response = await axios.get(
-        `${this.baseUrl}/payroll/schedule/?${params.toString()}`,
-        { headers }
+      const data = await apiService.get<GetPaymentScheduleResponse>(
+        `${this.baseUrl}/payroll/schedule/?${params.toString()}`
       );
 
-      
-      return response.data as GetPaymentScheduleResponse;
+      return data as GetPaymentScheduleResponse;
     } catch (error: any) {
       console.error('Payment schedule error:', error);
       
@@ -354,18 +313,13 @@ export class PayslipRepositoryImpl implements PayslipRepository {
 
   async getEmployeePayrollDetails(request: GetEmployeePayrollDetailsRequest): Promise<GetEmployeePayrollDetailsResponse> {
     try {
-      const headers = this.getAuthHeaders();
-      
       const params = new URLSearchParams();
       params.append('employee_id', request.employee_id);
-      
-      const response = await axios.get(
-        `${this.baseUrl}/admin/manager/payroll/employee-details/?${params.toString()}`,
-        { headers }
+      const data = await apiService.get<GetEmployeePayrollDetailsResponse>(
+        `${this.baseUrl}/admin/manager/payroll/employee-details/?${params.toString()}`
       );
 
-      
-      return response.data as GetEmployeePayrollDetailsResponse;
+      return data as GetEmployeePayrollDetailsResponse;
     } catch (error: any) {
       console.error('Employee payroll details error:', error);
       

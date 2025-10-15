@@ -32,6 +32,7 @@ import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSumma
 import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import { container } from './di/container'; // Import the container
+import { ToastProvider } from './presentation/components/Toast/ToastProvider';
 
 
 const ManagerLayout = () => {
@@ -71,8 +72,9 @@ function App() {
   // Auto-reconnect wallet on app load (handled within hooks/viewmodels as needed)
 
   return (
-    <WalletViewModelProvider value={walletViewModel}>
-      <Router>
+    <ToastProvider>
+      <WalletViewModelProvider value={walletViewModel}>
+        <Router>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
@@ -118,8 +120,9 @@ function App() {
 
           </Route>
         </Routes>
-      </Router>
-    </WalletViewModelProvider>
+        </Router>
+      </WalletViewModelProvider>
+    </ToastProvider>
   );
 }
 

@@ -1,77 +1,42 @@
 import { EmailVerificationRepository } from '../../domain/repositories/EmailVerificationRepository';
 import { VerifyEmailRequest, VerifyEmailResponse, ResendVerificationRequest, ResendVerificationResponse } from '../../domain/entities/EmailVerificationEntities';
+import apiService from '../api';
 
 export class EmailVerificationRepositoryImpl implements EmailVerificationRepository {
   private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
   async verifyEmail(request: VerifyEmailRequest): Promise<VerifyEmailResponse> {
     try {
-      // Debug: log outgoing request body
-      console.debug('verifyEmail request body:', request);
-      const response = await fetch(`${this.API_URL}/auth/verify-email/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          message: data.message || 'Email verification failed',
-          errors: data.errors || [data.message || 'Email verification failed']
-        };
-      }
-
+      const data = await apiService.post<any>(`${this.API_URL}/auth/verify-email/`, request);
       return {
-        success: true,
-        message: data.message || 'Email verified successfully'
+        success: data?.success ?? true,
+        message: data?.message || 'Email verified successfully',
+        errors: data?.errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Email verification request failed:', error);
       return {
         success: false,
-        message: 'Network error during email verification',
-        errors: ['Network error during email verification']
+        message: error?.response?.data?.message || 'Email verification failed',
+        errors: error?.response?.data?.errors || [error?.message || 'Network error during email verification'],
       };
     }
   }
 
   async resendVerificationEmail(request: ResendVerificationRequest): Promise<ResendVerificationResponse> {
     try {
-      // Debug: log outgoing request body
-      console.debug('resendVerificationEmail request body:', request);
-      const response = await fetch(`${this.API_URL}/auth/resend-verification/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          message: data.message || 'Failed to resend verification email',
-          errors: data.errors || [data.message || 'Failed to resend verification email']
-        };
-      }
-
+      const data = await apiService.post<any>(`${this.API_URL}/auth/resend-verification/`, request);
       return {
-        success: true,
-        message: data.message || 'Verification email sent successfully'
+        success: data?.success ?? true,
+        message: data?.message || 'Verification email sent successfully',
+        errors: data?.errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Resend verification request failed:', error);
       return {
         success: false,
-        message: 'Network error during resend verification',
-        errors: ['Network error during resend verification']
+        message: error?.response?.data?.message || 'Failed to resend verification email',
+        errors: error?.response?.data?.errors || [error?.message || 'Network error during resend verification'],
       };
     }
   }

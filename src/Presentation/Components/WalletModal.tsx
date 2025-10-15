@@ -12,7 +12,7 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, initialView = 'connect' }) => {
-  const { connectWallet, isWalletConnected, sendEth, isSendingEth, sendEthError, successMessage, fetchWalletBalance } = useWallet();
+  const { connectWallet, isWalletConnected, sendEth, isSendingEth, fetchWalletBalance } = useWallet();
   const [privateKeyInput, setPrivateKeyInput] = useState<string>('');
   const [currentView, setCurrentView] = useState<ModalView>(initialView);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
@@ -274,18 +274,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                           <Send className="w-4 h-4" />
                         </button>
                       </div>
-                      {successMessage && (
-                        <div className="mt-1 w-full">
-                          <p className="text-green-700 text-sm m-0 p-3 bg-green-50 rounded-md border border-green-100 text-ellipsis ">{successMessage}</p>
-                        </div>
-                      
-                      )}
-                      {sendEthError && (
-                        <div className="mt-1 w-full">
-                          <p className="text-red-600 text-sm m-0 p-3 bg-red-50 rounded-md border border-red-100">{sendEthError}</p>
-                        </div>
-                      )}
-
+                  
                     </div>
                   </section>
                 </div>

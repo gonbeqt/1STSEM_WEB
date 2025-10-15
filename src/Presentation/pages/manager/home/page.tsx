@@ -1,12 +1,11 @@
 // src/Presentation/pages/manager/home/page.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import Charts from '../../../components/Charts';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import { Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical, ChevronRight, Plug } from 'lucide-react';
+import { Loader2, Clock, TrendingDown, Send, DollarSign, FileText, TrendingUp, RefreshCw, ClipboardList, Copy, ChevronDown, MoreVertical, Plug } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
@@ -15,6 +14,7 @@ import RecentTransactionDetails from '../../../components/RecentTransactionDetai
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
+import { useToast } from '../../../components/Toast/ToastProvider';
 // Use a runtime string path for the background image so TypeScript doesn't need a module for .png files
 const WalletCardBg = '/assets/wallet_bg.png';
 
@@ -51,6 +51,7 @@ const Home = observer(() => {
     conversionResult,
     checkWalletConnection
   } = useWallet();
+  const { success: toastSuccess, error: toastError, warning: toastWarning, info: toastInfo } = useToast();
   const {
     transactions,
     isLoading: isLoadingTransactions,
@@ -59,7 +60,6 @@ const Home = observer(() => {
     pagination
   } = useEnhancedTransactionHistory();
 
-  const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [transactionSearch, setTransactionSearch] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
@@ -163,13 +163,16 @@ const Home = observer(() => {
     }
   }, [isWalletConnected, fetchWalletBalance]);
 
-  // Fetch the 5 most recent transactions for manager on load
+  // Fetch the 5 most recent transactions for manager on load (guard StrictMode double-invoke)
+  const initialTxFetchDone = useRef(false);
   useEffect(() => {
+    if (initialTxFetchDone.current) return;
+    initialTxFetchDone.current = true;
     fetchTransactionHistory({
       limit: 5,
       offset: 0
     });
-  }, []); // intentionally run once on mount
+  }, [fetchTransactionHistory]);
 
   const fetchAllTransactions = async () => {
     // Determine a sensible limit: use pagination.total if available, otherwise a large fallback
@@ -250,7 +253,7 @@ const Home = observer(() => {
 
   const handleSendPayment = () => {
     if (!isWalletConnected) {
-      alert('Please connect a wallet first');
+      toastWarning('Please connect a wallet first');
       handleOpenWalletModal('connect');
       return;
     }
@@ -259,7 +262,7 @@ const Home = observer(() => {
 
   const handleSendPayroll = () => {
     if (!isWalletConnected) {
-      alert('Please connect a wallet first');
+      toastWarning('Please connect a wallet first');
       handleOpenWalletModal('connect');
       return;
     }
@@ -290,7 +293,7 @@ const Home = observer(() => {
         ? ` ${failedCount} payment${failedCount === 1 ? '' : 's'} failed to complete.`
         : '';
 
-      alert(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
+      toastSuccess(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
       return;
     }
 
@@ -302,17 +305,20 @@ const Home = observer(() => {
         ? ` ${failedCount} entry${failedCount === 1 ? '' : 'ies'} failed to create.`
         : '';
 
-      alert(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
+      toastSuccess(`${successText}${failureText} Total scheduled amount: $${formattedTotal} USD.`);
       return;
     }
 
-    alert(`Payroll action completed. Total scheduled amount: $${formattedTotal} USD.`);
+    toastSuccess(`Payroll action completed. Total scheduled amount: $${formattedTotal} USD.`);
   };
 
-  const copyToClipboard = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
-      alert('Address copied to clipboard!');
+  const copyToClipboard = async () => {
+    if (!walletAddress) return;
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      toastSuccess('Address copied to clipboard!', { duration: 2000 });
+    } catch (e) {
+      toastError('Failed to copy address.');
     }
   };
 

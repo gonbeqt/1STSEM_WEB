@@ -18,6 +18,7 @@ import {
   RiskAnalysisResponse,
   RiskAnalysisPeriod
 } from '../../domain/entities/ReportEntities';
+import apiService from '../api';
 
 export class ReportRepositoryImpl implements ReportRepository {
   private readonly API_URL = process.env.REACT_APP_API_BASE_URL ?? '';
@@ -33,19 +34,7 @@ export class ReportRepositoryImpl implements ReportRepository {
   // Balance Sheet Operations
   async generateBalanceSheet(request: GenerateBalanceSheetRequest): Promise<GenerateBalanceSheetResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/balance-sheet/generate/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate balance sheet');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/balance-sheet/generate/`, request);
     } catch (error) {
       console.error('Balance sheet generation error:', error);
       throw error;
@@ -59,18 +48,7 @@ export class ReportRepositoryImpl implements ReportRepository {
         queryParams.append('balance_sheet_id', request.report_id);
       }
 
-      const response = await fetch(`${this.API_URL}/balance-sheet/export-excel/?${queryParams}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to export balance sheet to Excel');
-      }
-
-      return data;
+      return await apiService.get(`${this.API_URL}/balance-sheet/export-excel/?${queryParams}`);
     } catch (error) {
       console.error('Balance sheet Excel export error:', error);
       throw error;
@@ -79,19 +57,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async exportBalanceSheetPdf(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/balance-sheet/export-pdf/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to export balance sheet to PDF');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/balance-sheet/export-pdf/`, request);
     } catch (error) {
       console.error('Balance sheet PDF export error:', error);
       throw error;
@@ -100,18 +66,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async listBalanceSheets(): Promise<ListReportsResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/balance-sheet/list/`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch balance sheets');
-      }
-
-      return data;
+      return await apiService.get(`${this.API_URL}/balance-sheet/list/`);
     } catch (error) {
       console.error('List balance sheets error:', error);
       throw error;
@@ -121,19 +76,7 @@ export class ReportRepositoryImpl implements ReportRepository {
   // Cash Flow Operations
   async generateCashFlow(request: GenerateCashFlowRequest): Promise<GenerateCashFlowResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/cash-flow/generate/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate cash flow statement');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/cash-flow/generate/`, request);
     } catch (error) {
       console.error('Cash flow generation error:', error);
       throw error;
@@ -142,19 +85,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async exportCashFlowExcel(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/cash-flow/export-excel/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to export cash flow to Excel');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/cash-flow/export-excel/`, request);
     } catch (error) {
       console.error('Cash flow Excel export error:', error);
       throw error;
@@ -163,19 +94,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async exportCashFlowPdf(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/cash-flow/export-pdf/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to export cash flow to PDF');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/cash-flow/export-pdf/`, request);
     } catch (error) {
       console.error('Cash flow PDF export error:', error);
       throw error;
@@ -184,18 +103,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async listCashFlowStatements(): Promise<ListReportsResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/cash-flow/list/`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch cash flow statements');
-      }
-
-      return data;
+      return await apiService.get(`${this.API_URL}/cash-flow/list/`);
     } catch (error) {
       console.error('List cash flow statements error:', error);
       throw error;
@@ -205,19 +113,7 @@ export class ReportRepositoryImpl implements ReportRepository {
   // Tax Report Operations
   async generateTaxReport(request: GenerateTaxReportRequest): Promise<GenerateTaxReportResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/tax-reports/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate tax report');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/tax-reports/`, request);
     } catch (error) {
       console.error('Tax report generation error:', error);
       throw error;
@@ -226,18 +122,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async listTaxReports(): Promise<ListReportsResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/tax-reports/`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch tax reports');
-      }
-
-      return data;
+      return await apiService.get(`${this.API_URL}/tax-reports/`);
     } catch (error) {
       console.error('List tax reports error:', error);
       throw error;
@@ -247,19 +132,7 @@ export class ReportRepositoryImpl implements ReportRepository {
   // AI Tax Analysis Operations
   async generateTaxAnalysisDaily(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/ai/tax-analysis/daily/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate daily tax analysis');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/ai/tax-analysis/daily/`, request);
     } catch (error) {
       console.error('Daily tax analysis error:', error);
       throw error;
@@ -268,19 +141,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async generateTaxAnalysisWeekly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/ai/tax-analysis/weekly/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate weekly tax analysis');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/ai/tax-analysis/weekly/`, request);
     } catch (error) {
       console.error('Weekly tax analysis error:', error);
       throw error;
@@ -289,19 +150,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async generateTaxAnalysisMonthly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/ai/tax-analysis/monthly/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate monthly tax analysis');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/ai/tax-analysis/monthly/`, request);
     } catch (error) {
       console.error('Monthly tax analysis error:', error);
       throw error;
@@ -310,19 +159,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async generateTaxAnalysisYearly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/ai/tax-analysis/yearly/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate yearly tax analysis');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/ai/tax-analysis/yearly/`, request);
     } catch (error) {
       console.error('Yearly tax analysis error:', error);
       throw error;
@@ -331,19 +168,7 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async generateTaxAnalysisCustom(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}/ai/tax-analysis/custom/`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate custom tax analysis');
-      }
-
-      return data;
+      return await apiService.post(`${this.API_URL}/ai/tax-analysis/custom/`, request);
     } catch (error) {
       console.error('Custom tax analysis error:', error);
       throw error;
@@ -356,19 +181,11 @@ export class ReportRepositoryImpl implements ReportRepository {
     defaultError: string
   ): Promise<RiskAnalysisResponse> {
     try {
-      const response = await fetch(`${this.API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload ?? {}),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.success === false) {
-        throw new Error(data.error || data.message || defaultError);
+      const data = await apiService.post(`${this.API_URL}${endpoint}`, payload ?? {});
+      if ((data as any)?.success === false) {
+        throw new Error((data as any)?.error || (data as any)?.message || defaultError);
       }
-
-      return data;
+      return data as any;
     } catch (error) {
       console.error(`${defaultError}:`, error);
       if (error instanceof Error) {
@@ -427,18 +244,11 @@ export class ReportRepositoryImpl implements ReportRepository {
       const queryString = query.toString();
       const url = `${this.API_URL}/admin/ai/risk-analysis/history/${userId}/${queryString ? `?${queryString}` : ''}`;
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.success === false) {
-        throw new Error(data.error || 'Failed to fetch risk analysis history');
+      const data = await apiService.get(url);
+      if ((data as any)?.success === false) {
+        throw new Error((data as any)?.error || 'Failed to fetch risk analysis history');
       }
-
-      return data;
+      return data as any;
     } catch (error) {
       console.error('Risk analysis history error:', error);
       if (error instanceof Error) {
@@ -458,18 +268,11 @@ export class ReportRepositoryImpl implements ReportRepository {
       const queryString = query.toString();
       const url = `${this.API_URL}/admin/ai/risk-analysis/latest/${userId}/${queryString ? `?${queryString}` : ''}`;
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.success === false) {
-        throw new Error(data.error || 'Failed to fetch latest risk analysis');
+      const data = await apiService.get(url);
+      if ((data as any)?.success === false) {
+        throw new Error((data as any)?.error || 'Failed to fetch latest risk analysis');
       }
-
-      return data;
+      return data as any;
     } catch (error) {
       console.error('Latest risk analysis error:', error);
       if (error instanceof Error) {

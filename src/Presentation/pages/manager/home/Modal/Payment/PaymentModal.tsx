@@ -1,5 +1,6 @@
 // src/Presentation/pages/manager/home/Modal/Payment/PaymentModal.tsx
 import React, { useState } from 'react';
+import { useToast } from '../../../../../components/Toast/ToastProvider';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface PaymentData {
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
+  const { success: toastSuccess } = useToast();
   const [currentStep, setCurrentStep] = useState<PaymentStep>('recipient');
   const [paymentData, setPaymentData] = useState<PaymentData>({
     recipientName: '',
@@ -60,7 +62,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSendPayment = () => {
-    alert('Payment sent successfully!');
+    toastSuccess('Payment sent successfully!');
     handleClose();
   };
 

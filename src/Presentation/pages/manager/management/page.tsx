@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../../../components/Toast/ToastProvider';
 import InputWithIcon from '../../../components/InputWithIcon';
 import SearchIcon from '../../../components/icons/SearchIcon';
 import AddEmployee from './AddEmployee/page';
@@ -29,6 +30,7 @@ interface DetailedEmployee {
 }
 
 const EmployeeManagement: React.FC = () => {
+  const { error: toastError, success: toastSuccess, info: toastInfo, warning: toastWarning } = useToast();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddEmployeeModal, setIsAddEmployeeModal] = useState(false);
   const [showEmployeeDetailModal, setShowEmployeeDetailModal] = useState(false);
@@ -113,27 +115,23 @@ const EmployeeManagement: React.FC = () => {
 
   const handleDeleteEmployee = async () => {
     if (!selectedEmployee) return;
-    
-    const confirmMessage = `Are you sure you want to remove ${selectedEmployee.fullName} from your team? They will become available for other managers to assign.`;
-    
-    if (window.confirm(confirmMessage)) {
-      try {
-        const response = await removeEmployeeFromTeam({
-          username: selectedEmployee.emailAddress // Use email address instead of username
-        });
-        
-        if (response.success) {
-          // Refresh the employee list
-          setRefreshTrigger(prev => prev + 1);
-          handleCloseModal();
-        } else {
-          console.error('Failed to remove employee:', response.message);
-          alert(`Failed to remove employee: ${response.message}`);
-        }
-      } catch (error) {
-        console.error('Error removing employee:', error);
-        alert('An error occurred while removing the employee. Please try again.');
+    try {
+      const response = await removeEmployeeFromTeam({
+        username: selectedEmployee.emailAddress // Use email address instead of username
+      });
+
+      if (response.success) {
+        // Refresh the employee list
+        setRefreshTrigger(prev => prev + 1);
+        handleCloseModal();
+        toastSuccess('Employee removed successfully.');
+      } else {
+        console.error('Failed to remove employee:', response.message);
+        toastError(`Failed to remove employee: ${response.message}`);
       }
+    } catch (error) {
+      console.error('Error removing employee:', error);
+      toastError('An error occurred while removing the employee. Please try again.');
     }
   };
 

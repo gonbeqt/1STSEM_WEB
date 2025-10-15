@@ -218,15 +218,13 @@ export class WalletViewModel {
       const response: SendEthResponse = await this.sendEthUseCase.execute(request);
 
       if (response.success && response.data) {
-        this.state.successMessage = `Transaction sent successfully: ${response.data.transaction_hash}`;
-        await this.fetchWalletBalance(); // Refresh balance after sending
+        await this.fetchWalletBalance(); 
         return true;
       } else {
         this.state.sendEthError = response.message || 'Failed to send ETH.';
         return false;
       }
     } catch (error) {
-      this.state.sendEthError = error instanceof Error ? error.message : 'Failed to send ETH.';
       return false;
     } finally {
       this.state.isSendingEth = false;
@@ -241,13 +239,12 @@ export class WalletViewModel {
     }
 
     try {
-      this.state.isConnecting = true; // Reuse connecting state for disconnect loading
+      this.state.isConnecting = true;
       this.state.fetchBalanceError = null;
 
       const response: DisconnectWalletResponse = await this.disconnectWalletUseCase.execute(token);
       
       if (response.success) {
-        // Clear all wallet-related state
         this.resetWalletState();
         this.state.successMessage = response.message;
         return true;

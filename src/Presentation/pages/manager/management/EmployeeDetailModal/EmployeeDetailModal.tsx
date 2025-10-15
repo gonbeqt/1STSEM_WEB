@@ -43,8 +43,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   isOpen,
   employee,
   onClose,
-  onEdit,
-  onDelete,
   onRemoveFromTeam,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details');

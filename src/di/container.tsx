@@ -1,11 +1,9 @@
-import { SessionViewModel } from '../domain/viewmodel/SessionViewModel';
 import { UserRepositoryImpl } from '../data/repositoriesImpl/UserRepositoryImpl';
 import { WalletRepositoryImpl } from '../data/repositoriesImpl/WalletRepositoryImpl';
 import { RegisterUseCase } from '../domain/usecases/RegisterUseCase';
 import { LoginUseCase } from '../domain/usecases/LoginUseCase';
 import { RegisterViewModel } from '../domain/viewmodel/RegisterViewModel';
 import { LoginViewModel } from '../domain/viewmodel/LoginViewModel';
-import { GetSessionApprovalStatusUseCase } from '../domain/usecases/GetSessionApprovalStatusUseCase';
 import { TransactionRepositoryImpl } from '../data/repositoriesImpl/TransactionRepositoryImpl';
 import { GetTransactionHistoryUseCase } from '../domain/usecases/GetTransactionUseCase';
 import { SendEthUseCase } from '../domain/usecases/SendEthUseCase';
@@ -47,7 +45,6 @@ import {
   GetRiskAnalysisHistoryUseCase,
   GetLatestRiskAnalysisUseCase
 } from '../domain/usecases/RiskAnalysisUseCases';
-import { SessionRepositoryImpl } from '../data/repositoriesImpl/SessionRepositoryImpl';
 import { PayslipRepository } from '../domain/repositories/PayslipRepository';
 import { CreatePayslipUseCase } from '../domain/usecases/CreatePayslipUseCase';
 import { CreatePayrollEntryUseCase } from '../domain/usecases/CreatePayrollEntryUseCase';
@@ -68,11 +65,6 @@ import { AddressBookViewModel } from '../domain/viewmodel/AddressBookViewModel';
 import { LogoutUseCase } from '../domain/usecases/LogOutUseCase';
 import { GetWalletBalanceUseCase } from '../domain/usecases/GetWalletBalanceUseCase';
 import { ConnectWalletUseCase } from '../domain/usecases/ConnectWalletUseCase';
-import { ListSessionsUseCase } from '../domain/usecases/ListSessionsUseCase';
-import { RevokeOtherSessionsUseCase } from '../domain/usecases/RevokeOtherSessionsUseCase';
-import { RevokeSessionUseCase } from '../domain/usecases/RevokeSessionUseCase';
-import { TransferMainDeviceUseCase } from '../domain/usecases/TransferMainDeviceUseCase';
-import { ApproveSessionUseCase } from '../domain/usecases/ApproveSessionUseCase';
 import { GetUserPayslipsUseCase } from '../domain/usecases/GetUserPayslipsUseCase';
 import { WalletViewModel } from '../domain/viewmodel/WalletViewModal';
 import { PayslipRepositoryImpl } from '../data/repositoriesImpl/PayslipRepositoryImpl';
@@ -118,7 +110,6 @@ export interface Container {
   forgotPasswordViewModel(): any;
   userRepository: UserRepositoryImpl;
   walletRepository: WalletRepositoryImpl;
-  sessionRepository: SessionRepositoryImpl;
   transactionRepository: TransactionRepositoryImpl;
   exchangeRateRepository: ExchangeRateRepositoryImpl;
   addressBookRepository: AddressBookRepositoryImpl;
@@ -190,12 +181,6 @@ export interface Container {
   getRiskAnalysisHistoryUseCase: GetRiskAnalysisHistoryUseCase;
   getLatestRiskAnalysisUseCase: GetLatestRiskAnalysisUseCase;
 
-  listSessionsUseCase: ListSessionsUseCase;
-  revokeSessionUseCase: RevokeSessionUseCase;
-  revokeOtherSessionsUseCase: RevokeOtherSessionsUseCase;
-  approveSessionUseCase: ApproveSessionUseCase;
-  transferMainDeviceUseCase: TransferMainDeviceUseCase;
-  getSessionApprovalStatusUseCase: GetSessionApprovalStatusUseCase;
   getTransactionHistoryUseCase: GetTransactionHistoryUseCase;
   getUserPayslipsUseCase: GetUserPayslipsUseCase;
 
@@ -203,7 +188,6 @@ export interface Container {
   loginViewModel: () => LoginViewModel;
   walletViewModel: () => WalletViewModel;
   addressBookViewModel: () => AddressBookViewModel;
-  sessionViewModel: () => SessionViewModel;
   employeeViewModel: () => EmployeeViewModel;
   businessDocumentViewModel: () => BusinessDocumentViewModel;
   invoiceViewModel: () => InvoiceViewModel;
@@ -222,7 +206,6 @@ export interface Container {
 // ======= Create repository instances =======
 const userRepository = new UserRepositoryImpl();
 const walletRepository = new WalletRepositoryImpl();
-const sessionRepository = new SessionRepositoryImpl();
 const transactionRepository = new TransactionRepositoryImpl();
 const exchangeRateRepository = new ExchangeRateRepositoryImpl();
 const addressBookRepository = new AddressBookRepositoryImpl();
@@ -302,13 +285,6 @@ const generateYearlyRiskAnalysisUseCase = new GenerateYearlyRiskAnalysisUseCase(
 const getRiskAnalysisHistoryUseCase = new GetRiskAnalysisHistoryUseCase(reportRepository);
 const getLatestRiskAnalysisUseCase = new GetLatestRiskAnalysisUseCase(reportRepository);
 
-const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
-const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
-const revokeOtherSessionsUseCase = new RevokeOtherSessionsUseCase(sessionRepository);
-const approveSessionUseCase = new ApproveSessionUseCase(sessionRepository);
-const transferMainDeviceUseCase = new TransferMainDeviceUseCase(sessionRepository);
-const getSessionApprovalStatusUseCase = new GetSessionApprovalStatusUseCase(sessionRepository);
-
 const getTransactionHistoryUseCase = new GetTransactionHistoryUseCase(transactionRepository);
 const getUserPayslipsUseCase = new GetUserPayslipsUseCase(payslipRepository);
 
@@ -323,7 +299,6 @@ const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase();
 export const container: Container = {
   userRepository,
   walletRepository,
-  sessionRepository,
   transactionRepository,
   exchangeRateRepository,
   addressBookRepository,
@@ -393,12 +368,6 @@ export const container: Container = {
   getRiskAnalysisHistoryUseCase,
   getLatestRiskAnalysisUseCase,
 
-  listSessionsUseCase,
-  revokeSessionUseCase,
-  revokeOtherSessionsUseCase,
-  approveSessionUseCase,
-  transferMainDeviceUseCase,
-  getSessionApprovalStatusUseCase,
   getTransactionHistoryUseCase,
   getUserPayslipsUseCase,
 
@@ -422,13 +391,6 @@ export const container: Container = {
     getExchangeRatesUseCase
   ),
   addressBookViewModel: () => addressBookViewModelInstance,
-  sessionViewModel: () => new SessionViewModel(
-    listSessionsUseCase,
-    revokeSessionUseCase,
-    revokeOtherSessionsUseCase,
-    approveSessionUseCase,
-    transferMainDeviceUseCase
-  ),
   employeeViewModel: () => new EmployeeViewModel(
     addEmployeeUseCase,
     getEmployeesByManagerUseCase,
@@ -468,5 +430,7 @@ export const container: Container = {
   ),
   forgotPasswordViewModel: function () {
     throw new Error('Function not implemented.');
-  }
+  },
+  
+
 };

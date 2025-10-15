@@ -100,10 +100,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
         });
         setValidationErrors({});
         
-        onSubmit(response.employee);
-        onClose();
-        
-        alert(`Employee ${response.employee.full_name || response.employee.username} has been added to your team successfully!`);
+  onSubmit(response.employee);
+  onClose();
       } else {
         console.error('Failed to add employee to team:', response.message);
       }

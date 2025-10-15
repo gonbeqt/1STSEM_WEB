@@ -1,34 +1,24 @@
-// Update the import path if the file exists elsewhere, for example:
-import axios from 'axios';
 import { EmployeeHistory, EmployeeHistoryDetails } from "../../domain/entities/EmployeeHistoryEntities";
 import { EmployeeHistoryRepository } from "../../domain/repositories/EmployeeHistoryRepository";
+import apiService from '../api';
 
 export class EmployeeHistoryRepositoryImpl implements EmployeeHistoryRepository {
     private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
 
-    private getAuthHeaders() {
-        const token = localStorage.getItem('token');
-        return {
-            headers: {  
-                'Authorization': `Bearer ${token}`
-            }
-        };
-    }
+    // Auth headers handled by ApiService interceptors
 
     async getEmployeeHistory(): Promise<EmployeeHistory> {
-        const response = await axios.get<EmployeeHistory>(
-            `${this.API_URL}/employee/payroll/details/`,
-            this.getAuthHeaders()
+        const data = await apiService.get<EmployeeHistory>(
+            `${this.API_URL}/employee/payroll/details/`
         );
-        return response.data;
+        return data;
     }
 
     async getEmployeeHistoryDetails(entryId: string): Promise<EmployeeHistoryDetails> {
-        const response = await axios.get<EmployeeHistoryDetails>(
-            `${this.API_URL}/employee/payroll/entry-details/?entry_id=${entryId}`,
-            this.getAuthHeaders()
+        const data = await apiService.get<EmployeeHistoryDetails>(
+            `${this.API_URL}/employee/payroll/entry-details/?entry_id=${entryId}`
         );
-        return response.data;
+        return data;
     }
 }
 

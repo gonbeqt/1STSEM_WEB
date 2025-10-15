@@ -1,13 +1,15 @@
 // src/Presentation/pages/employee/home/page.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Bell, Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug } from 'lucide-react';
+import {  Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
+import { useToast } from '../../../components/Toast/ToastProvider';
+
 const WalletCardBg = '/assets/wallet_bg.png';
 
 type WalletModalInitialView = 'connect' | 'send';
@@ -21,6 +23,7 @@ const EmployeeHome = observer(() => {
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
   const [conversionCurrency, setConversionCurrency] = useState<string>('USD');
   const [isAutoConverting, setIsAutoConverting] = useState<boolean>(false);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   const { isWalletConnected,
     walletAddress,
@@ -135,13 +138,16 @@ const EmployeeHome = observer(() => {
     }
   }, [isWalletConnected, isMenuOpen]);
 
-  // Fetch all transactions for employee (no category filtering)
+  // Fetch all transactions for employee (no category filtering) - guard StrictMode double-invoke
+  const initialTxFetchDone = useRef(false);
   useEffect(() => {
+    if (initialTxFetchDone.current) return;
+    initialTxFetchDone.current = true;
     fetchTransactionHistory({
       limit: 10,
       offset: 0
     });
-  }, []); // intentionally empty: prevent infinite loop
+  }, [fetchTransactionHistory]);
 
 
   const getNextMonthFirstDay = () => {
@@ -167,10 +173,13 @@ const EmployeeHome = observer(() => {
     }
   };
 
-  const copyToClipboard = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
-      alert('Address copied to clipboard!');
+  const copyToClipboard = async () => {
+    if (!walletAddress) return;
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      toastSuccess('Address copied to clipboard!', { duration: 2000 });
+    } catch (e) {
+      toastError('Failed to copy address.');
     }
   };
 

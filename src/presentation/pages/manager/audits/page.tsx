@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef } from 'react';
+import { useToast } from '../../../components/Toast/ToastProvider';
 import { useNavigate } from 'react-router-dom';
 import SideNavbar from '../../../components/SideNavbar';
 import ManagerNavbar from '../../../components/ManagerNavbar';
@@ -70,6 +71,7 @@ const getRiskBadgeClass = (risk?: string) => {
 };
 
 const AuditSolidityContract: React.FC = () => {
+    const { warning: toastWarning, error: toastError, success: toastSuccess, info: toastInfo } = useToast();
     const [currentStep, setCurrentStep] = useState(1);
     const [contractName, setContractName] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -192,18 +194,18 @@ const AuditSolidityContract: React.FC = () => {
         }
 
         if (!contractName.trim()) {
-            alert('Please provide a contract name before starting the analysis.');
+            toastWarning('Please provide a contract name before starting the analysis.');
             return;
         }
 
         if (uploadedFiles.length === 0) {
-            alert('Please upload a Solidity contract file to analyze.');
+            toastWarning('Please upload a Solidity contract file to analyze.');
             return;
         }
 
         const activeFile = uploadedFiles[0]?.file;
         if (!activeFile) {
-            alert('The selected file could not be read. Please upload it again.');
+            toastError('The selected file could not be read. Please upload it again.');
             return;
         }
 

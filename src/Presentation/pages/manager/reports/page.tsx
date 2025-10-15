@@ -10,10 +10,6 @@ const ReportsComponent: React.FC = () => {
   const navigate = useNavigate();
   const [activePeriod, setActivePeriod] = useState<PeriodLabel>('Daily');
 
-  const handleCategoryChange = (categoryName: string) => {
-    // Not used anymore but keeping for compatibility
-  };
-
   const getLastUpdatedText = (periodLabel: string) => {
     switch (periodLabel) {
       case 'Daily':
@@ -120,7 +116,7 @@ const ReportsComponent: React.FC = () => {
 
             <div
               className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-200 cursor-pointer transition-all duration-200 hover:shadow-md"
-              onClick={() => handleReportTypeClick('/investment')}
+              onClick={() => handleReportTypeClick('/invest')}
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl bg-purple-500">
                 {getReportIcon('investment')}
@@ -154,13 +150,13 @@ const ReportsComponent: React.FC = () => {
           <div>
             <div
               className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-200 cursor-pointer transition-all duration-200 hover:shadow-md"
-              onClick={() => handleReportTypeClick('/vat_report')}
+              onClick={() => handleReportTypeClick('/tax_summary')}
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl bg-purple-500">
                 {getReportIcon('tax')}
               </div>
               <div className="flex-1">
-                <div className="text-lg font-semibold text-gray-900">VAT Report</div>
+                <div className="text-lg font-semibold text-gray-900">Tax Summaryt</div>
                 <div className="text-sm text-gray-500">{getLastUpdatedText(activePeriod)}</div>
               </div>
             </div>

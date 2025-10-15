@@ -1,5 +1,6 @@
 import { BusinessDocument } from "../../domain/entities/BusinessDocumentEntities";
 import { BusinessDocumentRepository } from "../../domain/repositories/BusinessDocumentRepository";
+import apiService from '../api';
 
 export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepository {
     private readonly API_URL = process.env.REACT_APP_API_BASE_URL;
@@ -24,13 +25,7 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             dtiFormData.append('file', documents.dti_document);
             dtiFormData.append('document_type', 'business_registration');
             
-            uploadPromises.push(
-                fetch(`${this.API_URL}/documents/submit/`, {
-                    method: 'POST',
-                    body: dtiFormData,
-                    headers: this.getAuthHeader()
-                })
-            );
+            uploadPromises.push(apiService.postForm(`${this.API_URL}/documents/submit/`, dtiFormData));
         }
 
         // Upload Form 2303
@@ -39,13 +34,7 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             form2303Data.append('file', documents.form_2303);
             form2303Data.append('document_type', 'tax_id');
             
-            uploadPromises.push(
-                fetch(`${this.API_URL}/documents/submit/`, {
-                    method: 'POST',
-                    body: form2303Data,
-                    headers: this.getAuthHeader()
-                })
-            );
+            uploadPromises.push(apiService.postForm(`${this.API_URL}/documents/submit/`, form2303Data));
         }
 
         // Upload Manager ID
@@ -54,30 +43,12 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             managerIdData.append('file', documents.manager_id);
             managerIdData.append('document_type', 'company_license');
             
-            uploadPromises.push(
-                fetch(`${this.API_URL}/documents/submit/`, {
-                    method: 'POST',
-                    body: managerIdData,
-                    headers: this.getAuthHeader()
-                })
-            );
+            uploadPromises.push(apiService.postForm(`${this.API_URL}/documents/submit/`, managerIdData));
         }
 
         try {
-            const responses = await Promise.all(uploadPromises);
-            const results = await Promise.all(responses.map(response => response.json()));
-
-            // Check if all uploads were successful
-            const failedUploads = responses.filter(response => !response.ok);
-            if (failedUploads.length > 0) {
-                throw new Error('Some documents failed to upload');
-            }
-
-            return {
-                success: true,
-                message: 'All business documents uploaded successfully',
-                results: results
-            };
+            const results = await Promise.all(uploadPromises);
+            return { success: true, message: 'All business documents uploaded successfully', results };
         } catch (error: any) {
             throw new Error(error?.message || 'Failed to upload business documents');
         }
@@ -90,21 +61,7 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             throw new Error('Not authenticated. Please log in to view your documents.');
         }
 
-        const response = await fetch(`${this.API_URL}/documents/my-documents/`, {
-            method: 'GET',
-            headers: {
-                ...this.getAuthHeader(),
-                'Accept': 'application/json'
-            }
-        });
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-            throw new Error(responseData.error || 'Failed to get user documents');
-        }
-
-        return responseData;
+        return await apiService.get(`${this.API_URL}/documents/my-documents/`);
     }
 
     async submitDocumentsForApproval(): Promise<any> {
@@ -113,20 +70,6 @@ export class BusinessDocumentRepositoryImpl implements BusinessDocumentRepositor
             throw new Error('Not authenticated. Please log in to submit documents for approval.');
         }
 
-        const response = await fetch(`${this.API_URL}/documents/submit/`, {
-            method: 'POST',
-            headers: {
-                ...this.getAuthHeader(),
-                'Accept': 'application/json'
-            }
-        });
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-            throw new Error(responseData.error || 'Failed to submit documents for approval');
-        }
-
-        return responseData;
+        return await apiService.post(`${this.API_URL}/documents/submit/`, {});
     }
 }

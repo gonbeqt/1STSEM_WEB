@@ -1,22 +1,16 @@
 import { ContractRepository } from '../../domain/repositories/ContractRepository';
 import { Audit, AuditContractResponse, AuditDetailsResponse, AuditRequestData, AuditStatisticsResponse, UploadContractResponse } from '../../domain/entities/ContractEntities';
-import axios from 'axios';
+import apiService from '../api';
 const API_URL = process.env.REACT_APP_API_BASE_URL;
 
 export class ContractRepositoryImpl implements ContractRepository {
     async uploadContract(file: File): Promise<UploadContractResponse> {
-        const token = localStorage.getItem('token');
         const formData = new FormData();
         formData.append('contract_file', file);
 
         try {
-            const response = await axios.post<UploadContractResponse>(`${API_URL}/ai/upload-contract/`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            return response.data;
+            const response = await apiService.postForm<UploadContractResponse>(`${API_URL}/ai/upload-contract/`, formData);
+            return response;
         } catch (error: any) {
             console.error('Upload contract error:', error);
             
@@ -54,15 +48,10 @@ export class ContractRepositoryImpl implements ContractRepository {
     }
 
     async auditContract(auditData: AuditRequestData): Promise<AuditContractResponse> {
-        const token = localStorage.getItem('token');
         
         try {
-            const response = await axios.post<AuditContractResponse>(`${API_URL}/admin/audit-contract/`, auditData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            return response.data;
+            const response = await apiService.post<AuditContractResponse>(`${API_URL}/admin/audit-contract/`, auditData);
+            return response;
         } catch (error: any) {
             console.error('Audit contract error:', error);
             
@@ -116,15 +105,10 @@ export class ContractRepositoryImpl implements ContractRepository {
     }
 
     async listAudits(): Promise<Audit[]> {
-        const token = localStorage.getItem('token');
         
         try {
-            const response = await axios.get<{success: boolean, audits: Audit[]}>(`${API_URL}/admin/audits/list/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            return response.data.audits || [];
+            const response = await apiService.get<{success: boolean, audits: Audit[]}>(`${API_URL}/admin/audits/list/`);
+            return response.audits || [];
         } catch (error: any) {
             console.error('List audits error:', error);
             
@@ -149,15 +133,10 @@ export class ContractRepositoryImpl implements ContractRepository {
     }
 
     async getAuditDetails(auditId: string): Promise<AuditDetailsResponse> {
-        const token = localStorage.getItem('token');
         
         try {
-            const response = await axios.get<AuditDetailsResponse>(`${API_URL}/admin/audits/details/?audit_id=${auditId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            return response.data;
+            const response = await apiService.get<AuditDetailsResponse>(`${API_URL}/admin/audits/details/?audit_id=${auditId}`);
+            return response;
         } catch (error: any) {
             console.error('Get audit details error:', error);
             
@@ -190,15 +169,10 @@ export class ContractRepositoryImpl implements ContractRepository {
     }
 
     async getAuditStatistics(): Promise<AuditStatisticsResponse> {
-        const token = localStorage.getItem('token');
         
         try {
-            const response = await axios.get<AuditStatisticsResponse>(`${API_URL}/admin/audits/statistics/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            return response.data;
+            const response = await apiService.get<AuditStatisticsResponse>(`${API_URL}/admin/audits/statistics/`);
+            return response;
         } catch (error: any) {
             console.error('Get audit statistics error:', error);
             
