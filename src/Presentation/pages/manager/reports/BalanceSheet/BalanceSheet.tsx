@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ArrowLeft } from 'lucide-react';
 
 
 
@@ -295,7 +296,8 @@ const BalanceSheet: React.FC = () => {
             </p>
             <div className="flex gap-3 flex-wrap">
               <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
-                ← Back
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
               </button>
               <button className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all" onClick={handleExportPdf}>
                 📄 Download Report
@@ -429,13 +431,14 @@ const BalanceSheet: React.FC = () => {
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
             onClick={() => navigate(-1)}
           >
-            ← Back to Reports
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Reports</span>
           </button>
           <div className="flex gap-2">
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeView === 'table' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-purple-600 text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('table')}
@@ -443,9 +446,9 @@ const BalanceSheet: React.FC = () => {
               Table View
             </button>
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeView === 'chart' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-purple-600 text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('chart')}
