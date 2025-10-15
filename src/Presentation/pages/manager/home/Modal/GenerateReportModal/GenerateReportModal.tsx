@@ -1,6 +1,7 @@
 // src/Presentation/pages/manager/home/Modal/GenerateReportModal/GenerateReportModal.tsx
 import React, { useState } from "react";
 import { X, CheckCircle, FileText, Download, Mail, Loader2, AlertCircle } from "lucide-react";
+import { sumObjectValues, getDateRangeForPeriod, ProgressBar } from '../../utils';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
@@ -26,53 +27,8 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
   const [error, setError] = useState<string>("");
   const [generatedReport, setGeneratedReport] = useState<any>(null);
 
-  // Helper function to sum values from nested objects
-  const sumObjectValues = (obj: any) => {
-    if (typeof obj !== 'object' || obj === null) {
-      return 0;
-    }
-    return Object.values(obj).reduce((sum: number, val: any) => {
-      const num = Number(val);
-      return sum + (isNaN(num) ? 0 : num);
-    }, 0);
-  };
-
-  // Calculate date range based on time period
-  const getDateRange = () => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    switch (timePeriod) {
-      case "Current Period":
-        return {
-          start_date: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
-          end_date: today.toISOString().split('T')[0]
-        };
-      case "Previous Period":
-        const lastMonth = new Date(currentYear, currentMonth - 1, 1);
-        const lastMonthEnd = new Date(currentYear, currentMonth, 0);
-        return {
-          start_date: lastMonth.toISOString().split('T')[0],
-          end_date: lastMonthEnd.toISOString().split('T')[0]
-        };
-      case "Year to Date":
-        return {
-          start_date: new Date(currentYear, 0, 1).toISOString().split('T')[0],
-          end_date: today.toISOString().split('T')[0]
-        };
-      case "Custom Period":
-        return {
-          start_date: customStartDate,
-          end_date: customEndDate
-        };
-      default:
-        return {
-          start_date: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
-          end_date: today.toISOString().split('T')[0]
-        };
-    }
-  };
+  // Use shared helpers for sum and date ranges
+  // sumObjectValues and getDateRangeForPeriod are imported from ../utils
 
   // Generate cash flow report
   const generateCashFlowReport = async () => {
@@ -80,7 +36,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
     setError("");
     
     try {
-      const { start_date, end_date } = getDateRange();
+  const { start_date, end_date } = getDateRangeForPeriod(timePeriod, customStartDate, customEndDate);
       
       if (timePeriod === "Custom Period" && (!customStartDate || !customEndDate)) {
         setError("Please select custom start and end dates");
@@ -138,8 +94,8 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
                       timePeriod === "Current Period" ? "MONTHLY" :
                       timePeriod === "Previous Period" ? "MONTHLY" :
                       timePeriod === "Year to Date" ? "YEARLY" : "MONTHLY",
-          start_date: timePeriod === "Custom Period" ? customStartDate : getDateRange().start_date,
-          end_date: timePeriod === "Custom Period" ? customEndDate : getDateRange().end_date,
+          start_date: timePeriod === "Custom Period" ? customStartDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).start_date,
+          end_date: timePeriod === "Custom Period" ? customEndDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).end_date,
           total_gains: 0, // Will be calculated by backend
           total_losses: 0 // Will be calculated by backend
         }),
@@ -151,8 +107,8 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
         setGeneratedReport({
           type: 'tax_analysis',
           analysis: data.analysis,
-          period_start: timePeriod === "Custom Period" ? customStartDate : getDateRange().start_date,
-          period_end: timePeriod === "Custom Period" ? customEndDate : getDateRange().end_date,
+          period_start: timePeriod === "Custom Period" ? customStartDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).start_date,
+          period_end: timePeriod === "Custom Period" ? customEndDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).end_date,
           generated_at: new Date().toISOString()
         });
         setStep("success");
@@ -176,7 +132,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
       const token = localStorage.getItem('token');
       
       // For balance sheet, we use the end date as the "as of" date
-      const { end_date } = getDateRange();
+  const { end_date } = getDateRangeForPeriod(timePeriod, customStartDate, customEndDate);
       
       const response = await fetch(`${API_URL}/balance-sheet/generate/`, {
         method: 'POST',

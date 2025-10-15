@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatKey, formatValue, KeyValueList } from '../pages/manager/home/utils';
 
 type AiAnalysis = {
   classification?: string;
@@ -38,29 +39,7 @@ const InfoTile = ({ label, children }: { label: string; children: React.ReactNod
   </div>
 );
 
-const formatKey = (key: string): string => {
-  const withSpaces = key.replace(/_/g, ' ');
-  return withSpaces.replace(/\b\w/g, char => char.toUpperCase());
-};
-
-const formatValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '—';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return value.toString();
-  if (value instanceof Date) return value.toISOString();
-  return JSON.stringify(value, null, 2);
-};
-
-const KeyValueList = ({ data }: { data: Record<string, unknown> }) => (
-  <div className="space-y-3">
-    {Object.entries(data).map(([key, value]) => (
-      <div key={key} className="rounded-md bg-gray-50 px-3 py-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{formatKey(key)}</p>
-        <p className="mt-1 whitespace-pre-wrap text-sm text-gray-800">{formatValue(value)}</p>
-      </div>
-    ))}
-  </div>
-);
+// formatKey, formatValue and KeyValueList are imported from the manager home utils
 
 const RecentTransactionDetails: React.FC<Props> = ({ isOpen, transaction, onClose }) => {
   if (!isOpen || !transaction) return null;

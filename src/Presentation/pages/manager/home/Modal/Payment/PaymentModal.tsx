@@ -1,6 +1,7 @@
 // src/Presentation/pages/manager/home/Modal/Payment/PaymentModal.tsx
 import React, { useState } from 'react';
 import { useToast } from '../../../../../components/Toast/ToastProvider';
+import { ProgressBar } from '../../utils';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -120,12 +121,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
         {/* Progress */}
         <div className="px-6 pt-4">
-          <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
-            <div
-              className="h-full transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-700"
-              style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
-            />
-          </div>
+          <ProgressBar progress={((currentStepIndex + 1) / steps.length) * 100} />
           <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
             <div className="flex items-center gap-6">
               <span className={currentStepIndex >= 0 ? 'text-purple-600 font-semibold' : ''}>Recipient</span>

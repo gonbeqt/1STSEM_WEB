@@ -1,6 +1,9 @@
-import React, { useMemo } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
+import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
+import { container } from '../../di/container';
+import LogoutConfirmModal from './LogoutConfirmModal';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/employee/home' },
@@ -9,6 +12,33 @@ const NAV_LINKS = [
 ];
 
 const EmployeeNavbar: React.FC = () => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+const navigate = useNavigate();
+const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel());
+  useEffect(() => {
+    if (!loginViewModel.isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+  }, [loginViewModel.isLoggedIn, navigate]);
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleCancelLogout = () => {
+    if (!loginViewModel.isLoggingOut) {
+      setShowLogoutModal(false);
+    }
+  };
+
+  const handleConfirmLogout = async () => {
+    const success = await loginViewModel.logout();
+    if (success) {
+      setShowLogoutModal(false);
+      navigate('/login');
+    }
+  };
   const employeeProfile = useMemo(() => {
     try {
       const stored = localStorage.getItem('user');
@@ -84,8 +114,22 @@ const EmployeeNavbar: React.FC = () => {
               {link.label}
             </NavLink>
           ))}
+           <button
+            onClick={handleLogoutClick}
+            className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          >
+            Logout
+          </button>
         </div>
+
       </nav>
+      <LogoutConfirmModal
+        open={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+        isProcessing={loginViewModel.isLoggingOut}
+        errorMessage={loginViewModel.logoutError}
+      />
     </header>
   );
 };
