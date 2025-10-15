@@ -381,7 +381,10 @@ const TaxSummary: React.FC = () => {
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
             onClick={() => navigate(-1)}
           >
-            ← Back to Reports
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Reports</span>
           </button>
           <div className="flex gap-2">
             <button 

@@ -48,6 +48,13 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('details');
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
 
+  // derive a consistent active status from available fields
+  const isActive = Boolean(
+    employee?.is_active
+    || (employee?.status && String(employee.status).toLowerCase() === 'active')
+  );
+  const statusLabel = isActive ? 'Active' : (employee?.status ?? 'Inactive');
+
   const employeePayslipId = employee?.employee_id || employee?.employeeId || '';
   const shouldFetchPayslips = isOpen && Boolean(employeePayslipId);
   const {
@@ -175,12 +182,12 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee Status</label>
             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ml-1 ${
-              employee.status === 'Active' 
-                ? 'bg-green-100 text-green-700 border border-green-200' 
-                : 'bg-red-100 text-red-700 border border-red-200'
+              isActive
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-red-100 text-red-700'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${employee.status === 'Active' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              {employee.status}
+              <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+              {statusLabel}
             </span>
           </div>
         </div>
@@ -193,35 +200,34 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-white p-4 rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">🏥</div>
+            <div className="flex items-center gap-2">
               <div>
                 <h4 className="font-semibold text-gray-900 text-sm">Health Insurance</h4>
                 <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">Enrolled</span>
               </div>
             </div>
           </div>
+
           <div className="bg-white p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">💼</div>
+            <div className="flex items-center gap-2">
               <div>
                 <h4 className="font-semibold text-gray-900 text-sm">Retirement Plan</h4>
                 <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">Enrolled</span>
               </div>
             </div>
           </div>
+
           <div className="bg-white p-4 rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">🦷</div>
+            <div className="flex items-center gap-2">
               <div>
                 <h4 className="font-semibold text-gray-900 text-sm">Dental Coverage</h4>
                 <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">Enrolled</span>
               </div>
             </div>
           </div>
+
           <div className="bg-white p-4 rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">🏖️</div>
+            <div className="flex items-center gap-2">
               <div>
                 <h4 className="font-semibold text-gray-900 text-sm">Paid Time Off</h4>
                 <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">Available</span>
@@ -504,28 +510,39 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Profile Header */}
+        {/* Profile Header (UI revised) */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 sm:p-6 mx-4 sm:mx-6 mt-4 rounded-xl sm:rounded-2xl text-white shadow-lg">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
+            {/* left: avatar + name + position */}
             <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg bg-white/20 flex items-center justify-center text-lg sm:text-xl font-bold">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100/10 flex items-center justify-center text-lg sm:text-xl font-bold overflow-hidden">
                 {employee.profileImage ? (
-                  <img src={employee.profileImage} alt={employee.full_name || employee.fullName} className="w-full h-full object-cover" />
+                  <img
+                    src={employee.profileImage}
+                    alt={employee.full_name || employee.fullName}
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 ) : (
-                  (employee.full_name || employee.fullName || '').split(' ').map(name => name.charAt(0)).join('').slice(0, 2)
+                  (employee.full_name || employee.fullName || '')
+                    .split(' ')
+                    .map(name => name.charAt(0))
+                    .join('')
+                    .slice(0, 2)
                 )}
               </div>
+
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold mb-1">{employee.full_name || employee.fullName}</h1>
                 <p className="text-sm sm:text-base text-white/80 font-medium">{employee.position}</p>
               </div>
             </div>
-            
-            <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 self-stretch sm:self-auto">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-xs sm:text-sm font-semibold">{employee.status}</span>
-              </div>
+
+            {/* right: status pushed to the end of the header */}
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className={`${isActive ? 'text-green-600' : 'text-red-600'} text-sm font-semibold`}>
+                {statusLabel}
+              </span>
             </div>
           </div>
         </div>
