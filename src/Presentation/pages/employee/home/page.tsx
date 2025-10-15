@@ -1,7 +1,7 @@
 // src/Presentation/pages/employee/home/page.tsx
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import {  Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug } from 'lucide-react';
+import { Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import WalletModal from '../../../components/WalletModal';
@@ -9,6 +9,7 @@ import EthereumIcon from '../../../components/icons/EthereumIcon';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 import { useToast } from '../../../components/Toast/ToastProvider';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 
 const WalletCardBg = '/assets/wallet_bg.png';
 
@@ -18,6 +19,9 @@ const EmployeeHome = observer(() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletModalInitialView, setWalletModalInitialView] = useState<WalletModalInitialView>('connect');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+  const menuRootRef = useRef<HTMLDivElement | null>(null);
+  const skipNextOutsideRef = useRef(false);
 
   // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
@@ -109,8 +113,11 @@ const EmployeeHome = observer(() => {
     };
   });
 
-  // Check wallet connection on page load
+  // Check wallet connection on page load (guard StrictMode double-invoke)
+  const initialWalletCheckDone = useRef(false);
   useEffect(() => {
+    if (initialWalletCheckDone.current) return;
+    initialWalletCheckDone.current = true;
     checkWalletConnection();
   }, [checkWalletConnection]);
 
@@ -131,12 +138,6 @@ const EmployeeHome = observer(() => {
     }
   }, [isWalletConnected, fetchWalletBalance]);
 
-  // Close menu when wallet disconnects
-  useEffect(() => {
-    if (!isWalletConnected && isMenuOpen) {
-      setIsMenuOpen(false);
-    }
-  }, [isWalletConnected, isMenuOpen]);
 
   // Fetch all transactions for employee (no category filtering) - guard StrictMode double-invoke
   const initialTxFetchDone = useRef(false);
@@ -162,16 +163,46 @@ const EmployeeHome = observer(() => {
     setIsWalletModalOpen(true);
   };
 
-  const handleDisconnectWallet = async () => {
-    const confirmed = window.confirm('Are you sure you want to disconnect your wallet? This will remove all wallet data from your account.');
-    if (confirmed) {
-      const success = await disconnectWallet();
-      if (success) {
-        // Refresh transactions after disconnecting
-        fetchTransactionHistory();
-      }
+  const toggleMenu = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!isMenuOpen) {
+      skipNextOutsideRef.current = true;
+      setIsMenuOpen(true);
+      // allow the opening click to complete before we start reacting to outside clicks
+      setTimeout(() => { skipNextOutsideRef.current = false; }, 0);
+    } else {
+      setIsMenuOpen(false);
     }
   };
+
+  // Close on outside click using a document listener (more robust than overlay)
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleDown = (ev: MouseEvent) => {
+      if (skipNextOutsideRef.current) { skipNextOutsideRef.current = false; return; }
+      const root = menuRootRef.current;
+      if (root && ev.target instanceof Node && !root.contains(ev.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleDown);
+    return () => document.removeEventListener('mousedown', handleDown);
+  }, [isMenuOpen]);
+
+  const handleDisconnectWallet = async () => {
+    setShowDisconnectConfirm(true);
+  };
+
+  const confirmDisconnect = async () => {
+    setShowDisconnectConfirm(false);
+    const success = await disconnectWallet();
+    if (success) {
+      // Refresh transactions after disconnecting
+      fetchTransactionHistory();
+    }
+  };
+
+  const cancelDisconnect = () => setShowDisconnectConfirm(false);
 
   const copyToClipboard = async () => {
     if (!walletAddress) return;
@@ -220,7 +251,7 @@ const EmployeeHome = observer(() => {
       <EmployeeNavbar />
 
 
-  <div className="w-full mx-auto px-4 sm:px-6 py-6">
+      <div className="w-full mx-auto px-4 sm:px-6 py-6">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
           <p className="text-sm text-gray-500">Your personal dashboard — balances, upcoming payouts, and recent activity.</p>
@@ -228,7 +259,7 @@ const EmployeeHome = observer(() => {
 
 
 
-  {/* Connected Wallet Card */}
+        {/* Connected Wallet Card */}
         <div
           className="rounded-3xl p-6 text-white shadow-xl mb-6 relative bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
@@ -241,9 +272,10 @@ const EmployeeHome = observer(() => {
             <span className="text-sm font-medium text-purple-100">
               Current Balance
             </span>
-            <div className="relative">
+            <div className="relative" ref={menuRootRef}>
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onMouseDown={(e) => { e.stopPropagation(); skipNextOutsideRef.current = true; setTimeout(() => { skipNextOutsideRef.current = false; }, 0); }}
+                onClick={toggleMenu}
                 className="p-1 hover:bg-white/20 rounded-full transition-all"
               >
                 <MoreVertical className="w-5 h-5" />
@@ -251,13 +283,10 @@ const EmployeeHome = observer(() => {
 
               {isMenuOpen && (
                 <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setIsMenuOpen(false)}
-                  />
                   <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg z-20 overflow-hidden">
                     {!isWalletConnected ? (
                       <button
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={() => {
                           handleOpenWalletModal('connect');
                           setIsMenuOpen(false);
@@ -270,6 +299,7 @@ const EmployeeHome = observer(() => {
                     ) : (
                       <>
                         <button
+                          onMouseDown={(e) => e.stopPropagation()}
                           onClick={() => {
                             fetchWalletBalance();
                             setIsMenuOpen(false);
@@ -280,6 +310,7 @@ const EmployeeHome = observer(() => {
                           <span className="text-sm font-medium">Refresh Balance</span>
                         </button>
                         <button
+                          onMouseDown={(e) => e.stopPropagation()}
                           onClick={() => {
                             handleDisconnectWallet();
                             setIsMenuOpen(false);
@@ -336,7 +367,7 @@ const EmployeeHome = observer(() => {
                 </button>
               </div>
 
-          
+
             </>
           ) : (
             <>
@@ -409,8 +440,8 @@ const EmployeeHome = observer(() => {
         </div>
 
 
-  {/* Action Buttons */}
-  <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1 bg-gray-100 border border-gray-200 rounded-2xl p-4 text-gray-800 flex items-center gap-3 transition-colors duration-200 hover:bg-gray-200">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-purple-500">📤</div>
             <div className="text-left">
@@ -504,6 +535,16 @@ const EmployeeHome = observer(() => {
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
         initialView={walletModalInitialView}
+      />
+
+      <ConfirmDialog
+        isOpen={showDisconnectConfirm}
+        title="Disconnect wallet?"
+        description="Are you sure you want to disconnect your wallet? This will remove all wallet data from your account."
+        confirmText="Disconnect"
+        cancelText="Cancel"
+        onConfirm={confirmDisconnect}
+        onCancel={cancelDisconnect}
       />
     </div>
   );

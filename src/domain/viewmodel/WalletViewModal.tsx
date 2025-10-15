@@ -246,7 +246,6 @@ export class WalletViewModel {
       
       if (response.success) {
         this.resetWalletState();
-        this.state.successMessage = response.message;
         return true;
       } else {
         this.state.fetchBalanceError = 'Failed to disconnect wallet';

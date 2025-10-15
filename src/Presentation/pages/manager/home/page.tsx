@@ -15,6 +15,7 @@ import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransac
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 import { useToast } from '../../../components/Toast/ToastProvider';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 // Use a runtime string path for the background image so TypeScript doesn't need a module for .png files
 const WalletCardBg = '/assets/wallet_bg.png';
 
@@ -29,6 +30,7 @@ const Home = observer(() => {
   const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
   const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
   // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
@@ -141,8 +143,10 @@ const Home = observer(() => {
     };
   });
 
-  // Check wallet connection on page load
+  const initialWalletCheckDone = useRef(false);
   useEffect(() => {
+    if (initialWalletCheckDone.current) return;
+    initialWalletCheckDone.current = true;
     checkWalletConnection();
   }, [checkWalletConnection]);
 
@@ -216,15 +220,19 @@ const Home = observer(() => {
   };
 
   const handleDisconnectWallet = async () => {
-    const confirmed = window.confirm('Are you sure you want to disconnect your wallet? This will remove all wallet data from your account.');
-    if (confirmed) {
-      const success = await disconnectWallet();
-      if (success) {
-        // Refresh transactions after disconnecting
-        fetchTransactionHistory();
-      }
+    setShowDisconnectConfirm(true);
+  };
+
+  const confirmDisconnect = async () => {
+    setShowDisconnectConfirm(false);
+    const success = await disconnectWallet();
+    if (success) {
+      // Refresh transactions after disconnecting
+      fetchTransactionHistory();
     }
   };
+
+  const cancelDisconnect = () => setShowDisconnectConfirm(false);
 
   // Auto-convert balance when ETH balance or currency changes
   useEffect(() => {
@@ -804,6 +812,16 @@ const Home = observer(() => {
       <InvestModal
         isOpen={isInvestModalOpen}
         onClose={() => setIsInvestModalOpen(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showDisconnectConfirm}
+        title="Disconnect wallet?"
+        description="Are you sure you want to disconnect your wallet? This will remove all wallet data from your account."
+        confirmText="Disconnect"
+        cancelText="Cancel"
+        onConfirm={confirmDisconnect}
+        onCancel={cancelDisconnect}
       />
     </div>
   );
