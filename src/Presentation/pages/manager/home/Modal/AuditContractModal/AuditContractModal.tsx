@@ -12,7 +12,7 @@ interface AuditContractModalProps {
 
 const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose }) => {
     const auditViewModel = container.auditContractViewModel();
-    
+
     const [uploadResponse, setUploadResponse] = useState<any>(null);
     const [auditResponse, setAuditResponse] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -22,57 +22,50 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
     const [isDragOver, setIsDragOver] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
 
-    // Helper function to get unique vulnerabilities
     const getUniqueVulnerabilities = (vulnerabilities: any[]) => {
         if (!vulnerabilities || vulnerabilities.length === 0) return [];
-        
-        
-        
-        // Use a Set to track seen combinations and filter out exact duplicates
+
         const seen = new Set();
         const uniqueVulns = vulnerabilities.filter((vuln, index) => {
-            // Create a more specific key including index to catch true duplicates
             const key = JSON.stringify({
                 title: vuln.title?.trim() || '',
                 severity: vuln.severity?.trim().toUpperCase() || '',
                 description: vuln.description?.trim() || ''
             });
-            
-            
-            
+
             if (seen.has(key)) {
-                
+
                 return false;
             }
-            
+
             seen.add(key);
             return true;
         });
 
-        
-        
+
+
         // Sort by severity priority
         const sorted = uniqueVulns.sort((a, b) => {
-            const severityOrder: { [key: string]: number } = { 
-                'CRITICAL': 0, 
-                'HIGH': 1, 
-                'MEDIUM': 2, 
-                'LOW': 3, 
-                'INFO': 4 
+            const severityOrder: { [key: string]: number } = {
+                'CRITICAL': 0,
+                'HIGH': 1,
+                'MEDIUM': 2,
+                'LOW': 3,
+                'INFO': 4
             };
             const aSeverityKey = (a.severity || '').toUpperCase();
             const bSeverityKey = (b.severity || '').toUpperCase();
             const aSeverity = severityOrder[aSeverityKey] !== undefined ? severityOrder[aSeverityKey] : 5;
             const bSeverity = severityOrder[bSeverityKey] !== undefined ? severityOrder[bSeverityKey] : 5;
-            
+
             if (aSeverity === bSeverity) {
                 return (a.title || '').localeCompare(b.title || '');
             }
-            
+
             return aSeverity - bSeverity;
         });
-        
-        
+
+
         return sorted;
     };
 
@@ -112,12 +105,12 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             setCurrentStep(2);
             setIsLoading(true);
             try {
-                
+
                 const uploadRes = await auditViewModel.uploadFile(selectedFile);
-                
+
                 setUploadResponse(uploadRes);
                 if (uploadRes?.success && uploadRes.contract_data) {
-                    
+
                     const auditRes = await auditViewModel.auditContract({
                         contract_code: uploadRes.contract_data.contract_code,
                         contract_name: contractName,
@@ -125,7 +118,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                         filename: selectedFile.name,
                         file_size: selectedFile.size
                     });
-                    
+
                     setAuditResponse(auditRes);
                     if (auditRes.success) {
                         setCurrentStep(3);
@@ -185,7 +178,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             pdf.setFontSize(fontSize);
             const width = maxWidth || pageWidth - 2 * margin;
             const textLines = pdf.splitTextToSize(text, width);
-            
+
             textLines.forEach((line: string) => {
                 checkPageBreak(lineHeight);
                 pdf.text(line, x, yPosition);
@@ -215,13 +208,13 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         // Overview details
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        
+
         const overviewData = [
             ['Contract Name:', auditResponse.audit.contract_name || 'N/A'],
             ['Risk Level:', auditResponse.audit.risk_level || 'N/A'],
             ['Vulnerabilities Found:', auditResponse.audit.vulnerabilities_found?.toString() || '0'],
-            ['Completed On:', auditResponse.audit.completed_at 
-                ? new Date(auditResponse.audit.completed_at).toLocaleString() 
+            ['Completed On:', auditResponse.audit.completed_at
+                ? new Date(auditResponse.audit.completed_at).toLocaleString()
                 : 'N/A']
         ];
 
@@ -245,14 +238,14 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
         if (auditResponse.vulnerabilities && auditResponse.vulnerabilities.length > 0) {
             const uniqueVulnerabilities = getUniqueVulnerabilities(auditResponse.vulnerabilities);
-            
+
             uniqueVulnerabilities.forEach((vuln, index) => {
                 checkPageBreak(lineHeight * 2);
                 pdf.setFontSize(10);
                 pdf.setFont('helvetica', 'bold');
                 pdf.text(`${index + 1}. ${vuln.title}`, margin, yPosition);
                 pdf.setFont('helvetica', 'normal');
-                
+
                 // Add severity with color coding (simulate with text)
                 const severityText = `[${vuln.severity.toUpperCase()}]`;
                 const severityWidth = pdf.getTextWidth(severityText);
@@ -342,22 +335,21 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col gap-2">
                             <label htmlFor="contractName" className="text-sm font-semibold text-gray-700">Contract Name</label>
-                            <input 
-                                type="text" 
-                                id="contractName" 
+                            <input
+                                type="text"
+                                id="contractName"
                                 className="p-3 border border-gray-300 rounded-lg text-sm transition-all bg-white text-gray-900 focus:outline-none focus:border-purple-600 focus:shadow-lg"
-                                value={contractName} 
-                                onChange={(e) => setContractName(e.target.value)} 
+                                value={contractName}
+                                onChange={(e) => setContractName(e.target.value)}
                                 placeholder="e.g., MyERC20Token"
                             />
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-gray-700">Upload Contract File</label>
                             <div
-                                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all min-h-[200px] flex flex-col justify-center items-center ${
-                                    isDragOver ? 'border-purple-600 bg-purple-50 transform scale-105' : 
-                                    selectedFile ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-purple-600 hover:bg-gray-100'
-                                }`}
+                                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all min-h-[200px] flex flex-col justify-center items-center ${isDragOver ? 'border-purple-600 bg-purple-50 transform scale-105' :
+                                        selectedFile ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-purple-600 hover:bg-gray-100'
+                                    }`}
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
@@ -435,9 +427,8 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                     <div className="space-y-6">
                         <div className="flex justify-between items-start">
                             <h3 className="text-xl font-bold text-gray-900">Audit Results</h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                auditResponse?.audit?.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${auditResponse?.audit?.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                }`}>
                                 {auditResponse?.audit?.status}
                             </span>
                         </div>
@@ -451,12 +442,11 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                                     </div>
                                     <div className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
                                         <span className="font-medium text-gray-600 text-sm">Risk Level:</span>
-                                        <span className={`font-semibold text-sm ${
-                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'critical' ? 'text-red-600' :
-                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'high' ? 'text-orange-600' :
-                                            auditResponse?.audit?.risk_level?.toLowerCase() === 'medium' ? 'text-yellow-600' :
-                                            'text-green-600'
-                                        }`}>
+                                        <span className={`font-semibold text-sm ${auditResponse?.audit?.risk_level?.toLowerCase() === 'critical' ? 'text-red-600' :
+                                                auditResponse?.audit?.risk_level?.toLowerCase() === 'high' ? 'text-orange-600' :
+                                                    auditResponse?.audit?.risk_level?.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                                        'text-green-600'
+                                            }`}>
                                             {auditResponse?.audit?.risk_level}
                                         </span>
                                     </div>
@@ -479,12 +469,11 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                                         {getUniqueVulnerabilities(auditResponse.vulnerabilities).slice(0, 3).map((vuln, index) => (
                                             <div key={index} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
                                                 <span className="font-medium text-gray-600 text-sm">{vuln.title}</span>
-                                                <span className={`font-semibold text-sm ${
-                                                    vuln.severity.toLowerCase() === 'critical' ? 'text-red-600' :
-                                                    vuln.severity.toLowerCase() === 'high' ? 'text-orange-600' :
-                                                    vuln.severity.toLowerCase() === 'medium' ? 'text-yellow-600' :
-                                                    'text-green-600'
-                                                }`}>
+                                                <span className={`font-semibold text-sm ${vuln.severity.toLowerCase() === 'critical' ? 'text-red-600' :
+                                                        vuln.severity.toLowerCase() === 'high' ? 'text-orange-600' :
+                                                            vuln.severity.toLowerCase() === 'medium' ? 'text-yellow-600' :
+                                                                'text-green-600'
+                                                    }`}>
                                                     {vuln.severity}
                                                 </span>
                                             </div>
@@ -535,8 +524,8 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                         <h1 className="text-2xl font-bold mb-1 tracking-tight text-white">Audit Solidity Contract</h1>
                         <p className="text-sm opacity-90 font-normal text-white">Secure your smart contracts with AI-powered analysis.</p>
                     </div>
-                    <button 
-                        className="absolute top-4 right-4 bg-white bg-opacity-20 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-all hover:bg-white hover:bg-opacity-30" 
+                    <button
+                        className="absolute top-4 right-4 bg-white bg-opacity-20 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-all hover:bg-white hover:bg-opacity-30"
                         onClick={handleClose}
                     >
                         <X size={20} />
@@ -546,34 +535,32 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 <div className="bg-white p-5 border-b border-gray-200 relative ml-[7%]">
                     <div className="flex justify-between items-start relative">
                         <div className="absolute top-8 left-15 right-15 h-0.5 bg-gray-200 z-10">
-                            <div 
+                            <div
                                 className="h-full bg-purple-600 transition-all duration-500 rounded-sm"
                                 style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
                             ></div>
                         </div>
-                        
+
                         {[1, 2, 3, 4].map((step, index) => (
                             <div key={step} className="flex flex-col items-center gap-2 relative z-20 bg-white px-2 flex-1 text-center">
-                                <div className={`w-10 h-10 rounded-full border-3 flex items-center justify-center font-semibold text-sm mt-[10%] transition-all duration-300 ${
-                                    currentStep >= step 
-                                        ? currentStep > step 
+                                <div className={`w-10 h-10 rounded-full border-3 flex items-center justify-center font-semibold text-sm mt-[10%] transition-all duration-300 ${currentStep >= step
+                                        ? currentStep > step
                                             ? 'bg-green-500 text-white border-green-500'
                                             : 'bg-purple-600 text-white border-purple-600'
                                         : 'bg-gray-200 text-gray-600 border-gray-200'
-                                }`}>
+                                    }`}>
                                     {currentStep > step ? '✓' : step}
                                 </div>
-                                <span className={`text-xs font-medium whitespace-nowrap leading-tight ${
-                                    currentStep >= step 
+                                <span className={`text-xs font-medium whitespace-nowrap leading-tight ${currentStep >= step
                                         ? currentStep > step
                                             ? 'text-green-500'
                                             : 'text-purple-600 font-semibold'
                                         : 'text-gray-600'
-                                }`}>
-                                    {step === 1 ? 'Contract Set up' : 
-                                     step === 2 ? 'AI Analysis' : 
-                                     step === 3 ? 'Audit Result' : 
-                                     'Assessment'}
+                                    }`}>
+                                    {step === 1 ? 'Contract Set up' :
+                                        step === 2 ? 'AI Analysis' :
+                                            step === 3 ? 'Audit Result' :
+                                                'Assessment'}
                                 </span>
                             </div>
                         ))}
@@ -604,19 +591,18 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
                 <div className="flex justify-end gap-3 p-5 border-t border-gray-200 bg-gray-50">
                     {currentStep > 1 && currentStep < 4 && (
-                        <button 
-                            onClick={handleBack} 
+                        <button
+                            onClick={handleBack}
                             className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 hover:-translate-y-0.5"
                         >
                             Back
                         </button>
                     )}
                     {currentStep < 4 && (
-                        <button 
-                            onClick={handleNext} 
-                            className={`mb-6 inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0 ${
-                                (currentStep === 1 && (!selectedFile || !contractName)) || isLoading ? 'opacity-50 cursor-not-allowed transform-none shadow-none' : ''
-                            }`}
+                        <button
+                            onClick={handleNext}
+                            className={`mb-6 inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0 ${(currentStep === 1 && (!selectedFile || !contractName)) || isLoading ? 'opacity-50 cursor-not-allowed transform-none shadow-none' : ''
+                                }`}
                             disabled={(currentStep === 1 && (!selectedFile || !contractName)) || isLoading}
                         >
                             {isLoading ? (
@@ -631,15 +617,15 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                     )}
                     {currentStep === 4 && (
                         <>
-                            <button 
-                                onClick={handleDownloadPdf} 
+                            <button
+                                onClick={handleDownloadPdf}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 hover:-translate-y-0.5"
                             >
                                 <Download size={16} />
                                 Download PDF
                             </button>
-                            <button 
-                                onClick={handleClose} 
+                            <button
+                                onClick={handleClose}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2 border-none rounded-lg text-sm font-semibold cursor-pointer transition-all min-h-[40px] whitespace-nowrap bg-purple-600 text-white hover:bg-purple-700 hover:-translate-y-0.5 active:translate-y-0"
                             >
                                 Finish

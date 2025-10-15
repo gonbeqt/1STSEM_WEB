@@ -9,27 +9,8 @@ import { useEmployeeViewModel } from '../../../../domain/viewmodel/EmployeeViewM
 import { Employee as ApiEmployee, AddEmployeeResponse } from '../../../../domain/repositories/EmployeeRepository';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
+import { DetailedEmployee, filterEmployeesList, getEmployeeDisplayName, getEmployeeInitial, getStatusBadgeClass, mapApiEmployeeToDetailed } from './utils';
  
-interface DetailedEmployee {
-  id: string;
-  fullName: string;
-  position: string;
-  employeeId: string;
-  emailAddress: string;
-  phoneNumber: string;
-  department: string;
-  baseSalary: number;
-  paymentSchedule: string;
-  employmentType: string;
-  startDate: string;
-  dateOfBirth?: string;
-  address?: string;
-  gender?: string;
-  nationality?: string;
-  status: 'Active' | 'Inactive';
-  profileImage?: string;
-}
-
 const EmployeeManagement: React.FC = () => {
   const { error: toastError, success: toastSuccess, info: toastInfo, warning: toastWarning } = useToast();
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -75,29 +56,8 @@ const EmployeeManagement: React.FC = () => {
     setIsAddEmployeeModal(true);
   };
 
-  
-
   const handleEmployeeDetails = (employee: ApiEmployee) => {
-    const detailed: DetailedEmployee = {
-      id: employee.user_id,
-      fullName: employee.full_name || employee.username,
-      employeeId: employee.employee_id || employee.user_id,
-      emailAddress: employee.email,
-      phoneNumber: employee.phone || 'N/A',
-      position: employee.position || 'N/A',
-      department: employee.department || 'N/A',
-      baseSalary: 0,
-      paymentSchedule: 'Weekly',
-      employmentType: 'Full-time',
-      startDate: employee.hired_date || employee.created_at,
-      dateOfBirth: 'N/A',
-      address: 'N/A',
-      gender: 'N/A',
-      nationality: 'N/A',
-      status: employee.is_active ? 'Active' : 'Inactive',
-      profileImage: employee.profileImage || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=User',
-    };
-
+    const detailed: DetailedEmployee = mapApiEmployeeToDetailed(employee);
     setSelectedEmployee(detailed);
     setSelectedApiEmployee(employee);
     setShowEmployeeDetailModal(true);
@@ -136,13 +96,7 @@ const EmployeeManagement: React.FC = () => {
     }
   };
 
-  const filteredEmployees = employees.filter((employee: ApiEmployee) => {
-    const matchesSearch = employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredEmployees = filterEmployeesList(employees, searchTerm);
 
   const handleAddEmployeeSubmit = (newEmployee: AddEmployeeResponse['employee']) => {
     setRefreshTrigger(prev => prev + 1);
@@ -231,11 +185,11 @@ const EmployeeManagement: React.FC = () => {
                     {employee.profileImage ? (
                       <img 
                         src={employee.profileImage} 
-                        alt={employee.full_name || employee.username} 
+                        alt={getEmployeeDisplayName(employee)} 
                         className="w-full h-full object-cover rounded-full" 
                       />
                     ) : (
-                      (employee.full_name || employee.username || '').charAt(0).toUpperCase()
+                      getEmployeeInitial(employee)
                     )}
                   </div>
                   
@@ -244,7 +198,7 @@ const EmployeeManagement: React.FC = () => {
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
-                          {employee.full_name || employee.username}
+                          {getEmployeeDisplayName(employee)}
                         </h3>
                         <p className="text-sm text-gray-500 mb-1">
                           Position: {employee.position || 'N/A'}
@@ -256,11 +210,7 @@ const EmployeeManagement: React.FC = () => {
                       
                       {/* Status Badge */}
                       <div className="flex-shrink-0">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
-                          employee.is_active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${getStatusBadgeClass(employee.is_active)}`}>
                           {employee.is_active ? 'ACTIVE' : 'INACTIVE'}
                         </span>
                       </div>

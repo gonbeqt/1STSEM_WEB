@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, CheckCircle, Clock, AlertCircle, Plus, SearchIcon } from 'lucide-react';
+import { FileText, SearchIcon, AlertCircle } from 'lucide-react';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 
 import { useInvoices } from '../../../hooks/useInvoices';
@@ -7,6 +7,7 @@ import { Invoice } from '../../../../domain/entities/InvoiceEntities';
 import InvoiceDetailsPage from './InvoiceDetails/page';
 import InputWithIcon from '../../../components/InputWithIcon';
 import Skeleton, { SkeletonText } from '../../../components/Skeleton';
+import { formatCurrency, formatDate, getStatusBadgeClass, getStatusIcon, filterInvoices, getStatusIconColorClass } from './utils';
 
 const ManagerInvoicePage: React.FC = () => {
   const userData = localStorage.getItem('user');
@@ -27,50 +28,11 @@ const ManagerInvoicePage: React.FC = () => {
   useEffect(() => {
     reloadInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally omit reloadInvoices from deps to avoid loop
+  }, []);
 
   useEffect(() => {
-    if (!invoices) return;
-
-    if (searchTerm) {
-      const filtered = invoices.filter(invoice =>
-        (invoice.client_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (invoice._id?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (invoice.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      setDisplayedInvoices(filtered);
-    } else {
-      setDisplayedInvoices(invoices);
-    }
+    setDisplayedInvoices(filterInvoices(invoices, searchTerm));
   }, [invoices, searchTerm]);
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <CheckCircle size={14} />;
-      case 'pending':
-        return <Clock size={14} />;
-      case 'overdue':
-        return <AlertCircle size={14} />;
-      default:
-        return <FileText size={14} />;
-    }
-  };
-
-  const formatAmount = (total_amount: number, currency: string = 'USD'): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
-    }).format(total_amount);
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   const handleCreateInvoice = () => {
     // Placeholder for navigation or modal trigger
@@ -176,10 +138,10 @@ const ManagerInvoicePage: React.FC = () => {
                   </div>
                   <div className="flex flex-col md:items-end gap-3 md:w-auto md:text-right">
                     <div className="text-xl font-extrabold text-gray-900 tracking-tight md:text-lg hover:text-purple-500 transition-colors">
-                      {formatAmount(invoice.total_amount, invoice.currency)}
+                      {formatCurrency(invoice.total_amount, invoice.currency)}
                     </div>
-                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide ${invoice.status === 'paid' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-300' : invoice.status === 'pending' ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-400' : 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300'}`}>
-                      <span className={`status-icon ${invoice.status === 'paid' ? 'text-green-500' : invoice.status === 'pending' ? 'text-amber-500' : 'text-red-500'}`}>
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide ${getStatusBadgeClass(invoice.status)}`}>
+                      <span className={`status-icon ${getStatusIconColorClass(invoice.status)}`}>
                         {getStatusIcon(invoice.status)}
                       </span>
                       <span>{invoice.status}</span>
