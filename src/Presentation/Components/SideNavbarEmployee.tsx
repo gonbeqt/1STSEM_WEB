@@ -145,7 +145,7 @@ const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpa
 
       <button 
         onClick={handleLogoutClick} 
-        className={`bg-transparent border-none text-black text-base flex items-center ${isExpanded ? 'gap-3 justify-start' : 'justify-center'} p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500 focus:outline-none`}
+        className={`bg-transparent border-none text-black text-base flex items-center ${isExpanded ? 'gap-3 justify-start' : 'justify-center'} p-3 cursor-pointer w-full rounded-xl transition-colors hover:bg-red-500/10 focus:outline-none`}
       >
         <LogOut className="w-6 h-6 flex-shrink-0 stroke-gray-700" />
         {isExpanded && <span className="opacity-100 transition-opacity duration-300">Log out</span>}

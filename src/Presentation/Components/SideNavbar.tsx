@@ -156,10 +156,10 @@ const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) =
       <div className="mb-4 p-0">
         <button 
           onClick={handleLogoutClick} 
-          className="text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-all duration-300 relative overflow-hidden whitespace-nowrap hover:bg-red-500 w-full "
+          className={`text-gray-700 no-underline text-base flex items-center p-2 rounded-lg transition-colors duration-300 relative overflow-hidden whitespace-nowrap hover:bg-red-500/10 w-full`}
         >
-          <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : 'mr-0'} flex-shrink-0 ${({ isActive }: { isActive: boolean }) => isActive ? 'stroke-white' : 'stroke-gray-700'}`} />
-            {isExpanded && <span className="opacity-100 transition-opacity duration-300">Logout</span>}
+          <LogOut className={`w-6 h-6 ${isExpanded ? 'mr-3' : ''} flex-shrink-0 stroke-gray-700`} />
+          {isExpanded && <span className="opacity-100 transition-opacity duration-300">Logout</span>}
         </button>
       </div>
 
