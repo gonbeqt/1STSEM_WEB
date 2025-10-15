@@ -1,5 +1,6 @@
 // src/Presentation/pages/manager/home/page.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import type { JSX } from 'react';
 import { observer } from 'mobx-react-lite';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import WalletModal from '../../../components/WalletModal';
@@ -20,6 +21,115 @@ import ConfirmDialog from '../../../components/ConfirmDialog';
 const WalletCardBg = '/assets/wallet_bg.png';
 
 type WalletModalInitialView = 'connect' | 'send';
+
+type TransactionRecord = {
+  amount_eth: number | string;
+  status: string;
+  transaction_category: string;
+  created_at: string;
+  transaction_hash?: string;
+  counterparty_name?: string;
+  counterparty_role?: string;
+  category_description?: string;
+  from_address?: string;
+  to_address?: string;
+  ai_analysis?: Record<string, unknown> | string | null;
+  explorer_url?: string;
+};
+
+type DisplayTransaction = {
+  name: string;
+  amount: number;
+  type: 'outflow' | 'pending';
+  date: string;
+  icon: JSX.Element;
+  hash?: string;
+  token_symbol: string;
+  from_address?: string;
+  to_address?: string;
+  counterparty_name?: string;
+  counterparty_role?: string;
+  category?: string;
+  ai_analysis?: Record<string, unknown> | string | null;
+  explorer_url?: string;
+};
+
+const formatTransactionDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffHours < 1) {
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    return `${diffMinutes} mins ago`;
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours} hrs ago`;
+  }
+
+  if (diffDays === 1) {
+    return '1 day ago';
+  }
+
+  if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  }
+
+  return date.toLocaleDateString();
+};
+
+const getTransactionIcon = (status: string) => {
+  if (status === 'pending') {
+    return <Clock className="w-5 h-5 text-yellow-600" />;
+  }
+
+  return <TrendingDown className="w-5 h-5 text-red-600" />;
+};
+
+const getTransactionName = (transaction: TransactionRecord): string => {
+  if (transaction.counterparty_name) {
+    return `${transaction.transaction_category === 'SENT' ? 'Sent to' : 'Received from'} ${transaction.counterparty_name}`;
+  }
+
+  if (transaction.category_description) {
+    return transaction.category_description;
+  }
+
+  const categoryLabels: Record<string, string> = {
+    SENT: 'Sent ETH',
+    RECEIVED: 'Received ETH',
+    TRANSFER: 'Internal Transfer',
+    EXTERNAL: 'External Transaction'
+  };
+
+  return categoryLabels[transaction.transaction_category] || 'ETH Transaction';
+};
+
+const mapTransactionToDisplay = (transaction: TransactionRecord): DisplayTransaction => {
+  const displayAmount = typeof transaction.amount_eth === 'string'
+    ? parseFloat(transaction.amount_eth) || 0
+    : Number(transaction.amount_eth) || 0;
+
+  return {
+    name: getTransactionName(transaction),
+    amount: displayAmount,
+    type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
+    date: formatTransactionDate(transaction.created_at),
+    icon: getTransactionIcon(transaction.status),
+    hash: transaction.transaction_hash,
+    token_symbol: 'ETH',
+    from_address: transaction.from_address,
+    to_address: transaction.to_address,
+    counterparty_name: transaction.counterparty_name,
+    counterparty_role: transaction.counterparty_role,
+    category: transaction.transaction_category,
+    ai_analysis: transaction.ai_analysis,
+    explorer_url: transaction.explorer_url
+  };
+};
 
 const Home = observer(() => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -53,7 +163,7 @@ const Home = observer(() => {
     conversionResult,
     checkWalletConnection
   } = useWallet();
-  const { success: toastSuccess, error: toastError, warning: toastWarning, info: toastInfo } = useToast();
+  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast();
   const {
     transactions,
     isLoading: isLoadingTransactions,
@@ -63,85 +173,15 @@ const Home = observer(() => {
   } = useEnhancedTransactionHistory();
 
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
-  const [transactionSearch, setTransactionSearch] = useState('');
-  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<DisplayTransaction | null>(null);
   const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
 
-  const formatTransactionDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const transactionData = useMemo<DisplayTransaction[]>(
+    () => transactions.map((transaction) => mapTransactionToDisplay(transaction as TransactionRecord)),
+    [transactions]
+  );
 
-    if (diffHours < 1) {
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      return `${diffMinutes} mins ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hrs ago`;
-    } else if (diffDays === 1) {
-      return '1 day ago';
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
-  const getTransactionIcon = (transaction: any) => {
-    if (transaction.status === 'pending') {
-      return <Clock className="w-5 h-5 text-yellow-600" />;
-    }
-    return <TrendingDown className="w-5 h-5 text-red-600" />;
-  };
-
-  const getTransactionName = (transaction: any): string => {
-    // Use counterparty name if available
-    if (transaction.counterparty_name) {
-      return `${transaction.transaction_category === 'SENT' ? 'Sent to' : 'Received from'} ${transaction.counterparty_name}`;
-    }
-
-    // Use category description from backend
-    if (transaction.category_description) {
-      return transaction.category_description;
-    }
-
-    // Fallback to transaction category
-    const categoryLabels: Record<string, string> = {
-      'SENT': 'Sent ETH',
-      'RECEIVED': 'Received ETH',
-      'TRANSFER': 'Internal Transfer',
-      'EXTERNAL': 'External Transaction'
-    };
-
-    return categoryLabels[transaction.transaction_category] || 'ETH Transaction';
-  };
-
-  // Convert API transactions to display format
-  const transactionData = transactions.map(transaction => {
-    // Use the new amount_eth field from the updated backend and ensure it's a number
-    const displayAmount = typeof transaction.amount_eth === 'string'
-      ? parseFloat(transaction.amount_eth) || 0
-      : Number(transaction.amount_eth) || 0;
-
-    return {
-      name: getTransactionName(transaction),
-      amount: displayAmount,
-      type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
-      date: formatTransactionDate(transaction.created_at),
-      icon: getTransactionIcon(transaction),
-      hash: transaction.transaction_hash,
-      token_symbol: 'ETH',
-      from_address: transaction.from_address,
-      to_address: transaction.to_address,
-      // Enhanced data from new backend
-      counterparty_name: transaction.counterparty_name,
-      counterparty_role: transaction.counterparty_role,
-      category: transaction.transaction_category,
-      ai_analysis: transaction.ai_analysis,
-      explorer_url: transaction.explorer_url
-    };
-  });
+  const recentTransactions = useMemo(() => transactionData.slice(0, 5), [transactionData]);
 
   const initialWalletCheckDone = useRef(false);
   useEffect(() => {
@@ -179,12 +219,11 @@ const Home = observer(() => {
   }, [fetchTransactionHistory]);
 
   const fetchAllTransactions = async () => {
-    // Determine a sensible limit: use pagination.total if available, otherwise a large fallback
     const limit = pagination?.total && pagination.total > 0 ? pagination.total : 10000;
     await fetchTransactionHistory({ limit, offset: 0 });
   };
 
-  const openTransactionDetails = (tx: any) => {
+  const openTransactionDetails = (tx: DisplayTransaction) => {
     setSelectedTransaction(tx);
     setIsTransactionDetailsOpen(true);
   };
@@ -200,7 +239,7 @@ const Home = observer(() => {
     try {
       await fetchAllTransactions();
     } catch (err) {
-      console.error('Failed to load all transactions for modal:', err);
+      toastError('Unable to load all transactions. Please try again.');
     }
   };
 
@@ -210,7 +249,7 @@ const Home = observer(() => {
     try {
       await fetchTransactionHistory({ limit: 5, offset: 0 });
     } catch (err) {
-      console.error('Failed to restore recent transactions:', err);
+      toastError('Unable to restore recent transactions. Please refresh.');
     }
   };
 
@@ -219,7 +258,7 @@ const Home = observer(() => {
     setIsWalletModalOpen(true);
   };
 
-  const handleDisconnectWallet = async () => {
+  const handleDisconnectWallet = () => {
     setShowDisconnectConfirm(true);
   };
 
@@ -234,26 +273,50 @@ const Home = observer(() => {
 
   const cancelDisconnect = () => setShowDisconnectConfirm(false);
 
-  // Auto-convert balance when ETH balance or currency changes
   useEffect(() => {
+    if (!isWalletConnected || !ethBalance || ethBalance <= 0) {
+      setConvertedBalance(null);
+      setIsAutoConverting(false);
+      return;
+    }
+
+    let isCancelled = false;
+
     const autoConvertBalance = async () => {
-      if (ethBalance && ethBalance > 0 && isWalletConnected) {
-        setIsAutoConverting(true);
-        try {
-          const success = await convertCryptoToFiat(ethBalance, 'ETH', conversionCurrency);
-          if (success && conversionResult && conversionResult.content && conversionResult.content.length > 0) {
-            setConvertedBalance(conversionResult.content[0].total_value);
-          }
-        } catch (error) {
-          console.error('Auto-conversion failed:', error);
-        } finally {
+      setIsAutoConverting(true);
+      try {
+        const success = await convertCryptoToFiat(ethBalance, 'ETH', conversionCurrency);
+        if (!success && !isCancelled) {
+          setConvertedBalance(null);
+        }
+      } catch (error) {
+        console.error('Auto-conversion failed:', error);
+      } finally {
+        if (!isCancelled) {
           setIsAutoConverting(false);
         }
       }
     };
 
     autoConvertBalance();
-  }, [ethBalance, conversionCurrency, isWalletConnected]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [convertCryptoToFiat, conversionCurrency, ethBalance, isWalletConnected]);
+
+  useEffect(() => {
+    if (!conversionResult?.content?.length) {
+      return;
+    }
+
+    const latest = conversionResult.content[0];
+    if (latest.fiat?.toUpperCase() !== conversionCurrency) {
+      return;
+    }
+
+    setConvertedBalance(latest.total_value);
+  }, [conversionResult, conversionCurrency]);
 
   const toggleCurrency = () => {
     setConversionCurrency(conversionCurrency === 'USD' ? 'PHP' : 'USD');
@@ -343,11 +406,11 @@ const Home = observer(() => {
       <ManagerNavbar />
 
       <div className="w-full mx-auto px-4 sm:px-6 py-6">
-         <div className="mb-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
         </div>
 
-    
+
         {/* Connected Wallet Card */}
         <div
           className="rounded-3xl p-6 text-white shadow-xl mb-6 relative bg-cover bg-center bg-no-repeat overflow-hidden"
@@ -363,7 +426,7 @@ const Home = observer(() => {
             </span>
             <div className="relative">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen((prev) => !prev)}
                 className="p-1 hover:bg-white/20 rounded-full transition-all"
               >
                 <MoreVertical className="w-5 h-5" />
@@ -456,7 +519,7 @@ const Home = observer(() => {
                 </button>
               </div>
 
-          
+
             </>
           ) : (
             <>
@@ -629,22 +692,20 @@ const Home = observer(() => {
                 </div>
               </div>
             ) : (
-              transactionData.slice(0, 5).map((tx: any, index: number, arr: any[]) => (
+              recentTransactions.map((tx, index) => (
                 <div
-                  key={index}
+                  key={tx.hash ?? index}
                   onClick={() => openTransactionDetails(tx)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTransactionDetails(tx); }}
-                  className={`cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 transition-colors ${
-                    index !== arr.length - 1 ? 'border-b border-gray-100' : ''
-                  } hover:bg-purple-50/30`}
+                  className={`cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 transition-colors ${index !== recentTransactions.length - 1 ? 'border-b border-gray-100' : ''
+                    } hover:bg-purple-50/30`}
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                        tx.type === 'outflow' ? 'bg-red-50 text-red-600' : 'bg-purple-100 text-purple-600'
-                      }`}
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50 text-red-600' : 'bg-purple-100 text-purple-600'
+                        }`}
                     >
                       {tx.icon}
                     </div>
@@ -657,9 +718,8 @@ const Home = observer(() => {
                   </div>
                   <div className="mt-3 sm:mt-0 text-left sm:text-right">
                     <p
-                      className={`font-semibold text-sm sm:text-base ${
-                        tx.type === 'outflow' ? 'text-red-600' : 'text-purple-600'
-                      }`}
+                      className={`font-semibold text-sm sm:text-base ${tx.type === 'outflow' ? 'text-red-600' : 'text-purple-600'
+                        }`}
                     >
                       {tx.type === 'outflow' ? '-' : '+'}
                       {(tx.amount || 0).toFixed(4)} {tx.token_symbol}
@@ -679,19 +739,9 @@ const Home = observer(() => {
               <div className="flex items-center justify-between p-4 border-b border-gray-100 gap-4">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold">All Transactions</h3>
-                  <p className="text-sm text-gray-500">Search by wallet address or hash</p>
+                  <p className="text-sm text-gray-500">Full history from the connected wallet</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={transactionSearch}
-                    onChange={(e) => setTransactionSearch(e.target.value)}
-                    placeholder="Search address or hash"
-                    className="px-3 py-2 border border-gray-200 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  <button onClick={() => { setTransactionSearch(''); }} className="text-sm text-gray-500">Clear</button>
-                  <button onClick={closeTransactionsModal} className="text-sm text-gray-600 hover:text-gray-800">Close</button>
-                </div>
+                <button onClick={closeTransactionsModal} className="text-sm text-gray-600 hover:text-gray-800">Close</button>
               </div>
               <div className="max-h-[60vh] overflow-y-auto">
                 {isLoadingTransactions ? (
@@ -717,63 +767,32 @@ const Home = observer(() => {
                     <p className="text-sm text-gray-600">No transactions found</p>
                   </div>
                 ) : (
-                  // filter transactions by wallet address (from/to) when a search is provided
-                  transactions
-                    .filter((transaction: any) => {
-                      const q = transactionSearch.trim().toLowerCase();
-                      if (!q) return true;
-                      const from = (transaction.counterparty_name || transaction.transaction_hash || '').toString().toLowerCase();
-                      const to = (transaction.transaction_hash || '').toString().toLowerCase();
-                      const rawFrom = (transaction.from_address || '').toString().toLowerCase();
-                      const rawTo = (transaction.to_address || '').toString().toLowerCase();
-                      return from.includes(q) || to.includes(q) || rawFrom.includes(q) || rawTo.includes(q);
-                    })
-                    .map((transaction: any, idx: number) => {
-                      // Map to display format as in transactionData
-                      const displayAmount = typeof transaction.amount_eth === 'string'
-                        ? parseFloat(transaction.amount_eth) || 0
-                        : Number(transaction.amount_eth) || 0;
-                      const tx = {
-                        name: getTransactionName(transaction),
-                        amount: displayAmount,
-                        type: transaction.status === 'confirmed' ? 'outflow' : 'pending',
-                        date: formatTransactionDate(transaction.created_at),
-                        icon: getTransactionIcon(transaction),
-                        hash: transaction.transaction_hash,
-                        token_symbol: 'ETH',
-                        counterparty_name: transaction.counterparty_name,
-                        counterparty_role: transaction.counterparty_role,
-                        category: transaction.transaction_category,
-                        ai_analysis: transaction.ai_analysis,
-                        explorer_url: transaction.explorer_url
-                      };
-                      return (
-                        <div key={idx} className={`flex items-center justify-between p-4 border-b border-gray-100`}>
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'}`}>
-                              {tx.icon}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{tx.name}</p>
-                              <p className="text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className={`font-semibold ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
-                              {tx.type === 'outflow' ? '-' : '+'}{(tx.amount || 0).toFixed(4)} {tx.token_symbol}
-                            </p>
-                            <p className="text-sm text-gray-500">{tx.date}</p>
-                          </div>
+                  transactionData.map((tx, idx) => (
+                    <div key={tx.hash ?? idx} className="flex items-center justify-between p-4 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'}`}>
+                          {tx.icon}
                         </div>
-                      );
-                    })
+                        <div>
+                          <p className="font-medium text-gray-900">{tx.name}</p>
+                          <p className="text-sm text-gray-500">{tx.hash ? `${tx.hash.substring(0, 10)}...` : 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-semibold ${tx.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'}`}>
+                          {tx.type === 'outflow' ? '-' : '+'}{(tx.amount || 0).toFixed(4)} {tx.token_symbol}
+                        </p>
+                        <p className="text-sm text-gray-500">{tx.date}</p>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           </div>
         )}
 
-        
+
       </div>
 
       {/* All Modals */}

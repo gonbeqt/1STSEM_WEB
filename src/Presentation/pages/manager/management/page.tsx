@@ -8,6 +8,7 @@ import { container } from '../../../../di/container';
 import { useEmployeeViewModel } from '../../../../domain/viewmodel/EmployeeViewModel';
 import { Employee as ApiEmployee, AddEmployeeResponse } from '../../../../domain/repositories/EmployeeRepository';
 import ManagerNavbar from '../../../components/ManagerNavbar';
+import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
  
 interface DetailedEmployee {
   id: string;
@@ -178,9 +179,21 @@ const EmployeeManagement: React.FC = () => {
         {/* Employee List */}
         <div className="space-y-4">
           {isLoadingEmployees ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
-              <p className="text-gray-500 text-base">Loading employees...</p>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-4 bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                >
+                  <SkeletonCircle className="h-12 w-12" />
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <SkeletonText className="w-48 h-5" />
+                    <SkeletonText className="w-36" />
+                    <SkeletonText className="w-28" />
+                  </div>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              ))}
             </div>
           ) : employeesError ? (
             <div className="flex flex-col items-center justify-center p-16 text-center bg-red-50 rounded-xl border border-red-200 shadow-sm">
