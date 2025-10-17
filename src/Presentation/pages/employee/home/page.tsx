@@ -1,9 +1,12 @@
 // src/Presentation/pages/employee/home/page.tsx
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug } from 'lucide-react';
+import { Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug, FileText, CalendarDays } from 'lucide-react';
 import { useWallet } from '../../../hooks/useWallet';
-import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
+import { usePayslips } from '../../../hooks/usePayslips';
+import { useViewModel } from '../../../hooks/useViewModel';
+import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
+import type { Payslip } from '../../../../domain/entities/PayslipEntities';
 import WalletModal from '../../../components/WalletModal';
 import EthereumIcon from '../../../components/icons/EthereumIcon';
 import EmployeeNavbar from '../../../components/EmployeeNavbar';
@@ -43,75 +46,70 @@ const EmployeeHome = observer(() => {
     conversionResult,
     checkWalletConnection
   } = useWallet();
+  const loginViewModel = useViewModel(LoginViewModel);
+  const currentUser = loginViewModel?.currentUser;
+  const userId = currentUser?.id;
 
   const {
-    transactions,
-    isLoading: isLoadingTransactions,
-    error: transactionError,
-    refreshTransactions,
-    fetchTransactionHistory
-  } = useEnhancedTransactionHistory();
+    payslips,
+    loading: isLoadingPayslips,
+    error: payslipsError,
+    refreshPayslips
+  } = usePayslips({ userId }, { enabled: Boolean(userId) });
 
-  const formatTransactionDate = (dateString: string): string => {
+  const formatDate = (dateString?: string | null): string => {
+    if (!dateString) return 'Not provided';
     const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (Number.isNaN(date.getTime())) return 'Not provided';
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
-    if (diffHours < 1) {
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      return `${diffMinutes} mins ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hrs ago`;
-    } else if (diffDays === 1) {
-      return '1 day ago';
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString();
+  const formatCurrency = (amount: number, currency = 'USD'): string => {
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency
+      }).format(amount);
+    } catch {
+      return `$${amount.toFixed(2)}`;
     }
   };
 
-
-
-  const getTransactionName = (transaction: any): string => {
-    if (transaction.category_description) {
-      return transaction.category_description;
-    }
-
-    const categoryLabels: Record<string, string> = {
-      'SENT': 'Sent ETH',
-      'RECEIVED': 'Received ETH',
-      'TRANSFER': 'Internal Transfer',
-      'EXTERNAL': 'External Transaction'
-    };
-
-    return categoryLabels[transaction.transaction_category] || 'ETH Transaction';
+  const resolveNetPay = (payslip: Payslip): number => {
+    const value = payslip.final_net_pay ?? payslip.net_amount ?? payslip.usd_equivalent ?? 0;
+    return Number.isFinite(value) ? Number(value) : 0;
   };
 
-  // Convert API transactions to display format
-  const transactionData = transactions.map(transaction => {
-    // Use the new amount_eth field from the updated backend and ensure it's a number
-    const displayAmount = typeof transaction.amount_eth === 'string'
-      ? parseFloat(transaction.amount_eth) || 0
-      : Number(transaction.amount_eth) || 0;
+  const resolveCurrency = (payslip: Payslip): string => payslip.salary_currency || 'USD';
 
-    return {
-      name: getTransactionName(transaction),
-      amount: displayAmount,
-      type: transaction.status === 'confirmed' ? 'inflow' : 'pending',
-      date: formatTransactionDate(transaction.created_at),
-      hash: transaction.transaction_hash,
-      token_symbol: 'ETH',
-      // Enhanced data from new backend
-      counterparty_name: transaction.counterparty_name,
-      counterparty_role: transaction.counterparty_role,
-      category: transaction.transaction_category,
-      ai_analysis: transaction.ai_analysis,
-      explorer_url: transaction.explorer_url
-    };
-  });
+  const payslipStatusTone = (status?: string) => {
+    const normalized = (status || '').toUpperCase();
+    if (normalized === 'PAID') return 'bg-green-100 text-green-700 border-green-200';
+    if (normalized === 'PENDING') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    if (normalized === 'GENERATED') return 'bg-blue-100 text-blue-700 border-blue-200';
+    return 'bg-gray-100 text-gray-700 border-gray-200';
+  };
+
+  const recentPayslips = useMemo(() => {
+    if (!payslips || payslips.length === 0) return [];
+    return [...payslips]
+      .sort((a, b) => {
+        const dateA = new Date(a.created_at || a.pay_date || a.pay_period_end || 0).getTime();
+        const dateB = new Date(b.created_at || b.pay_date || b.pay_period_end || 0).getTime();
+        return dateB - dateA;
+      })
+      .slice(0, 5);
+  }, [payslips]);
+
+  const getPayPeriodLabel = (payslip: Payslip) => `${formatDate(payslip.pay_period_start)} - ${formatDate(payslip.pay_period_end)}`;
+
+  const getPayDateLabel = (payslip: Payslip) => formatDate(payslip.pay_date || payslip.created_at || payslip.issued_at);
+
+  const canRefreshPayslips = Boolean(userId);
 
   // Check wallet connection on page load (guard StrictMode double-invoke)
   const initialWalletCheckDone = useRef(false);
@@ -121,15 +119,11 @@ const EmployeeHome = observer(() => {
     checkWalletConnection();
   }, [checkWalletConnection]);
 
-  // Clear success message after showing it
   useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        clearSuccessMessage();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, clearSuccessMessage]);
+    if (!successMessage) return;
+    toastSuccess(successMessage, { duration: 2400 });
+    clearSuccessMessage();
+  }, [successMessage, clearSuccessMessage, toastSuccess]);
 
   // Fetch wallet balance when connected
   useEffect(() => {
@@ -139,16 +133,11 @@ const EmployeeHome = observer(() => {
   }, [isWalletConnected, fetchWalletBalance]);
 
 
-  // Fetch all transactions for employee (no category filtering) - guard StrictMode double-invoke
-  const initialTxFetchDone = useRef(false);
   useEffect(() => {
-    if (initialTxFetchDone.current) return;
-    initialTxFetchDone.current = true;
-    fetchTransactionHistory({
-      limit: 10,
-      offset: 0
-    });
-  }, [fetchTransactionHistory]);
+    if (payslipsError) {
+      toastError(payslipsError);
+    }
+  }, [payslipsError, toastError]);
 
 
   const getNextMonthFirstDay = () => {
@@ -197,8 +186,7 @@ const EmployeeHome = observer(() => {
     setShowDisconnectConfirm(false);
     const success = await disconnectWallet();
     if (success) {
-      // Refresh transactions after disconnecting
-      fetchTransactionHistory();
+      await refreshPayslips();
     }
   };
 
@@ -241,13 +229,6 @@ const EmployeeHome = observer(() => {
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
-      {successMessage && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm font-medium">{successMessage}</span>
-        </div>
-      )}
-
       <EmployeeNavbar />
 
 
@@ -459,24 +440,27 @@ const EmployeeHome = observer(() => {
           </div>
         </div>
 
-        {/* Recent Transactions */}
+        {/* Recent Payslips */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-0 sm:px-5 my-6 bg-transparent">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 m-0">Recent Transactions</h2>
-            <p className="text-sm text-gray-600 mt-1">Showing all recent transactions</p>
+            <h2 className="text-lg font-semibold text-gray-900 m-0">Recent Payslips</h2>
+            <p className="text-sm text-gray-600 mt-1">Your latest payroll documents in one place.</p>
           </div>
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-indigo-600 text-sm font-medium self-start sm:self-center transition-colors hover:text-indigo-700"
-            onClick={refreshTransactions}
+            className={`inline-flex items-center gap-1 text-sm font-medium self-start sm:self-center transition-colors ${
+              canRefreshPayslips && !isLoadingPayslips ? 'text-indigo-600 hover:text-indigo-700' : 'text-gray-400 cursor-not-allowed'
+            }`}
+            onClick={() => canRefreshPayslips && refreshPayslips()}
+            disabled={!canRefreshPayslips || isLoadingPayslips}
           >
-            <span>Refresh</span>
+            <span>{isLoadingPayslips ? 'Refreshing…' : 'Refresh'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
         <div className="mb-8 sm:mx-5 rounded-xl overflow-hidden min-h-[200px]">
-          {isLoadingTransactions ? (
+          {isLoadingPayslips ? (
             <div className="space-y-3">
               {[...Array(4)].map((_, idx) => (
                 <div key={idx} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
@@ -491,40 +475,74 @@ const EmployeeHome = observer(() => {
                 </div>
               ))}
             </div>
-          ) : transactionError ? (
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
+          ) : !canRefreshPayslips ? (
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl text-gray-600 text-sm">
+              <p className="m-0">Sign in to view your payslips.</p>
+            </div>
+          ) : payslipsError ? (
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-red-200 rounded-xl">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">Error loading transactions</div>
-                  <div className="text-sm text-gray-900">{transactionError}</div>
+                  <div className="text-sm font-medium text-red-700">Unable to load payslips</div>
+                  <div className="text-sm text-red-600">{payslipsError}</div>
                 </div>
               </div>
             </div>
-          ) : transactionData.length === 0 ? (
+          ) : recentPayslips.length === 0 ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">No transactions found</div>
-                  <div className="text-sm text-gray-900">Start making transactions to see them here.</div>
+                  <div className="text-sm font-medium text-gray-900">No payslips yet</div>
+                  <div className="text-sm text-gray-600">Your payslips will appear here once generated.</div>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              {transactionData.map((transaction, index) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 bg-white min-h-[70px] shadow-sm border border-gray-100 rounded-xl">
-                  <div className="flex items-start sm:items-center gap-4 flex-1 w-full">
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 leading-tight">{transaction.name}</div>
+              {recentPayslips.map((payslip) => {
+                const netPay = resolveNetPay(payslip);
+                const currency = resolveCurrency(payslip);
+                const cryptoAmount = payslip.crypto_amount;
+                return (
+                  <div key={payslip.payslip_id} className="p-4 bg-white shadow-sm border border-gray-100 rounded-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                          <FileText className="w-5 h-5" />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{payslip.payslip_number}</p>
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${payslipStatusTone(payslip.status)}`}>
+                              {payslip.status || 'UNKNOWN'}
+                            </span>
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                            <span className="inline-flex items-center gap-1">
+                              <CalendarDays className="w-3.5 h-3.5" />
+                              {getPayPeriodLabel(payslip)}
+                            </span>
+                            <span className="hidden sm:inline text-gray-300">•</span>
+                            <span>Pay date: {getPayDateLabel(payslip)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:items-end gap-1 text-sm text-gray-600">
+                        <span className="text-xs uppercase tracking-wide">Net Pay</span>
+                        <span className="text-lg font-semibold text-green-600">
+                          {formatCurrency(netPay, currency)}
+                        </span>
+                        {typeof cryptoAmount === 'number' && payslip.cryptocurrency ? (
+                          <span className="text-xs text-gray-500">
+                            {cryptoAmount.toFixed(6)} {payslip.cryptocurrency}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                  <div className={`text-lg font-semibold flex-shrink-0 whitespace-nowrap sm:text-right ${transaction.type === 'outflow' ? 'text-red-600' : 'text-yellow-600'
-                    }`}>
-                    {transaction.type === 'outflow' ? '' : transaction.type === 'pending' ? '' : '+'}
-                    {(transaction.amount || 0).toFixed(4)} {transaction.token_symbol || 'ETH'}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

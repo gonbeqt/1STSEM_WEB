@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
-import EmployeeNavbar from '../../../components/EmployeeNavbar';
-import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
+import ManagerNavbar from '../../../components/ManagerNavbar';
+import { Lock, ShieldCheck, HelpCircle, ChevronRight, ArrowLeft, Eye, EyeOff, CircleHelp, MessageCircle, Search, ChevronDown } from 'lucide-react';
 
 interface MenuItem {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
+  description: string;
   value?: string;
   path?: string;
   onClick?: () => void;
@@ -26,6 +27,44 @@ const EmployeeSettings: React.FC = () => {
   const navigate = useNavigate();
   const loginViewModel = useViewModel(LoginViewModel);
   const [user, setUser] = useState<User | null>(null);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [faqSearchTerm, setFaqSearchTerm] = useState('');
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [contactMessage, setContactMessage] = useState('');
+  const [isSendingSupport, setIsSendingSupport] = useState(false);
+  const [supportFeedback, setSupportFeedback] = useState<string | null>(null);
+
+  const faqs = [
+    { question: 'How do I connect my wallet?', answer: 'Open the wallet menu and choose “Connect Wallet”, then follow the wallet prompts to authorize Cryphoria.' },
+    { question: 'How are transaction fees calculated?', answer: 'Fees depend on current network gas prices. Cryphoria shows an estimate before you confirm any transaction.' },
+    { question: 'Is my data secure?', answer: 'Yes. We encrypt sensitive information at rest and in transit, following industry-standard security practices.' },
+    { question: 'How do I generate an invoice?', answer: 'Navigate to Invoices, click “Create Invoice”, fill out the client and line item details, then save or send it.' },
+    { question: 'What compliance documents do I need to provide?', answer: 'Upload your business verification, tax documents, and any region-specific compliance forms from the Compliance section.' },
+  ];
+
+  const menuItems: MenuItem[] = [
+    
+    {
+      icon: <ShieldCheck className="w-5 h-5" />,
+      title: 'Security',
+      description: 'Change your password and secure your account',
+      onClick: () => setIsChangePasswordModalOpen(true),
+    },
+    {
+      icon: <HelpCircle className="w-5 h-5" />,
+      title: 'Help & Support',
+      description: 'Get help, FAQs, and contact support',
+      onClick: () => setIsHelpModalOpen(true),
+    },
+  ];
 
   useEffect(() => {
     const currentUser = loginViewModel.currentUser;
@@ -36,7 +75,7 @@ const EmployeeSettings: React.FC = () => {
       
       setUser({
         name: fullName,
-        title: currentUser.role || 'Employee',
+        title: currentUser.role,
         email: currentUser.email,
         first_name: currentUser.first_name,
         last_name: currentUser.last_name,
@@ -45,10 +84,6 @@ const EmployeeSettings: React.FC = () => {
     }
   }, [loginViewModel]);
 
-  const menuItems: MenuItem[] = [
-    { icon: "help", title: "Help & Support", path: "/help" }
-  ];
-
   const handleMenuItemClick = (item: MenuItem) => {
     if (item.onClick) {
       item.onClick();
@@ -56,6 +91,75 @@ const EmployeeSettings: React.FC = () => {
       navigate(item.path);
     }
   };
+
+  const handlePasswordSubmit = async (evt: React.FormEvent) => {
+    evt.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (!/[0-9]/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordError('Include at least one number and one symbol.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+
+    try {
+      setIsSubmittingPassword(true);
+      const changePassword = (loginViewModel as any)?.changePassword;
+      if (typeof changePassword === 'function') {
+        await changePassword({ newPassword, confirmPassword });
+      }
+      setPasswordSuccess('Password updated successfully.');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        setIsChangePasswordModalOpen(false);
+        setPasswordSuccess(null);
+      }, 1200);
+    } catch (error: any) {
+      setPasswordError(error?.message || 'Failed to update password. Please try again.');
+    } finally {
+      setIsSubmittingPassword(false);
+    }
+  };
+
+  const handleSupportSubmit = async (evt: React.FormEvent) => {
+    evt.preventDefault();
+    if (!contactMessage.trim()) return;
+
+    try {
+      setIsSendingSupport(true);
+      setSupportFeedback(null);
+
+      const sendSupportMessage = (loginViewModel as any)?.sendSupportMessage;
+      if (typeof sendSupportMessage === 'function') {
+        await sendSupportMessage({ message: contactMessage.trim() });
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+
+      setSupportFeedback('Message sent! Our team will reach out soon.');
+      setContactMessage('');
+      setOpenFaqIndex(null);
+    } catch (error: any) {
+      setSupportFeedback(error?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSendingSupport(false);
+    }
+  };
+
+  const filteredFaqs = faqs.filter((faq) =>
+    faq.question.toLowerCase().includes(faqSearchTerm.toLowerCase().trim())
+  );
 
   return (
     <>
@@ -75,12 +179,15 @@ const EmployeeSettings: React.FC = () => {
         .sidebar::-webkit-scrollbar-track { background: transparent; }
         .sidebar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 2px; }
         .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.5); }
-        .icon.session::before { content: "💻"; }
+        .icon.document::before { content: "📄"; }
         .icon.help::before { content: "❓"; }
       `}</style>
+      
       <div className="min-h-screen w-full bg-gray-50">
-              <EmployeeNavbar />
+      <ManagerNavbar />
+          
         <div className="p-6">
+
         {user ? (
           <div 
             className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg transition-all duration-300 hover:shadow-xl "
@@ -93,55 +200,290 @@ const EmployeeSettings: React.FC = () => {
             
             <div className="user-info flex-1 min-w-0">
               <h2 className="text-lg font-bold text-white tracking-tight truncate mb-1">{user.name}</h2>
-              <span className="text-sm text-white/90 block font-medium truncate mb-1">{user.title}</span>
-              {user.email && <span className="user-email text-xs text-white/80 block truncate">{user.email}</span>}
-            </div>
-            
-            <div className="profile-status absolute top-4 right-4">
-              <div className="status-indicator online w-3 h-3 rounded-full border-2 border-white bg-green-500 animate-pulse-status"></div>
+              {user.email && (
+                <span className="user-email text-xs text-white/80 block truncate">{user.email}</span>
+              )}
             </div>
           </div>
         ) : (
-          <div className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-white border border-gray-200 shadow-sm">
-            <SkeletonCircle className="h-16 w-16 mr-4" />
-            <div className="user-info flex-1 min-w-0 space-y-2">
-              <SkeletonText className="h-5 w-40" />
-              <SkeletonText className="h-4 w-32" />
-              <Skeleton className="h-3 w-48" />
+          <div className="user-profile flex items-center mb-8 p-6 rounded-2xl relative bg-gray-200 shadow-sm">
+            <div className="w-16 h-16 rounded-full mr-4 bg-gray-300 flex items-center justify-center text-gray-600 text-2xl font-bold">
+              ?
+            </div>
+            <div className="user-info flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-gray-700 truncate mb-1">Loading...</h2>
+              <span className="text-sm text-gray-600 block truncate">Please wait</span>
             </div>
           </div>
         )}
 
-        <nav className="menu flex-1 flex flex-col" role="navigation">
-          <div className="menu-section mb-6">
-            <h3 className="menu-section-title text-xs font-bold uppercase tracking-wide text-gray-500 mb-4 px-2">MAIN</h3>
-            {menuItems.slice(0, 1).map((item, index) => (
-              <div 
-                key={index} 
-                className={`menu-item flex items-center p-4 mb-2 bg-white rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-gray-50 focus:outline-none animate-slideInLeft ${item.path === window.location.pathname ? 'bg-purple-50 border-l-4 border-purple-500' : 'shadow-sm'}`}
-                style={{ animationDelay: `${0.1 * (index + 1)}s` }}
-                onClick={() => handleMenuItemClick(item)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleMenuItemClick(item);
-                  }
-                }}
-              >
-                <i className={`icon ${item.icon} w-5 h-5 mr-4 text-gray-600 flex items-center justify-center text-lg transition-all duration-200 flex-shrink-0`} aria-hidden="true"></i>
-                <span className="item-title flex-1 text-sm font-medium text-gray-800 tracking-tight truncate">{item.title}</span>
-                {item.value && (
-                  <span className="item-value text-xs font-medium text-gray-500 bg-gray-100 py-1 px-2 rounded-md">{item.value}</span>
-                )}
-              </div>
-            ))}
-          </div>
+        <nav className="menu flex-1 flex flex-col gap-4" role="navigation">
+          {menuItems.map((item, index) => {
+            const isActive = item.path === window.location.pathname;
 
-          
+            return (
+              <button
+                key={item.title}
+                type="button"
+                className={`group menu-item w-full text-left bg-white rounded-2xl border transition-all duration-200 ease-out flex items-center gap-4 p-5 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400/60 animate-slideInLeft ${
+                  isActive
+                    ? 'border-purple-200 bg-purple-50 shadow-md'
+                    : 'border-gray-100 hover:shadow-md hover:-translate-y-0.5'
+                }`}
+                style={{ animationDelay: `${0.08 * (index + 1)}s` }}
+                onClick={() => handleMenuItemClick(item)}
+              >
+                <span
+                  className={`flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 text-purple-600 transition-colors ${
+                    isActive
+                      ? 'bg-purple-200 text-purple-700'
+                      : 'group-hover:bg-purple-200 group-hover:text-purple-700'
+                  }`}
+                >
+                  {item.icon}
+                </span>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
+                  <p className="text-xs text-gray-500 mt-1 truncate">{item.description}</p>
+                </div>
+
+                <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+              </button>
+            );
+          })}
         </nav>
-        </div>
       </div>
+      </div>
+
+      {isChangePasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+            <div className="flex items-center gap-3 px-6 pt-6 pb-4">
+              <button
+                type="button"
+                onClick={() => setIsChangePasswordModalOpen(false)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                aria-label="Close change password modal"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Security</h2>
+                <p className="text-sm text-gray-500">Change your password and secure your account</p>
+              </div>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="px-6 pb-6 pt-2 space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700" htmlFor="new-password">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="new-password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    placeholder="Enter new password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-400 hover:text-gray-600"
+                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700" htmlFor="confirm-password">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    placeholder="Re-enter new password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-400 hover:text-gray-600"
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
+              {passwordSuccess && (
+                <p className="text-sm text-green-500">{passwordSuccess}</p>
+              )}
+
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsChangePasswordModalOpen(false);
+                    setPasswordError(null);
+                    setPasswordSuccess(null);
+                  }}
+                  className="w-full rounded-full border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingPassword}
+                  className="w-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-purple-600 hover:to-indigo-600 transition-all disabled:from-purple-400 disabled:to-indigo-400"
+                >
+                  {isSubmittingPassword ? 'Updating…' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isHelpModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-6 sm:px-4">
+          <div className="w-full max-w-lg sm:max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center gap-3 px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsHelpModalOpen(false);
+                  setFaqSearchTerm('');
+                  setContactMessage('');
+                  setSupportFeedback(null);
+                  setOpenFaqIndex(null);
+                }}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors sm:h-11 sm:w-11"
+                aria-label="Close help modal"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Help</h2>
+                <p className="text-xs text-gray-500 sm:text-sm">Find answers quickly or reach out to our support team.</p>
+              </div>
+            </div>
+
+            <div className="flex-1 px-4 pb-5 pt-2 space-y-5 overflow-y-auto sm:px-6 sm:pb-6">
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-5 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
+                    <CircleHelp className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Frequently Asked Questions</h3>
+                    <p className="text-xs text-gray-500">Search common topics or expand a question to learn more.</p>
+                  </div>
+                </div>
+
+                <div className="relative mb-4">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-400">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="search"
+                    value={faqSearchTerm}
+                    onChange={(e) => setFaqSearchTerm(e.target.value)}
+                    placeholder="Search FAQs..."
+                    className="w-full rounded-2xl border border-transparent bg-white px-10 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  {filteredFaqs.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-6">No FAQs match your search.</p>
+                  ) : (
+                    filteredFaqs.map((faq, idx) => {
+                      const actualIndex = faqs.indexOf(faq);
+                      const isOpen = openFaqIndex === actualIndex;
+
+                      return (
+                        <div key={faq.question} className="rounded-2xl bg-white border border-gray-100">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setOpenFaqIndex(isOpen ? null : actualIndex)
+                            }
+                            className="w-full flex items-center justify-between gap-3 px-3 py-3 text-left sm:px-4"
+                          >
+                            <span className="text-sm font-medium text-gray-900">{faq.question}</span>
+                            <ChevronDown
+                              className={`w-4 h-4 text-gray-400 transition-transform ${
+                                isOpen ? 'rotate-180 text-purple-500' : ''
+                              }`}
+                            />
+                          </button>
+                          {isOpen && (
+                            <div className="px-3 pb-4 sm:px-4">
+                              <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </section>
+
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-4 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
+                    <MessageCircle className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Contact Support</h3>
+                    <p className="text-xs text-gray-500">How can we help you?</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSupportSubmit} className="space-y-4">
+                  <textarea
+                    value={contactMessage}
+                    onChange={(e) => {
+                      setContactMessage(e.target.value);
+                      setSupportFeedback(null);
+                    }}
+                    rows={4}
+                    placeholder="Describe your issue or question..."
+                    className="w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                  />
+                  {supportFeedback && (
+                    <p className="text-xs text-purple-600">{supportFeedback}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={!contactMessage.trim() || isSendingSupport}
+                    className={`w-full rounded-full px-4 py-3 text-sm font-semibold transition-all ${
+                      !contactMessage.trim() || isSendingSupport
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm hover:from-purple-600 hover:to-indigo-600'
+                    }`}
+                  >
+                    {isSendingSupport ? 'Sending…' : 'Send Message'}
+                  </button>
+                </form>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

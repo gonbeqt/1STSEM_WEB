@@ -15,7 +15,13 @@ import {
 
 export interface PayslipRepository {
   createPayslip(request: CreatePayslipRequest): Promise<CreatePayslipResponse>;
-  getUserPayslips(employee_id?: string, status?: string, isManager?: boolean, email?: string): Promise<Payslip[]>;
+  getUserPayslips(params?: {
+    userId?: string;
+    employeeId?: string;
+    status?: string;
+    isManager?: boolean;
+    email?: string;
+  }): Promise<Payslip[]>;
   
   // New payroll methods
   createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse>;

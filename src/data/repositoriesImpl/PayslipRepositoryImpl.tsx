@@ -59,43 +59,47 @@ export class PayslipRepositoryImpl implements PayslipRepository {
     }
   }
 
-  async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
+  async getUserPayslips(params: {
+    userId?: string;
+    employeeId?: string;
+    status?: string;
+    isManager?: boolean;
+    email?: string;
+  } = {}): Promise<Payslip[]> {
+    const { userId, employeeId, status, isManager, email } = params;
+
     try {
+      const searchParams = new URLSearchParams();
+      if (employeeId) searchParams.append('employee_id', employeeId);
+      if (status) searchParams.append('status', status);
+      if (userId) searchParams.append('user_id', userId);
+      if (email) searchParams.append('email', email);
 
-      // Build query parameters
-      const params = new URLSearchParams();
-      if (employee_id) params.append('employee_id', employee_id);
-      if (status) params.append('status', status);
+      const basePath = isManager ? '/manager/payslips/list/' : '/payslips/list/';
+      const queryString = searchParams.toString();
+      const url = `${this.baseUrl}${basePath}${queryString ? `?${queryString}` : ''}`;
 
-      // Use the correct payslips endpoint
-      const data = await apiService.get<any>(
-        `${this.baseUrl}/manager/payslips/list/?${params.toString()}`
-      );
+      const data = await apiService.get<any>(url);
 
-      // Handle the response format from the backend
-      if (data.success && data.payslips) {
+      if (data?.success && Array.isArray(data.payslips)) {
         return data.payslips as Payslip[];
-      } else {
-        
-        return this.getMockPayslips(employee_id, status);
       }
+
+      return this.getMockPayslips({ employeeId, status, userId });
     } catch (error: any) {
       console.error('Error fetching user payslips:', error);
-
-      // If there's an error, fall back to mock data for development
-      
-      return this.getMockPayslips(employee_id, status);
+      return this.getMockPayslips({ employeeId, status, userId });
     }
   }
 
-  private getMockPayslips(employee_id?: string, status?: string): Payslip[] {
+  private getMockPayslips({ employeeId, status, userId }: { employeeId?: string; status?: string; userId?: string }): Payslip[] {
     // Mock data for development when backend endpoint is not available
     const mockPayslips: Payslip[] = [
       {
         payslip_id: '4e799c98-5a03-4e2a-bf21-e5e97e6328bc',
         payslip_number: 'PS-2025-10-000026',
-        user_id: employee_id || '68dc79f5832f59f405bbc830',
-        employee_id: employee_id || '68dc8ad197f623d507ee73fa',
+        user_id: userId || '68dc79f5832f59f405bbc830',
+        employee_id: employeeId || '68dc8ad197f623d507ee73fa',
         employee_name: 'Justin Caronongan',
         employee_email: 'eshavilario11@gmail.com',
         employee_wallet: undefined,
@@ -129,8 +133,8 @@ export class PayslipRepositoryImpl implements PayslipRepository {
       {
         payslip_id: '4e799c98-5a03-4e2a-bf21-e5e97e6328bd',
         payslip_number: 'PS-2025-10-000027',
-        user_id: employee_id || '68dc79f5832f59f405bbc830',
-        employee_id: employee_id || '68dc8ad197f623d507ee73fa',
+        user_id: userId || '68dc79f5832f59f405bbc830',
+        employee_id: employeeId || '68dc8ad197f623d507ee73fa',
         employee_name: 'Justin Caronongan',
         employee_email: 'eshavilario11@gmail.com',
         employee_wallet: undefined,

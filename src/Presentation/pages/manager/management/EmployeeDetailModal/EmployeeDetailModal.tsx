@@ -61,7 +61,10 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     payslips,
     loading: payslipsLoading,
     error: payslipsError
-  } = usePayslips(shouldFetchPayslips ? employeePayslipId : undefined);
+  } = usePayslips(
+    { employeeId: employeePayslipId, isManager: true },
+    { enabled: shouldFetchPayslips }
+  );
 
   useEffect(() => {
     if (isOpen) {

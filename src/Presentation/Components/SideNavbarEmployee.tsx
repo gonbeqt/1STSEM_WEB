@@ -1,7 +1,7 @@
 // src/Presentation/Components/SideNavbarEmployee.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, History, Settings, LogOut, X } from 'lucide-react';
+import { Home, History, User, LogOut, X } from 'lucide-react';
 import { container } from '../../di/container';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { observer } from 'mobx-react-lite';
@@ -68,7 +68,7 @@ const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpa
     () => [
       { to: '/employee/home', label: 'Home', Icon: Home },
       { to: '/employee/history', label: 'History', Icon: History },
-      { to: '/employee/settings', label: 'Settings', Icon: Settings },
+      { to: '/employee/settings',  label: 'User Profile', Icon: User },
     ],
     []
   );

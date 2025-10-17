@@ -363,9 +363,9 @@ const Profile: React.FC = () => {
       )}
 
       {isHelpModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
-          <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="flex items-center gap-3 px-6 pt-6 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-6 sm:px-4">
+          <div className="w-full max-w-lg sm:max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center gap-3 px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4">
               <button
                 type="button"
                 onClick={() => {
@@ -375,21 +375,21 @@ const Profile: React.FC = () => {
                   setSupportFeedback(null);
                   setOpenFaqIndex(null);
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors sm:h-11 sm:w-11"
                 aria-label="Close help modal"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Help</h2>
-                <p className="text-sm text-gray-500">Find answers quickly or reach out to our support team.</p>
+                <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Help</h2>
+                <p className="text-xs text-gray-500 sm:text-sm">Find answers quickly or reach out to our support team.</p>
               </div>
             </div>
 
-            <div className="px-6 pb-6 pt-2 space-y-5">
-              <section className="rounded-3xl bg-gray-50 px-5 py-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+            <div className="flex-1 px-4 pb-5 pt-2 space-y-5 overflow-y-auto sm:px-6 sm:pb-6">
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-5 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
                     <CircleHelp className="w-5 h-5" />
                   </span>
                   <div>
@@ -426,7 +426,7 @@ const Profile: React.FC = () => {
                             onClick={() =>
                               setOpenFaqIndex(isOpen ? null : actualIndex)
                             }
-                            className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+                            className="w-full flex items-center justify-between gap-3 px-3 py-3 text-left sm:px-4"
                           >
                             <span className="text-sm font-medium text-gray-900">{faq.question}</span>
                             <ChevronDown
@@ -436,7 +436,7 @@ const Profile: React.FC = () => {
                             />
                           </button>
                           {isOpen && (
-                            <div className="px-4 pb-4">
+                            <div className="px-3 pb-4 sm:px-4">
                               <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
                             </div>
                           )}
@@ -447,9 +447,9 @@ const Profile: React.FC = () => {
                 </div>
               </section>
 
-              <section className="rounded-3xl bg-gray-50 px-5 py-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-4 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
                     <MessageCircle className="w-5 h-5" />
                   </span>
                   <div>
