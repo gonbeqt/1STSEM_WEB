@@ -55,11 +55,6 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
     if (invoice.client_address) doc.text(invoice.client_address, 14, 68);
     if (invoice.client_email) doc.text(invoice.client_email, 14, 74);
 
-    doc.text("From:", 105, 55);
-    doc.text("Your Company", 105, 62);
-    doc.text("123 Business St, City, Country", 105, 68);
-    doc.text("support@yourcompany.com", 105, 74);
-
     let yPos = 95;
     doc.setFontSize(12);
     doc.text("Description", 14, yPos);
@@ -200,12 +195,7 @@ const InvoiceDetailsPage: React.FC<InvoiceDetailsProps> = ({ invoiceId, onClose 
               {invoice.client_address && <p className="text-sm text-gray-600">{invoice.client_address}</p>}
               {invoice.client_email && <p className="text-sm text-gray-600">{invoice.client_email}</p>}
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">From</h3>
-              <p className="font-semibold mb-1">Your Company</p>
-              <p className="text-sm text-gray-600">123 Business St, City, Country</p>
-              <p className="text-sm text-gray-600">support@yourcompany.com</p>
-            </div>
+           
           </div>
 
           {/* Items Table */}

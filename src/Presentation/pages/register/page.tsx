@@ -12,6 +12,7 @@ const Register = observer(() => {
   const { formData } = viewModel;
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isTermsModalOpen, setTermsModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
   const handleOpenTermsModal = () => {
     setTermsModalOpen(true);
@@ -179,20 +180,29 @@ const Register = observer(() => {
     e.preventDefault();
     
     // Validate form before submission
+    setSubmitError('');
     if (!validateForm()) {
       return;
     }
     
-    const success = await viewModel.register();
-    
-    if (success) {
-      // FORCE EMAIL VERIFICATION REDIRECT - ALWAYS GO TO EMAIL VERIFICATION
-      navigate('/email-verification', { 
-        state: { 
-          email: formData.email,
-          message: 'Registration successful! Please verify your email to continue.'
-        }
-      });
+    try {
+      const success = await viewModel.register();
+      if (success) {
+        // FORCE EMAIL VERIFICATION REDIRECT - ALWAYS GO TO EMAIL VERIFICATION
+        navigate('/email-verification', { 
+          state: { 
+            email: formData.email,
+            message: 'Registration successful! Please verify your email to continue.'
+          }
+        });
+      } else if (!formData.error) {
+        // Fallback message if viewModel didn't set an error
+        setSubmitError('We could not complete your registration. Please review the form and try again.');
+      }
+    } catch (err) {
+      // Defensive catch in case register throws unexpectedly
+      setSubmitError('Something went wrong while registering. Please try again.');
+      // console.error(err);
     }
   };
 // ...existing code...
@@ -212,9 +222,9 @@ const Register = observer(() => {
           </div>
 
           {/* Error Message */}
-          {formData.error && (
+          {(formData.error || submitError) && (
             <div className="mb-6 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-              {formData.error}
+              {submitError || formData.error}
             </div>
           )}
 

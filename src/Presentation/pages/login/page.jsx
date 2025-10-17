@@ -10,6 +10,8 @@ const Login = observer(() => {
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
+  const [submitError, setSubmitError] = useState('');
 
   const handlePasswordChange = (e) => {
     // Strip all whitespace characters from the password as the user types
@@ -18,7 +20,43 @@ const Login = observer(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, password);
+    // Reset previous errors
+    setSubmitError('');
+    setFieldErrors({ email: '', password: '' });
+
+    // Basic client-side validation
+    const errors = { email: '', password: '' };
+    const trimmedEmail = (email || '').trim();
+    if (!trimmedEmail) {
+      errors.email = 'Email is required';
+    } else {
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        errors.email = 'Please enter a valid email address';
+      }
+    }
+
+    if (!password) {
+      errors.password = 'Password is required';
+    }
+
+    if (errors.email || errors.password) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    try {
+      const ok = await login(trimmedEmail, password);
+      if (!ok && !error) {
+        // Fallback message if underlying hook didn't provide one
+        setSubmitError('Unable to sign in. Please check your credentials and try again.');
+      }
+    } catch (err) {
+      // Extremely defensive: in case the hook throws unexpectedly
+      setSubmitError('Something went wrong while signing in. Please try again.');
+      // Optionally log to console for developers
+      // console.error(err);
+    }
   };
 
   return (
@@ -44,8 +82,15 @@ const Login = observer(() => {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+                if (submitError) setSubmitError('');
+              }}
             />
+            {fieldErrors.email && (
+              <div className="mt-1 text-red-600 text-sm">{fieldErrors.email}</div>
+            )}
           </div>
 
           <div>
@@ -58,8 +103,15 @@ const Login = observer(() => {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={handlePasswordChange}
+              onChange={(e) => {
+                handlePasswordChange(e);
+                if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: '' }));
+                if (submitError) setSubmitError('');
+              }}
             />
+            {fieldErrors.password && (
+              <div className="mt-1 text-red-600 text-sm">{fieldErrors.password}</div>
+            )}
           </div>
 
           <div className="text-right">
@@ -71,9 +123,9 @@ const Login = observer(() => {
             </Link>
           </div>
 
-          {error && (
+          {(error || submitError) && (
             <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-              {error}
+              {submitError || error}
             </div>
           )}
 
