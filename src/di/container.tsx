@@ -2,6 +2,8 @@ import { UserRepositoryImpl } from '../data/repositoriesImpl/UserRepositoryImpl'
 import { WalletRepositoryImpl } from '../data/repositoriesImpl/WalletRepositoryImpl';
 import { RegisterUseCase } from '../domain/usecases/RegisterUseCase';
 import { LoginUseCase } from '../domain/usecases/LoginUseCase';
+import { ChangePasswordUseCase } from '../domain/usecases/ChangePasswordUseCase';
+import { SendSupportMessageUseCase } from '../domain/usecases/SendSupportMessageUseCase';
 import { RegisterViewModel } from '../domain/viewmodel/RegisterViewModel';
 import { LoginViewModel } from '../domain/viewmodel/LoginViewModel';
 import { TransactionRepositoryImpl } from '../data/repositoriesImpl/TransactionRepositoryImpl';
@@ -131,6 +133,7 @@ export interface Container {
   resendVerificationUseCase: ResendVerificationUseCase;
   requestPasswordResetUseCase: RequestPasswordResetUseCase;
   resetPasswordUseCase: ResetPasswordUseCase;
+  changePasswordUseCase: ChangePasswordUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
   getInvoicesUseCase: GetInvoicesUseCase;
 
@@ -222,6 +225,8 @@ const employeeHistoryRepository = new EmployeeHistoryRepositoryImpl();
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
 const loginUseCase = new LoginUseCase(userRepository);
+const changePasswordUseCase = new ChangePasswordUseCase(userRepository);
+const sendSupportMessageUseCase = new SendSupportMessageUseCase(userRepository);
 const logoutUseCase = new LogoutUseCase(userRepository);
 const verifyEmailUseCase = new VerifyEmailUseCase(emailVerificationRepository);
 const resendVerificationUseCase = new ResendVerificationUseCase(emailVerificationRepository);
@@ -370,6 +375,7 @@ export const container: Container = {
 
   getTransactionHistoryUseCase,
   getUserPayslipsUseCase,
+  changePasswordUseCase,
 
   registerViewModel: () => new RegisterViewModel(registerUseCase),
   loginViewModel: () => {
@@ -380,7 +386,7 @@ export const container: Container = {
       convertCryptoToFiatUseCase,
       sendEthUseCase,
       getExchangeRatesUseCase
-    ));
+    ), changePasswordUseCase, sendSupportMessageUseCase);
   },
   walletViewModel: () => new WalletViewModel(
     connectWalletUseCase,

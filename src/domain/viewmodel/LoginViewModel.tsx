@@ -2,6 +2,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
+import { ChangePasswordUseCase } from '../usecases/ChangePasswordUseCase';
+import { SendSupportMessageUseCase } from '../usecases/SendSupportMessageUseCase';
 import { WalletViewModel } from './WalletViewModal';
 import { LoginResponse } from '../entities/LoginResponse'; // Added this import
  
@@ -30,7 +32,9 @@ export class LoginViewModel {
   constructor(
     private loginUseCase: LoginUseCase,
     private logoutUseCase: LogoutUseCase,
-    private getWalletViewModel: () => WalletViewModel
+    private getWalletViewModel: () => WalletViewModel,
+    private changePasswordUseCase?: ChangePasswordUseCase,
+    private sendSupportMessageUseCase?: SendSupportMessageUseCase
   ) {
     makeAutoObservable(this, {}, { autoBind: true });
 
@@ -40,6 +44,47 @@ export class LoginViewModel {
     runInAction(() => {
       this.state.isLoggedIn = !!(token && user);
     });
+  }
+
+  // Change password via use case
+  changePassword = async (payload: { current_password?: string; newPassword?: string; confirmPassword?: string; revoke_other_sessions?: boolean }) => {
+    // Normalize fields
+    const current_password = payload.current_password || '';
+    const new_password = payload.newPassword || payload.newPassword || '';
+
+    if (!new_password) {
+      throw new Error('New password is required');
+    }
+
+    if (!this.changePasswordUseCase) {
+      throw new Error('ChangePassword use case not available');
+    }
+
+    // Call use case
+    const result = await this.changePasswordUseCase.execute({
+      current_password,
+      new_password,
+      revoke_other_sessions: payload.revoke_other_sessions
+    });
+
+    return result;
+  }
+
+  // Send support message via use case
+  sendSupportMessage = async (payload: { subject?: string; message: string; category?: string; priority?: string; attachments?: File | Blob | string | FileList | Array<File | Blob | string> }) => {
+    if (!this.sendSupportMessageUseCase) {
+      throw new Error('SendSupportMessage use case not available');
+    }
+
+    const result = await this.sendSupportMessageUseCase.execute({
+      subject: payload.subject || 'User Support Message',
+      message: payload.message,
+      category: payload.category || 'general',
+      priority: payload.priority || 'medium',
+      attachments: payload.attachments || []
+    });
+
+    return result;
   }
 
   private checkLoginStatus = () => {

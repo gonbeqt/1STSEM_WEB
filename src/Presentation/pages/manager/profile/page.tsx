@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
@@ -30,6 +30,7 @@ const Profile: React.FC = () => {
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
@@ -41,6 +42,8 @@ const Profile: React.FC = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [isSendingSupport, setIsSendingSupport] = useState(false);
   const [supportFeedback, setSupportFeedback] = useState<string | null>(null);
+  const [supportFiles, setSupportFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const faqs = [
     { question: 'How do I connect my wallet?', answer: 'Open the wallet menu and choose “Connect Wallet”, then follow the wallet prompts to authorize Cryphoria.' },
@@ -121,11 +124,12 @@ const Profile: React.FC = () => {
       setIsSubmittingPassword(true);
       const changePassword = (loginViewModel as any)?.changePassword;
       if (typeof changePassword === 'function') {
-        await changePassword({ newPassword, confirmPassword });
+        await changePassword({ current_password: currentPassword, newPassword, confirmPassword, revoke_other_sessions: true });
       }
       setPasswordSuccess('Password updated successfully.');
       setNewPassword('');
       setConfirmPassword('');
+      setCurrentPassword('');
       setTimeout(() => {
         setIsChangePasswordModalOpen(false);
         setPasswordSuccess(null);
@@ -139,7 +143,10 @@ const Profile: React.FC = () => {
 
   const handleSupportSubmit = async (evt: React.FormEvent) => {
     evt.preventDefault();
-    if (!contactMessage.trim()) return;
+    if (contactMessage.trim().length < 10) {
+      setSupportFeedback('Please enter at least 10 characters.');
+      return;
+    }
 
     try {
       setIsSendingSupport(true);
@@ -147,13 +154,15 @@ const Profile: React.FC = () => {
 
       const sendSupportMessage = (loginViewModel as any)?.sendSupportMessage;
       if (typeof sendSupportMessage === 'function') {
-        await sendSupportMessage({ message: contactMessage.trim() });
+        await sendSupportMessage({ message: contactMessage.trim(), attachments: supportFiles });
       } else {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
       setSupportFeedback('Message sent! Our team will reach out soon.');
       setContactMessage('');
+      setSupportFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setOpenFaqIndex(null);
     } catch (error: any) {
       setSupportFeedback(error?.message || 'Failed to send message. Please try again.');
@@ -280,6 +289,22 @@ const Profile: React.FC = () => {
             </div>
 
             <form onSubmit={handlePasswordSubmit} className="px-6 pb-6 pt-2 space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700" htmlFor="current-password">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    placeholder="Enter current password"
+                    required
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700" htmlFor="new-password">
                   New Password
@@ -466,22 +491,43 @@ const Profile: React.FC = () => {
                       setSupportFeedback(null);
                     }}
                     rows={4}
+                    minLength={10}
                     placeholder="Describe your issue or question..."
                     className="w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   />
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Attachments (optional)</label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setSupportFiles(files);
+                      }}
+                      className="block w-full text-xs text-gray-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-purple-700 hover:file:bg-purple-100"
+                    />
+                    {supportFiles.length > 0 && (
+                      <ul className="text-xs text-gray-500 list-disc pl-5 space-y-1">
+                        {supportFiles.map((f, idx) => (
+                          <li key={idx} className="truncate">{f.name}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                   {supportFeedback && (
                     <p className="text-xs text-purple-600">{supportFeedback}</p>
                   )}
                   <button
                     type="submit"
-                    disabled={!contactMessage.trim() || isSendingSupport}
+                    disabled={contactMessage.trim().length < 10 || isSendingSupport}
                     className={`w-full rounded-full px-4 py-3 text-sm font-semibold transition-all ${
-                      !contactMessage.trim() || isSendingSupport
+                      contactMessage.trim().length < 10 || isSendingSupport
                         ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm hover:from-purple-600 hover:to-indigo-600'
                     }`}
                   >
-                    {isSendingSupport ? 'Sending…' : 'Send Message'}
+                    {isSendingSupport ? 'Sending…' : `Send Message${contactMessage.trim().length > 0 && contactMessage.trim().length < 10 ? ' (min 10 chars)' : ''}`}
                   </button>
                 </form>
               </section>
