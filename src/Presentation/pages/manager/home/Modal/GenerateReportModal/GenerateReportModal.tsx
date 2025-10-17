@@ -20,12 +20,14 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
   const [timePeriod, setTimePeriod] = useState<string>("Current Period");
   const [format, setFormat] = useState<"PDF" | "EXCEL" | "CSV">("PDF");
   const [includeBreakdown, setIncludeBreakdown] = useState(true);
-  const [emailReport, setEmailReport] = useState(false);
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string>("");
   const [generatedReport, setGeneratedReport] = useState<any>(null);
+  const [taxReports, setTaxReports] = useState<any[]>([]);
+  const [isLoadingTaxReports, setIsLoadingTaxReports] = useState(false);
+  const [taxListError, setTaxListError] = useState<string>("");
 
   // Use shared helpers for sum and date ranges
   // sumObjectValues and getDateRangeForPeriod are imported from ../utils
@@ -74,51 +76,32 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
     }
   };
 
-  // Generate tax analysis report
-  const generateTaxAnalysisReport = async () => {
-    setIsGenerating(true);
-    setError("");
-    
+  // (Tax analysis generation removed; using loadTaxReports instead)
+
+  // Load user's tax reports list
+  const loadTaxReports = async () => {
     try {
+      setIsLoadingTaxReports(true);
+      setTaxListError("");
       const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
       const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_URL}/admin/tax-analysis/`, {
-        method: 'POST',
+      const resp = await fetch(`${API_URL}/financial/tax-report/list/`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : '',
         },
-        body: JSON.stringify({
-          period_type: timePeriod === "Custom Period" ? "CUSTOM" : 
-                      timePeriod === "Current Period" ? "MONTHLY" :
-                      timePeriod === "Previous Period" ? "MONTHLY" :
-                      timePeriod === "Year to Date" ? "YEARLY" : "MONTHLY",
-          start_date: timePeriod === "Custom Period" ? customStartDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).start_date,
-          end_date: timePeriod === "Custom Period" ? customEndDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).end_date,
-          total_gains: 0, // Will be calculated by backend
-          total_losses: 0 // Will be calculated by backend
-        }),
       });
-
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        setGeneratedReport({
-          type: 'tax_analysis',
-          analysis: data.analysis,
-          period_start: timePeriod === "Custom Period" ? customStartDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).start_date,
-          period_end: timePeriod === "Custom Period" ? customEndDate : getDateRangeForPeriod(timePeriod, customStartDate, customEndDate).end_date,
-          generated_at: new Date().toISOString()
-        });
-        setStep("success");
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        setTaxReports(Array.isArray(data.tax_reports) ? data.tax_reports : []);
       } else {
-        setError(data.error || 'Failed to generate tax analysis report');
+        setTaxListError(data.error || 'Failed to load tax reports');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate tax analysis report');
+    } catch (e: any) {
+      setTaxListError(e?.message || 'Failed to load tax reports');
     } finally {
-      setIsGenerating(false);
+      setIsLoadingTaxReports(false);
     }
   };
 
@@ -580,7 +563,19 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
     if (reportType === "Cashflow") {
       await generateCashFlowReport();
     } else if (reportType === "Tax") {
-      await generateTaxAnalysisReport();
+      setIsGenerating(true);
+      setError("");
+      await loadTaxReports();
+      // Provide a placeholder generatedReport to enable success UI rendering
+      setGeneratedReport({
+        type: 'tax_analysis',
+        analysis: '',
+        period_start: '',
+        period_end: '',
+        generated_at: new Date().toISOString()
+      });
+      setStep("success");
+      setIsGenerating(false);
     } else if (reportType === "BalanceSheet") {
       await generateBalanceSheetReport();
     } else {
@@ -722,17 +717,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
                 Include detailed breakdown
               </label>
             </div>
-            <div className="mb-4 text-sm text-gray-700">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={emailReport}
-                  onChange={() => setEmailReport(!emailReport)}
-                  className="w-4 h-4 text-purple-600"
-                />
-                Email report when generated
-              </label>
-            </div>
+            
 
             {/* Error Display */}
             {error && (
@@ -822,14 +807,35 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
                       <span className="text-gray-600">Analysis Type:</span>
                       <span className="font-medium">AI-Powered Tax Analysis</span>
                     </div>
+              
+                    {/* Previous Tax Reports */}
                     <div className="border-t pt-2">
-                      <span className="text-gray-600 block mb-1">AI Analysis Preview:</span>
-                      <div className="text-xs text-gray-700 bg-gray-100 p-2 rounded max-h-20 overflow-y-auto">
-                        {generatedReport.analysis ? 
-                          generatedReport.analysis.substring(0, 200) + (generatedReport.analysis.length > 200 ? '...' : '') 
-                          : 'No analysis available'
-                        }
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600">Previous Tax Reports</span>
+                        <button
+                          type="button"
+                          onClick={loadTaxReports}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Refresh
+                        </button>
                       </div>
+                      {isLoadingTaxReports ? (
+                        <p className="text-xs text-gray-500">Loading…</p>
+                      ) : taxListError ? (
+                        <p className="text-xs text-red-600">{taxListError}</p>
+                      ) : taxReports.length === 0 ? (
+                        <p className="text-xs text-gray-500">No previous tax reports found.</p>
+                      ) : (
+                        <ul className="text-xs text-gray-700 space-y-1 max-h-24 overflow-y-auto">
+                          {taxReports.slice(0, 5).map((r, idx) => (
+                            <li key={r._id || idx} className="flex items-center justify-between">
+                              <span>{(r.start_date || '').split('T')[0]} → {(r.end_date || '').split('T')[0]}</span>
+                              <span className="text-gray-500">{(r.generated_at || '').split('T')[0]}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
                 )}
@@ -863,16 +869,14 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
               </div>
             )}
 
-            <div className="flex justify-between gap-2 mb-4">
+            <div className="flex gap-2 mb-4">
               <button 
                 className="flex-1 bg-purple-600 text-white border-none py-2 px-4 rounded-lg cursor-pointer font-medium flex items-center justify-center gap-2 hover:bg-purple-700 transition-colors"
                 onClick={handleDownload}
               >
                 <Download size={16} /> Download {format}
               </button>
-              <button className="flex-1 bg-gray-100 text-gray-700 border-none py-2 px-4 rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
-                <Mail size={16} /> Email
-              </button>
+             
             </div>
 
             <button

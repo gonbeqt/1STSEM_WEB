@@ -199,10 +199,17 @@ const EmployeeSettings: React.FC = () => {
     setProfileSuccess(null);
 
     // Basic validation
-    const fn = (profileData.first_name || '').trim();
-    const ln = (profileData.last_name || '').trim();
+  const fn = (profileData.first_name || '').trim();
+  const ln = (profileData.last_name || '').trim();
+  const rawPhone = (profileData.phone_number || '').trim();
     if (!fn || !ln) {
       setProfileError('First name and last name are required.');
+      return;
+    }
+
+    // PH mobile number validation: must start with 09 and be exactly 11 digits
+    if (rawPhone && !/^09\d{9}$/.test(rawPhone)) {
+      setProfileError('Please enter a valid PH mobile number that starts with 09 and has 11 digits (e.g., 09XXXXXXXXX).');
       return;
     }
 
@@ -214,7 +221,7 @@ const EmployeeSettings: React.FC = () => {
         first_name: fn,
         last_name: ln,
         email: (profileData.email || '').trim(),
-        phone_number: (profileData.phone_number || '').trim(),
+        phone_number: rawPhone,
       };
       const res: any = await apiService.put(`${API_URL}/auth/profile-mongodb/`, payload);
       if (res?.success) {
@@ -580,9 +587,16 @@ const EmployeeSettings: React.FC = () => {
                         id="phone"
                         type="tel"
                         value={profileData.phone_number || ''}
-                        onChange={(e) => setProfileData((p) => ({ ...p, phone_number: e.target.value }))}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                          setProfileData((p) => ({ ...p, phone_number: digits }));
+                        }}
+                        inputMode="numeric"
+                        maxLength={11}
+                        pattern="^09\d{9}$"
+                        title="Enter PH mobile number that starts with 09 and is 11 digits (e.g., 09XXXXXXXXX)"
                         className="mt-1 w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                        placeholder="Enter phone number"
+                        placeholder="Enter phone number (e.g., 09XXXXXXXXX)"
                       />
                     </div>
                   </div>

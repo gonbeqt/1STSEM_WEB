@@ -85,7 +85,11 @@ const SideNavbarEmployeeComponent: React.FC<SideNavbarEmployeeProps> = ({ onExpa
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="text-center mb-10 relative h-10 flex items-center justify-center">
+    <div
+        className={`mb-10 relative h-10 flex items-center ${
+          isExpanded ? 'justify-start' : 'justify-center'
+        }`}
+      >
         {isExpanded && (
           <>
             <div className="flex items-center gap-2">
