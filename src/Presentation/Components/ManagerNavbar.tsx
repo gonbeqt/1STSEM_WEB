@@ -90,15 +90,7 @@ const ManagerNavbar: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="p-2 rounded-full hover:bg-gray-100 transition-all"
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
+       
       </div>
       <nav className="border-t border-gray-200 bg-white lg:hidden">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-2 overflow-x-auto">

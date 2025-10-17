@@ -11,6 +11,11 @@ const Login = observer(() => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const handlePasswordChange = (e) => {
+    // Strip all whitespace characters from the password as the user types
+    setPassword(e.target.value.replace(/\s/g, ''));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(email, password);
@@ -53,7 +58,7 @@ const Login = observer(() => {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
             />
           </div>
 

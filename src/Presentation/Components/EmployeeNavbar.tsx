@@ -86,15 +86,7 @@ const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="p-2 rounded-full hover:bg-gray-100 transition-all"
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
+
       </div>
 
       <nav className="border-t border-gray-200 bg-white lg:hidden">

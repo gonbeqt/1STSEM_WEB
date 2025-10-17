@@ -35,17 +35,32 @@ const Register = observer(() => {
       case 'last_name':
         if (!trimmedValue) return `${name.replace('_', ' ')} is required`;
         if (trimmedValue.length < 2) return `${name.replace('_', ' ')} must be at least 2 characters`;
+        if (trimmedValue.length > 50) return `${name.replace('_', ' ')} must be at most 50 characters`;
+        // Allow only letters (basic latin) plus spaces and hyphens between parts.
+        // Split on spaces to validate each part (allow hyphenated parts too).
+        const nameParts = trimmedValue.split(/\s+/);
+        for (const part of nameParts) {
+          // Allow hyphenated segments like "Anne-Marie"
+          const segments = part.split('-');
+          for (const seg of segments) {
+            if (!/^[A-Za-z]+$/.test(seg)) return `${name.replace('_', ' ')} can only contain letters`;
+          }
+        }
         return '';
       
       case 'username':
         if (!trimmedValue) return 'Username is required';
-        if (trimmedValue.length < 3) return 'Username must be at least 3 characters';
-        if (!/^[a-zA-Z0-9_]+$/.test(trimmedValue)) return 'Username can only contain letters, numbers, and underscores';
+        if (trimmedValue.length < 5) return 'Username must be at least 5 characters';
+        if (trimmedValue.length > 50) return 'Username must be at most 50 characters';
+        // Allow only letters and numbers (no underscores per new requirement)
+        if (!/^[a-zA-Z0-9]+$/.test(trimmedValue)) return 'Username can only contain letters and numbers';
         return '';
       
       case 'email':
         if (!trimmedValue) return 'Email is required';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue)) return 'Please enter a valid email address';
+        // Stronger client-side email validation regex (reasonable balance between strictness and practicality)
+          const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/;
+        if (!emailRegex.test(trimmedValue)) return 'Please enter a valid email address';
         return '';
       
       case 'password':
@@ -82,18 +97,38 @@ const Register = observer(() => {
     // Apply field-specific logic
     switch (fieldName) {
       case 'first_name':
-        viewModel.setFirstName(value);
+        // Remove any character that's not a letter, space, or hyphen while typing.
+        // Then collapse multiple spaces to a single space and trim to max 50 chars.
+        {
+          const sanitized = value
+            // Replace any character that's not a letter (A-Z, a-z), space or hyphen
+            .replace(/[^A-Za-z\-\s]/g, '')
+            // Replace multiple spaces with a single space
+            .replace(/\s{2,}/g, ' ')
+            .slice(0, 50);
+          viewModel.setFirstName(sanitized);
+        }
         break;
       case 'last_name':
-        viewModel.setLastName(value);
+        {
+          const sanitized = value
+            .replace(/[^A-Za-z\-\s]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .slice(0, 50);
+          viewModel.setLastName(sanitized);
+        }
         break;
       case 'username':
-        viewModel.setUsername(value);
+        {
+          // Allow only letters and numbers while typing (no underscores or special chars)
+          const sanitizedUsername = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 50);
+          viewModel.setUsername(sanitizedUsername);
+        }
         break;
       case 'email':
         viewModel.setEmail(value);
         break;
-      case 'password':
+      case 'password':  
         // Remove spaces from password input
         const cleanPassword = value.replace(/\s/g, '');
         viewModel.setPassword(cleanPassword);
