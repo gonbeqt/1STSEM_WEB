@@ -73,7 +73,7 @@ const ReportsComponent: React.FC = () => {
 
   const taxReports = [
     {
-      title: 'VAT Report',
+      title: 'Tax Report',
       path: '/tax_summary',
       Icon: ScrollText,
       iconBg: 'bg-amber-100',
