@@ -1,0 +1,26 @@
+[
+	{
+		"id": 1,
+		"title": "Audit payslip data flow",
+		"description": "Review repository, use case, and hooks to support new get_user_payslips endpoint using user id.",
+		"status": "completed"
+	},
+	{
+		"id": 2,
+		"title": "Fetch recent payslips on employee home",
+		"description": "Update hooks/view model usage to load payslips and replace recent transactions section.",
+		"status": "completed"
+	},
+	{
+		"id": 3,
+		"title": "UI adjustments and testing",
+		"description": "Ensure UI displays payslips responsively, add loading/error states, and run checks.",
+		"status": "completed"
+	},
+	{
+		"id": 4,
+		"title": "Resolve undefined transaction functions",
+		"description": "Cleanup employee home page to remove remaining references to transaction hooks and handlers causing runtime errors.",
+		"status": "done"
+	}
+]

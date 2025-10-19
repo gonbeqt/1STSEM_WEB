@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
 import ManagerNavbar from '../../../components/ManagerNavbar';
-import { Lock, ShieldCheck, HelpCircle, ChevronRight, ArrowLeft, Eye, EyeOff, CircleHelp, MessageCircle, Search, ChevronDown } from 'lucide-react';
+import { Lock, ShieldCheck, HelpCircle, ChevronRight, ArrowLeft, Eye, EyeOff, CircleHelp, MessageCircle, Search, ChevronDown, Pencil } from 'lucide-react';
+import apiService from '../../../../data/api';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -23,13 +24,24 @@ interface User {
   role?: string;
 }
 
+interface ProfileData {
+  id?: string;
+  email?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+}
+
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const loginViewModel = useViewModel(LoginViewModel);
   const [user, setUser] = useState<User | null>(null);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
@@ -41,6 +53,15 @@ const Profile: React.FC = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [isSendingSupport, setIsSendingSupport] = useState(false);
   const [supportFeedback, setSupportFeedback] = useState<string | null>(null);
+  const [supportFiles, setSupportFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Edit profile state
+  const [profileData, setProfileData] = useState<ProfileData>({});
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
 
   const faqs = [
     { question: 'How do I connect my wallet?', answer: 'Open the wallet menu and choose “Connect Wallet”, then follow the wallet prompts to authorize Cryphoria.' },
@@ -121,11 +142,12 @@ const Profile: React.FC = () => {
       setIsSubmittingPassword(true);
       const changePassword = (loginViewModel as any)?.changePassword;
       if (typeof changePassword === 'function') {
-        await changePassword({ newPassword, confirmPassword });
+        await changePassword({ current_password: currentPassword, newPassword, confirmPassword, revoke_other_sessions: true });
       }
       setPasswordSuccess('Password updated successfully.');
       setNewPassword('');
       setConfirmPassword('');
+      setCurrentPassword('');
       setTimeout(() => {
         setIsChangePasswordModalOpen(false);
         setPasswordSuccess(null);
@@ -139,7 +161,10 @@ const Profile: React.FC = () => {
 
   const handleSupportSubmit = async (evt: React.FormEvent) => {
     evt.preventDefault();
-    if (!contactMessage.trim()) return;
+    if (contactMessage.trim().length < 10) {
+      setSupportFeedback('Please enter at least 10 characters.');
+      return;
+    }
 
     try {
       setIsSendingSupport(true);
@@ -147,18 +172,118 @@ const Profile: React.FC = () => {
 
       const sendSupportMessage = (loginViewModel as any)?.sendSupportMessage;
       if (typeof sendSupportMessage === 'function') {
-        await sendSupportMessage({ message: contactMessage.trim() });
+        await sendSupportMessage({ message: contactMessage.trim(), attachments: supportFiles });
       } else {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
       setSupportFeedback('Message sent! Our team will reach out soon.');
       setContactMessage('');
+      setSupportFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setOpenFaqIndex(null);
     } catch (error: any) {
       setSupportFeedback(error?.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSendingSupport(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    try {
+      setIsProfileLoading(true);
+      setProfileError(null);
+      const API_URL = process.env.REACT_APP_API_BASE_URL || '';
+      const data: any = await apiService.get(`${API_URL}/auth/profile-mongodb/`);
+      if (data?.success && data?.profile) {
+        setProfileData({ ...(data.profile as ProfileData) });
+      } else {
+        setProfileError(data?.errors?.[0] || 'Failed to load profile');
+      }
+    } catch (err: any) {
+      setProfileError(err?.message || 'Failed to load profile');
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
+
+  const openEditProfile = async () => {
+    // Prefill from current user immediately for snappy UI
+    const cu = loginViewModel.currentUser;
+    if (cu) {
+      setProfileData((prev) => ({
+        ...prev,
+        first_name: cu.first_name || '',
+        last_name: cu.last_name || '',
+        email: cu.email || '',
+        username: cu.username || '',
+        role: cu.role || '',
+      }));
+    }
+    setIsEditProfileModalOpen(true);
+    await loadProfile();
+  };
+
+  const handleProfileSave = async (evt: React.FormEvent) => {
+    evt.preventDefault();
+    setProfileError(null);
+    setProfileSuccess(null);
+
+    // Basic validation
+    const fn = (profileData.first_name || '').trim();
+    const ln = (profileData.last_name || '').trim();
+    if (!fn || !ln) {
+      setProfileError('First name and last name are required.');
+      return;
+    }
+
+    try {
+      setIsProfileSaving(true);
+      const API_URL = process.env.REACT_APP_API_BASE_URL || '';
+      // Send only editable fields
+      const payload: ProfileData = {
+        first_name: fn,
+        last_name: ln,
+        email: (profileData.email || '').trim(),
+        phone_number: (profileData.phone_number || '').trim()
+      };
+      const res: any = await apiService.put(`${API_URL}/auth/profile-mongodb/`, payload);
+      if (res?.success) {
+        setProfileSuccess(res?.message || 'Profile updated successfully.');
+        // Update local user cache for immediate UI reflection
+        try {
+          const userStr = localStorage.getItem('user');
+          const current = userStr ? JSON.parse(userStr) : {};
+          const updated = {
+            ...current,
+            first_name: payload.first_name,
+            last_name: payload.last_name,
+            email: payload.email || current.email,
+          };
+          localStorage.setItem('user', JSON.stringify(updated));
+          const fullName = `${updated.first_name || ''} ${updated.last_name || ''}`.trim() || updated.username || 'User';
+          setUser((prev) => ({
+            ...(prev || { name: fullName, title: updated.role || '' }),
+            name: fullName,
+            email: updated.email,
+            title: updated.role || (prev?.title || ''),
+            first_name: updated.first_name,
+            last_name: updated.last_name,
+            role: updated.role || prev?.role,
+          }));
+        } catch {}
+
+        setTimeout(() => {
+          setIsEditProfileModalOpen(false);
+          setProfileSuccess(null);
+        }, 900);
+      } else {
+        setProfileError(res?.errors?.[0] || 'Failed to update profile');
+      }
+    } catch (err: any) {
+      setProfileError(err?.message || 'Failed to update profile');
+    } finally {
+      setIsProfileSaving(false);
     }
   };
 
@@ -208,6 +333,19 @@ const Profile: React.FC = () => {
               {user.email && (
                 <span className="user-email text-xs text-white/80 block truncate">{user.email}</span>
               )}
+            </div>
+
+            {/* Edit Profile Button */}
+            <div className="absolute right-4 top-4">
+              <button
+                type="button"
+                onClick={openEditProfile}
+                className="inline-flex items-center gap-2 rounded-full bg-white/90 text-purple-700 px-3 py-1.5 text-xs font-semibold shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
+                aria-label="Edit profile"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
             </div>
           </div>
         ) : (
@@ -280,6 +418,22 @@ const Profile: React.FC = () => {
             </div>
 
             <form onSubmit={handlePasswordSubmit} className="px-6 pb-6 pt-2 space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700" htmlFor="current-password">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    placeholder="Enter current password"
+                    required
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700" htmlFor="new-password">
                   New Password
@@ -362,10 +516,118 @@ const Profile: React.FC = () => {
         </div>
       )}
 
-      {isHelpModalOpen && (
+      {isEditProfileModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
-          <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="flex items-center gap-3 px-6 pt-6 pb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditProfileModalOpen(false);
+                  setProfileError(null);
+                  setProfileSuccess(null);
+                }}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                aria-label="Close edit profile modal"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Edit Profile</h2>
+                <p className="text-sm text-gray-500">Update your personal details</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleProfileSave} className="px-6 pb-6 pt-2 space-y-4">
+              {isProfileLoading ? (
+                <p className="text-sm text-gray-500">Loading profile…</p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700" htmlFor="first_name">First Name</label>
+                      <input
+                        id="first_name"
+                        type="text"
+                        value={profileData.first_name || ''}
+                        onChange={(e) => setProfileData((p) => ({ ...p, first_name: e.target.value }))}
+                        className="mt-1 w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        placeholder="Enter first name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700" htmlFor="last_name">Last Name</label>
+                      <input
+                        id="last_name"
+                        type="text"
+                        value={profileData.last_name || ''}
+                        onChange={(e) => setProfileData((p) => ({ ...p, last_name: e.target.value }))}
+                        className="mt-1 w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        placeholder="Enter last name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700" htmlFor="email">Email</label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={profileData.email || ''}
+                        disabled
+                        readOnly
+                        className="mt-1 w-full rounded-2xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm text-gray-600 cursor-not-allowed"
+                        placeholder="Enter email"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700" htmlFor="phone">Phone Number</label>
+                      <input
+                        id="phone"
+                        type="tel"
+                        value={profileData.phone_number || ''}
+                        onChange={(e) => setProfileData((p) => ({ ...p, phone_number: e.target.value }))}
+                        className="mt-1 w-full rounded-2xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        placeholder="Enter phone number"
+                      />
+                    </div>
+      
+                  </div>
+
+                  {profileError && <p className="text-sm text-red-500">{profileError}</p>}
+                  {profileSuccess && <p className="text-sm text-green-500">{profileSuccess}</p>}
+
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditProfileModalOpen(false);
+                        setProfileError(null);
+                        setProfileSuccess(null);
+                      }}
+                      className="w-full rounded-full border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isProfileSaving}
+                      className="w-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-purple-600 hover:to-indigo-600 transition-all disabled:from-purple-400 disabled:to-indigo-400"
+                    >
+                      {isProfileSaving ? 'Saving…' : 'Save Changes'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isHelpModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-6 sm:px-4">
+          <div className="w-full max-w-lg sm:max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center gap-3 px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4">
               <button
                 type="button"
                 onClick={() => {
@@ -375,21 +637,21 @@ const Profile: React.FC = () => {
                   setSupportFeedback(null);
                   setOpenFaqIndex(null);
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors sm:h-11 sm:w-11"
                 aria-label="Close help modal"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Help</h2>
-                <p className="text-sm text-gray-500">Find answers quickly or reach out to our support team.</p>
+                <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Help</h2>
+                <p className="text-xs text-gray-500 sm:text-sm">Find answers quickly or reach out to our support team.</p>
               </div>
             </div>
 
-            <div className="px-6 pb-6 pt-2 space-y-5">
-              <section className="rounded-3xl bg-gray-50 px-5 py-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+            <div className="flex-1 px-4 pb-5 pt-2 space-y-5 overflow-y-auto sm:px-6 sm:pb-6">
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-5 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
                     <CircleHelp className="w-5 h-5" />
                   </span>
                   <div>
@@ -426,7 +688,7 @@ const Profile: React.FC = () => {
                             onClick={() =>
                               setOpenFaqIndex(isOpen ? null : actualIndex)
                             }
-                            className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+                            className="w-full flex items-center justify-between gap-3 px-3 py-3 text-left sm:px-4"
                           >
                             <span className="text-sm font-medium text-gray-900">{faq.question}</span>
                             <ChevronDown
@@ -436,7 +698,7 @@ const Profile: React.FC = () => {
                             />
                           </button>
                           {isOpen && (
-                            <div className="px-4 pb-4">
+                            <div className="px-3 pb-4 sm:px-4">
                               <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
                             </div>
                           )}
@@ -447,9 +709,9 @@ const Profile: React.FC = () => {
                 </div>
               </section>
 
-              <section className="rounded-3xl bg-gray-50 px-5 py-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+              <section className="rounded-3xl bg-gray-50 px-4 py-5 sm:px-5 sm:py-6">
+                <div className="flex items-start gap-3 mb-4 sm:items-center sm:gap-4">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 sm:h-11 sm:w-11">
                     <MessageCircle className="w-5 h-5" />
                   </span>
                   <div>
@@ -466,22 +728,43 @@ const Profile: React.FC = () => {
                       setSupportFeedback(null);
                     }}
                     rows={4}
+                    minLength={10}
                     placeholder="Describe your issue or question..."
                     className="w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   />
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Attachments (optional)</label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setSupportFiles(files);
+                      }}
+                      className="block w-full text-xs text-gray-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-purple-700 hover:file:bg-purple-100"
+                    />
+                    {supportFiles.length > 0 && (
+                      <ul className="text-xs text-gray-500 list-disc pl-5 space-y-1">
+                        {supportFiles.map((f, idx) => (
+                          <li key={idx} className="truncate">{f.name}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                   {supportFeedback && (
                     <p className="text-xs text-purple-600">{supportFeedback}</p>
                   )}
                   <button
                     type="submit"
-                    disabled={!contactMessage.trim() || isSendingSupport}
+                    disabled={contactMessage.trim().length < 10 || isSendingSupport}
                     className={`w-full rounded-full px-4 py-3 text-sm font-semibold transition-all ${
-                      !contactMessage.trim() || isSendingSupport
+                      contactMessage.trim().length < 10 || isSendingSupport
                         ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm hover:from-purple-600 hover:to-indigo-600'
                     }`}
                   >
-                    {isSendingSupport ? 'Sending…' : 'Send Message'}
+                    {isSendingSupport ? 'Sending…' : `Send Message${contactMessage.trim().length > 0 && contactMessage.trim().length < 10 ? ' (min 10 chars)' : ''}`}
                   </button>
                 </form>
               </section>
