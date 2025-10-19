@@ -22,8 +22,14 @@ export class PayslipRepositoryImpl implements PayslipRepository {
     return this.remote.createPayslip(request);
   }
 
-  async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
-    return this.remote.getUserPayslips(employee_id, status);
+  async getUserPayslips(params?: {
+    userId?: string;
+    employeeId?: string;
+    status?: string;
+    isManager?: boolean;
+    email?: string;
+  }): Promise<Payslip[]> {
+    return this.remote.getUserPayslips(params);
   }
 
   async createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {

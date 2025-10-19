@@ -204,7 +204,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
       return null;
     }
 
-    const entryId: string | undefined = rawEntry.entry_id || rawEntry.id || rawEntry._id;
+  const entryId: string | undefined = rawEntry.entry_id || rawEntry.entryId || rawEntry.id || rawEntry._id;
     if (!entryId) {
       return null;
     }
@@ -212,6 +212,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     const fallbackAmount = Number(
       rawEntry.amount ??
       rawEntry.salary_amount ??
+      rawEntry.salaryAmount ??
       payrollRequest.amount ??
       payrollRequest.salary_amount ??
       entity.salary_amount ??
@@ -220,6 +221,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
 
     const fallbackSalaryAmount = Number(
       rawEntry.salary_amount ??
+      rawEntry.salaryAmount ??
       rawEntry.amount ??
       payrollRequest.salary_amount ??
       payrollRequest.amount ??
@@ -228,13 +230,13 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
       0
     );
 
-    const salaryCurrency = rawEntry.salary_currency ?? payrollRequest.salary_currency ?? rawEntry.cryptocurrency ?? payrollRequest.cryptocurrency ?? 'USD';
-    const cryptoCurrency = rawEntry.cryptocurrency ?? payrollRequest.cryptocurrency ?? rawEntry.salary_currency ?? payrollRequest.salary_currency ?? salaryCurrency;
+  const salaryCurrency = rawEntry.salary_currency ?? rawEntry.salaryCurrency ?? payrollRequest.salary_currency ?? rawEntry.cryptocurrency ?? rawEntry.cryptoCurrency ?? payrollRequest.cryptocurrency ?? 'USD';
+  const cryptoCurrency = rawEntry.cryptocurrency ?? rawEntry.cryptoCurrency ?? payrollRequest.cryptocurrency ?? rawEntry.salary_currency ?? rawEntry.salaryCurrency ?? payrollRequest.salary_currency ?? salaryCurrency;
 
     return {
       ...rawEntry,
       entry_id: entryId,
-      employee_name: rawEntry.employee_name ?? entity.employee_name ?? entity.user_id ?? '',
+  employee_name: rawEntry.employee_name ?? rawEntry.employeeName ?? entity.employee_name ?? entity.user_id ?? '',
       amount: Number.isFinite(fallbackAmount) ? fallbackAmount : 0,
       salary_amount: Number.isFinite(fallbackSalaryAmount) ? fallbackSalaryAmount : 0,
       salary_currency: salaryCurrency,

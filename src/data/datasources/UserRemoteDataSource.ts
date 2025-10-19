@@ -4,6 +4,7 @@ import { RegisterResponse } from '../../domain/entities/RegisterReponse';
 import { LoginRequest } from '../../domain/entities/LoginRequest';
 import { LoginResponse } from '../../domain/entities/LoginResponse';
 import { LogoutRequest, LogoutResponse } from '../../domain/entities/LogoutEntities';
+import { ChangePasswordRequest } from '../../domain/usecases/ChangePasswordUseCase';
 
 export class UserRemoteDataSource {
   private readonly apiUrl = process.env.REACT_APP_API_BASE_URL;
@@ -40,5 +41,87 @@ export class UserRemoteDataSource {
   async logout(request: LogoutRequest): Promise<LogoutResponse> {
     const data = await this.api.post<LogoutResponse>(`${this.apiUrl}/auth/logout/`, request);
     return data;
+  }
+
+  async changePassword(request: ChangePasswordRequest): Promise<any> {
+    const payload = {
+      current_password: request.current_password,
+      new_password: request.new_password,
+      revoke_other_sessions: request.revoke_other_sessions !== false,
+    };
+
+    const endpoints = [
+      `${this.apiUrl}/auth/change-password/`,
+      `${this.apiUrl}/auth/change-password`,
+      `${this.apiUrl}/auth/change_password/`,
+      `${this.apiUrl}/auth/change_password`,
+      `${this.apiUrl}/auth/password/change/`,
+      `${this.apiUrl}/auth/password/change`,
+    ];
+
+    let lastError: unknown;
+    for (const path of endpoints) {
+      try {
+        return await this.api.post<any>(path, payload);
+      } catch (error: any) {
+        lastError = error;
+        if (error?.response?.status !== 404) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  async sendSupportMessage(request: { subject?: string; message: string; category?: string; priority?: string; attachments?: File | Blob | string | FileList | Array<File | Blob | string> }): Promise<any> {
+    const subject = request.subject || 'User Support Message';
+    const category = request.category || 'general';
+    const priority = request.priority || 'medium';
+
+    const form = new FormData();
+    form.append('subject', subject);
+    form.append('message', request.message);
+    form.append('category', category);
+    form.append('priority', priority);
+
+    const attachments = request.attachments;
+    const appendAttachment = (value: File | Blob | string) => {
+      if (value == null) {
+        return;
+      }
+      form.append('attachments', value as any);
+    };
+
+    if (attachments) {
+      if (attachments instanceof FileList) {
+        Array.from(attachments).forEach(appendAttachment);
+      } else if (Array.isArray(attachments)) {
+        attachments.forEach(appendAttachment);
+      } else {
+        appendAttachment(attachments as File | Blob | string);
+      }
+    }
+
+    const endpoints = [
+      `${this.apiUrl}/support/submit/`,
+      `${this.apiUrl}/support/submit`,
+      `${this.apiUrl}/support/`,
+      `${this.apiUrl}/support`,
+    ];
+
+    let lastError: unknown;
+    for (const path of endpoints) {
+      try {
+        return await this.api.postForm<any>(path, form);
+      } catch (error: any) {
+        lastError = error;
+        if (error?.response?.status !== 404) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError;
   }
 }

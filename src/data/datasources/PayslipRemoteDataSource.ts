@@ -45,22 +45,34 @@ export class PayslipRemoteDataSource {
     }
   }
 
-  async getUserPayslips(employee_id?: string, status?: string): Promise<Payslip[]> {
+  async getUserPayslips(filters?: {
+    userId?: string;
+    employeeId?: string;
+    status?: string;
+    isManager?: boolean;
+    email?: string;
+  }): Promise<Payslip[]> {
     try {
-      const params = new URLSearchParams();
-      if (employee_id) params.append('employee_id', employee_id);
-      if (status) params.append('status', status);
+      const searchParams = new URLSearchParams();
+      if (filters?.userId) searchParams.append('user_id', filters.userId);
+      if (filters?.employeeId) searchParams.append('employee_id', filters.employeeId);
+      if (filters?.status) searchParams.append('status', filters.status);
+      if (filters?.isManager != null) searchParams.append('is_manager', String(filters.isManager));
+      if (filters?.email) searchParams.append('email', filters.email);
 
-      const data = await this.api.get<any>(`${this.apiUrl}/manager/payslips/list/?${params.toString()}`);
+      const query = searchParams.toString();
+      const url = query ? `${this.apiUrl}/manager/payslips/list/?${query}` : `${this.apiUrl}/manager/payslips/list/`;
+
+      const data = await this.api.get<any>(url);
 
       if (data.success && data.payslips) {
         return data.payslips as Payslip[];
       }
 
-      return this.getMockPayslips(employee_id, status);
+      return this.getMockPayslips(filters?.employeeId, filters?.status);
     } catch (error: any) {
       console.error('Error fetching user payslips:', error);
-      return this.getMockPayslips(employee_id, status);
+      return this.getMockPayslips(filters?.employeeId, filters?.status);
     }
   }
 
@@ -148,7 +160,13 @@ export class PayslipRemoteDataSource {
 
   async createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      const data = await this.api.post<CreatePayrollEntryResponse>(`${this.apiUrl}/payroll/create/`, request);
+      const data = await this.api.post<any>(`${this.apiUrl}/payroll/create/`, request);
+      if (data?.payroll_entry) {
+        return data.payroll_entry as CreatePayrollEntryResponse;
+      }
+      if (data?.payrollEntry) {
+        return data.payrollEntry as CreatePayrollEntryResponse;
+      }
       return data as CreatePayrollEntryResponse;
     } catch (error: any) {
       console.error('Payroll entry creation error:', error);
@@ -166,7 +184,13 @@ export class PayslipRemoteDataSource {
 
   async createSinglePayrollEntry(request: CreateSinglePayrollEntryRequest): Promise<CreatePayrollEntryResponse> {
     try {
-      const data = await this.api.post<CreatePayrollEntryResponse>(`${this.apiUrl}/payroll/create/`, request);
+      const data = await this.api.post<any>(`${this.apiUrl}/payroll/create/`, request);
+      if (data?.payroll_entry) {
+        return data.payroll_entry as CreatePayrollEntryResponse;
+      }
+      if (data?.payrollEntry) {
+        return data.payrollEntry as CreatePayrollEntryResponse;
+      }
       return data as CreatePayrollEntryResponse;
     } catch (error: any) {
       console.error('Single payroll entry creation error:', error);

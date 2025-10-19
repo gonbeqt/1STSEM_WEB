@@ -154,6 +154,7 @@ export interface Container {
   requestPasswordResetUseCase: RequestPasswordResetUseCase;
   resetPasswordUseCase: ResetPasswordUseCase;
   changePasswordUseCase: ChangePasswordUseCase;
+  sendSupportMessageUseCase: SendSupportMessageUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
   getUserBusinessDocumentsUseCase: GetUserBusinessDocumentsUseCase;
   submitBusinessDocumentsForApprovalUseCase: SubmitBusinessDocumentsForApprovalUseCase;
@@ -425,6 +426,7 @@ export const container: Container = {
   getTransactionHistoryUseCase,
   getUserPayslipsUseCase,
   changePasswordUseCase,
+  sendSupportMessageUseCase,
 
   registerViewModel: () => new RegisterViewModel(registerUseCase),
   loginViewModel: () => {
