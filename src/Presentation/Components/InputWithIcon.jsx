@@ -30,10 +30,16 @@ const InputWithIcon = ({
       />
       {type === "password" && (
         <button 
+          type="button"
           onClick={togglePasswordVisibility} 
+          onMouseDown={(event) => event.preventDefault()}
           className="bg-transparent border-none cursor-pointer text-gray-400 p-0 hover:text-gray-600 transition-colors flex-shrink-0"
         >
-          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          {showPassword ? (
+            <EyeOffIcon size={18} className="pointer-events-none" />
+          ) : (
+            <EyeIcon size={18} className="pointer-events-none" />
+          )}
         </button>
       )}
     </div>

@@ -107,6 +107,10 @@ export class LoginViewModel {
     this.state.logoutError = null;
   };
 
+  setError = (message: string | null) => {
+    this.state.error = message;
+  };
+
   login = async (): Promise<LoginResponse | null> => {
     runInAction(() => {
       this.state.isLoading = true;
@@ -163,7 +167,7 @@ export class LoginViewModel {
       return response;
     } catch (error) {
       runInAction(() => {
-        this.state.error = error instanceof Error ? error.message : 'Login failed';
+        this.state.error = this.extractErrorMessage(error) || 'Login failed';
         this.state.isLoggedIn = false;
       });
       return null;
@@ -172,6 +176,104 @@ export class LoginViewModel {
         this.state.isLoading = false;
       });
     }
+  };
+
+  private extractErrorMessage = (error: unknown): string | null => {
+    if (!error) {
+      return null;
+    }
+
+    if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
+      return 'No internet connection detected. Check your network and try again.';
+    }
+
+    const anyError = error as any;
+    const status = anyError?.response?.status as number | undefined;
+
+    if (status) {
+      if (status === 401) {
+        return 'Invalid email or password. Please try again.';
+      }
+
+      if (status >= 500) {
+        return 'Our servers are having trouble right now. Please try again shortly.';
+      }
+    }
+
+    const responseData = anyError?.response?.data ?? anyError?.data;
+
+    const parsed = this.formatBackendError(responseData);
+    if (parsed) {
+      return parsed;
+    }
+
+    if (anyError?.message) {
+      return anyError.message;
+    }
+
+    return null;
+  };
+
+  private formatBackendError = (payload: unknown): string | null => {
+    if (!payload) {
+      return null;
+    }
+
+    if (typeof payload === 'string') {
+      return payload;
+    }
+
+    if (Array.isArray(payload)) {
+      for (const entry of payload) {
+        const message = this.formatBackendError(entry);
+        if (message) {
+          return message;
+        }
+      }
+      return null;
+    }
+
+    if (typeof payload === 'object') {
+      const record = payload as Record<string, unknown>;
+
+      const preferredKeys = ['message', 'error', 'detail', 'errors', 'non_field_errors'];
+      for (const key of preferredKeys) {
+        if (record[key] != null) {
+          if (key === 'errors' && typeof record[key] === 'object') {
+            const nested = record[key] as Record<string, unknown>;
+            for (const [field, value] of Object.entries(nested)) {
+              const message = this.formatBackendError(value);
+              if (message) {
+                return `${this.formatFieldName(field)}: ${message}`;
+              }
+            }
+          }
+
+          const message = this.formatBackendError(record[key]);
+          if (message) {
+            return message;
+          }
+        }
+      }
+
+      for (const [field, value] of Object.entries(record)) {
+        const message = this.formatBackendError(value);
+        if (message) {
+          return `${this.formatFieldName(field)}: ${message}`;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  private formatFieldName = (field: string): string => {
+    if (!field) {
+      return '';
+    }
+
+    const normalized = field.replace(/[_-]/g, ' ');
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   };
 
   logout = async (): Promise<boolean> => {

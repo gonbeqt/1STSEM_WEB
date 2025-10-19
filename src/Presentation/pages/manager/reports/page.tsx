@@ -11,9 +11,6 @@ const ReportsComponent: React.FC = () => {
   const navigate = useNavigate();
   const [activePeriod, setActivePeriod] = useState<PeriodLabel>('Daily');
 
-  const handleCategoryChange = (categoryName: string) => {
-    // Not used anymore but keeping for compatibility
-  };
 
   const getLastUpdatedText = (periodLabel: string) => {
     switch (periodLabel) {

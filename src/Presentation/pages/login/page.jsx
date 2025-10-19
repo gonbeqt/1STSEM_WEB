@@ -1,19 +1,81 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useLogin } from '../../hooks/useLogin';
 import InputWithIcon from '../../components/InputWithIcon';
 import EmailIcon from '../../components/icons/EmailIcon';
 import PasswordIcon from '../../components/icons/PasswordIcon';
 import { Link } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
 
 const Login = observer(() => {
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ email: '', password: '', form: '' });
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const validationMessages = useMemo(() => {
+    const messages = { ...fieldErrors };
+
+    if (isOffline) {
+      messages.form = 'You appear to be offline. Reconnect to the internet and try again.';
+    }
+
+    return messages;
+  }, [fieldErrors, isOffline]);
+
+  const validateFields = () => {
+    const messages = { email: '', password: '', form: '' };
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail) {
+      messages.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      messages.email = 'Enter a valid email address';
+    }
+
+    if (!trimmedPassword) {
+      messages.password = 'Password is required';
+    }
+
+    setFieldErrors(messages);
+    return !messages.email && !messages.password;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, password);
+    if (!validateFields()) {
+      return;
+    }
+
+    if (isOffline) {
+      return;
+    }
+
+    const success = await login(email, password);
+    if (!success) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        form: prev.form || 'Unable to sign in. Please check your credentials and try again.'
+      }));
+      return;
+    }
+
+    setFieldErrors({ email: '', password: '', form: '' });
   };
 
   return (
@@ -41,6 +103,12 @@ const Login = observer(() => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {validationMessages.email && (
+              <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4" />
+                <span>{validationMessages.email}</span>
+              </div>
+            )}
           </div>
 
           <div>
@@ -55,6 +123,12 @@ const Login = observer(() => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            {validationMessages.password && (
+              <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4" />
+                <span>{validationMessages.password}</span>
+              </div>
+            )}
           </div>
 
           <div className="text-right">
@@ -66,18 +140,19 @@ const Login = observer(() => {
             </Link>
           </div>
 
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-              {error}
+          {(error || validationMessages.form) && (
+            <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+              <AlertCircle className="mt-0.5 w-4 h-4 flex-shrink-0" />
+              <span>{error || validationMessages.form}</span>
             </div>
           )}
 
           <button 
             type="submit" 
             className="w-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold rounded-xl py-3.5 px-4 mt-6 border-none cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            disabled={isLoading}
+            disabled={isLoading || isOffline}
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isOffline ? 'Offline' : isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
         
