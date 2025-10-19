@@ -48,6 +48,7 @@ import {
 import { PayslipRepository } from '../domain/repositories/PayslipRepository';
 import { CreatePayslipUseCase } from '../domain/usecases/CreatePayslipUseCase';
 import { CreatePayrollEntryUseCase } from '../domain/usecases/CreatePayrollEntryUseCase';
+import { CreateSinglePayrollEntryUseCase } from '../domain/usecases/CreateSinglePayrollEntryUseCase';
 import { ProcessPayrollPaymentUseCase } from '../domain/usecases/ProcessPayrollPaymentUseCase';
 import { GetEmployeePayrollDetailsUseCase } from '../domain/usecases/GetEmployeePayrollDetailsUseCase';
 import { CreateRecurringPaymentUseCase } from '../domain/usecases/CreateRecurringPaymentUseCase';
@@ -71,6 +72,8 @@ import { PayslipRepositoryImpl } from '../data/repositoriesImpl/PayslipRepositor
 import { BusinessDocumentRepository } from '../domain/repositories/BusinessDocumentRepository';
 import { BusinessDocumentRepositoryImpl } from '../data/repositoriesImpl/BusinessDocumentRepositoryImpl';
 import { UploadBusinessDocumentsUseCase } from '../domain/usecases/UploadBusinessDocumentsUseCase';
+import { GetUserBusinessDocumentsUseCase } from '../domain/usecases/GetUserBusinessDocumentsUseCase';
+import { SubmitBusinessDocumentsForApprovalUseCase } from '../domain/usecases/SubmitBusinessDocumentsForApprovalUseCase';
 import { BusinessDocumentViewModel } from '../domain/viewmodel/BusinessDocumentViewModel';
 
 import { InvoiceRepository } from '../domain/repositories/InvoiceRepository';
@@ -95,11 +98,28 @@ import { PasswordResetRepositoryImpl } from '../data/repositoriesImpl/PasswordRe
 import { RequestPasswordResetUseCase } from '../domain/usecases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '../domain/usecases/ResetPasswordUseCase';
 import { PasswordResetViewModel } from '../domain/viewmodel/PasswordResetViewModel';
+import { ForgotPasswordViewModel } from '../domain/viewmodel/ForgotPasswordViewModel';
 import { EmployeeHistoryRepository } from '../domain/repositories/EmployeeHistoryRepository';
 import { EmployeeHistoryRepositoryImpl } from '../data/repositoriesImpl/EmployeeHistoryRepositoryImpl';
 import { GetEmployeeHistoryUseCase, GetEmployeeHistoryUseCaseImpl } from '../domain/usecases/GetEmployeeHistoryUseCase';
 import { EmployeeHistoryViewModel } from '../domain/viewmodel/EmployeeHistoryViewModel';
 import { RiskAnalysisViewModel } from '../domain/viewmodel/RiskAnalysisViewModel';
+
+import { ApiService } from '../data/api/ApiService';
+import { UserRemoteDataSource } from '../data/datasources/UserRemoteDataSource';
+import { WalletRemoteDataSource } from '../data/datasources/WalletRemoteDataSource';
+import { TransactionRemoteDataSource } from '../data/datasources/TransactionRemoteDataSource';
+import { ExchangeRateRemoteDataSource } from '../data/datasources/ExchangeRateRemoteDataSource';
+import { AddressBookRemoteDataSource } from '../data/datasources/AddressBookRemoteDataSource';
+import { EmployeeRemoteDataSource } from '../data/datasources/EmployeeRemoteDataSource';
+import { ReportRemoteDataSource } from '../data/datasources/ReportRemoteDataSource';
+import { PayslipRemoteDataSource } from '../data/datasources/PayslipRemoteDataSource';
+import { BusinessDocumentRemoteDataSource } from '../data/datasources/BusinessDocumentRemoteDataSource';
+import { InvoiceRemoteDataSource } from '../data/datasources/InvoiceRemoteDataSource';
+import { ContractRemoteDataSource } from '../data/datasources/ContractRemoteDataSource';
+import { EmailVerificationRemoteDataSource } from '../data/datasources/EmailVerificationRemoteDataSource';
+import { PasswordResetRemoteDataSource } from '../data/datasources/PasswordResetRemoteDataSource';
+import { EmployeeHistoryRemoteDataSource } from '../data/datasources/EmployeeHistoryRemoteDataSource';
 
 
 
@@ -107,7 +127,7 @@ import { RiskAnalysisViewModel } from '../domain/viewmodel/RiskAnalysisViewModel
 
 
 export interface Container {
-  forgotPasswordViewModel(): any;
+  forgotPasswordViewModel: () => ForgotPasswordViewModel;
   userRepository: UserRepositoryImpl;
   walletRepository: WalletRepositoryImpl;
   transactionRepository: TransactionRepositoryImpl;
@@ -132,6 +152,8 @@ export interface Container {
   requestPasswordResetUseCase: RequestPasswordResetUseCase;
   resetPasswordUseCase: ResetPasswordUseCase;
   uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase;
+  getUserBusinessDocumentsUseCase: GetUserBusinessDocumentsUseCase;
+  submitBusinessDocumentsForApprovalUseCase: SubmitBusinessDocumentsForApprovalUseCase;
   getInvoicesUseCase: GetInvoicesUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
@@ -143,6 +165,7 @@ export interface Container {
   removeEmployeeFromTeamUseCase: RemoveEmployeeFromTeamUseCase;
   createPayslipUseCase: CreatePayslipUseCase;
   createPayrollEntryUseCase: CreatePayrollEntryUseCase;
+  createSinglePayrollEntryUseCase: CreateSinglePayrollEntryUseCase;
   processPayrollPaymentUseCase: ProcessPayrollPaymentUseCase;
   getEmployeePayrollDetailsUseCase: GetEmployeePayrollDetailsUseCase;
   createRecurringPaymentUseCase: CreateRecurringPaymentUseCase;
@@ -203,21 +226,41 @@ export interface Container {
 }
 
 
+// ======= Core services =======
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
+const apiService = new ApiService(apiBaseUrl);
+
+// ======= Create data source instances =======
+const userRemoteDataSource = new UserRemoteDataSource(apiService);
+const walletRemoteDataSource = new WalletRemoteDataSource(apiService);
+const transactionRemoteDataSource = new TransactionRemoteDataSource(apiService);
+const exchangeRateRemoteDataSource = new ExchangeRateRemoteDataSource(apiService);
+const addressBookRemoteDataSource = new AddressBookRemoteDataSource(apiService);
+const employeeRemoteDataSource = new EmployeeRemoteDataSource(apiService);
+const reportRemoteDataSource = new ReportRemoteDataSource(apiService);
+const payslipRemoteDataSource = new PayslipRemoteDataSource(apiService);
+const businessDocumentRemoteDataSource = new BusinessDocumentRemoteDataSource(apiService);
+const invoiceRemoteDataSource = new InvoiceRemoteDataSource(apiService);
+const contractRemoteDataSource = new ContractRemoteDataSource(apiService);
+const emailVerificationRemoteDataSource = new EmailVerificationRemoteDataSource(apiService);
+const passwordResetRemoteDataSource = new PasswordResetRemoteDataSource(apiService);
+const employeeHistoryRemoteDataSource = new EmployeeHistoryRemoteDataSource(apiService);
+
 // ======= Create repository instances =======
-const userRepository = new UserRepositoryImpl();
-const walletRepository = new WalletRepositoryImpl();
-const transactionRepository = new TransactionRepositoryImpl();
-const exchangeRateRepository = new ExchangeRateRepositoryImpl();
-const addressBookRepository = new AddressBookRepositoryImpl();
-const employeeRepository = new EmployeeRepositoryImpl();
-const reportRepository = new ReportRepositoryImpl();
-const payslipRepository = new PayslipRepositoryImpl();
-const businessDocumentRepository = new BusinessDocumentRepositoryImpl();
-const invoiceRepository = new InvoiceRepositoryImpl();
-const contractRepository = new ContractRepositoryImpl();
-const emailVerificationRepository = new EmailVerificationRepositoryImpl();
-const passwordResetRepository = new PasswordResetRepositoryImpl();
-const employeeHistoryRepository = new EmployeeHistoryRepositoryImpl();
+const userRepository = new UserRepositoryImpl(userRemoteDataSource);
+const walletRepository = new WalletRepositoryImpl(walletRemoteDataSource);
+const transactionRepository = new TransactionRepositoryImpl(transactionRemoteDataSource);
+const exchangeRateRepository = new ExchangeRateRepositoryImpl(exchangeRateRemoteDataSource);
+const addressBookRepository = new AddressBookRepositoryImpl(addressBookRemoteDataSource);
+const employeeRepository = new EmployeeRepositoryImpl(employeeRemoteDataSource);
+const reportRepository = new ReportRepositoryImpl(reportRemoteDataSource);
+const payslipRepository = new PayslipRepositoryImpl(payslipRemoteDataSource);
+const businessDocumentRepository = new BusinessDocumentRepositoryImpl(businessDocumentRemoteDataSource);
+const invoiceRepository = new InvoiceRepositoryImpl(invoiceRemoteDataSource);
+const contractRepository = new ContractRepositoryImpl(contractRemoteDataSource);
+const emailVerificationRepository = new EmailVerificationRepositoryImpl(emailVerificationRemoteDataSource);
+const passwordResetRepository = new PasswordResetRepositoryImpl(passwordResetRemoteDataSource);
+const employeeHistoryRepository = new EmployeeHistoryRepositoryImpl(employeeHistoryRemoteDataSource);
 
 // ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
@@ -228,6 +271,8 @@ const resendVerificationUseCase = new ResendVerificationUseCase(emailVerificatio
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(passwordResetRepository);
 const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetRepository);
 const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(businessDocumentRepository);
+const getUserBusinessDocumentsUseCase = new GetUserBusinessDocumentsUseCase(businessDocumentRepository);
+const submitBusinessDocumentsForApprovalUseCase = new SubmitBusinessDocumentsForApprovalUseCase(businessDocumentRepository);
 const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
 
 const connectWalletUseCase = new ConnectWalletUseCase(walletRepository);
@@ -255,6 +300,7 @@ const getEmployeesByManagerUseCase = new GetEmployeesByManagerUseCase(employeeRe
 const removeEmployeeFromTeamUseCase = new RemoveEmployeeFromTeamUseCase(employeeRepository);
 const createPayslipUseCase = new CreatePayslipUseCase(payslipRepository);
 const createPayrollEntryUseCase = new CreatePayrollEntryUseCase(payslipRepository);
+const createSinglePayrollEntryUseCase = new CreateSinglePayrollEntryUseCase(payslipRepository);
 const processPayrollPaymentUseCase = new ProcessPayrollPaymentUseCase(payslipRepository);
 const getEmployeePayrollDetailsUseCase = new GetEmployeePayrollDetailsUseCase(payslipRepository);
 const createRecurringPaymentUseCase = new CreateRecurringPaymentUseCase(payslipRepository);
@@ -289,11 +335,11 @@ const getTransactionHistoryUseCase = new GetTransactionHistoryUseCase(transactio
 const getUserPayslipsUseCase = new GetUserPayslipsUseCase(payslipRepository);
 
 // Audit Contract Use Cases
-const uploadContractUseCase = new UploadContractUseCase();
-const auditContractUseCase = new AuditContractUseCase();
-const listAuditsUseCase = new ListAuditsUseCase();
-const getAuditDetailsUseCase = new GetAuditDetailsUseCase();
-const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase();
+const uploadContractUseCase = new UploadContractUseCase(contractRepository);
+const auditContractUseCase = new AuditContractUseCase(contractRepository);
+const listAuditsUseCase = new ListAuditsUseCase(contractRepository);
+const getAuditDetailsUseCase = new GetAuditDetailsUseCase(contractRepository);
+const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase(contractRepository);
 
 // ======= Container =======
 export const container: Container = {
@@ -320,6 +366,8 @@ export const container: Container = {
   requestPasswordResetUseCase,
   resetPasswordUseCase,
   uploadBusinessDocumentsUseCase,
+  getUserBusinessDocumentsUseCase,
+  submitBusinessDocumentsForApprovalUseCase,
   getInvoicesUseCase,
 
   connectWalletUseCase,
@@ -331,6 +379,7 @@ export const container: Container = {
   removeEmployeeFromTeamUseCase,
   createPayslipUseCase,
   createPayrollEntryUseCase,
+  createSinglePayrollEntryUseCase,
   processPayrollPaymentUseCase,
   getEmployeePayrollDetailsUseCase,
   createRecurringPaymentUseCase,
@@ -398,7 +447,8 @@ export const container: Container = {
   ),
   businessDocumentViewModel: () => new BusinessDocumentViewModel(
     uploadBusinessDocumentsUseCase,
-    businessDocumentRepository
+    getUserBusinessDocumentsUseCase,
+    submitBusinessDocumentsForApprovalUseCase
   ),
   invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase),
   payslipViewModel: () => new PayslipViewModel(createPayslipUseCase),
@@ -428,9 +478,7 @@ export const container: Container = {
     getRiskAnalysisHistoryUseCase,
     getLatestRiskAnalysisUseCase
   ),
-  forgotPasswordViewModel: function () {
-    throw new Error('Function not implemented.');
-  },
+  forgotPasswordViewModel: () => new ForgotPasswordViewModel(requestPasswordResetUseCase),
   
 
 };

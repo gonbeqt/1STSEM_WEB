@@ -1,16 +1,14 @@
-// ...existing code...
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { container } from '../../../di/container';
 import { observer } from 'mobx-react-lite';
+import { ForgotPasswordViewModel } from '../../../domain/viewmodel/ForgotPasswordViewModel';
 
 const ForgotPassword = observer(() => {
   const navigate = useNavigate();
-  const viewModel: any = useMemo(() => {
-    try { return container.forgotPasswordViewModel(); } catch { return null; }
-  }, []);
+  const viewModel = useMemo<ForgotPasswordViewModel>(() => container.forgotPasswordViewModel(), []);
 
-  const initialEmail = viewModel?.formData?.email ?? '';
+  const initialEmail = viewModel.formData.email ?? '';
   const [email, setEmail] = useState<string>(initialEmail);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,30 +27,17 @@ const ForgotPassword = observer(() => {
     try {
       setLoading(true);
 
-      if (viewModel && typeof viewModel.requestPasswordReset === 'function') {
-        const res = await viewModel.requestPasswordReset(email.trim());
-        if (res && (res.success || res === true)) {
-          setSuccess(res.message || 'Verification code sent. Check your email.');
-          navigate('/password-reset', { state: { email: email.trim() } });
-          return;
-        } else {
-          throw new Error(res?.error || (Array.isArray(res?.errors) ? res.errors.join(', ') : 'Failed to request code'));
-        }
+      viewModel.setEmail(email.trim());
+      const res = await viewModel.requestPasswordReset(email.trim());
+
+      if (res.success) {
+        setSuccess(res.message || 'Verification code sent. Check your email.');
+        navigate('/password-reset', { state: { email: email.trim() } });
+        return;
       }
 
-      const API_URL = process.env.REACT_APP_API_BASE_URL ?? '';
-      const resp = await fetch(`${API_URL}/auth/password-reset-request/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await resp.json();
-      if (!resp.ok || !data.success) {
-        throw new Error(data.errors ? (Array.isArray(data.errors) ? data.errors.join(', ') : data.errors) : (data.error || 'Failed to request verification code'));
-      }
-      setSuccess(data.message || 'Verification code sent. Check your email.');
-      navigate('/reset-password', { state: { email: email.trim() } });
+      const requestError = res.errors?.[0] || res.message || 'Failed to request verification code';
+      throw new Error(requestError);
     } catch (err: any) {
       setError(err?.message || 'Failed to request verification code');
     } finally {

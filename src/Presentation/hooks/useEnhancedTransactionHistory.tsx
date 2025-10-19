@@ -1,7 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
-import { GetTransactionHistoryUseCase } from '../../domain/usecases/GetTransactionUseCase';
-import { TransactionRepositoryImpl } from '../../data/repositoriesImpl/TransactionRepositoryImpl';
+import { useState, useCallback } from 'react';
 import { Transaction, TransactionHistoryRequest } from '../../domain/entities/TransactionEntities';
+import { container } from '../../di/container';
 
 export const useEnhancedTransactionHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -14,10 +13,7 @@ export const useEnhancedTransactionHistory = () => {
     has_more: false
   });
 
-  const getTransactionHistoryUseCase = useMemo(() => {
-    const transactionRepository = new TransactionRepositoryImpl();
-    return new GetTransactionHistoryUseCase(transactionRepository);
-  }, []);
+  const getTransactionHistoryUseCase = container.getTransactionHistoryUseCase;
 
   const fetchTransactionHistory = useCallback(async (request: TransactionHistoryRequest = {}) => {
     try {

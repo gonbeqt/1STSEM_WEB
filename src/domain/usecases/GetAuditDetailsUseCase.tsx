@@ -1,13 +1,8 @@
-import { ContractRepositoryImpl } from "../../data/repositoriesImpl/ContractRepositoryImpl";
 import { AuditDetailsResponse } from "../entities/ContractEntities";
 import { ContractRepository } from "../repositories/ContractRepository";
 
 export class GetAuditDetailsUseCase {
-    private contractRepository: ContractRepository;
-
-    constructor() {
-        this.contractRepository = new ContractRepositoryImpl();
-    }
+    constructor(private readonly contractRepository: ContractRepository) {}
 
     async execute(auditId: string): Promise<AuditDetailsResponse> {
         try {

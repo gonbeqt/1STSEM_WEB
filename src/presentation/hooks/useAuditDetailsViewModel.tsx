@@ -1,14 +1,13 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { GetAuditDetailsUseCase } from "../../domain/usecases/GetAuditDetailsUseCase";
+import { useState, useEffect, useCallback } from "react";
 import { Audit, Vulnerability } from "../../domain/entities/ContractEntities";
+import { container } from "../../di/container";
 
 export const useAuditDetailsViewModel = (auditId: string) => {
     const [audit, setAudit] = useState<Audit | null>(null);
     const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
-    const getAuditDetailsUseCase = useMemo(() => new GetAuditDetailsUseCase(), []);
+    const getAuditDetailsUseCase = container.getAuditDetailsUseCase;
 
     const fetchAuditDetails = useCallback(async () => {
         setIsLoading(true);

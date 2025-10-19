@@ -50,6 +50,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     container.createPayrollEntryUseCase,
     container.processPayrollPaymentUseCase
   );
+  const createSinglePayrollEntryUseCase = container.createSinglePayrollEntryUseCase;
   
   const [employees, setEmployees] = useState<PayrollEmployeeUI[]>([]);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(false);
@@ -290,23 +291,34 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
       };
 
       try {
-        const repositoryResult = await container.payslipRepository.createSinglePayrollEntry(payrollRequest);
-        const normalizedEntry = normalizePayrollEntryResponse(repositoryResult, entity, payrollRequest);
+        const creationResult = await createSinglePayrollEntryUseCase.execute(payrollRequest);
 
-        if (normalizedEntry) {
-          results.push({
-            ui,
-            entity,
-            response: normalizedEntry
-          });
-          successCount++;
+        if (creationResult.success && creationResult.payrollEntry) {
+          const normalizedEntry = normalizePayrollEntryResponse(creationResult.payrollEntry, entity, payrollRequest);
+
+          if (normalizedEntry) {
+            results.push({
+              ui,
+              entity,
+              response: normalizedEntry
+            });
+            successCount++;
+          } else {
+            const normalizationError = 'Failed to parse payroll entry response from server.';
+            console.error('❌ Unable to normalize payroll entry response:', creationResult);
+            results.push({
+              ui,
+              entity,
+              error: normalizationError
+            });
+            errorCount++;
+          }
         } else {
-          const normalizationError = 'Failed to parse payroll entry response from server.';
-          console.error('❌ Unable to normalize payroll entry response:', repositoryResult);
+          const creationErrorMessage = creationResult.error || creationResult.message || 'Unable to create payroll entry';
           results.push({
             ui,
             entity,
-            error: normalizationError
+            error: creationErrorMessage
           });
           errorCount++;
         }

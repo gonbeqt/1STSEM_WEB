@@ -1,16 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { ListAuditsUseCase } from "../../domain/usecases/ListAuditsUseCase";
-import { GetAuditStatisticsUseCase } from "../../domain/usecases/GetAuditStatisticsUseCase";
+import { useState, useEffect, useCallback } from "react";
 import { Audit, AuditStatistics } from "../../domain/entities/ContractEntities";
+import { container } from "../../di/container";
 
 export const useAuditsViewModel = () => {
     const [audits, setAudits] = useState<Audit[]>([]);
     const [statistics, setStatistics] = useState<AuditStatistics | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
-    const listAuditsUseCase = useMemo(() => new ListAuditsUseCase(), []);
-    const getAuditStatisticsUseCase = useMemo(() => new GetAuditStatisticsUseCase(), []);
+    const listAuditsUseCase = container.listAuditsUseCase;
+    const getAuditStatisticsUseCase = container.getAuditStatisticsUseCase;
 
     const fetchAudits = useCallback(async () => {
         setIsLoading(true);

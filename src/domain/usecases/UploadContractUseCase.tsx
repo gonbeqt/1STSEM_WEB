@@ -1,14 +1,9 @@
-import { ContractRepositoryImpl } from "../../data/repositoriesImpl/ContractRepositoryImpl";
 import { UploadContractResponse } from "../entities/ContractEntities";
 import { ContractRepository } from "../repositories/ContractRepository";
 import { isAxiosError } from 'axios';
 
 export class UploadContractUseCase {
-    private contractRepository: ContractRepository;
-
-    constructor() {
-        this.contractRepository = new ContractRepositoryImpl();
-    }
+    constructor(private readonly contractRepository: ContractRepository) {}
 
     async execute(file: File): Promise<UploadContractResponse> {
         // Optional: client-side validation can be kept for better UX

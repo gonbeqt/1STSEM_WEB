@@ -1,7 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import { BusinessDocument } from "../entities/BusinessDocumentEntities";
 import { UploadBusinessDocumentsUseCase } from "../usecases/UploadBusinessDocumentsUseCase";
-import { BusinessDocumentRepository } from "../repositories/BusinessDocumentRepository";
+import { GetUserBusinessDocumentsUseCase } from "../usecases/GetUserBusinessDocumentsUseCase";
+import { SubmitBusinessDocumentsForApprovalUseCase } from "../usecases/SubmitBusinessDocumentsForApprovalUseCase";
 
 interface BusinessDocumentState {
     isLoading: boolean;
@@ -18,7 +19,8 @@ export class BusinessDocumentViewModel {
 
     constructor(
         private readonly uploadBusinessDocumentsUseCase: UploadBusinessDocumentsUseCase,
-        private readonly businessDocumentRepository: BusinessDocumentRepository
+        private readonly getUserBusinessDocumentsUseCase: GetUserBusinessDocumentsUseCase,
+        private readonly submitBusinessDocumentsForApprovalUseCase: SubmitBusinessDocumentsForApprovalUseCase
     ) {
         makeAutoObservable(this);
     }
@@ -75,7 +77,7 @@ export class BusinessDocumentViewModel {
 
         try {
             // Use the existing backend endpoint to get user documents
-            const result = await this.businessDocumentRepository.getUserDocuments();
+            const result = await this.getUserBusinessDocumentsUseCase.execute();
             return result;
         } catch (error: any) {
             this.state.error = error.message || 'Failed to get user documents';
@@ -91,7 +93,7 @@ export class BusinessDocumentViewModel {
         this.state.successMessage = null;
 
         try {
-            const result = await this.businessDocumentRepository.submitDocumentsForApproval();
+            const result = await this.submitBusinessDocumentsForApprovalUseCase.execute();
             this.state.successMessage = 'Documents submitted for approval successfully';
             return result;
         } catch (error: any) {
