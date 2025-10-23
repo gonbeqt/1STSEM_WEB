@@ -7,7 +7,6 @@ import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
 import { Loader2, Clock, TrendingDown, MoreVertical } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
-import GenerateReportModal from './Modal/GenerateReportModal/GenerateReportModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
 import RecentTransactionDetails from '../../../components/RecentTransactionDetails';
@@ -30,7 +29,6 @@ const Home = observer(() => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAuditContractModalOpen, setIsAuditContractModalOpen] = useState(false);
-  const [isGenerateReportModalOpen, setIsGenerateReportModalOpen] = useState(false);
   const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
@@ -231,10 +229,7 @@ const Home = observer(() => {
     setIsAuditContractModalOpen(true);
   }
 
-  const handleGenerateReport = () => {
-    setIsGenerateReportModalOpen(true);
-  }
-
+  
   const handleInvestment = () => {
     setIsInvestModalOpen(true);
   }
@@ -320,7 +315,6 @@ const Home = observer(() => {
           onSendPayment={handleSendPayment}
           onSendPayroll={handleSendPayroll}
           onAuditContract={handleAuditContract}
-          onGenerateReport={handleGenerateReport}
           onInvestment={handleInvestment}
         />
 
@@ -372,10 +366,7 @@ const Home = observer(() => {
         onClose={() => setIsAuditContractModalOpen(false)}
       />
 
-      <GenerateReportModal
-        isOpen={isGenerateReportModalOpen}
-        onClose={() => setIsGenerateReportModalOpen(false)}
-      />
+      
 
       <InvestModal
         isOpen={isInvestModalOpen}

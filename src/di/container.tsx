@@ -21,6 +21,8 @@ import { RemoveEmployeeFromTeamUseCase } from '../domain/usecases/RemoveEmployee
 import { EmployeeViewModel } from '../domain/viewmodel/EmployeeViewModel';
 import { ReportRepository } from '../domain/repositories/ReportRepository';
 import { ReportRepositoryImpl } from '../data/repositoriesImpl/ReportRepositoryImpl';
+import { InvestmentRepository } from '../domain/repositories/InvestmentRepository';
+import { InvestmentRepositoryImpl } from '../data/repositoriesImpl/InvestmentRepositoryImpl';
 import {
   GenerateBalanceSheetUseCase,
   ExportBalanceSheetExcelUseCase,
@@ -82,6 +84,8 @@ import { InvoiceRepository } from '../domain/repositories/InvoiceRepository';
 import { InvoiceRepositoryImpl } from '../data/repositoriesImpl/InvoiceRepositoryImpl';
 import { GetInvoicesUseCase } from '../domain/usecases/GetInvoicesUseCase';
 import { InvoiceViewModel } from '../domain/viewmodel/InvoiceViewModel';
+import { GetInvestmentReportUseCase } from '../domain/usecases/GetInvestmentReportUseCase';
+import { InvestmentReportViewModel } from '../domain/viewmodel/InvestmentReportViewModel';
 
 // Audit Contract imports
 import { ContractRepository } from '../domain/repositories/ContractRepository';
@@ -122,6 +126,7 @@ import { ContractRemoteDataSource } from '../data/datasources/ContractRemoteData
 import { EmailVerificationRemoteDataSource } from '../data/datasources/EmailVerificationRemoteDataSource';
 import { PasswordResetRemoteDataSource } from '../data/datasources/PasswordResetRemoteDataSource';
 import { EmployeeHistoryRemoteDataSource } from '../data/datasources/EmployeeHistoryRemoteDataSource';
+import { InvestmentRemoteDataSource } from '../data/datasources/InvestmentRemoteDataSource';
 
 
 
@@ -137,6 +142,7 @@ export interface Container {
   addressBookRepository: AddressBookRepositoryImpl;
   employeeRepository: EmployeeRepository;
   reportRepository: ReportRepository;
+  investmentRepository: InvestmentRepository;
   payslipRepository: PayslipRepository;
   businessDocumentRepository: BusinessDocumentRepository;
   invoiceRepository: InvoiceRepository;
@@ -159,6 +165,7 @@ export interface Container {
   getUserBusinessDocumentsUseCase: GetUserBusinessDocumentsUseCase;
   submitBusinessDocumentsForApprovalUseCase: SubmitBusinessDocumentsForApprovalUseCase;
   getInvoicesUseCase: GetInvoicesUseCase;
+  getInvestmentReportUseCase: GetInvestmentReportUseCase;
 
   connectWalletUseCase: ConnectWalletUseCase;
   getWalletBalanceUseCase: GetWalletBalanceUseCase;
@@ -218,6 +225,7 @@ export interface Container {
   employeeViewModel: () => EmployeeViewModel;
   businessDocumentViewModel: () => BusinessDocumentViewModel;
   invoiceViewModel: () => InvoiceViewModel;
+  investmentReportViewModel: () => InvestmentReportViewModel;
   payslipViewModel: () => PayslipViewModel;
   payrollViewModel: () => PayrollViewModel;
   auditContractViewModel: () => AuditContractViewModel;
@@ -249,6 +257,7 @@ const contractRemoteDataSource = new ContractRemoteDataSource(apiService);
 const emailVerificationRemoteDataSource = new EmailVerificationRemoteDataSource(apiService);
 const passwordResetRemoteDataSource = new PasswordResetRemoteDataSource(apiService);
 const employeeHistoryRemoteDataSource = new EmployeeHistoryRemoteDataSource(apiService);
+const investmentRemoteDataSource = new InvestmentRemoteDataSource(apiService);
 
 // ======= Create repository instances =======
 const userRepository = new UserRepositoryImpl(userRemoteDataSource);
@@ -258,6 +267,7 @@ const exchangeRateRepository = new ExchangeRateRepositoryImpl(exchangeRateRemote
 const addressBookRepository = new AddressBookRepositoryImpl(addressBookRemoteDataSource);
 const employeeRepository = new EmployeeRepositoryImpl(employeeRemoteDataSource);
 const reportRepository = new ReportRepositoryImpl(reportRemoteDataSource);
+const investmentRepository = new InvestmentRepositoryImpl(investmentRemoteDataSource);
 const payslipRepository = new PayslipRepositoryImpl(payslipRemoteDataSource);
 const businessDocumentRepository = new BusinessDocumentRepositoryImpl(businessDocumentRemoteDataSource);
 const invoiceRepository = new InvoiceRepositoryImpl(invoiceRemoteDataSource);
@@ -280,6 +290,7 @@ const uploadBusinessDocumentsUseCase = new UploadBusinessDocumentsUseCase(busine
 const getUserBusinessDocumentsUseCase = new GetUserBusinessDocumentsUseCase(businessDocumentRepository);
 const submitBusinessDocumentsForApprovalUseCase = new SubmitBusinessDocumentsForApprovalUseCase(businessDocumentRepository);
 const getInvoicesUseCase = new GetInvoicesUseCase(invoiceRepository);
+const getInvestmentReportUseCase = new GetInvestmentReportUseCase(investmentRepository);
 
 const connectWalletUseCase = new ConnectWalletUseCase(walletRepository);
 const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository);
@@ -356,6 +367,7 @@ export const container: Container = {
   addressBookRepository,
   employeeRepository,
   reportRepository,
+  investmentRepository,
   payslipRepository,
   businessDocumentRepository,
   invoiceRepository,
@@ -375,6 +387,7 @@ export const container: Container = {
   getUserBusinessDocumentsUseCase,
   submitBusinessDocumentsForApprovalUseCase,
   getInvoicesUseCase,
+  getInvestmentReportUseCase,
 
   connectWalletUseCase,
   getWalletBalanceUseCase,
@@ -459,6 +472,7 @@ export const container: Container = {
     submitBusinessDocumentsForApprovalUseCase
   ),
   invoiceViewModel: () => new InvoiceViewModel(getInvoicesUseCase),
+  investmentReportViewModel: () => new InvestmentReportViewModel(getInvestmentReportUseCase),
   payslipViewModel: () => new PayslipViewModel(createPayslipUseCase),
   payrollViewModel: () => new PayrollViewModel(createPayrollEntryUseCase, processPayrollPaymentUseCase),
   auditContractViewModel: () => new AuditContractViewModel(
