@@ -16,38 +16,93 @@ export class AddressBookRemoteDataSource {
 
   async upsertAddressBookEntry(request: UpsertAddressBookRequest): Promise<UpsertAddressBookResponse> {
     try {
-      return await this.api.post<UpsertAddressBookResponse>(`${this.apiUrl}/address-book/upsert/`, request);
+      const payload = {
+        address: request.address?.toString().trim().toLowerCase(),
+        name: request.name?.toString().trim(),
+        role: request.role?.toString().trim() || 'investor',
+        notes: request.notes?.toString().trim() || '',
+      };
+
+      // Basic client-side validation
+      if (!payload.address || !payload.name) {
+        return { success: false, message: 'address and name are required', error: 'address and name are required' };
+      }
+
+      if (!(payload.address.startsWith('0x') && payload.address.length === 42)) {
+        return { success: false, message: 'Invalid wallet address format', error: 'Invalid wallet address format' };
+      }
+
+      return await this.api.post<UpsertAddressBookResponse>(`${this.apiUrl}/address-book/upsert/`, payload);
     } catch (error) {
       console.error('Error upserting address book entry:', error);
-      return { success: false, message: 'Network error occurred', error: 'Network error occurred' };
+      const msg = (error as any)?.response?.data?.error || (error as any)?.response?.data?.message || (error as any)?.message || 'Network error occurred';
+      return { success: false, message: msg, error: msg };
     }
   }
 
   async resolveAddressName(request: ResolveAddressRequest): Promise<ResolveAddressResponse> {
     try {
-      const url = `${this.apiUrl}/address-book/resolve/?address=${encodeURIComponent(request.address)}`;
+      const address = request.address?.toString().trim().toLowerCase();
+      if (!address) {
+        return { success: false, data: null, message: 'address is required', error: 'address is required' };
+      }
+
+      if (!(address.startsWith('0x') && address.length === 42)) {
+        return { success: false, data: null, message: 'Invalid wallet address format', error: 'Invalid wallet address format' };
+      }
+
+      const url = `${this.apiUrl}/address-book/resolve/?address=${encodeURIComponent(address)}`;
       return await this.api.get<ResolveAddressResponse>(url);
     } catch (error) {
       console.error('Error resolving address name:', error);
-      return { success: false, error: 'Network error occurred' };
+      const msg = (error as any)?.response?.data?.error || (error as any)?.message || 'Network error occurred';
+      return { success: false, data: null, error: msg };
     }
   }
 
   async listAddressBook(): Promise<ListAddressBookResponse> {
     try {
-      return await this.api.get<ListAddressBookResponse>(`${this.apiUrl}/address-book/list/`);
+      const primaryUrl = `${this.apiUrl}/address-book/list/`;
+      try {
+        return await this.api.get<ListAddressBookResponse>(primaryUrl);
+      } catch (err) {
+        const status = (err as any)?.response?.status;
+        // If primary returned 404, attempt with an /api/ prefix (some deployments include it)
+        if (status === 404) {
+          const altUrl = `${this.apiUrl}/api/address-book/list/`;
+          try {
+            return await this.api.get<ListAddressBookResponse>(altUrl);
+          } catch (err2) {
+            console.error('Error listing address book (alt):', err2, 'url:', altUrl);
+            throw err2;
+          }
+        }
+        console.error('Error listing address book (primary):', err, 'url:', primaryUrl);
+        throw err;
+      }
     } catch (error) {
       console.error('Error listing address book:', error);
-      return { success: false, data: [], count: 0, error: 'Network error occurred' };
+      const msg = (error as any)?.response?.data?.error || (error as any)?.message || 'Network error occurred';
+      return { success: false, data: [], count: 0, error: msg };
     }
   }
 
   async deleteAddressBookEntry(request: DeleteAddressBookRequest): Promise<DeleteAddressBookResponse> {
     try {
-      return await this.api.delete<DeleteAddressBookResponse>(`${this.apiUrl}/address-book/delete/`, request);
+      const address = request.address?.toString().trim().toLowerCase();
+      if (!address) {
+        return { success: false, message: 'address is required', error: 'address is required' };
+      }
+
+      if (!(address.startsWith('0x') && address.length === 42)) {
+        return { success: false, message: 'Invalid wallet address format', error: 'Invalid wallet address format' };
+      }
+
+      return await this.api.delete<DeleteAddressBookResponse>(`${this.apiUrl}/address-book/delete/`, { address });
     } catch (error) {
       console.error('Error deleting address book entry:', error);
-      return { success: false, message: 'Network error occurred', error: 'Network error occurred' };
+      const msg = (error as any)?.response?.data?.error || (error as any)?.message || 'Network error occurred';
+      return { success: false, message: msg, error: msg };
     }
   }
 }

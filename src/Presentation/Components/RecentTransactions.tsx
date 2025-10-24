@@ -23,7 +23,7 @@ const RecentTransactions: React.FC<Props> = ({ isLoading, error, transactions, r
           View all
         </button>
       </div>
-      <p className="text-sm text-gray-500 mb-4">Showing 5 most recent</p>
+  <p className="text-sm text-gray-500 mb-4">Showing {Math.min(recent.length, 5)} most recent</p>
 
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         {isLoading ? (
@@ -46,7 +46,7 @@ const RecentTransactions: React.FC<Props> = ({ isLoading, error, transactions, r
           </div>
         ) : error ? (
           <div className="p-6"><p className="text-sm text-red-600">Error loading transactions: {error}</p></div>
-        ) : transactions.length === 0 ? (
+        ) : recent.length === 0 ? (
           <div className="p-6">
             <div className="rounded-3xl border border-dashed border-purple-200 bg-purple-50/40 px-6 py-10 text-center">
               <h4 className="text-base font-semibold text-gray-900 mb-2">No transactions found</h4>
@@ -56,7 +56,7 @@ const RecentTransactions: React.FC<Props> = ({ isLoading, error, transactions, r
         ) : (
           recent.map((tx, index) => (
             <div
-              key={tx.hash ?? index}
+              key={`${tx.hash ?? 'tx'}-${index}`}
               onClick={() => onOpenDetails(tx)}
               role="button"
               tabIndex={0}

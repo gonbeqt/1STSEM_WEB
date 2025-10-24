@@ -56,7 +56,7 @@ export class ContractRemoteDataSource {
 
   async auditContract(auditData: AuditRequestData): Promise<AuditContractResponse> {
     try {
-      const response = await this.api.post<AuditContractResponse>(`${API_URL}/admin/audit-contract/`, auditData);
+      const response = await this.api.post<AuditContractResponse>(`${API_URL}/ai/audit-contract/`, auditData);
       return response;
     } catch (error: any) {
       console.error('Audit contract error:', error);
@@ -98,7 +98,7 @@ export class ContractRemoteDataSource {
 
   async listAudits(): Promise<Audit[]> {
     try {
-      const response = await this.api.get<{ success: boolean; audits: Audit[] }>(`${API_URL}/admin/audits/list/`);
+      const response = await this.api.get<{ success: boolean; audits: Audit[] }>(`${API_URL}/ai/audits/list/`);
       return response.audits || [];
     } catch (error: any) {
       console.error('List audits error:', error);
@@ -124,7 +124,7 @@ export class ContractRemoteDataSource {
 
   async getAuditDetails(auditId: string): Promise<AuditDetailsResponse> {
     try {
-      const response = await this.api.get<AuditDetailsResponse>(`${API_URL}/admin/audits/details/?audit_id=${auditId}`);
+      const response = await this.api.get<AuditDetailsResponse>(`${API_URL}/ai/audits/details/?audit_id=${auditId}`);
       return response;
     } catch (error: any) {
       console.error('Get audit details error:', error);
@@ -154,7 +154,7 @@ export class ContractRemoteDataSource {
 
   async getAuditStatistics(): Promise<AuditStatisticsResponse> {
     try {
-      const response = await this.api.get<AuditStatisticsResponse>(`${API_URL}/admin/audits/statistics/`);
+      const response = await this.api.get<AuditStatisticsResponse>(`${API_URL}/ai/audits/statistics/`);
       return response;
     } catch (error: any) {
       console.error('Get audit statistics error:', error);

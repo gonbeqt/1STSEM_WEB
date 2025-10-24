@@ -191,12 +191,20 @@ export class WalletViewModel {
       return false;
     }
 
-    if (!recipientAddress.trim()) {
+    const normalizedRecipient = recipientAddress.trim();
+    if (!normalizedRecipient) {
       this.state.sendEthError = 'Recipient address is required.';
       return false;
     }
 
-    if (parseFloat(amount) <= 0) {
+    if (!(normalizedRecipient.startsWith('0x') && normalizedRecipient.length === 42)) {
+      this.state.sendEthError = 'Invalid recipient address format.';
+      return false;
+    }
+
+    const normalizedAmount = amount.trim();
+    const amountValue = Number(normalizedAmount);
+    if (!normalizedAmount || Number.isNaN(amountValue) || amountValue <= 0) {
       this.state.sendEthError = 'Amount must be greater than zero.';
       return false;
     }
@@ -205,26 +213,33 @@ export class WalletViewModel {
       this.state.isSendingEth = true;
       this.state.sendEthError = null;
 
+      const normalizedCompany = company?.trim();
+      const normalizedCategory = category?.trim() || 'BUSINESS_PAYMENT';
+      const normalizedDescription = description?.trim();
+      const normalizedInvestorName = investorName?.trim();
+      const shouldFlagInvesting = Boolean(isInvesting || normalizedInvestorName);
+
       const request: SendEthRequest = {
-        to_address: recipientAddress,
-        amount: amount,
-        company: company,
-        category: category,
-        description: description,
-        is_investing: isInvesting,
-        investor_name: investorName,
+        to_address: normalizedRecipient,
+        amount: normalizedAmount,
+        company: normalizedCompany || undefined,
+        category: normalizedCategory,
+        description: normalizedDescription || undefined,
+        is_investing: shouldFlagInvesting,
+        investor_name: normalizedInvestorName || undefined,
       };
 
       const response: SendEthResponse = await this.sendEthUseCase.execute(request);
 
       if (response.success && response.data) {
-        await this.fetchWalletBalance(); 
+        await this.fetchWalletBalance();
         return true;
-      } else {
-        this.state.sendEthError = response.message || 'Failed to send ETH.';
-        return false;
       }
+
+      this.state.sendEthError = response.message || 'Failed to send ETH.';
+      return false;
     } catch (error) {
+      this.state.sendEthError = error instanceof Error ? error.message : 'Failed to send ETH.';
       return false;
     } finally {
       this.state.isSendingEth = false;

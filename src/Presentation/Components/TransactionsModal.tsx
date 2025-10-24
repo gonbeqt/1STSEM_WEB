@@ -46,7 +46,7 @@ const TransactionsModal: React.FC<Props> = ({ isOpen, isLoading, transactions, o
             </div>
           ) : (
             transactions.map((tx, idx) => (
-              <div key={tx.hash ?? idx} className="flex items-center justify-between p-4 border-b border-gray-100">
+              <div key={`${tx.hash ?? 'tx'}-${idx}`} className="flex items-center justify-between p-4 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'outflow' ? 'bg-red-50' : 'bg-yellow-50'}`}>
                     {tx.icon}

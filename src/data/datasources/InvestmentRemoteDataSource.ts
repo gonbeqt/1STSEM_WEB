@@ -2,15 +2,19 @@ import { ApiService } from '../api/ApiService';
 import { InvestmentReportRequest, InvestmentReportResponse } from '../../domain/entities/InvestmentEntities';
 
 export class InvestmentRemoteDataSource {
+  // Keep a local apiUrl for callers that need to resolve full URLs here.
+  // Falls back to relative paths when not configured in env.
   private readonly apiUrl: string = process.env.REACT_APP_API_BASE_URL ?? '';
 
   constructor(private readonly api: ApiService) {}
 
   private buildUrl(path: string): string {
+    // If a full URL is provided, use it directly.
     if (/^https?:\/\//i.test(path)) {
       return path;
     }
-    const sanitizedBase = this.apiUrl.replace(/\/+$/, '');
+    // If apiUrl is configured use it to build an absolute endpoint, otherwise return a relative path.
+    const sanitizedBase = (this.apiUrl || '').replace(/\/+$/, '');
     const sanitizedPath = path.replace(/^\/+/, '');
     if (!sanitizedBase) {
       return `/${sanitizedPath}`;
@@ -29,9 +33,9 @@ export class InvestmentRemoteDataSource {
       params.append('end_date', request.end_date);
     }
 
-      const query = params.toString();
-      const configuredEndpoint = process.env.REACT_APP_API_BASE_URL;
-      const basePath = this.buildUrl(configuredEndpoint || 'financial/investment-report/statistics/');
+  const query = params.toString();
+  // Use a relative endpoint; ApiService already has baseURL configured in the DI container.
+  const basePath = this.buildUrl('/financial/investment-report/statistics/');
       const pathWithQuery = query ? `${basePath}${basePath.includes('?') ? '&' : '?'}${query}` : basePath;
 
       try {

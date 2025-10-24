@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { X, Send, Wallet, AlertCircle, CheckCircle, User, Building, Search, Plus, Edit, Trash2, ArrowLeft, ArrowDownLeft, ArrowUpRight, TrendingUp, TrendingDown, RefreshCcw, ClipboardList } from 'lucide-react';
+import { X, Send, Wallet, AlertCircle, CheckCircle, User, Building, Search, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { useWallet } from '../../../../../hooks/useWallet';
 import { useAddressBook } from '../../../../../hooks/useAddressBook';
-import { useInvestmentReport } from '../../../../../hooks/useInvestmentReport';
 import { AddressBookEntry } from '../../../../../../domain/entities/AddressBookEntities';
 
 interface InvestModalProps {
@@ -36,14 +35,9 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     filteredEntries = []
   } = addressBookViewModel || {};
 
-  // Investment report data
-  const investmentReportViewModel = useInvestmentReport();
-
   // Modal view state
-  const [currentTab, setCurrentTab] = useState<'addressbook' | 'investmentReport'>('addressbook');
   const [currentView, setCurrentView] = useState<'addressbook' | 'sendeth'>('addressbook');
   const [selectedEntry, setSelectedEntry] = useState<AddressBookEntry | null>(null);
-  const investmentReportLoadedRef = useRef(false);
 
   // Form state for sending ETH
   const [recipientAddress, setRecipientAddress] = useState<string>('');
@@ -52,137 +46,12 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
   const [category, setCategory] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
-  const investmentTotals = investmentReportViewModel.totals;
-  const investmentFilter = investmentReportViewModel.filter;
-  const investmentIsLoading = investmentReportViewModel.isLoading;
-  const investmentError = investmentReportViewModel.error;
-  const investmentRecords = investmentReportViewModel.filteredInvestments;
-  const investmentLastUpdated = investmentReportViewModel.lastUpdatedAt;
-
-  const formatCurrency = (value: number, currency = 'USD') => {
-    if (!Number.isFinite(value)) {
-      return '—';
-    }
-
-    try {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency,
-        maximumFractionDigits: 2
-      }).format(value);
-    } catch (error) {
-      return `${currency} ${value.toFixed(2)}`;
-    }
-  };
-
-  const formatAddress = (address?: string | null) => {
-    if (!address) {
-      return '—';
-    }
-
-    if (address.length <= 12) {
-      return address;
-    }
-
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
-
-  const getTimeAgo = (timestamp?: string) => {
-    if (!timestamp) {
-      return '';
-    }
-
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-
-    const minutes = Math.floor(diffMs / (1000 * 60));
-    if (minutes < 1) {
-      return 'Just now';
-    }
-
-    if (minutes < 60) {
-      return `${minutes}m ago`;
-    }
-
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-      return `${hours}h ago`;
-    }
-
-    const days = Math.floor(hours / 24);
-    if (days < 30) {
-      return `${days}d ago`;
-    }
-
-    const months = Math.floor(days / 30);
-    if (months < 12) {
-      return `${months}mo ago`;
-    }
-
-    const years = Math.floor(days / 365);
-    return `${years}y ago`;
-  };
-
-  const handleTabChange = (tab: 'addressbook' | 'investmentReport') => {
-    setCurrentTab(tab);
-    if (tab === 'addressbook') {
-      setCurrentView('addressbook');
-    } else {
-      setCurrentView('addressbook');
-      setSelectedEntry(null);
-    }
-  };
-
-  const handleRefreshInvestmentReport = () => {
-    investmentReportLoadedRef.current = true;
-    void investmentReportViewModel.loadInvestmentReport({
-      start_date: investmentReportViewModel.startDate,
-      end_date: investmentReportViewModel.endDate
-    });
-  };
-
-  const handleInvestmentFilterChange = (filter: 'all' | 'received' | 'sent') => {
-    investmentReportViewModel.setFilter(filter);
-  };
-
-  const isInvestmentReportTab = currentTab === 'investmentReport';
-  const isSendView = currentView === 'sendeth';
-
-  const headerIcon = isInvestmentReportTab ? (
-    <ClipboardList className="w-6 h-6 text-purple-600" />
-  ) : isSendView ? (
-    <Wallet className="w-6 h-6 text-purple-600" />
-  ) : (
-    <User className="w-6 h-6 text-purple-600" />
-  );
-
-  const headerTitle = isInvestmentReportTab
-    ? 'Investment Report'
-    : isSendView
-      ? 'Send Investment ETH'
-      : 'Investment Address Book';
-
-  const headerSubtitle = isInvestmentReportTab
-    ? 'Review investment activity, totals, and counterparties.'
-    : isSendView
-      ? selectedEntry
-        ? `Sending to ${selectedEntry.name}`
-        : 'Send ETH for investment purposes'
-      : 'Select an entry to send investment ETH';
-
   // Load address book when modal opens
   useEffect(() => {
     if (isOpen && addressBookViewModel) {
       addressBookViewModel.loadAddressBook();
-      setCurrentTab('addressbook');
       setCurrentView('addressbook');
       setSelectedEntry(null);
-      investmentReportLoadedRef.current = false;
     }
   }, [isOpen, addressBookViewModel]);
 
@@ -193,17 +62,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     }
   }, [isOpen, isWalletConnected, fetchWalletBalance]);
 
-  useEffect(() => {
-    if (!isOpen || currentTab !== 'investmentReport') {
-      return;
-    }
-
-    if (!investmentReportLoadedRef.current) {
-      investmentReportLoadedRef.current = true;
-      void investmentReportViewModel.loadInvestmentReport();
-    }
-  }, [isOpen, currentTab, investmentReportViewModel]);
-
   // Clear form when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -212,7 +70,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
       setCompany('');
       setCategory('');
       setDescription('');
-      setCurrentTab('addressbook');
       setCurrentView('addressbook');
       setSelectedEntry(null);
       if (clearSuccessMessage) {
@@ -328,9 +185,9 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-200">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            {isSendView && (
+            {currentView === 'sendeth' && (
               <button
                 onClick={() => setCurrentView('addressbook')}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors mr-2"
@@ -339,11 +196,22 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
               </button>
             )}
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              {headerIcon}
+              {currentView === 'addressbook' ? (
+                <User className="w-6 h-6 text-purple-600" />
+              ) : (
+                <Wallet className="w-6 h-6 text-purple-600" />
+              )}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{headerTitle}</h2>
-              <p className="text-gray-500 text-sm">{headerSubtitle}</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {currentView === 'addressbook' ? 'Investment Address Book' : 'Send Investment ETH'}
+              </h2>
+              <p className="text-gray-500 text-sm">
+                {currentView === 'addressbook' 
+                  ? 'Select an entry to send investment ETH' 
+                  : selectedEntry ? `Sending to ${selectedEntry.name}` : 'Send ETH for investment purposes'
+                }
+              </p>
             </div>
           </div>
           <button
@@ -354,33 +222,10 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
           </button>
         </div>
 
-        <div className="px-6 py-4 border-b border-gray-100 bg-white">
-          <div className="flex flex-wrap gap-2 rounded-xl bg-gray-100/80 p-1 w-full sm:w-auto">
-            {(
-              [
-                { label: 'Address Book', value: 'addressbook' },
-                { label: 'Investment Report', value: 'investmentReport' }
-              ] as Array<{ label: string; value: 'addressbook' | 'investmentReport' }>
-            ).map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => handleTabChange(tab.value)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  currentTab === tab.value
-                    ? 'bg-white text-purple-600 shadow'
-                    : 'text-gray-500 hover:text-purple-600'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           <div className="space-y-6">
-            {currentTab === 'addressbook' && currentView === 'addressbook' && addressBookViewModel ? (
+            {currentView === 'addressbook' && addressBookViewModel ? (
               <>
                 {/* Search and Add Button */}
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -575,12 +420,12 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                   )}
                 </div>
               </>
-            ) : currentTab === 'addressbook' && currentView === 'addressbook' ? (
+            ) : currentView === 'addressbook' ? (
               <div className="text-center py-8 text-gray-500">
                 <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                 <p>Address book is loading...</p>
               </div>
-            ) : currentTab === 'addressbook' && currentView === 'sendeth' ? (
+            ) : (
               <>
                 {/* Wallet Connection Status */}
                 {!isWalletConnected && (
@@ -720,156 +565,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
                         Back to Address Book
                       </button>
                     </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {investmentError && (
-                  <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-red-500" />
-                    <div className="text-sm text-red-700 flex-1">{investmentError}</div>
-                    <button
-                      onClick={() => investmentReportViewModel.clearError()}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Investment Overview</h3>
-                    <p className="text-sm text-gray-500">
-                      Monitor investment inflows and outflows for your organization.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {investmentLastUpdated && (
-                      <span className="text-xs text-gray-500">
-                        Last updated {getTimeAgo(investmentLastUpdated.toISOString())}
-                      </span>
-                    )}
-                    <button
-                      onClick={handleRefreshInvestmentReport}
-                      disabled={investmentIsLoading}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-purple-200 text-purple-600 hover:bg-purple-50 transition-colors disabled:opacity-50"
-                    >
-                      <RefreshCcw className={`w-4 h-4 ${investmentIsLoading ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-purple-100 bg-purple-50/60">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-purple-700">Total Received</span>
-                      <TrendingUp className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <p className="mt-2 text-2xl font-semibold text-purple-900">
-                      {formatCurrency(investmentTotals.totalReceived)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-rose-100 bg-rose-50/70">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-rose-700">Total Sent</span>
-                      <TrendingDown className="w-5 h-5 text-rose-600" />
-                    </div>
-                    <p className="mt-2 text-2xl font-semibold text-rose-900">
-                      {formatCurrency(investmentTotals.totalSent)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Transactions</span>
-                      <ClipboardList className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <p className="mt-2 text-2xl font-semibold text-gray-900">
-                      {investmentTotals.transactionCount}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {([
-                    { label: 'All', value: 'all' },
-                    { label: 'Received', value: 'received' },
-                    { label: 'Sent', value: 'sent' }
-                  ] as Array<{ label: string; value: 'all' | 'received' | 'sent' }>).map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleInvestmentFilterChange(option.value)}
-                      className={`px-4 py-2 text-sm font-medium rounded-full border transition-colors ${
-                        investmentFilter === option.value
-                          ? 'bg-purple-600 text-white border-purple-600 shadow'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:text-purple-600'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-
-                {investmentIsLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : investmentRecords.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No investment transactions recorded for this period.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {investmentRecords.map((record, index) => {
-                      const isReceived = record.direction === 'RECEIVED';
-                      const amountFormatted = formatCurrency(record.amount, record.currency || 'USD');
-                      const amountLabel = amountFormatted === '—' ? amountFormatted : `${isReceived ? '+' : '-'}${amountFormatted}`;
-
-                      return (
-                        <div
-                          key={`${record.transaction_hash || record.timestamp || 'tx'}-${index}`}
-                          className="p-4 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                  isReceived ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                                }`}
-                              >
-                                {isReceived ? (
-                                  <ArrowDownLeft className="w-6 h-6" />
-                                ) : (
-                                  <ArrowUpRight className="w-6 h-6" />
-                                )}
-                              </div>
-                              <div>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {isReceived ? record.investor_name || 'Incoming Investment' : record.recipient_name || 'Outgoing Investment'}
-                                </p>
-                                <p className="text-xs text-gray-500 max-w-md">
-                                  {record.description_receiver_pov || 'Investment transaction'}
-                                </p>
-                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500">
-                                  <span>From: {formatAddress(record.from_address)}</span>
-                                  <span>To: {formatAddress(record.to_address)}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-lg font-semibold ${isReceived ? 'text-green-600' : 'text-red-600'}`}>{amountLabel}</p>
-                              <p className="text-xs text-gray-400">{getTimeAgo(record.timestamp)}{record.currency && record.currency !== 'USD' ? ` · ${record.currency}` : ''}</p>
-                              {record.transaction_hash && (
-                                <p className="mt-1 text-[11px] text-gray-400 font-mono">{formatAddress(record.transaction_hash)}</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
               </>

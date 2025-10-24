@@ -102,6 +102,37 @@ export interface SendEthRequest {
   investor_name?: string;
 }
 
+export interface CryptoToFiatAnalysis {
+  fiat_amount: number;
+  fiat_currency: string;
+  gas_fee_fiat: number;
+  total_cost_fiat: number;
+  exchange_rate: number;
+  conversion_timestamp: string;
+}
+
+export interface LlmAnalysis {
+  tax_category: string;
+  is_business_expense: boolean;
+  crypto_to_fiat: CryptoToFiatAnalysis;
+  ai_classification?: string;
+  ai_confidence?: number;
+  ai_reasoning?: string;
+  ai_tags?: string[];
+  ai_metadata?: any;
+  is_ai_analyzed?: boolean;
+}
+
+export interface TaxDeductionsSummary {
+  gross_amount: number;
+  deductions: Record<string, number>;
+  total_tax_amount: number;
+  net_amount: number;
+  total_cost_with_tax: number;
+  tax_rates_applied: Record<string, number>;
+  tax_config_source: string;
+}
+
 export interface SendEthResponse {
   success: boolean;
   message: string;
@@ -124,27 +155,12 @@ export interface SendEthResponse {
     description: string;
     timestamp: string;
     explorer_url?: string;
-    used_connected_wallet: boolean;
-    user_role: string;
-    wallet_type: string;
-    llm_analysis?: {
-      ai_classification: string;
-      ai_confidence: number;
-      ai_reasoning: string;
-      ai_tags: string[];
-      ai_metadata: any;
-      is_ai_analyzed: boolean;
-      tax_category: string;
-      is_business_expense: boolean;
-      crypto_to_fiat: {
-        fiat_amount: number;
-        fiat_currency: string;
-        gas_fee_fiat: number;
-        total_cost_fiat: number;
-        exchange_rate: number;
-        conversion_timestamp: string;
-      };
-    };
+    accounting_processed?: boolean;
+    used_connected_wallet?: boolean;
+    user_role?: string;
+    wallet_type?: string;
+    llm_analysis?: LlmAnalysis;
+    tax_deductions?: TaxDeductionsSummary;
   };
 }
 

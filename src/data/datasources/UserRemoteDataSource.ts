@@ -104,10 +104,10 @@ export class UserRemoteDataSource {
     }
 
     const endpoints = [
-      `${this.apiUrl}/support/submit/`,
-      `${this.apiUrl}/support/submit`,
-      `${this.apiUrl}/support/`,
-      `${this.apiUrl}/support`,
+      `/support/submit/`,
+      `/support/submit`,
+      `/support/`,
+      `/support`,
     ];
 
     let lastError: unknown;
