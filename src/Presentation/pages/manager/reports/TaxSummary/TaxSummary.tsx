@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver';
 import { ArrowLeft, Download } from 'lucide-react';
 import { useTaxSummaryViewModel } from '../../../../hooks/useTaxSummaryViewModel';
 import { TaxReport } from '../../../../../domain/viewmodel/TaxSummaryViewModel';
+import { TaxSummarySkeleton, TaxSummaryChartSkeleton } from '../../../../components/TaxSummarySkeleton';
 
 const TaxSummary: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -408,10 +409,7 @@ const TaxSummary: React.FC = observer(() => {
       {/* Content */}
       <div className="p-6">
         {taxSummaryViewModel.isLoading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading tax summary...</p>
-          </div>
+          activeView === 'chart' ? <TaxSummaryChartSkeleton /> : <TaxSummarySkeleton />
         )}
         
         {taxSummaryViewModel.lastError && (

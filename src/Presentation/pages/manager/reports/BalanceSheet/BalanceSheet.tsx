@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver';
 import { useBalanceSheetViewModel } from '../../../../hooks/useBalanceSheetViewModel';
 import { useBalanceSheetListViewModel } from '../../../../hooks/useBalanceSheetViewModel';
 import { BalanceSheetData } from '../../../../../domain/entities/ReportEntities';
+import { ReportTableSkeleton } from '../../../../components/TaxSummarySkeleton';
 
 type BalanceSheetViewData = BalanceSheetData & Record<string, any>;
 
@@ -338,10 +339,7 @@ const BalanceSheet: React.FC = observer(() => {
       )}
 
       {balanceSheetListViewModel.isLoading ? (
-        <div className="text-center py-6">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto mb-3" />
-          <p className="text-gray-600 text-sm">Loading balance sheets...</p>
-        </div>
+        <ReportTableSkeleton />
       ) : balanceSheetListViewModel.items.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

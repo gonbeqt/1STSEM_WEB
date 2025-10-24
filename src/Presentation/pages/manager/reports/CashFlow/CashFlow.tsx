@@ -9,6 +9,7 @@ import { saveAs } from 'file-saver';
 import { ArrowLeft, Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { useCashFlowListViewModel } from '../../../../hooks/useCashFlowViewModel';
 import { CashFlowSummary } from '../../../../../domain/viewmodel/CashFlowListViewModel';
+import { ReportChartSkeleton } from '../../../../components/TaxSummarySkeleton';
 
 interface CashFlowItem {
   name: string;
@@ -761,10 +762,7 @@ const CashFlow: React.FC = observer(() => {
       {/* Content */}
       <div className="p-6">
         {cashFlowViewModel.isLoading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading cash flow statement...</p>
-          </div>
+          <ReportChartSkeleton title="Cash Flow Statement" />
         )}
         
         {cashFlowViewModel.lastError && (

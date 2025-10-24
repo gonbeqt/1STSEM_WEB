@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ArrowLeft, Download } from 'lucide-react';
 import { useIncomeViewModel } from '../../../../hooks/useBalanceSheetViewModel';
+import { ReportChartSkeleton } from '../../../../components/TaxSummarySkeleton';
 
 interface IncomeItem {
   name: string;
@@ -549,10 +550,7 @@ const Income: React.FC = observer(() => {
       {/* Content */}
       <div className="p-6">
         {incomeViewModel.isLoading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading income statement...</p>
-          </div>
+          <ReportChartSkeleton title="Income Statement" />
         )}
         
         {incomeViewModel.lastError && (
