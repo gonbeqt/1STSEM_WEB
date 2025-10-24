@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ArrowLeft, Download, TrendingUp, TrendingDown } from 'lucide-react';
-import { useIncomeViewModel } from '../../../../hooks/useBalanceSheetViewModel';
+import { useCashFlowListViewModel } from '../../../../hooks/useCashFlowViewModel';
+import { CashFlowSummary } from '../../../../../domain/viewmodel/CashFlowListViewModel';
 
 interface CashFlowItem {
   name: string;
@@ -29,21 +30,35 @@ interface CashFlowStatementData {
 const CashFlow: React.FC = observer(() => {
   const navigate = useNavigate();
   
-  const incomeViewModel = useIncomeViewModel();
+  const cashFlowViewModel = useCashFlowListViewModel();
+
+  const displayName = (fieldName: string): string => {
+    return fieldName
+      .split('_')
+      .map((word, index) => {
+        if (index === 0) {
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+        return word.toLowerCase();
+      })
+      .join(' ');
+  };
 
   const normalizeItems = (raw: any, fallbackLabel: string): CashFlowItem[] => {
-    if (!raw) return [{ name: fallbackLabel, amount: 0 }];
+    if (!raw) return [];
     if (Array.isArray(raw)) {
       return raw.map((r) => ({ name: r?.name ?? String(r?.label ?? 'Item'), amount: Number(r?.amount ?? r?.value ?? 0) }));
     }
     if (typeof raw === 'object') {
       // object shaped like { accountName: amount, ... }
-      return Object.entries(raw).map(([k, v]) => ({ name: k, amount: Number((v as any) ?? 0) }));
+      return Object.entries(raw)
+        .filter(([, v]) => v !== null && v !== undefined)
+        .map(([k, v]) => ({ name: displayName(k), amount: Number(v as any) ?? 0 }));
     }
     if (typeof raw === 'number' || !isNaN(Number(raw))) {
       return [{ name: fallbackLabel, amount: Number(raw) }];
     }
-    return [{ name: fallbackLabel, amount: 0 }];
+    return [];
   };
   // input values (what the user types) and applied values (what is actually used by the filter)
   const [periodStartInput, setPeriodStartInput] = React.useState<string>('');
@@ -51,7 +66,7 @@ const CashFlow: React.FC = observer(() => {
   const [appliedPeriodStart, setAppliedPeriodStart] = React.useState<string>('');
   const [appliedPeriodEnd, setAppliedPeriodEnd] = React.useState<string>('');
 
-  const plainItems = React.useMemo(() => toJS(incomeViewModel.items ?? []), [incomeViewModel.items]);
+  const plainItems = React.useMemo(() => toJS(cashFlowViewModel.items ?? []), [cashFlowViewModel.items]);
 
   const normalizeDate = (v: any): string | null => {
     if (!v && v !== 0) return null;
@@ -84,24 +99,77 @@ const CashFlow: React.FC = observer(() => {
   const cashFlowStatement: CashFlowStatementData | null = React.useMemo(() => {
     if (!activeRaw) return null;
     
-    const operating_items = normalizeItems(activeRaw.operating_activities || activeRaw.operating_cash_flow, 'Operating Activities');
-    const investing_items = normalizeItems(activeRaw.investing_activities || activeRaw.investing_cash_flow, 'Investing Activities');
-    const financing_items = normalizeItems(activeRaw.financing_activities || activeRaw.financing_cash_flow, 'Financing Activities');
+    // Extract values based on report type
+    let operating_cash_flow = 0;
+    let investing_cash_flow = 0;
+    let financing_cash_flow = 0;
+    let beginning_cash = 0;
+    let ending_cash = 0;
+    let operating_items: CashFlowItem[] = [];
+    let investing_items: CashFlowItem[] = [];
+    let financing_items: CashFlowItem[] = [];
     
-    const operating_cash_flow = activeRaw.operating_cash_flow ?? operating_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
-    const investing_cash_flow = activeRaw.investing_cash_flow ?? investing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
-    const financing_cash_flow = activeRaw.financing_cash_flow ?? financing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+    if (activeRaw.report_type === 'PERIODIC') {
+      // For PERIODIC reports, use net_cash_flow from each activity
+      operating_cash_flow = activeRaw.operating_activities?.net_cash_flow ?? 0;
+      investing_cash_flow = activeRaw.investing_activities?.net_cash_flow ?? 0;
+      financing_cash_flow = activeRaw.financing_activities?.net_cash_flow ?? 0;
+      beginning_cash = activeRaw.cash_summary?.beginning_cash ?? 0;
+      ending_cash = activeRaw.cash_summary?.ending_cash ?? 0;
+      
+      // Extract detailed items from cash_receipts and cash_payments
+      if (activeRaw.operating_activities) {
+        const opReceipts = normalizeItems(activeRaw.operating_activities.cash_receipts, '');
+        const opPayments = normalizeItems(activeRaw.operating_activities.cash_payments, '');
+        operating_items = [...opReceipts, ...opPayments];
+      }
+      if (activeRaw.investing_activities) {
+        const invReceipts = normalizeItems(activeRaw.investing_activities.cash_receipts, '');
+        const invPayments = normalizeItems(activeRaw.investing_activities.cash_payments, '');
+        investing_items = [...invReceipts, ...invPayments];
+      }
+      if (activeRaw.financing_activities) {
+        const finReceipts = normalizeItems(activeRaw.financing_activities.cash_receipts, '');
+        const finPayments = normalizeItems(activeRaw.financing_activities.cash_payments, '');
+        financing_items = [...finReceipts, ...finPayments];
+      }
+    } else {
+      // For TRANSACTION and CUMULATIVE reports, use cash_flows and cash_summary
+      operating_cash_flow = activeRaw.cash_flows?.operating_activities?.net_cash_from_operations ?? activeRaw.cash_summary?.net_cash_from_operations ?? 0;
+      investing_cash_flow = activeRaw.cash_flows?.investing_activities?.net_cash_from_investing ?? activeRaw.cash_summary?.net_cash_from_investing ?? 0;
+      financing_cash_flow = activeRaw.cash_flows?.financing_activities?.net_cash_from_financing ?? activeRaw.cash_summary?.net_cash_from_financing ?? 0;
+      beginning_cash = activeRaw.cash_summary?.cash_at_beginning ?? 0;
+      ending_cash = activeRaw.cash_summary?.cash_at_end ?? 0;
+      
+      // Extract line items from cash_flows object (excluding the main net_cash_from_* fields as they're shown as subtotals)
+      if (activeRaw.cash_flows?.operating_activities) {
+        operating_items = [
+          { name: 'previous_value', amount: activeRaw.cash_flows.operating_activities.previous_value ?? 0 },
+          { name: 'transaction_impact', amount: activeRaw.cash_flows.operating_activities.transaction_impact ?? 0 }
+        ].filter(item => item.amount !== 0);
+      }
+      if (activeRaw.cash_flows?.investing_activities) {
+        investing_items = [
+          { name: 'previous_value', amount: activeRaw.cash_flows.investing_activities.previous_value ?? 0 },
+          { name: 'transaction_impact', amount: activeRaw.cash_flows.investing_activities.transaction_impact ?? 0 }
+        ].filter(item => item.amount !== 0);
+      }
+      if (activeRaw.cash_flows?.financing_activities) {
+        financing_items = [
+          { name: 'previous_value', amount: activeRaw.cash_flows.financing_activities.previous_value ?? 0 },
+          { name: 'transaction_impact', amount: activeRaw.cash_flows.financing_activities.transaction_impact ?? 0 }
+        ].filter(item => item.amount !== 0);
+      }
+    }
     
-    const beginning_cash = Number(activeRaw.beginning_cash ?? 0);
     const net_change_in_cash = operating_cash_flow + investing_cash_flow + financing_cash_flow;
-    const ending_cash = beginning_cash + net_change_in_cash;
     
     return { 
       operating_cash_flow, 
       investing_cash_flow, 
       financing_cash_flow,
       beginning_cash,
-      ending_cash,
+      ending_cash: ending_cash || (beginning_cash + net_change_in_cash),
       net_change_in_cash,
       operating_items,
       investing_items,
@@ -113,8 +181,8 @@ const CashFlow: React.FC = observer(() => {
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
 
   useEffect(() => {
-    void incomeViewModel.fetchAll();
-  }, [incomeViewModel]);
+    cashFlowViewModel.fetchAll();
+  }, []);
 
   const exportToExcel = () => {
     const cashFlow = (() => {
@@ -163,15 +231,21 @@ const CashFlow: React.FC = observer(() => {
         [`As of: ${new Date().toISOString().split('T')[0]}`],
         [''],
         ['OPERATING ACTIVITIES', ''],
-        ...cashFlow.operating_items!.map(item => [displayName(item.name), item.amount]),
+        ...cashFlow.operating_items!
+          .filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+          .map(item => [displayName(item.name), item.amount]),
         ['Net Cash from Operating Activities', cashFlow.operating_cash_flow],
         [''],
         ['INVESTING ACTIVITIES', ''],
-        ...cashFlow.investing_items!.map(item => [displayName(item.name), item.amount]),
+        ...cashFlow.investing_items!
+          .filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+          .map(item => [displayName(item.name), item.amount]),
         ['Net Cash from Investing Activities', cashFlow.investing_cash_flow],
         [''],
         ['FINANCING ACTIVITIES', ''],
-        ...cashFlow.financing_items!.map(item => [displayName(item.name), item.amount]),
+        ...cashFlow.financing_items!
+          .filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+          .map(item => [displayName(item.name), item.amount]),
         ['Net Cash from Financing Activities', cashFlow.financing_cash_flow],
         [''],
         ['Beginning Cash', cashFlow.beginning_cash],
@@ -183,10 +257,22 @@ const CashFlow: React.FC = observer(() => {
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
+      // Format cells with currency
+      const rows = excelData.length;
+      for (let i = 0; i < rows; i++) {
+        if (excelData[i][1] && typeof excelData[i][1] === 'number') {
+          const cellRef = `B${i + 1}`;
+          if (!ws[cellRef]) {
+            ws[cellRef] = { t: 'n', v: excelData[i][1] };
+          }
+          ws[cellRef].z = '"$"#,##0.00;[Red]"$"#,##0.00';
+        }
+      }
+
       // Set column widths
       ws['!cols'] = [
-        { wch: 30 }, // Account column
-        { wch: 15 }  // Amount column
+        { wch: 35 }, // Account column
+        { wch: 18 }  // Amount column
       ];
 
       // Add worksheet to workbook
@@ -247,21 +333,8 @@ const CashFlow: React.FC = observer(() => {
     return `${((n / d) * 100).toFixed(1)}%`;
   };
 
-  const displayName = (raw?: any): string => {
-    if (!raw && raw !== 0) return '';
-    let s = String(raw);
-    // replace underscores and dashes with spaces
-    s = s.replace(/[_-]+/g, ' ');
-    // insert spaces before camelCase transitions: aB -> a B
-    s = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
-    // collapse multiple spaces
-    s = s.replace(/\s+/g, ' ').trim();
-    // title case
-    return s.split(' ').map(w => w.length ? (w[0].toUpperCase() + w.slice(1)) : '').join(' ');
-  };
-
   const clearError = () => {
-    incomeViewModel.clearError();
+    cashFlowViewModel.clearError();
   };
 
   const handleExportExcel = () => {
@@ -273,7 +346,7 @@ const CashFlow: React.FC = observer(() => {
   };
 
   const handleRefresh = async () => {
-    await incomeViewModel.fetchAll();
+    await cashFlowViewModel.fetchAll();
   };
 
   const renderChartView = () => (
@@ -318,30 +391,35 @@ const CashFlow: React.FC = observer(() => {
           <BarChart data={[
             { 
               name: 'Beginning Cash', 
-              value: cashFlowStatement?.beginning_cash || 0
+              value: Math.abs(cashFlowStatement?.beginning_cash || 0),
+              fill: '#3b82f6'
             },
             { 
               name: 'Operating Activities', 
-              value: cashFlowStatement?.operating_cash_flow || 0
+              value: Math.abs(cashFlowStatement?.operating_cash_flow || 0),
+              fill: '#10b981'
             },
             { 
               name: 'Investing Activities', 
-              value: cashFlowStatement?.investing_cash_flow || 0
+              value: Math.abs(cashFlowStatement?.investing_cash_flow || 0),
+              fill: '#ef4444'
             },
             { 
               name: 'Financing Activities', 
-              value: cashFlowStatement?.financing_cash_flow || 0
+              value: Math.abs(cashFlowStatement?.financing_cash_flow || 0),
+              fill: '#6366f1'
             },
             { 
               name: 'Ending Cash', 
-              value: cashFlowStatement?.ending_cash || 0
+              value: Math.abs(cashFlowStatement?.ending_cash || 0),
+              fill: '#3b82f6'
             }
           ]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis tickFormatter={formatYAxisTick} />
             <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-            <Bar dataKey="value" fill="#3b82f6" />
+            <Bar dataKey="value" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -395,7 +473,7 @@ const CashFlow: React.FC = observer(() => {
         <button 
           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
           onClick={handleExportExcel} 
-          disabled={incomeViewModel.isLoading}
+          disabled={cashFlowViewModel.isLoading}
         >
           Export to Excel
         </button>
@@ -423,9 +501,11 @@ const CashFlow: React.FC = observer(() => {
               <td className="px-6 py-4 text-right font-semibold text-green-700">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</td>
             </tr>
             
-            {cashFlowStatement?.operating_items?.map((item, index) => (
+            {cashFlowStatement?.operating_items
+              ?.filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+              .map((item, index) => (
               <tr key={`op-${index}`} className="hover:bg-gray-50">
-                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{displayName(item.name)}</td>
                 <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
               </tr>
             ))}
@@ -441,9 +521,11 @@ const CashFlow: React.FC = observer(() => {
               <td className="px-6 py-4 text-right font-semibold text-red-700">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</td>
             </tr>
             
-            {cashFlowStatement?.investing_items?.map((item, index) => (
+            {cashFlowStatement?.investing_items
+              ?.filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+              .map((item, index) => (
               <tr key={`inv-${index}`} className="hover:bg-gray-50">
-                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{displayName(item.name)}</td>
                 <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
               </tr>
             ))}
@@ -459,9 +541,11 @@ const CashFlow: React.FC = observer(() => {
               <td className="px-6 py-4 text-right font-semibold text-blue-700">{formatCurrency(cashFlowStatement?.financing_cash_flow || 0)}</td>
             </tr>
             
-            {cashFlowStatement?.financing_items?.map((item, index) => (
+            {cashFlowStatement?.financing_items
+              ?.filter(item => !['previous_value', 'transaction_impact'].includes(item.name))
+              .map((item, index) => (
               <tr key={`fin-${index}`} className="hover:bg-gray-50">
-                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{displayName(item.name)}</td>
                 <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
               </tr>
             ))}
@@ -676,21 +760,21 @@ const CashFlow: React.FC = observer(() => {
 
       {/* Content */}
       <div className="p-6">
-        {incomeViewModel.isLoading && (
+        {cashFlowViewModel.isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading cash flow statement...</p>
           </div>
         )}
         
-        {incomeViewModel.lastError && (
+        {cashFlowViewModel.lastError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-            Error: {incomeViewModel.lastError}
+            Error: {cashFlowViewModel.lastError}
             <button className="ml-4 text-red-800 underline" onClick={clearError}>Dismiss</button>
           </div>
         )}
         
-        {!incomeViewModel.isLoading && !incomeViewModel.lastError && (activeView === 'chart' ? renderChartView() : renderTableView())}
+        {!cashFlowViewModel.isLoading && !cashFlowViewModel.lastError && (activeView === 'chart' ? renderChartView() : renderTableView())}
       </div>
     </div>
   );

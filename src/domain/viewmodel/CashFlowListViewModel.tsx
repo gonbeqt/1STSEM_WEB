@@ -3,21 +3,74 @@ import { ListCashFlowStatementsUseCase } from '../usecases/ListCashFlowStatement
 
 export interface CashFlowSummary {
   _id?: string;
+  cash_flow_id?: string;
+  user_id?: string;
   generated_at?: string;
+  period_start?: string;
+  period_end?: string;
+  period?: string;
+  report_type?: 'CUMULATIVE' | 'TRANSACTION' | 'PERIODIC';
+  currency?: string;
+  
+  // For TRANSACTION and CUMULATIVE reports
+  cash_flows?: {
+    operating_activities?: {
+      net_cash_from_operations?: number;
+      previous_value?: number;
+      transaction_impact?: number;
+    };
+    investing_activities?: {
+      net_cash_from_investing?: number;
+      previous_value?: number;
+      transaction_impact?: number;
+    };
+    financing_activities?: {
+      net_cash_from_financing?: number;
+      previous_value?: number;
+      transaction_impact?: number;
+    };
+  };
+  
+  // For PERIODIC reports
   operating_activities?: {
-    net_cash_flow: number;
+    cash_receipts?: Record<string, number>;
+    cash_payments?: Record<string, number>;
+    net_cash_flow?: number;
   };
   investing_activities?: {
-    net_cash_flow: number;
+    cash_receipts?: Record<string, number>;
+    cash_payments?: Record<string, number>;
+    net_cash_flow?: number;
   };
   financing_activities?: {
-    net_cash_flow: number;
+    cash_receipts?: Record<string, number>;
+    cash_payments?: Record<string, number>;
+    net_cash_flow?: number;
   };
+  
+  // Common cash summary
   cash_summary?: {
-    beginning_cash: number;
-    ending_cash: number;
-    net_change_in_cash: number;
+    net_cash_from_operations?: number;
+    net_cash_from_investing?: number;
+    net_cash_from_financing?: number;
+    net_change_in_cash?: number;
+    cash_at_beginning?: number;
+    cash_at_end?: number;
+    beginning_cash?: number;
+    ending_cash?: number;
   };
+  
+  // Additional fields
+  transaction_details?: {
+    transaction_type?: string;
+    amount_usd?: number;
+    description?: string;
+    currency?: string;
+  };
+  analysis?: Record<string, any>;
+  metadata?: Record<string, any>;
+  
+  [key: string]: any;
 }
 
 export class CashFlowListViewModel {
