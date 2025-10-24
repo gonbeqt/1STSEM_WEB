@@ -1,29 +1,64 @@
 // Report Entity Types for Smart Accounting System
+export interface BalanceSheetAssets {
+  current_assets: {
+    crypto_holdings: Record<string, CryptoHolding>;
+    cash_and_equivalents?: number;
+    accounts_receivable?: number;
+    inventory?: number;
+    other_current_assets?: number;
+    total: number;
+  };
+  non_current_assets?: {
+    property_plant_equipment?: number;
+    intangible_assets?: number;
+    long_term_investments?: number;
+    other_non_current_assets?: number;
+    total?: number;
+  };
+  total?: number;
+}
+
+export interface BalanceSheetLiabilities {
+  current_liabilities: {
+    accounts_payable?: number;
+    short_term_debt?: number;
+    accrued_expenses?: number;
+    other_current_liabilities?: number;
+    [key: string]: number | undefined;
+  };
+  long_term_liabilities?: {
+    long_term_debt?: number;
+    deferred_tax_liabilities?: number;
+    other_long_term_liabilities?: number;
+    [key: string]: number | undefined;
+  };
+  total: number;
+}
+
+export interface BalanceSheetEquity {
+  retained_earnings: number;
+  common_stock?: number;
+  additional_paid_in_capital?: number;
+  other_equity?: number;
+  total: number;
+}
+
+export interface BalanceSheetTotals {
+  total_assets: number;
+  total_liabilities: number;
+  total_equity: number;
+  balance_check: number;
+}
+
 export interface BalanceSheetData {
   balance_sheet_id: string;
   as_of_date: string;
   currency: string;
-  assets: {
-    current_assets: {
-      crypto_holdings: Record<string, CryptoHolding>;
-      total: number;
-    };
-    total: number;
-  };
-  liabilities: {
-    current_liabilities: Record<string, number>;
-    total: number;
-  };
-  equity: {
-    retained_earnings: number;
-    total: number;
-  };
-  totals: {
-    total_assets: number;
-    total_liabilities: number;
-    total_equity: number;
-    balance_check: number;
-  };
+  assets: BalanceSheetAssets;
+  liabilities: BalanceSheetLiabilities;
+  equity: BalanceSheetEquity;
+  totals: BalanceSheetTotals;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CryptoHolding {
@@ -203,9 +238,15 @@ export interface ListReportsResponse {
   success: boolean;
   balance_sheets?: BalanceSheetData[];
   cash_flow_statements?: CashFlowStatement[];
+  income_statements?: any[];
   tax_reports?: TaxReport[];
   count: number;
   error?: string;
+}
+
+export interface ListBalanceSheetsParams {
+  report_type?: string;
+  limit?: number;
 }
 
 // AI Tax Analysis Types

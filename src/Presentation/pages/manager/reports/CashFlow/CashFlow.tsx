@@ -1,110 +1,182 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import React, { useState, useEffect } from 'react';
+// Cash Flow Statement Component - v1.0
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ArrowLeft, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { useIncomeViewModel } from '../../../../hooks/useBalanceSheetViewModel';
 
- 
-
-interface CashFlowSection {
-  cash_receipts: Record<string, number> & { total: number };
-  cash_payments: Record<string, number> & { total: number };
-  net_cash_flow: number;
+interface CashFlowItem {
+  name: string;
+  amount: number;
 }
 
-interface CashFlowData {
-  operating_activities: CashFlowSection;
-  investing_activities: CashFlowSection;
-  financing_activities: CashFlowSection;
-  cash_summary: {
-    beginning_cash: number;
-    ending_cash: number;
-    net_change_in_cash: number;
-  };
+interface CashFlowStatementData {
+  operating_cash_flow: number;
+  investing_cash_flow: number;
+  financing_cash_flow: number;
+  beginning_cash: number;
+  ending_cash: number;
+  net_change_in_cash: number;
+  operating_items?: CashFlowItem[];
+  investing_items?: CashFlowItem[];
+  financing_items?: CashFlowItem[];
 }
 
-const CashFlow: React.FC = () => {
+const CashFlow: React.FC = observer(() => {
   const navigate = useNavigate();
-  const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
-  const [cashFlowData, setCashFlowData] = useState<CashFlowData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+  const incomeViewModel = useIncomeViewModel();
 
-  useEffect(() => {
-    generateCashFlowStatement();
-  }, []);
+  const normalizeItems = (raw: any, fallbackLabel: string): CashFlowItem[] => {
+    if (!raw) return [{ name: fallbackLabel, amount: 0 }];
+    if (Array.isArray(raw)) {
+      return raw.map((r) => ({ name: r?.name ?? String(r?.label ?? 'Item'), amount: Number(r?.amount ?? r?.value ?? 0) }));
+    }
+    if (typeof raw === 'object') {
+      // object shaped like { accountName: amount, ... }
+      return Object.entries(raw).map(([k, v]) => ({ name: k, amount: Number((v as any) ?? 0) }));
+    }
+    if (typeof raw === 'number' || !isNaN(Number(raw))) {
+      return [{ name: fallbackLabel, amount: Number(raw) }];
+    }
+    return [{ name: fallbackLabel, amount: 0 }];
+  };
+  // input values (what the user types) and applied values (what is actually used by the filter)
+  const [periodStartInput, setPeriodStartInput] = React.useState<string>('');
+  const [periodEndInput, setPeriodEndInput] = React.useState<string>('');
+  const [appliedPeriodStart, setAppliedPeriodStart] = React.useState<string>('');
+  const [appliedPeriodEnd, setAppliedPeriodEnd] = React.useState<string>('');
 
-  const generateCashFlowStatement = async () => {
-    setLoading(true);
-    setError(null);
-    
+  const plainItems = React.useMemo(() => toJS(incomeViewModel.items ?? []), [incomeViewModel.items]);
+
+  const normalizeDate = (v: any): string | null => {
+    if (!v && v !== 0) return null;
     try {
-      const API_URL = process.env.REACT_APP_API_BASE_URL;
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_URL}/cash-flow/generate/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({
-          start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-          end_date: new Date().toISOString().split('T')[0]
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate cash flow statement');
-      }
-
-      if (data.success) {
-        setCashFlowData(data.cash_flow_statement);
-      } else {
-        throw new Error(data.error || 'Failed to generate cash flow statement');
-      }
-    } catch (err: any) {
-      console.error('Cash flow generation error:', err);
-      setError(err.message || 'Failed to load cash flow statement');
-    } finally {
-      setLoading(false);
+      const d = new Date(String(v));
+      if (isNaN(d.getTime())) return null;
+      return d.toISOString().split('T')[0];
+    } catch (e) {
+      return null;
     }
   };
 
+  const activeRaw = React.useMemo(() => {
+    if (!plainItems || plainItems.length === 0) return null;
+    // Only filter when an applied period is present (user clicked Apply)
+    if (appliedPeriodStart && appliedPeriodEnd) {
+      const targetStart = normalizeDate(appliedPeriodStart);
+      const targetEnd = normalizeDate(appliedPeriodEnd);
+      const found = plainItems.find((it: any) => {
+        const s = normalizeDate(it.period_start ?? it.start_date ?? it.period?.split('-')?.[0]);
+        const e = normalizeDate(it.period_end ?? it.end_date ?? it.period?.split('-')?.[1]);
+        return s === targetStart && e === targetEnd;
+      });
+      if (found) return found;
+    }
+    // default to first (latest)
+    return plainItems[0] ?? null;
+  }, [plainItems, appliedPeriodStart, appliedPeriodEnd]);
+
+  const cashFlowStatement: CashFlowStatementData | null = React.useMemo(() => {
+    if (!activeRaw) return null;
+    
+    const operating_items = normalizeItems(activeRaw.operating_activities || activeRaw.operating_cash_flow, 'Operating Activities');
+    const investing_items = normalizeItems(activeRaw.investing_activities || activeRaw.investing_cash_flow, 'Investing Activities');
+    const financing_items = normalizeItems(activeRaw.financing_activities || activeRaw.financing_cash_flow, 'Financing Activities');
+    
+    const operating_cash_flow = activeRaw.operating_cash_flow ?? operating_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+    const investing_cash_flow = activeRaw.investing_cash_flow ?? investing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+    const financing_cash_flow = activeRaw.financing_cash_flow ?? financing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+    
+    const beginning_cash = Number(activeRaw.beginning_cash ?? 0);
+    const net_change_in_cash = operating_cash_flow + investing_cash_flow + financing_cash_flow;
+    const ending_cash = beginning_cash + net_change_in_cash;
+    
+    return { 
+      operating_cash_flow, 
+      investing_cash_flow, 
+      financing_cash_flow,
+      beginning_cash,
+      ending_cash,
+      net_change_in_cash,
+      operating_items,
+      investing_items,
+      financing_items
+    } as CashFlowStatementData;
+  }, [activeRaw]);
+
+  
+  const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
+
+  useEffect(() => {
+    void incomeViewModel.fetchAll();
+  }, [incomeViewModel]);
+
   const exportToExcel = () => {
-    if (!cashFlowData) {
-      setError('No cash flow data to export');
+    const cashFlow = (() => {
+      const latest = activeRaw;
+      if (!latest) return null;
+      // normalize to CashFlowStatementData shape
+      const operating_items = normalizeItems(latest.operating_activities || latest.operating_cash_flow, 'Operating Activities');
+      const investing_items = normalizeItems(latest.investing_activities || latest.investing_cash_flow, 'Investing Activities');
+      const financing_items = normalizeItems(latest.financing_activities || latest.financing_cash_flow, 'Financing Activities');
+      
+      const operating_cash_flow = latest.operating_cash_flow ?? operating_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+      const investing_cash_flow = latest.investing_cash_flow ?? investing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+      const financing_cash_flow = latest.financing_cash_flow ?? financing_items.reduce((s: number, r: CashFlowItem) => s + (Number(r.amount) || 0), 0);
+      
+      const beginning_cash = Number(latest.beginning_cash ?? 0);
+      const net_change_in_cash = operating_cash_flow + investing_cash_flow + financing_cash_flow;
+      const ending_cash = beginning_cash + net_change_in_cash;
+      
+      return { 
+        operating_cash_flow, 
+        investing_cash_flow, 
+        financing_cash_flow,
+        beginning_cash,
+        ending_cash,
+        net_change_in_cash,
+        operating_items,
+        investing_items,
+        financing_items
+      } as CashFlowStatementData;
+    })();
+
+    if (!cashFlow) {
+      // nothing to export
       return;
     }
 
     try {
-      // Prepare data for Excel export
+      // Prepare data for Excel export (include selected period info)
+    const periodLabel = (activeRaw && (activeRaw.period_start || activeRaw.period_end || activeRaw.period))
+      ? (activeRaw.period ? String(activeRaw.period) : `${activeRaw.period_start ?? '...'} - ${activeRaw.period_end ?? '...'}`)
+      : (appliedPeriodStart || appliedPeriodEnd ? `${appliedPeriodStart || '...'} - ${appliedPeriodEnd || '...'}` : 'N/A');
+
       const excelData = [
         ['CASH FLOW STATEMENT'],
+        ['Period', periodLabel],
         [`As of: ${new Date().toISOString().split('T')[0]}`],
         [''],
         ['OPERATING ACTIVITIES', ''],
-        ['Cash Receipts', cashFlowData.operating_activities.cash_receipts.total],
-        ['Cash Payments', -cashFlowData.operating_activities.cash_payments.total],
-        ['Net Cash from Operating', cashFlowData.operating_activities.net_cash_flow],
+        ...cashFlow.operating_items!.map(item => [displayName(item.name), item.amount]),
+        ['Net Cash from Operating Activities', cashFlow.operating_cash_flow],
         [''],
         ['INVESTING ACTIVITIES', ''],
-        ['Cash Receipts', cashFlowData.investing_activities.cash_receipts.total],
-        ['Cash Payments', -cashFlowData.investing_activities.cash_payments.total],
-        ['Net Cash from Investing', cashFlowData.investing_activities.net_cash_flow],
+        ...cashFlow.investing_items!.map(item => [displayName(item.name), item.amount]),
+        ['Net Cash from Investing Activities', cashFlow.investing_cash_flow],
         [''],
         ['FINANCING ACTIVITIES', ''],
-        ['Cash Receipts', cashFlowData.financing_activities.cash_receipts.total],
-        ['Cash Payments', -cashFlowData.financing_activities.cash_payments.total],
-        ['Net Cash from Financing', cashFlowData.financing_activities.net_cash_flow],
+        ...cashFlow.financing_items!.map(item => [displayName(item.name), item.amount]),
+        ['Net Cash from Financing Activities', cashFlow.financing_cash_flow],
         [''],
-        ['CASH SUMMARY', ''],
-        ['Beginning Cash', cashFlowData.cash_summary.beginning_cash],
-        ['Net Change in Cash', cashFlowData.cash_summary.net_change_in_cash],
-        ['Ending Cash', cashFlowData.cash_summary.ending_cash]
+        ['Beginning Cash', cashFlow.beginning_cash],
+        ['Net Change in Cash', cashFlow.net_change_in_cash],
+        ['Ending Cash', cashFlow.ending_cash]
       ];
 
       // Create workbook and worksheet
@@ -118,38 +190,43 @@ const CashFlow: React.FC = () => {
       ];
 
       // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, 'Cash Flow');
+      XLSX.utils.book_append_sheet(wb, ws, 'Cash Flow Statement');
 
       // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      const fileName = `CashFlow_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const fileName = `CashFlowStatement_${new Date().toISOString().split('T')[0]}.xlsx`;
       saveAs(blob, fileName);
       
     } catch (err: any) {
-      setError(err.message || 'Failed to export to Excel');
       console.error('Excel export error:', err);
     }
   };
 
-  const chartData = cashFlowData ? [
+  const chartData = cashFlowStatement ? [
     { 
       name: 'Operating', 
-      value: cashFlowData.operating_activities.net_cash_flow,
-      fill: '#8884d8'
+      value: cashFlowStatement.operating_cash_flow,
+      fill: '#10b981'
     },
     { 
       name: 'Investing', 
-      value: cashFlowData.investing_activities.net_cash_flow,
-      fill: '#82ca9d'
+      value: cashFlowStatement.investing_cash_flow,
+      fill: '#ef4444'
     },
     { 
       name: 'Financing', 
-      value: cashFlowData.financing_activities.net_cash_flow,
-      fill: '#ffc658'
+      value: cashFlowStatement.financing_cash_flow,
+      fill: '#6366f1'
     }
   ] : [];
+
+  const formatYAxisTick = (val: number) => {
+    if (!isFinite(val)) return '';
+    const k = Math.round(val / 1000);
+    return `$${k}K`;
+  };
 
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
@@ -163,8 +240,28 @@ const CashFlow: React.FC = () => {
     }).format(Math.abs(amount));
   };
 
+  const formatPercent = (numerator: number | null | undefined, denominator: number | null | undefined): string => {
+    const n = Number(numerator ?? 0);
+    const d = Number(denominator ?? 0);
+    if (!isFinite(n) || !isFinite(d) || d === 0) return '0.0%';
+    return `${((n / d) * 100).toFixed(1)}%`;
+  };
+
+  const displayName = (raw?: any): string => {
+    if (!raw && raw !== 0) return '';
+    let s = String(raw);
+    // replace underscores and dashes with spaces
+    s = s.replace(/[_-]+/g, ' ');
+    // insert spaces before camelCase transitions: aB -> a B
+    s = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+    // collapse multiple spaces
+    s = s.replace(/\s+/g, ' ').trim();
+    // title case
+    return s.split(' ').map(w => w.length ? (w[0].toUpperCase() + w.slice(1)) : '').join(' ');
+  };
+
   const clearError = () => {
-    setError(null);
+    incomeViewModel.clearError();
   };
 
   const handleExportExcel = () => {
@@ -176,82 +273,117 @@ const CashFlow: React.FC = () => {
   };
 
   const handleRefresh = async () => {
-    await generateCashFlowStatement();
+    await incomeViewModel.fetchAll();
   };
 
   const renderChartView = () => (
     <div className="chart-view p-6 h-full overflow-y-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Cash Flow Overview</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-              <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-600 text-sm font-medium">Operating Cash Flow</p>
+              <p className="text-2xl font-bold text-green-800 mt-2">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</p>
+            </div>
+            <TrendingUp className="w-8 h-8 text-green-600 opacity-20" />
+          </div>
         </div>
-        
-        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h4>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-600">Operating Activities</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(cashFlowData?.operating_activities?.net_cash_flow || 0)}</span>
+
+        <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-600 text-sm font-medium">Investing Cash Flow</p>
+              <p className="text-2xl font-bold text-red-800 mt-2">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</p>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-600">Investing Activities</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(cashFlowData?.investing_activities?.net_cash_flow || 0)}</span>
+            <TrendingDown className="w-8 h-8 text-red-600 opacity-20" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-600 text-sm font-medium">Net Change</p>
+              <p className="text-2xl font-bold text-blue-800 mt-2">{formatCurrency(cashFlowStatement?.net_change_in_cash || 0)}</p>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-600">Financing Activities</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(cashFlowData?.financing_activities?.net_cash_flow || 0)}</span>
-            </div>
-            <div className="flex justify-between items-center py-2 bg-gray-50 rounded-lg p-3">
-              <span className="text-gray-700 font-medium">Net Change in Cash</span>
-              <span className="font-bold text-lg text-gray-900">{formatCurrency(cashFlowData?.cash_summary?.net_change_in_cash || 0)}</span>
-            </div>
+            <div className="w-8 h-8 text-blue-600 opacity-20">📊</div>
           </div>
         </div>
       </div>
-      
-      <div className="chart-summary bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+
+      {/* Chart */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm mb-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Daily Report</h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={[
+            { 
+              name: 'Beginning Cash', 
+              value: cashFlowStatement?.beginning_cash || 0
+            },
+            { 
+              name: 'Operating Activities', 
+              value: cashFlowStatement?.operating_cash_flow || 0
+            },
+            { 
+              name: 'Investing Activities', 
+              value: cashFlowStatement?.investing_cash_flow || 0
+            },
+            { 
+              name: 'Financing Activities', 
+              value: cashFlowStatement?.financing_cash_flow || 0
+            },
+            { 
+              name: 'Ending Cash', 
+              value: cashFlowStatement?.ending_cash || 0
+            }
+          ]}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis tickFormatter={formatYAxisTick} />
+            <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+            <Bar dataKey="value" fill="#3b82f6" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Cash Summary */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Cash Flow Summary</h4>
-        {cashFlowData ? (
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Your cash flow shows a net change of <strong>{formatCurrency(cashFlowData.cash_summary.net_change_in_cash)}</strong> 
-              with ending cash of <strong>{formatCurrency(cashFlowData.cash_summary.ending_cash)}</strong>.
-            </p>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Operating activities generated <strong>{formatCurrency(cashFlowData.operating_activities.net_cash_flow)}</strong> 
-              while investing and financing activities resulted in <strong>{formatCurrency(cashFlowData.investing_activities.net_cash_flow)}</strong> and <strong>{formatCurrency(cashFlowData.financing_activities.net_cash_flow)}</strong> respectively.
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              <button
-                className="py-2.5 px-5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all flex items-center gap-2"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
-              </button>
-              <button
-                className="py-2.5 px-5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 hover:border-purple-700 transition-all flex items-center gap-2"
-                onClick={handleExportExcel}
-              >
-                <Download className="w-4 h-4" />
-                <span>Download Report</span>
-              </button>
-            </div>
+        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div>
+            <p className="text-gray-600">Beginning Cash</p>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(cashFlowStatement?.beginning_cash || 0)}</p>
           </div>
-        ) : (
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-            Loading cash flow data...
-          </p>
-        )}
+          <div>
+            <p className="text-gray-600">Operating Activities</p>
+            <p className="text-lg font-semibold text-green-600">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Investing Activities</p>
+            <p className="text-lg font-semibold text-red-600">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Financing Activities</p>
+            <p className="text-lg font-semibold text-blue-600">{formatCurrency(cashFlowStatement?.financing_cash_flow || 0)}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Net Change in Cash</p>
+            <p className="text-lg font-semibold text-indigo-600">{formatCurrency(cashFlowStatement?.net_change_in_cash || 0)}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Ending Cash</p>
+            <p className="text-lg font-semibold text-blue-800">{formatCurrency(cashFlowStatement?.ending_cash || 0)}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button className="flex-1 py-2.5 rounded-lg text-sm font-medium border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all" onClick={() => navigate(-1)}>
+            ← Close
+          </button>
+          <button className="flex-1 py-2.5 rounded-lg text-sm font-medium border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 transition-all" onClick={handleExportExcel}>
+            ↓ Download Report
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -263,7 +395,7 @@ const CashFlow: React.FC = () => {
         <button 
           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
           onClick={handleExportExcel} 
-          disabled={loading}
+          disabled={incomeViewModel.isLoading}
         >
           Export to Excel
         </button>
@@ -275,52 +407,106 @@ const CashFlow: React.FC = () => {
         </button>
       </div>
 
-      {/* Simple Cash Flow Table */}
+      {/* Cash Flow Statement Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {/* Operating Activities */}
-            <tr className="bg-blue-50">
-              <td className="px-6 py-4 font-semibold text-gray-900">OPERATING ACTIVITIES</td>
-              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(cashFlowData?.operating_activities?.net_cash_flow || 0)}</td>
-            </tr>
-            
-            {/* Investing Activities */}
+            {/* Operating Activities Section */}
             <tr className="bg-green-50">
-              <td className="px-6 py-4 font-semibold text-gray-900">INVESTING ACTIVITIES</td>
-              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(cashFlowData?.investing_activities?.net_cash_flow || 0)}</td>
+              <td className="px-6 py-4 font-semibold text-gray-900">Operating Activities</td>
+              <td className="px-6 py-4 text-right font-semibold text-green-700">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</td>
             </tr>
             
-            {/* Financing Activities */}
-            <tr className="bg-purple-50">
-              <td className="px-6 py-4 font-semibold text-gray-900">FINANCING ACTIVITIES</td>
-              <td className="px-6 py-4 text-right font-semibold text-gray-900">{formatCurrency(cashFlowData?.financing_activities?.net_cash_flow || 0)}</td>
+            {cashFlowStatement?.operating_items?.map((item, index) => (
+              <tr key={`op-${index}`} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+
+            <tr className="bg-white font-semibold text-gray-900">
+              <td className="px-6 py-3 pl-12">Net Cash from Operating Activities</td>
+              <td className="px-6 py-3 text-right text-green-700">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</td>
             </tr>
             
-            {/* Cash Summary */}
-            <tr className="bg-gray-100 border-t-2 border-gray-300">
-              <td className="px-6 py-4 font-bold text-gray-900">BEGINNING CASH</td>
-              <td className="px-6 py-4 text-right font-bold text-gray-900">{formatCurrency(cashFlowData?.cash_summary?.beginning_cash || 0)}</td>
+            {/* Investing Activities Section */}
+            <tr className="bg-red-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">Investing Activities</td>
+              <td className="px-6 py-4 text-right font-semibold text-red-700">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</td>
             </tr>
-            <tr className="bg-gray-100">
-              <td className="px-6 py-4 font-bold text-gray-900">NET CHANGE IN CASH</td>
-              <td className="px-6 py-4 text-right font-bold text-gray-900">{formatCurrency(cashFlowData?.cash_summary?.net_change_in_cash || 0)}</td>
+            
+            {cashFlowStatement?.investing_items?.map((item, index) => (
+              <tr key={`inv-${index}`} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+
+            <tr className="bg-white font-semibold text-gray-900">
+              <td className="px-6 py-3 pl-12">Net Cash from Investing Activities</td>
+              <td className="px-6 py-3 text-right text-red-700">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</td>
             </tr>
-            <tr className="bg-gray-100 border-t-2 border-gray-300">
-              <td className="px-6 py-4 font-bold text-gray-900">ENDING CASH</td>
-              <td className="px-6 py-4 text-right font-bold text-gray-900">{formatCurrency(cashFlowData?.cash_summary?.ending_cash || 0)}</td>
+            
+            {/* Financing Activities Section */}
+            <tr className="bg-blue-50">
+              <td className="px-6 py-4 font-semibold text-gray-900">Financing Activities</td>
+              <td className="px-6 py-4 text-right font-semibold text-blue-700">{formatCurrency(cashFlowStatement?.financing_cash_flow || 0)}</td>
+            </tr>
+            
+            {cashFlowStatement?.financing_items?.map((item, index) => (
+              <tr key={`fin-${index}`} className="hover:bg-gray-50">
+                <td className="px-6 py-2 pl-12 text-sm text-gray-600">{item.name}</td>
+                <td className="px-6 py-2 text-right text-sm text-gray-900">{formatCurrency(item.amount)}</td>
+              </tr>
+            ))}
+
+            <tr className="bg-white font-semibold text-gray-900">
+              <td className="px-6 py-3 pl-12">Net Cash from Financing Activities</td>
+              <td className="px-6 py-3 text-right text-blue-700">{formatCurrency(cashFlowStatement?.financing_cash_flow || 0)}</td>
+            </tr>
+
+            {/* Summary Section */}
+            <tr className="bg-gray-50">
+              <td className="px-6 py-3 font-semibold text-gray-900">Beginning Cash</td>
+              <td className="px-6 py-3 text-right font-semibold text-blue-600">{formatCurrency(cashFlowStatement?.beginning_cash || 0)}</td>
+            </tr>
+
+            <tr className="bg-white">
+              <td className="px-6 py-3 font-semibold text-gray-900">Net Cash from Operating Activities</td>
+              <td className="px-6 py-3 text-right text-gray-900">{formatCurrency(cashFlowStatement?.operating_cash_flow || 0)}</td>
+            </tr>
+
+            <tr className="bg-white">
+              <td className="px-6 py-3 font-semibold text-gray-900">Net Cash from Investing Activities</td>
+              <td className="px-6 py-3 text-right text-gray-900">{formatCurrency(cashFlowStatement?.investing_cash_flow || 0)}</td>
+            </tr>
+
+            <tr className="bg-white">
+              <td className="px-6 py-3 font-semibold text-gray-900">Net Cash from Financing Activities</td>
+              <td className="px-6 py-3 text-right text-gray-900">{formatCurrency(cashFlowStatement?.financing_cash_flow || 0)}</td>
+            </tr>
+
+            {/* Net Change and Ending Cash */}
+            <tr className="bg-purple-50 border-t-2 border-purple-300">
+              <td className="px-6 py-3 font-bold text-gray-900">Net Change in Cash</td>
+              <td className="px-6 py-3 text-right font-bold text-purple-700">{formatCurrency(cashFlowStatement?.net_change_in_cash || 0)}</td>
+            </tr>
+
+            <tr className="bg-blue-50">
+              <td className="px-6 py-3 font-bold text-gray-900">Ending Cash</td>
+              <td className="px-6 py-3 text-right font-bold text-blue-700 text-lg">{formatCurrency(cashFlowStatement?.ending_cash || 0)}</td>
             </tr>
           </tbody>
         </table>
       </div>
       
-      {/* Summary */}
+      {/* Success Message */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
         <div className="flex items-center justify-center gap-2 text-green-800">
           <span className="text-lg">✓</span>
@@ -330,68 +516,184 @@ const CashFlow: React.FC = () => {
     </div>
   );
 
+  const renderBreakdown = () => (
+    <div className="space-y-6">
+      {/* Financial Breakdown Card */}
+      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cash Flow Breakdown</h3>
+        <div className="space-y-6">
+          <div>
+            <div className="inline-block bg-green-50 text-green-800 px-3 py-1 rounded-md mb-3">Operating Activities</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-gray-600">Total Operating Cash Flow</div>
+              <div className="text-right font-semibold text-green-700">{formatCurrency(cashFlowStatement?.operating_cash_flow ?? 0)}</div>
+              {cashFlowStatement?.operating_items
+                ?.map((r, i) => (
+                  <React.Fragment key={`op-${i}`}>
+                    <div className="text-gray-600 pl-4">{displayName(r.name)}</div>
+                    <div className="text-right">{formatCurrency(r.amount)}</div>
+                  </React.Fragment>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="inline-block bg-red-50 text-red-800 px-3 py-1 rounded-md mb-3">Investing Activities</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-gray-600">Total Investing Cash Flow</div>
+              <div className="text-right font-semibold text-red-700">{formatCurrency(cashFlowStatement?.investing_cash_flow ?? 0)}</div>
+              {cashFlowStatement?.investing_items
+                ?.map((e, i) => (
+                  <React.Fragment key={`inv-${i}`}>
+                    <div className="text-gray-600 pl-4">{displayName(e.name)}</div>
+                    <div className="text-right">{formatCurrency(e.amount)}</div>
+                  </React.Fragment>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="inline-block bg-blue-50 text-blue-800 px-3 py-1 rounded-md mb-3">Financing Activities</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-gray-600">Total Financing Cash Flow</div>
+              <div className="text-right font-semibold text-blue-700">{formatCurrency(cashFlowStatement?.financing_cash_flow ?? 0)}</div>
+              {cashFlowStatement?.financing_items
+                ?.map((f, i) => (
+                  <React.Fragment key={`fin-${i}`}>
+                    <div className="text-gray-600 pl-4">{displayName(f.name)}</div>
+                    <div className="text-right">{formatCurrency(f.amount)}</div>
+                  </React.Fragment>
+                ))}
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <div className="inline-block bg-purple-50 text-purple-800 px-3 py-1 rounded-md mb-3">Summary</div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="text-gray-600">Beginning Cash</div>
+              <div className="text-right font-semibold">{formatCurrency(cashFlowStatement?.beginning_cash ?? 0)}</div>
+
+              <div className="text-gray-600">Net Change in Cash</div>
+              <div className="text-right font-semibold text-purple-700">{formatCurrency(cashFlowStatement?.net_change_in_cash ?? 0)}</div>
+
+              <div className="text-gray-600 font-semibold">Ending Cash</div>
+              <div className="text-right font-bold text-blue-700 text-base">{formatCurrency(cashFlowStatement?.ending_cash ?? 0)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Report Information Card */}
+      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Report Information</h3>
+        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+          <div>Period</div>
+          <div className="text-right">{(activeRaw?.period_start && activeRaw?.period_end) ? `${new Date(activeRaw.period_start).toLocaleDateString()} - ${new Date(activeRaw.period_end).toLocaleDateString()}` : (activeRaw?.period ?? '—')}</div>
+          <div>Currency</div>
+          <div className="text-right">{activeRaw?.currency ?? 'USD'}</div>
+          <div>Generated</div>
+          <div className="text-right">{activeRaw?.generated_at ? new Date(activeRaw.generated_at).toLocaleDateString() : (activeRaw?.generated ? activeRaw.generated : '—')}</div>
+          <div>Transactions Processed</div>
+          <div className="text-right">{activeRaw?.transactions_processed ?? activeRaw?.transactions_count ?? '0'}</div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-800" onClick={() => navigate(-1)}>Close</button>
+          <button className="flex-1 py-2 rounded-lg bg-purple-600 text-white" onClick={handleExportExcel}>Download Report</button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="cash-flow-container w-full min-h-screen bg-white">
+    <div className="cash-flow-statement-container w-full min-h-screen bg-white">
       {/* Simple Header */}
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <button 
-                      className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
-                      onClick={() => navigate(-1)}
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Back to Reports</span>
-                    </button>
+         <button 
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Reports</span>
+          </button>
           <div className="flex gap-2">
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
                 activeView === 'table' 
-                  ? 'bg-purple-600 text-white shadow-sm'
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('table')}
             >
-              Table View
+              📊 Table View
             </button>
             <button 
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
                 activeView === 'chart' 
-                  ? 'bg-purple-600 text-white shadow-sm'
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => setActiveView('chart')}
             >
-              Chart View
+              📈 Chart View
             </button>
           </div>
         </div>
         
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Cash Flow Statement</h1>
-        <p className="text-gray-600">
-          Daily Report | {new Date().toLocaleDateString()}
-        </p>
+        <p className="text-gray-600 text-sm mb-4">Cash movements as of {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        
+        <div className="flex items-center gap-3 text-gray-600">
+          <label className="text-sm font-medium">Period</label>
+          <input
+            type="date"
+            value={periodStartInput}
+            onChange={(e) => setPeriodStartInput(e.target.value)}
+            className="border rounded px-2 py-1 text-sm"
+          />
+          <span>-</span>
+          <input
+            type="date"
+            value={periodEndInput}
+            onChange={(e) => setPeriodEndInput(e.target.value)}
+            className="border rounded px-2 py-1 text-sm"
+          />
+          <button
+            className="ml-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
+            onClick={() => {
+              // apply the input dates so activeRaw will pick them
+              setAppliedPeriodStart(periodStartInput);
+              setAppliedPeriodEnd(periodEndInput);
+            }}
+          >Apply</button>
+          <button
+            className="ml-2 px-3 py-1 bg-gray-100 text-gray-800 rounded text-sm"
+            onClick={() => { setPeriodStartInput(''); setPeriodEndInput(''); setAppliedPeriodStart(''); setAppliedPeriodEnd(''); }}
+          >Clear</button>
+        </div>
       </div>
 
       {/* Content */}
       <div className="p-6">
-        {loading && (
+        {incomeViewModel.isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading cash flow statement...</p>
           </div>
         )}
         
-        {error && (
+        {incomeViewModel.lastError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-            Error: {error}
+            Error: {incomeViewModel.lastError}
             <button className="ml-4 text-red-800 underline" onClick={clearError}>Dismiss</button>
           </div>
         )}
         
-        {!loading && !error && (activeView === 'chart' ? renderChartView() : renderTableView())}
+        {!incomeViewModel.isLoading && !incomeViewModel.lastError && (activeView === 'chart' ? renderChartView() : renderTableView())}
       </div>
     </div>
   );
-};
+});
 
 export default CashFlow;

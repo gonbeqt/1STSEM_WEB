@@ -40,6 +40,7 @@ import {
   GenerateTaxAnalysisYearlyUseCase,
   GenerateTaxAnalysisCustomUseCase
 } from '../domain/usecases/ReportUseCases';
+import { ListIncomeStatementsUseCase } from '../domain/usecases/ReportUseCases';
 import {
   GenerateDailyRiskAnalysisUseCase,
   GenerateWeeklyRiskAnalysisUseCase,
@@ -110,6 +111,10 @@ import { EmployeeHistoryRepositoryImpl } from '../data/repositoriesImpl/Employee
 import { GetEmployeeHistoryUseCase, GetEmployeeHistoryUseCaseImpl } from '../domain/usecases/GetEmployeeHistoryUseCase';
 import { EmployeeHistoryViewModel } from '../domain/viewmodel/EmployeeHistoryViewModel';
 import { RiskAnalysisViewModel } from '../domain/viewmodel/RiskAnalysisViewModel';
+import { BalanceSheetViewModel } from '../domain/viewmodel/BalanceSheetViewModel';
+import { IncomeViewModel } from '../domain/viewmodel/IncomeViewModel';
+import { ListBalanceSheetUseCase } from '../domain/usecases/BalanceSheetListUseCase';
+import { BalanceSheetListViewModel } from '../domain/viewmodel/BalanceSheetListViewModel';
 
 import { ApiService } from '../data/api/ApiService';
 import { UserRemoteDataSource } from '../data/datasources/UserRemoteDataSource';
@@ -196,6 +201,7 @@ export interface Container {
   exportBalanceSheetExcelUseCase: ExportBalanceSheetExcelUseCase;
   exportBalanceSheetPdfUseCase: ExportBalanceSheetPdfUseCase;
   listBalanceSheetsUseCase: ListBalanceSheetsUseCase;
+  listBalanceSheetUseCase: ListBalanceSheetUseCase;
   generateCashFlowUseCase: GenerateCashFlowUseCase;
   exportCashFlowExcelUseCase: ExportCashFlowExcelUseCase;
   exportCashFlowPdfUseCase: ExportCashFlowPdfUseCase;
@@ -233,6 +239,9 @@ export interface Container {
   passwordResetViewModel: () => PasswordResetViewModel;
   employeeHistoryViewModel: () => EmployeeHistoryViewModel;
   riskAnalysisViewModel: () => RiskAnalysisViewModel;
+  balanceSheetViewModel: () => BalanceSheetViewModel;
+  balanceSheetListViewModel: () => BalanceSheetListViewModel;
+  incomeViewModel: () => IncomeViewModel;
 
 
 }
@@ -329,10 +338,12 @@ const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportReposi
 const exportBalanceSheetExcelUseCase = new ExportBalanceSheetExcelUseCase(reportRepository);
 const exportBalanceSheetPdfUseCase = new ExportBalanceSheetPdfUseCase(reportRepository);
 const listBalanceSheetsUseCase = new ListBalanceSheetsUseCase(reportRepository);
+const listBalanceSheetUseCase = new ListBalanceSheetUseCase(reportRepository);
 const generateCashFlowUseCase = new GenerateCashFlowUseCase(reportRepository);
 const exportCashFlowExcelUseCase = new ExportCashFlowExcelUseCase(reportRepository);
 const exportCashFlowPdfUseCase = new ExportCashFlowPdfUseCase(reportRepository);
 const listCashFlowStatementsUseCase = new ListCashFlowStatementsUseCase(reportRepository);
+const listIncomeStatementsUseCase = new ListIncomeStatementsUseCase(reportRepository);
 const generateTaxReportUseCase = new GenerateTaxReportUseCase(reportRepository);
 const listTaxReportsUseCase = new ListTaxReportsUseCase(reportRepository);
 const generateTaxAnalysisDailyUseCase = new GenerateTaxAnalysisDailyUseCase(reportRepository);
@@ -417,6 +428,7 @@ export const container: Container = {
   exportBalanceSheetExcelUseCase,
   exportBalanceSheetPdfUseCase,
   listBalanceSheetsUseCase,
+  listBalanceSheetUseCase,
   generateCashFlowUseCase,
   exportCashFlowExcelUseCase,
   exportCashFlowPdfUseCase,
@@ -501,6 +513,16 @@ export const container: Container = {
     getLatestRiskAnalysisUseCase
   ),
   forgotPasswordViewModel: () => new ForgotPasswordViewModel(requestPasswordResetUseCase),
+  balanceSheetViewModel: () => new BalanceSheetViewModel(
+    generateBalanceSheetUseCase,
+    listBalanceSheetsUseCase,
+    exportBalanceSheetExcelUseCase,
+    exportBalanceSheetPdfUseCase
+  ),
+  balanceSheetListViewModel: () => new BalanceSheetListViewModel(listBalanceSheetUseCase),
+  incomeViewModel: () => new IncomeViewModel(
+    listIncomeStatementsUseCase
+  ),
   
 
 };

@@ -14,6 +14,7 @@ import {
   ListReportsResponse,
   TaxAnalysisRequest,
   TaxAnalysisResponse,
+  ListBalanceSheetsParams,
   RiskAnalysisGenerateRequest,
   RiskAnalysisHistoryParams,
   RiskAnalysisHistoryResponse,
@@ -26,13 +27,16 @@ export interface ReportRepository {
   generateBalanceSheet(request: GenerateBalanceSheetRequest): Promise<GenerateBalanceSheetResponse>;
   exportBalanceSheetExcel(request: ExportReportRequest): Promise<ExportReportResponse>;
   exportBalanceSheetPdf(request: ExportReportRequest): Promise<ExportReportResponse>;
-  listBalanceSheets(): Promise<ListReportsResponse>;
+  listBalanceSheets(params?: ListBalanceSheetsParams): Promise<ListReportsResponse>;
 
   // Cash Flow Operations
   generateCashFlow(request: GenerateCashFlowRequest): Promise<GenerateCashFlowResponse>;
   exportCashFlowExcel(request: ExportReportRequest): Promise<ExportReportResponse>;
   exportCashFlowPdf(request: ExportReportRequest): Promise<ExportReportResponse>;
   listCashFlowStatements(): Promise<ListReportsResponse>;
+
+  // Income Statement Operations
+  listIncomeStatements(): Promise<ListReportsResponse>;
 
   // Tax Report Operations
   generateTaxReport(request: GenerateTaxReportRequest): Promise<GenerateTaxReportResponse>;

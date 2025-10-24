@@ -12,20 +12,6 @@ const ReportsComponent: React.FC = () => {
   const [activePeriod, setActivePeriod] = useState<PeriodLabel>('Daily');
 
 
-  const getLastUpdatedText = (periodLabel: string) => {
-    switch (periodLabel) {
-      case 'Daily':
-        return 'Last updated: Today';
-      case 'Weekly':
-        return 'Last updated: This Week';
-      case 'Monthly':
-        return 'Last updated: This Month';
-      case 'Quarterly':
-        return 'Last updated: This Quarter';
-      default:
-        return 'Last updated';
-    }
-  };
 
   const financialReports = [
     {
@@ -48,13 +34,6 @@ const ReportsComponent: React.FC = () => {
       Icon: TrendingUp,
       iconBg: 'bg-indigo-100',
       iconColor: 'text-indigo-600',
-    },
-    {
-      title: 'Investment Performance',
-      path: '/invest',
-      Icon: LineChart,
-      iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600',
     },
   ];
 
@@ -114,7 +93,7 @@ const ReportsComponent: React.FC = () => {
         {/* Financial Reports Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Financial Reports</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {financialReports.map(({ title, path, Icon, iconBg, iconColor }) => (
               <button
                 key={title}
@@ -126,7 +105,6 @@ const ReportsComponent: React.FC = () => {
                 </span>
                 <div className="flex-1">
                   <div className="text-base font-semibold text-gray-900">{title}</div>
-                  <div className="text-xs text-gray-500">{getLastUpdatedText(activePeriod)}</div>
                 </div>
               </button>
             ))}
@@ -146,7 +124,6 @@ const ReportsComponent: React.FC = () => {
                 </span>
                 <div className="flex-1">
                   <div className="text-base font-semibold text-gray-900">{title}</div>
-                  <div className="text-xs text-gray-500">{getLastUpdatedText(activePeriod)}</div>
                 </div>
               </button>
             ))}
@@ -166,7 +143,6 @@ const ReportsComponent: React.FC = () => {
                 </span>
                 <div className="flex-1">
                   <div className="text-base font-semibold text-gray-900">{title}</div>
-                  <div className="text-xs text-gray-500">{getLastUpdatedText(activePeriod)}</div>
                 </div>
               </button>
             ))}

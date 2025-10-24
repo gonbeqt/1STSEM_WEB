@@ -12,6 +12,7 @@ import {
   ListReportsResponse,
   TaxAnalysisRequest,
   TaxAnalysisResponse,
+  ListBalanceSheetsParams,
   RiskAnalysisGenerateRequest,
   RiskAnalysisHistoryParams,
   RiskAnalysisHistoryResponse,
@@ -35,8 +36,8 @@ export class ReportRepositoryImpl implements ReportRepository {
     return this.remote.exportBalanceSheetPdf(request);
   }
 
-  async listBalanceSheets(): Promise<ListReportsResponse> {
-    return this.remote.listBalanceSheets();
+  async listBalanceSheets(params?: ListBalanceSheetsParams): Promise<ListReportsResponse> {
+    return this.remote.listBalanceSheets(params);
   }
 
   async generateCashFlow(request: GenerateCashFlowRequest): Promise<GenerateCashFlowResponse> {
@@ -53,6 +54,10 @@ export class ReportRepositoryImpl implements ReportRepository {
 
   async listCashFlowStatements(): Promise<ListReportsResponse> {
     return this.remote.listCashFlowStatements();
+  }
+
+  async listIncomeStatements(): Promise<ListReportsResponse> {
+    return this.remote.listIncomeStatements();
   }
 
   async generateTaxReport(request: GenerateTaxReportRequest): Promise<GenerateTaxReportResponse> {

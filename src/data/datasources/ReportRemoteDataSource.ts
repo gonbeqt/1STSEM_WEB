@@ -9,6 +9,7 @@ import {
   ExportReportRequest,
   ExportReportResponse,
   ListReportsResponse,
+  ListBalanceSheetsParams,
   TaxAnalysisRequest,
   TaxAnalysisResponse,
   RiskAnalysisGenerateRequest,
@@ -23,9 +24,18 @@ export class ReportRemoteDataSource {
 
   constructor(private readonly api: ApiService) {}
 
+  private buildUrl(path: string): string {
+    if (/^https?:\/\//i.test(path)) {
+      return path;
+    }
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const base = (this.apiUrl || '').replace(/\/+$/, '');
+    return base ? `${base}${normalizedPath}` : normalizedPath;
+  }
+
   async generateBalanceSheet(request: GenerateBalanceSheetRequest): Promise<GenerateBalanceSheetResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/balance-sheet/generate/`, request);
+      return await this.api.post(this.buildUrl('/balance-sheet/generate/'), request);
     } catch (error) {
       console.error('Balance sheet generation error:', error);
       throw error;
@@ -39,7 +49,7 @@ export class ReportRemoteDataSource {
         queryParams.append('balance_sheet_id', request.report_id);
       }
 
-      return await this.api.get(`${this.apiUrl}/balance-sheet/export-excel/?${queryParams}`);
+  return await this.api.get(this.buildUrl(`/balance-sheet/export-excel/?${queryParams}`));
     } catch (error) {
       console.error('Balance sheet Excel export error:', error);
       throw error;
@@ -48,16 +58,25 @@ export class ReportRemoteDataSource {
 
   async exportBalanceSheetPdf(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/balance-sheet/export-pdf/`, request);
+  return await this.api.post(this.buildUrl('/balance-sheet/export-pdf/'), request);
     } catch (error) {
       console.error('Balance sheet PDF export error:', error);
       throw error;
     }
   }
 
-  async listBalanceSheets(): Promise<ListReportsResponse> {
+  async listBalanceSheets(params: ListBalanceSheetsParams = {}): Promise<ListReportsResponse> {
     try {
-      return await this.api.get(`${this.apiUrl}/balance-sheet/list/`);
+      const query = new URLSearchParams();
+      if (params.report_type) {
+        query.append('report_type', params.report_type);
+      }
+      if (typeof params.limit === 'number' && !Number.isNaN(params.limit)) {
+        query.append('limit', params.limit.toString());
+      }
+      const queryString = query.toString();
+      const url = this.buildUrl(`/financial/balance-sheet/list/${queryString ? `?${queryString}` : ''}`);
+      return await this.api.get(url);
     } catch (error) {
       console.error('List balance sheets error:', error);
       throw error;
@@ -66,7 +85,7 @@ export class ReportRemoteDataSource {
 
   async generateCashFlow(request: GenerateCashFlowRequest): Promise<GenerateCashFlowResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/cash-flow/generate/`, request);
+      return await this.api.post(this.buildUrl('/cash-flow/generate/'), request);
     } catch (error) {
       console.error('Cash flow generation error:', error);
       throw error;
@@ -75,7 +94,7 @@ export class ReportRemoteDataSource {
 
   async exportCashFlowExcel(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/cash-flow/export-excel/`, request);
+      return await this.api.post(this.buildUrl('/cash-flow/export-excel/'), request);
     } catch (error) {
       console.error('Cash flow Excel export error:', error);
       throw error;
@@ -84,7 +103,7 @@ export class ReportRemoteDataSource {
 
   async exportCashFlowPdf(request: ExportReportRequest): Promise<ExportReportResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/cash-flow/export-pdf/`, request);
+      return await this.api.post(this.buildUrl('/cash-flow/export-pdf/'), request);
     } catch (error) {
       console.error('Cash flow PDF export error:', error);
       throw error;
@@ -93,7 +112,7 @@ export class ReportRemoteDataSource {
 
   async listCashFlowStatements(): Promise<ListReportsResponse> {
     try {
-      return await this.api.get(`${this.apiUrl}/cash-flow/list/`);
+      return await this.api.get(this.buildUrl('/financial/cash-flow/list/'));
     } catch (error) {
       console.error('List cash flow statements error:', error);
       throw error;
@@ -102,7 +121,7 @@ export class ReportRemoteDataSource {
 
   async generateTaxReport(request: GenerateTaxReportRequest): Promise<GenerateTaxReportResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/tax-reports/`, request);
+      return await this.api.post(this.buildUrl('/tax-reports/'), request);
     } catch (error) {
       console.error('Tax report generation error:', error);
       throw error;
@@ -111,16 +130,25 @@ export class ReportRemoteDataSource {
 
   async listTaxReports(): Promise<ListReportsResponse> {
     try {
-      return await this.api.get(`${this.apiUrl}/tax-reports/`);
+      return await this.api.get(this.buildUrl('/tax-reports/'));
     } catch (error) {
       console.error('List tax reports error:', error);
       throw error;
     }
   }
 
+  async listIncomeStatements(): Promise<ListReportsResponse> {
+    try {
+      return await this.api.get(this.buildUrl('/financial/income-statement/list/'));
+    } catch (error) {
+      console.error('List income statements error:', error);
+      throw error;
+    }
+  }
+
   async generateTaxAnalysisDaily(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/ai/tax-analysis/daily/`, request);
+      return await this.api.post(this.buildUrl('/ai/tax-analysis/daily/'), request);
     } catch (error) {
       console.error('Daily tax analysis error:', error);
       throw error;
@@ -129,7 +157,7 @@ export class ReportRemoteDataSource {
 
   async generateTaxAnalysisWeekly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/ai/tax-analysis/weekly/`, request);
+      return await this.api.post(this.buildUrl('/ai/tax-analysis/weekly/'), request);
     } catch (error) {
       console.error('Weekly tax analysis error:', error);
       throw error;
@@ -138,7 +166,7 @@ export class ReportRemoteDataSource {
 
   async generateTaxAnalysisMonthly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/ai/tax-analysis/monthly/`, request);
+      return await this.api.post(this.buildUrl('/ai/tax-analysis/monthly/'), request);
     } catch (error) {
       console.error('Monthly tax analysis error:', error);
       throw error;
@@ -147,7 +175,7 @@ export class ReportRemoteDataSource {
 
   async generateTaxAnalysisYearly(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/ai/tax-analysis/yearly/`, request);
+      return await this.api.post(this.buildUrl('/ai/tax-analysis/yearly/'), request);
     } catch (error) {
       console.error('Yearly tax analysis error:', error);
       throw error;
@@ -156,7 +184,7 @@ export class ReportRemoteDataSource {
 
   async generateTaxAnalysisCustom(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {
     try {
-      return await this.api.post(`${this.apiUrl}/ai/tax-analysis/custom/`, request);
+      return await this.api.post(this.buildUrl('/ai/tax-analysis/custom/'), request);
     } catch (error) {
       console.error('Custom tax analysis error:', error);
       throw error;
@@ -169,7 +197,7 @@ export class ReportRemoteDataSource {
     defaultError: string,
   ): Promise<RiskAnalysisResponse> {
     try {
-      const data = await this.api.post(`${this.apiUrl}${endpoint}`, payload ?? {});
+      const data = await this.api.post(this.buildUrl(endpoint), payload ?? {});
       if ((data as any)?.success === false) {
         throw new Error((data as any)?.error || (data as any)?.message || defaultError);
       }
@@ -229,10 +257,11 @@ export class ReportRemoteDataSource {
         query.append('quarter', params.quarter.toString());
       }
 
-      const queryString = query.toString();
-      const url = `${this.apiUrl}/admin/ai/risk-analysis/history/${userId}/${queryString ? `?${queryString}` : ''}`;
+  const queryString = query.toString();
+  const path = `/admin/ai/risk-analysis/history/${userId}/`;
+  const url = this.buildUrl(`${path}${queryString ? `?${queryString}` : ''}`);
 
-      const data = await this.api.get(url);
+  const data = await this.api.get(url);
       if ((data as any)?.success === false) {
         throw new Error((data as any)?.error || 'Failed to fetch risk analysis history');
       }
@@ -253,10 +282,11 @@ export class ReportRemoteDataSource {
         query.append('period_type', periodType);
       }
 
-      const queryString = query.toString();
-      const url = `${this.apiUrl}/admin/ai/risk-analysis/latest/${userId}/${queryString ? `?${queryString}` : ''}`;
+  const queryString = query.toString();
+  const path = `/admin/ai/risk-analysis/latest/${userId}/`;
+  const url = this.buildUrl(`${path}${queryString ? `?${queryString}` : ''}`);
 
-      const data = await this.api.get(url);
+  const data = await this.api.get(url);
       if ((data as any)?.success === false) {
         throw new Error((data as any)?.error || 'Failed to fetch latest risk analysis');
       }

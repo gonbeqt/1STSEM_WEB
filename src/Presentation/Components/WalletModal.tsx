@@ -176,14 +176,19 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="category" className="text-black text-sm font-medium">Category</label>
-                        <input
+                        <select
                           id="category"
-                          type="text"
-                          placeholder="Transaction Category"
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:shadow-md"
-                        />
+                          className="w-full bg-white border border-gray-200 rounded-lg p-3 text-black text-sm transition-all focus:outline-none focus:border-purple-600 focus:shadow-md"
+                        >
+                          <option value="">Select Category</option>
+                          <option value="CUSTOMER_PAYMENT">Customer Payment</option>
+                          <option value="BUSINESS_PAYMENT">Business Payment</option>
+                          <option value="SUPPLIER_PAYMENT">Supplier Payment</option>
+                          <option value="INVESTMENT">Investment</option>
+                          <option value="PAYROLL">Payroll</option>
+                        </select>
                       </div>
 
                       <div>

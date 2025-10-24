@@ -10,6 +10,7 @@ import {
   ExportReportRequest,
   ExportReportResponse,
   ListReportsResponse,
+  ListBalanceSheetsParams,
   TaxAnalysisRequest,
   TaxAnalysisResponse
 } from '../entities/ReportEntities';
@@ -41,8 +42,8 @@ export class ExportBalanceSheetPdfUseCase {
 export class ListBalanceSheetsUseCase {
   constructor(private reportRepository: ReportRepository) {}
 
-  async execute(): Promise<ListReportsResponse> {
-    return this.reportRepository.listBalanceSheets();
+  async execute(params?: ListBalanceSheetsParams): Promise<ListReportsResponse> {
+    return this.reportRepository.listBalanceSheets(params);
   }
 }
 
@@ -75,6 +76,14 @@ export class ListCashFlowStatementsUseCase {
 
   async execute(): Promise<ListReportsResponse> {
     return this.reportRepository.listCashFlowStatements();
+  }
+}
+
+export class ListIncomeStatementsUseCase {
+  constructor(private reportRepository: ReportRepository) {}
+
+  async execute(): Promise<ListReportsResponse> {
+    return this.reportRepository.listIncomeStatements();
   }
 }
 
