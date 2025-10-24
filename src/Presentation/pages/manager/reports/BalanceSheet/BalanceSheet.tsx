@@ -2,7 +2,7 @@ import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Ba
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useBalanceSheetViewModel } from '../../../../hooks/useBalanceSheetViewModel';
@@ -39,9 +39,11 @@ const BalanceSheet: React.FC = observer(() => {
 
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
   const [expandedSheetId, setExpandedSheetId] = useState<string | null>(null);
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
   useEffect(() => {
-    // Fetch list of balance sheets via list endpoint (no generation, just fetch existing)
     void balanceSheetListViewModel.fetchAll({ limit: 10 });
   }, [balanceSheetListViewModel]);
 
@@ -51,8 +53,62 @@ const BalanceSheet: React.FC = observer(() => {
     }
   }, [balanceSheetViewModel.error]);
 
+  const getDateRange = useCallback(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startOfToday = new Date(today);
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const startOfQuarter = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
+
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+    switch (periodFilter) {
+      case 'today':
+        return { start: startOfToday, end: endOfToday };
+      case 'week':
+        return { start: startOfWeek, end: endOfToday };
+      case 'month':
+        return { start: startOfMonth, end: endOfToday };
+      case 'quarter':
+        return { start: startOfQuarter, end: endOfToday };
+      case 'year':
+        return { start: startOfYear, end: endOfToday };
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          return {
+            start: new Date(customStartDate),
+            end: new Date(new Date(customEndDate).getTime() + 86400000)
+          };
+        }
+        return null;
+      default:
+        return null;
+    }
+  }, [periodFilter, customStartDate, customEndDate]);
+
+  const filteredBalanceSheets = useMemo(() => {
+    if (periodFilter === 'all') {
+      return balanceSheetListViewModel.items;
+    }
+
+    const dateRange = getDateRange();
+    if (!dateRange) return balanceSheetListViewModel.items;
+
+    return balanceSheetListViewModel.items.filter((sheet: any) => {
+      const sheetDate = new Date(sheet.as_of_date);
+      sheetDate.setHours(0, 0, 0, 0);
+      return sheetDate >= dateRange.start && sheetDate <= dateRange.end;
+    });
+  }, [balanceSheetListViewModel.items, periodFilter, getDateRange]);
+
   const handleRefresh = useCallback(async () => {
-    // Refresh by fetching latest balance sheets from list endpoint
     await balanceSheetListViewModel.fetchAll({ limit: 10 });
   }, [balanceSheetListViewModel]);
 
@@ -77,7 +133,7 @@ const BalanceSheet: React.FC = observer(() => {
     balanceSheetListViewModel.clearError();
   }, [balanceSheetListViewModel]);
 
-  const balanceSheet = (balanceSheetListViewModel.items?.[0] ?? balanceSheetViewModel.balanceSheet) as BalanceSheetViewData | null;
+  const balanceSheet = (filteredBalanceSheets?.[0] ?? balanceSheetViewModel.balanceSheet) as BalanceSheetViewData | null;
   const totals = {
     currentAssets: Number(balanceSheet?.assets?.current_assets?.total ?? 0),
     totalAssets: Number(balanceSheet?.totals?.total_assets ?? 0),
@@ -182,7 +238,6 @@ const BalanceSheet: React.FC = observer(() => {
                 <span className="font-semibold">{formatCurrency(sheet.assets?.current_assets?.total ?? 0)}</span>
               </div>
               
-              {/* Crypto Holdings */}
               {sheet.assets?.current_assets?.crypto_holdings && Object.keys(sheet.assets.current_assets.crypto_holdings).length > 0 && (
                 <div className="ml-4 border border-gray-200 rounded p-3 bg-white mb-2">
                   <div className="font-medium text-gray-800 mb-2">Crypto Holdings</div>
@@ -316,9 +371,62 @@ const BalanceSheet: React.FC = observer(() => {
     </div>
   );
 
+  const renderPeriodFilter = () => (
+    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+      <div className="flex items-center gap-3 mb-3">
+        <Calendar className="w-5 h-5 text-gray-600" />
+        <span className="font-semibold text-gray-900">Filter by Period:</span>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {['all', 'today', 'week', 'month', 'quarter', 'year', 'custom'].map((period) => (
+          <button
+            key={period}
+            onClick={() => setPeriodFilter(period as any)}
+            className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+              periodFilter === period
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {period.charAt(0).toUpperCase() + period.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {periodFilter === 'custom' && (
+        <div className="flex gap-3 items-end">
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">Start Date</label>
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">End Date</label>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+        </div>
+      )}
+
+      {filteredBalanceSheets.length > 0 && (
+        <p className="text-sm text-gray-600 mt-3">
+          Showing <span className="font-semibold">{filteredBalanceSheets.length}</span> balance sheet(s) for selected period
+        </p>
+      )}
+    </div>
+  );
+
   const renderHistorySection = () => (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <h4 className="text-lg font-semibold text-gray-900">Recent Balance Sheets</h4>
         <button
           className="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
@@ -328,6 +436,8 @@ const BalanceSheet: React.FC = observer(() => {
           Refresh History
         </button>
       </div>
+
+      {renderPeriodFilter()}
 
       {balanceSheetListViewModel.lastError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md mb-4">
@@ -340,7 +450,7 @@ const BalanceSheet: React.FC = observer(() => {
 
       {balanceSheetListViewModel.isLoading ? (
         <ReportTableSkeleton />
-      ) : balanceSheetListViewModel.items.length > 0 ? (
+      ) : filteredBalanceSheets.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
@@ -353,7 +463,7 @@ const BalanceSheet: React.FC = observer(() => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {balanceSheetListViewModel.items.map((item: any) => (
+              {filteredBalanceSheets.map((item: any) => (
                 <React.Fragment key={item.balance_sheet_id}>
                   <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => setExpandedSheetId(expandedSheetId === item.balance_sheet_id ? null : item.balance_sheet_id)}>
                     <td className="px-4 py-2 text-gray-700">{item.balance_sheet_id}</td>
@@ -375,7 +485,7 @@ const BalanceSheet: React.FC = observer(() => {
           </table>
         </div>
       ) : (
-        <p className="text-sm text-gray-600">No balance sheets available.</p>
+        <p className="text-sm text-gray-600">No balance sheets available for the selected period.</p>
       )}
     </div>
   );
@@ -462,10 +572,9 @@ const BalanceSheet: React.FC = observer(() => {
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Set column widths
       ws['!cols'] = [
-        { wch: 35 }, // Account column
-        { wch: 18 }  // Amount column
+        { wch: 35 },
+        { wch: 18 }
       ];
 
       XLSX.utils.book_append_sheet(wb, ws, 'Balance Sheet');
