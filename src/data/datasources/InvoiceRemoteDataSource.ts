@@ -7,7 +7,7 @@ export class InvoiceRemoteDataSource {
   constructor(private readonly api: ApiService) {}
 
   async getUserInvoices(userId: string): Promise<Invoice[]> {
-    void userId; // Currently unused; kept for future filtering support.
+    void userId; 
     try {
       const url = `${this.apiUrl}/invoices/list`;
       const data = await this.api.get<{ invoices: Invoice[] }>(url);

@@ -23,7 +23,6 @@ export class AddressBookRemoteDataSource {
         notes: request.notes?.toString().trim() || '',
       };
 
-      // Basic client-side validation
       if (!payload.address || !payload.name) {
         return { success: false, message: 'address and name are required', error: 'address and name are required' };
       }
