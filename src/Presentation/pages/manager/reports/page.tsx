@@ -4,12 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import { FileText, BarChart3, TrendingUp, LineChart, ClipboardList, ScrollText } from 'lucide-react';
 
-const PERIOD_LABELS = ['Daily', 'Weekly', 'Monthly', 'Quarterly'] as const;
-type PeriodLabel = typeof PERIOD_LABELS[number];
 
 const ReportsComponent: React.FC = () => {
   const navigate = useNavigate();
-  const [activePeriod, setActivePeriod] = useState<PeriodLabel>('Daily');
 
 
 
@@ -61,9 +58,6 @@ const ReportsComponent: React.FC = () => {
     navigate(path);
   };
 
-  const handlePeriodChange = (label: PeriodLabel) => {
-    setActivePeriod(label);
-  };
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
@@ -72,22 +66,7 @@ const ReportsComponent: React.FC = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Reports</h1>
           
-          {/* Period Selector */}
-          <div className="flex gap-3 mb-8">
-            {PERIOD_LABELS.map((label) => (
-              <button
-                key={label}
-                className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
-                  activePeriod === label
-                    ? 'bg-purple-100 text-purple-700 border-2 border-purple-200'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => handlePeriodChange(label)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          
         </div>
 
         {/* Financial Reports Section */}

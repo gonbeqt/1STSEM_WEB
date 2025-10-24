@@ -372,20 +372,21 @@ const TaxSummary: React.FC = observer(() => {
             >
               <option value="">-- Select a report --</option>
               {toJS(taxSummaryViewModel.items).map((report) => {
-                const date = new Date(report.generated_at);
-                const formattedDate = date.toLocaleDateString('en-US', {
+                const startDate = new Date(report.start_date);
+                const endDate = new Date(report.end_date);
+                const formattedStartDate = startDate.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric'
                 });
-                const formattedTime = date.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true
+                const formattedEndDate = endDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
                 });
                 return (
                   <option key={report._id} value={report._id}>
-                    {report.report_type} - {formattedDate} at {formattedTime} ({report.status})
+                    {report.report_type} - {formattedStartDate} to {formattedEndDate} ({report.status})
                   </option>
                 );
               })}
