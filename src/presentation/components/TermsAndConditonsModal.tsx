@@ -54,83 +54,98 @@ const TermsAndConditonsModal: React.FC<TermsAndConditionsModalProps> = ({
 
           <h4 className="mb-1 font-semibold">Acceptance of Terms</h4>
           <p className="mb-4">
-            By creating an account or using the app, you agree to comply with
-            these Terms and Conditions and any applicable laws and regulations.
-            If you do not agree, please discontinue using the app.
+            By creating an account or accessing the application, you enter into
+            a binding agreement to comply with these Terms and Conditions and
+            all applicable laws and regulations governing your use of the
+            services. Your continued use of the application constitutes ongoing
+            acceptance of these terms as they may be modified from time to time.
           </p>
 
           <h4 className="mb-1 font-semibold">Data Collection and Usage</h4>
           <p className="mb-4">
-            To provide our services, we collect and process certain information.
-            This may include personal and business details such as employee
-            names and business credentials, as well as financial data including
-            budgets, wallet addresses, and transaction records. The information
-            you provide will be used solely to deliver and improve our services
-            in compliance with applicable data protection laws.
+            To provide our services, we collect and process certain information
+            including personal and business details such as employee names and
+            business credentials, as well as financial data including budgets,
+            wallet addresses, and transaction records. All information collected
+            is used exclusively to deliver and enhance our services. We are
+            committed to safeguarding your privacy in strict accordance with the
+            Data Privacy Act of 2012 (Republic Act No. 10173) of the Republic of
+            the Philippines and all other applicable data protection
+            legislation. Your personal data is processed securely, stored with
+            appropriate confidentiality measures, and will not be disclosed to
+            third parties without your explicit prior consent except where
+            required by law or regulatory authority.
           </p>
 
-          <h4 className="mb-1 font-semibold">Service Limitations</h4>
+          <h4 className="mb-1 font-semibold">Service Scope and Limitations</h4>
           <p className="mb-4">
-            At present, the functionalities available within the app represent
-            the full extent of our services, and we cannot guarantee additional
-            features or services outside of what is currently provided.
-          </p>
-
-          <h4 className="mb-1 font-semibold">Cryptocurrency Payroll Automation</h4>
-          <p className="mb-4">
-            Our platform is designed to automate cryptocurrency-based payroll
-            distribution. At this time, the system only supports businesses or
-            organizations that pay employees on a fixed monthly salary basis.
-            The platform does not calculate or manage hourly wages, commissions,
-            attendance records, or overtime pay. Managers are solely responsible
-            for ensuring accurate payment amounts before initiating transactions.
+            The Cryphoria platform is designed to facilitate
+            cryptocurrency-based payroll distribution. At this time, the system
+            only supports businesses or organizations that pay employees on a
+            fixed monthly salary basis. The platform does not support or
+            calculate hourly wages, commission-based compensation, attendance
+            tracking, or overtime pay. Users acknowledge and accept full
+            responsibility for verifying the accuracy of all payment amounts
+            prior to initiating any transaction through the platform.
           </p>
 
           <h4 className="mb-1 font-semibold">Financial Transactions Disclaimer</h4>
           <p className="mb-4">
-            Users are solely responsible for ensuring the accuracy of all wallet
-            addresses and transaction details they enter. We are not liable for
-            any loss of funds resulting from incorrect recipient information,
-            fraudulent activities, or investment scams outside our platform.
+            Users bear sole responsibility for ensuring the accuracy of all
+            wallet addresses and transaction details they enter. Cryphoria is
+            not liable for any loss of funds resulting from incorrect recipient
+            information, fraudulent activities, or scams occurring outside our
+            platform. All cryptocurrency transactions executed through the
+            platform are final and irreversible. Users are strongly advised to
+            carefully verify all information before confirming any transaction.
           </p>
 
-          <h4 className="mb-1 font-semibold">Use of AI and Automation</h4>
+          <h4 className="mb-1 font-semibold">
+            Artificial Intelligence and Automated Processing
+          </h4>
           <p className="mb-4">
-            Our application uses Artificial Intelligence (AI) and Large Language
-            Models (LLMs) to automate certain accounting and financial tasks.
-            While we strive for accuracy, automated outputs may not always be
-            completely correct. Users are advised to carefully review all
-            AI-generated reports and suggestions before making financial
-            decisions, as we are not liable for decisions made solely on
-            AI-generated content.
+            This application leverages Artificial Intelligence (AI) and Large
+            Language Models (LLMs) to streamline accounting and financial
+            operations. While we maintain high standards for accuracy, users
+            should be aware that AI-generated results may occasionally contain
+            errors, inaccuracies, or require human verification. Users are
+            responsible for reviewing and validating all automated results
+            before making critical decisions.
           </p>
 
           <h4 className="mb-1 font-semibold">User Responsibilities</h4>
           <p className="mb-4">
-            You are responsible for the accuracy of the data you provide and for
-            safeguarding your account information. The app must be used only for
-            lawful purposes, and any misuse for fraudulent or illegal activities
-            will result in the termination of your access.
+            Users are required to provide accurate, complete, and current
+            information and to maintain the security of their account
+            credentials. The platform must be used exclusively for lawful
+            purposes. Any engagement in fraudulent, illegal, or unauthorized
+            activities will result in immediate termination of account access
+            without prior notice and may be reported to appropriate legal and
+            regulatory authorities. Users must promptly notify Cryphoria of any
+            suspected unauthorized access to their account.
           </p>
 
-          <h4 className="mb-1 font-semibold">Amendments</h4>
+          <h4 className="mb-1 font-semibold">Amendments to Terms</h4>
           <p className="mb-4">
-            We reserve the right to update these Terms and Conditions at any
-            time. Any changes will take effect immediately upon being published,
-            and continued use of the app constitutes acceptance of the revised
-            terms.
+            Cryphoria reserves the right to modify or update these Terms and
+            Conditions at any time. All modifications shall become effective
+            immediately upon publication within the application. Continued use
+            of the application following any such modification constitutes
+            binding acceptance of the revised terms. Users are encouraged to
+            review these terms periodically to remain informed of any changes.
           </p>
 
           <h4 className="mb-1 font-semibold">Contact Us</h4>
           <p className="mb-4">
-            For questions or concerns about these Terms and Conditions, please
-            contact us at:{" "}
+            For inquiries, concerns, or requests regarding these Terms and
+            Conditions, please contact us at{" "}
             <a
-              href="mailto:cryphoria@gmail.com"
+              href="mailto:cryphoria.team@gmail.com"
               className="text-purple-600 underline"
             >
-              cryphoria@gmail.com
+              cryphoria.team@gmail.com
             </a>
+            .
           </p>
         </div>
 
