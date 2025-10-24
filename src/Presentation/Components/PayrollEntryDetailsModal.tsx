@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmployeeHistoryDetails } from '../../domain/entities/EmployeeHistoryEntities';
-import { X, Hash, DollarSign, CreditCard, Calendar, FileText, CheckCircle, Clock, AlertCircle, ExternalLink, Download } from 'lucide-react';
+import { X, Hash, DollarSign, Calendar, FileText, CheckCircle, Clock, AlertCircle, ExternalLink, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 interface PayrollEntryDetailsModalProps {

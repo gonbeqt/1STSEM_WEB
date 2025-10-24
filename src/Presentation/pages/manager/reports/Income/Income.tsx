@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useIncomeViewModel } from '../../../../hooks/useBalanceSheetViewModel';
 import { ReportChartSkeleton } from '../../../../components/TaxSummarySkeleton';
 

@@ -36,40 +36,6 @@ const dedupeVulnerabilities = (vulnerabilities?: Vulnerability[]) => {
     });
 };
 
-const getSeverityBadgeClass = (severity?: string) => {
-    const normalized = severity?.toUpperCase();
-
-    switch (normalized) {
-        case 'CRITICAL':
-            return 'bg-red-100 text-red-700 border-red-200';
-        case 'HIGH':
-            return 'bg-orange-100 text-orange-700 border-orange-200';
-        case 'MEDIUM':
-            return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-        case 'LOW':
-            return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-        default:
-            return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-};
-
-const getRiskBadgeClass = (risk?: string) => {
-    const normalized = risk?.toUpperCase();
-
-    switch (normalized) {
-        case 'CRITICAL':
-            return 'text-red-600';
-        case 'HIGH':
-            return 'text-orange-600';
-        case 'MEDIUM':
-            return 'text-yellow-600';
-        case 'LOW':
-            return 'text-emerald-600';
-        default:
-            return 'text-gray-600';
-    }
-};
-
 const AuditSolidityContract: React.FC = () => {
     const { warning: toastWarning, error: toastError, success: toastSuccess, info: toastInfo } = useToast();
     const [currentStep, setCurrentStep] = useState(1);
@@ -86,11 +52,6 @@ const AuditSolidityContract: React.FC = () => {
     const [analysisError, setAnalysisError] = useState<string | null>(null);
     const [uploadResponse, setUploadResponse] = useState<UploadContractResponse | null>(null);
     const [auditResponse, setAuditResponse] = useState<AuditContractResponse | null>(null);
-
-    const uniqueVulnerabilities = useMemo(
-        () => dedupeVulnerabilities(auditResponse?.vulnerabilities),
-        [auditResponse]
-    );
 
     const steps = [
         { number: 1, title: 'Contract Set up', active: currentStep === 1 },

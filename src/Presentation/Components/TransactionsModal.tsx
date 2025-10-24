@@ -1,5 +1,5 @@
 import React from 'react';
-import Skeleton, { SkeletonCircle, SkeletonText } from './Skeleton';
+import { SkeletonCircle, SkeletonText } from './Skeleton';
 import type { DisplayTransaction } from '../pages/manager/home/utils';
 
 interface Props {

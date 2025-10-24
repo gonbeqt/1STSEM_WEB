@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import ManagerNavbar from '../../../components/ManagerNavbar';
-import { FileText, BarChart3, TrendingUp, LineChart, ClipboardList, ScrollText } from 'lucide-react';
+import { FileText, BarChart3, TrendingUp, ClipboardList, ScrollText } from 'lucide-react';
 
 
 const ReportsComponent: React.FC = () => {

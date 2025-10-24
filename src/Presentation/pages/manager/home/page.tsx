@@ -1,18 +1,15 @@
 // src/Presentation/pages/manager/home/page.tsx
 import { useState, useEffect, useRef, useMemo } from 'react';
-import type { JSX } from 'react';
 import { observer } from 'mobx-react-lite';
 import WalletModal from '../../../components/WalletModal';
 import PaymentModal from './Modal/Payment/PaymentModal';
 import PayrollModal from './Modal/Payroll/PayrollModal';
-import { Loader2, Clock, TrendingDown, MoreVertical } from 'lucide-react';
 import AuditContractModal from './Modal/AuditContractModal/AuditContractModal';
 import InvestModal from './Modal/InvestModal/InvestModal';
 import { useWallet } from '../../../hooks/useWallet';
 import RecentTransactionDetails from '../../../components/RecentTransactionDetails';
 import { useEnhancedTransactionHistory } from '../../../hooks/useEnhancedTransactionHistory';
 import ManagerNavbar from '../../../components/ManagerNavbar';
-import Skeleton, { SkeletonCircle, SkeletonText } from '../../../components/Skeleton';
 import { useToast } from '../../../components/Toast/ToastProvider';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { TransactionRecord, DisplayTransaction, mapTransactionToDisplay } from './utils';

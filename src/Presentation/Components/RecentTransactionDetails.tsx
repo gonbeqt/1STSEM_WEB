@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatKey, formatValue, KeyValueList } from '../pages/manager/home/utils';
+import { KeyValueList } from '../pages/manager/home/utils';
 
 type AiAnalysis = {
   classification?: string;

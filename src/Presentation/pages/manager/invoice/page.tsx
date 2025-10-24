@@ -34,10 +34,6 @@ const ManagerInvoicePage: React.FC = () => {
     setDisplayedInvoices(filterInvoices(invoices, searchTerm));
   }, [invoices, searchTerm]);
 
-  const handleCreateInvoice = () => {
-    // Placeholder for navigation or modal trigger
-  };
-
   const renderContent = () => {
     if (loading) {
       return (

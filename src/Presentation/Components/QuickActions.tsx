@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, DollarSign, ClipboardList, FileText, TrendingUp } from 'lucide-react';
+import { Send, DollarSign, ClipboardList, TrendingUp } from 'lucide-react';
 
 interface Props {
   onSendPayment: () => void;

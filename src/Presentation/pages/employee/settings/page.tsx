@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useViewModel } from '../../../hooks/useViewModel';
 import { LoginViewModel } from '../../../../domain/viewmodel/LoginViewModel';
 import ManagerNavbar from '../../../components/ManagerNavbar';
-import { Lock, ShieldCheck, HelpCircle, ChevronRight, ArrowLeft, Eye, EyeOff, CircleHelp, MessageCircle, Search, ChevronDown, Pencil } from 'lucide-react';
+import { ShieldCheck, HelpCircle, ChevronRight, ArrowLeft, Eye, EyeOff, CircleHelp, MessageCircle, Search, ChevronDown, Pencil } from 'lucide-react';
 import apiService from '../../../../data/api';
 
 interface MenuItem {

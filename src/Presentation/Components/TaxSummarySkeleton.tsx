@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skeleton, SkeletonText } from './Skeleton';
+import { Skeleton } from './Skeleton';
 
 export const TaxSummarySkeleton: React.FC = () => (
   <div className="space-y-6">

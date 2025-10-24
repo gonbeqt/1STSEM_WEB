@@ -1,11 +1,11 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useTaxSummaryViewModel } from '../../../../hooks/useTaxSummaryViewModel';
 import { TaxReport } from '../../../../../domain/viewmodel/TaxSummaryViewModel';
 import { TaxSummarySkeleton, TaxSummaryChartSkeleton } from '../../../../components/TaxSummarySkeleton';
@@ -364,15 +364,15 @@ const TaxSummary: React.FC = observer(() => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Report</label>
             <select 
               value={taxSummaryViewModel.selectedReport?._id || ''} 
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 const reportId = e.target.value;
-                const report = toJS(taxSummaryViewModel.items).find(r => r._id === reportId);
+                const report = toJS(taxSummaryViewModel.items).find((r: TaxReport) => r._id === reportId);
                 if (report) taxSummaryViewModel.selectReport(report);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">-- Select a report --</option>
-              {toJS(taxSummaryViewModel.items).map((report) => {
+              {toJS(taxSummaryViewModel.items).map((report: TaxReport) => {
                 const startDate = new Date(report.start_date);
                 const endDate = new Date(report.end_date);
                 const formattedStartDate = startDate.toLocaleDateString('en-US', {

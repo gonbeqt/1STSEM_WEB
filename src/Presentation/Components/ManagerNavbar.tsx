@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
-
-import { BarChart2, Bell, FileText, Home, LogOutIcon, Settings, Users } from 'lucide-react';
+import { BarChart2, FileText, Home, Settings, Users } from 'lucide-react';
 import LogoutConfirmModal from './LogoutConfirmModal';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
 import { container } from '../../di/container';
-import { Log } from 'ethers';
 const NAV_LINKS = [
   { to: '/home', label: 'Home', Icon: Home },
   { to: '/management', label: 'Management', Icon: Users },

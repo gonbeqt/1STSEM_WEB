@@ -1,5 +1,5 @@
 import React from 'react';
-import Skeleton, { SkeletonCircle, SkeletonText } from './Skeleton';
+import { SkeletonCircle, SkeletonText } from './Skeleton';
 import { MoreVertical } from 'lucide-react';
 import type { DisplayTransaction } from '../pages/manager/home/utils';
 
