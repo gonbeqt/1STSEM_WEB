@@ -76,6 +76,16 @@ const TermsAndConditonsModal: React.FC<TermsAndConditionsModalProps> = ({
             features or services outside of what is currently provided.
           </p>
 
+          <h4 className="mb-1 font-semibold">Cryptocurrency Payroll Automation</h4>
+          <p className="mb-4">
+            Our platform is designed to automate cryptocurrency-based payroll
+            distribution. At this time, the system only supports businesses or
+            organizations that pay employees on a fixed monthly salary basis.
+            The platform does not calculate or manage hourly wages, commissions,
+            attendance records, or overtime pay. Managers are solely responsible
+            for ensuring accurate payment amounts before initiating transactions.
+          </p>
+
           <h4 className="mb-1 font-semibold">Financial Transactions Disclaimer</h4>
           <p className="mb-4">
             Users are solely responsible for ensuring the accuracy of all wallet

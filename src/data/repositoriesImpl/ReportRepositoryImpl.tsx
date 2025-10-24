@@ -65,7 +65,7 @@ export class ReportRepositoryImpl implements ReportRepository {
   }
 
   async listTaxReports(): Promise<ListReportsResponse> {
-    return this.remote.listTaxReports();
+    return this.remote.getUserTaxReports();
   }
 
   async generateTaxAnalysisDaily(request: TaxAnalysisRequest): Promise<TaxAnalysisResponse> {

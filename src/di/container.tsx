@@ -31,9 +31,7 @@ import {
   GenerateCashFlowUseCase,
   ExportCashFlowExcelUseCase,
   ExportCashFlowPdfUseCase,
-  ListCashFlowStatementsUseCase,
   GenerateTaxReportUseCase,
-  ListTaxReportsUseCase,
   GenerateTaxAnalysisDailyUseCase,
   GenerateTaxAnalysisWeeklyUseCase,
   GenerateTaxAnalysisMonthlyUseCase,
@@ -41,6 +39,8 @@ import {
   GenerateTaxAnalysisCustomUseCase
 } from '../domain/usecases/ReportUseCases';
 import { ListIncomeStatementsUseCase } from '../domain/usecases/ReportUseCases';
+import { ListCashFlowStatementsUseCase } from '../domain/usecases/ListCashFlowStatementsUseCase';
+import { ListTaxReportsUseCase } from '../domain/usecases/ListTaxReportsUseCase';
 import {
   GenerateDailyRiskAnalysisUseCase,
   GenerateWeeklyRiskAnalysisUseCase,
@@ -113,6 +113,8 @@ import { EmployeeHistoryViewModel } from '../domain/viewmodel/EmployeeHistoryVie
 import { RiskAnalysisViewModel } from '../domain/viewmodel/RiskAnalysisViewModel';
 import { BalanceSheetViewModel } from '../domain/viewmodel/BalanceSheetViewModel';
 import { IncomeViewModel } from '../domain/viewmodel/IncomeViewModel';
+import { CashFlowListViewModel } from '../domain/viewmodel/CashFlowListViewModel';
+import { TaxSummaryViewModel } from '../domain/viewmodel/TaxSummaryViewModel';
 import { ListBalanceSheetUseCase } from '../domain/usecases/BalanceSheetListUseCase';
 import { BalanceSheetListViewModel } from '../domain/viewmodel/BalanceSheetListViewModel';
 
@@ -242,6 +244,8 @@ export interface Container {
   balanceSheetViewModel: () => BalanceSheetViewModel;
   balanceSheetListViewModel: () => BalanceSheetListViewModel;
   incomeViewModel: () => IncomeViewModel;
+  cashFlowListViewModel: () => CashFlowListViewModel;
+  taxSummaryViewModel: () => TaxSummaryViewModel;
 
 
 }
@@ -523,6 +527,8 @@ export const container: Container = {
   incomeViewModel: () => new IncomeViewModel(
     listIncomeStatementsUseCase
   ),
+  cashFlowListViewModel: () => new CashFlowListViewModel(listCashFlowStatementsUseCase),
+  taxSummaryViewModel: () => new TaxSummaryViewModel(listTaxReportsUseCase),
   
 
 };

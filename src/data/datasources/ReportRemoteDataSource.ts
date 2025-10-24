@@ -137,6 +137,15 @@ export class ReportRemoteDataSource {
     }
   }
 
+  async getUserTaxReports(): Promise<any> {
+    try {
+      return await this.api.get(this.buildUrl('/financial/tax-report/list/'));
+    } catch (error) {
+      console.error('Get user tax reports error:', error);
+      throw error;
+    }
+  }
+
   async listIncomeStatements(): Promise<ListReportsResponse> {
     try {
       return await this.api.get(this.buildUrl('/financial/income-statement/list/'));
