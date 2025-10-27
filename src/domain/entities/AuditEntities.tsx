@@ -1,4 +1,3 @@
-// src/domain/entities/AuditEntities.tsx
 
 export interface UploadContractFileRequest {
   contract_file: File;
@@ -56,7 +55,6 @@ export interface AuditSmartContractResponse {
 }
 
 export interface GetUserAuditsRequest {
-  // No specific parameters needed for user audits
 }
 
 export interface UserAudit {
@@ -105,7 +103,6 @@ export interface GetAuditDetailsResponse {
 }
 
 export interface GetAuditStatisticsRequest {
-  // No specific parameters needed for statistics
 }
 
 export interface AuditStatistics {

@@ -1,4 +1,3 @@
-// src/domain/models/LoginViewModel.tsx
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LoginUseCase } from '../usecases/LoginUseCase';
 import { LogoutUseCase } from '../usecases/LogOutUseCase';
@@ -38,7 +37,6 @@ export class LoginViewModel {
   ) {
     makeAutoObservable(this, {}, { autoBind: true });
 
-    // Initialize login status based on existing tokens
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     runInAction(() => {
@@ -46,9 +44,7 @@ export class LoginViewModel {
     });
   }
 
-  // Change password via use case
   changePassword = async (payload: { current_password?: string; newPassword?: string; confirmPassword?: string; revoke_other_sessions?: boolean }) => {
-    // Normalize fields
     const current_password = payload.current_password || '';
     const new_password = payload.newPassword || payload.newPassword || '';
 
@@ -60,7 +56,6 @@ export class LoginViewModel {
       throw new Error('ChangePassword use case not available');
     }
 
-    // Call use case
     const result = await this.changePasswordUseCase.execute({
       current_password,
       new_password,
@@ -70,7 +65,6 @@ export class LoginViewModel {
     return result;
   }
 
-  // Send support message via use case
   sendSupportMessage = async (payload: { subject?: string; message: string; category?: string; priority?: string; attachments?: File | Blob | string | FileList | Array<File | Blob | string> }) => {
     if (!this.sendSupportMessageUseCase) {
       throw new Error('SendSupportMessage use case not available');
@@ -88,8 +82,6 @@ export class LoginViewModel {
   }
 
   private checkLoginStatus = () => {
-    // This method is no longer needed as login status is initialized in the constructor
-    // and updated by login/logout actions.
   };
 
   setEmail = (email: string) => {
@@ -128,31 +120,19 @@ export class LoginViewModel {
 
       
 
-      // Check if response exists and is not null/undefined
-      if (!response || response === null || response === undefined) {
-        console.error('No data in response');
-        throw new Error('No data received from login response');
+      if (!response || response === null || response === undefined) {        throw new Error('No data received from login response');
       }
 
-      // Check if login was successful
       if (!response.success) {
         throw new Error(response.message || 'Login failed');
       }
 
-      // Check if user and session_token exist
-      if (!response.user) {
-        console.error('No user data in response:', response);
-        throw new Error('No user data received from login response');
+      if (!response.user) {        throw new Error('No user data received from login response');
       }
 
-      // Log the full user object to debug role issue
-
   
-      // Log role information for debugging
 
-      if (!response.session_token) {
-        console.error('No session_token in response:', response);
-        throw new Error('No session token received from login');
+      if (!response.session_token) {        throw new Error('No session token received from login');
       }
 
       localStorage.setItem('token', response.session_token);
@@ -305,7 +285,6 @@ export class LoginViewModel {
     }
   };
 
-  // Getters
   get formData() {
     return {
       email: this.state.email,

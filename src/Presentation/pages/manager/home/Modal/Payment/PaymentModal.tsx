@@ -1,4 +1,3 @@
-// src/Presentation/pages/manager/home/Modal/Payment/PaymentModal.tsx
 import React, { useState } from 'react';
 import { useToast } from '../../../../../components/Toast/ToastProvider';
 import { ProgressBar } from '../../utils';

@@ -1,4 +1,3 @@
-// src/domain/viewmodel/PayrollViewModel.tsx
 import { useState } from 'react';
 import { CreatePayrollEntryUseCase, CreatePayrollEntryUseCaseResponse } from '../usecases/CreatePayrollEntryUseCase';
 import { ProcessPayrollPaymentUseCase } from '../usecases/ProcessPayrollPaymentUseCase';
@@ -8,7 +7,6 @@ import {
   ProcessPayrollPaymentResponse 
 } from '../entities/PayrollEntities';
 
-// Hook-based version for React components
 export const usePayrollViewModel = (
   createPayrollEntryUseCase: CreatePayrollEntryUseCase,
   processPayrollPaymentUseCase: ProcessPayrollPaymentUseCase
@@ -34,17 +32,12 @@ export const usePayrollViewModel = (
         setSuccess(response.message || 'Payroll entry created successfully!');
         
       } else {
-        setError(response.error || 'Failed to create payroll entry');
-        console.error('❌ Payroll entry creation failed:', response);
-      }
+        setError(response.error || 'Failed to create payroll entry');      }
       
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(errorMessage);
-      console.error('❌ Payroll entry creation error:', err);
-      
-      return {
+      setError(errorMessage);      return {
         success: false,
         error: errorMessage
       };
@@ -65,17 +58,12 @@ export const usePayrollViewModel = (
         setSuccess(response.message || 'Payroll payment processed successfully!');
         
       } else {
-        setError(response.error || 'Failed to process payroll payment');
-        console.error('❌ Payroll payment processing failed:', response);
-      }
+        setError(response.error || 'Failed to process payroll payment');      }
       
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(errorMessage);
-      console.error('❌ Payroll payment processing error:', err);
-      
-      return {
+      setError(errorMessage);      return {
         success: false,
         error: errorMessage
       };
@@ -107,16 +95,11 @@ export class PayrollViewModel {
       
       if (response.success) {
         
-      } else {
-        console.error('❌ Payroll entry creation failed:', response);
-      }
+      } else {      }
       
       return response;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      console.error('❌ Payroll entry creation error:', err);
-      
-      return {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';      return {
         success: false,
         error: errorMessage
       };
@@ -130,16 +113,11 @@ export class PayrollViewModel {
       
       if (response.success) {
         
-      } else {
-        console.error('❌ Payroll payment processing failed:', response);
-      }
+      } else {      }
       
       return response;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      console.error('❌ Payroll payment processing error:', err);
-      
-      return {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';      return {
         success: false,
         error: errorMessage
       };

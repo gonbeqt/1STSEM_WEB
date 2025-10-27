@@ -1,4 +1,3 @@
-// Simple Report Service for Backend Connection
 class ReportService {
   private readonly API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -29,9 +28,7 @@ class ReportService {
       }
 
       return data;
-    } catch (error) {
-      console.error('Balance sheet generation error:', error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
@@ -53,9 +50,7 @@ class ReportService {
       }
 
       return data;
-    } catch (error) {
-      console.error('Cash flow generation error:', error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
@@ -80,9 +75,7 @@ class ReportService {
       }
 
       return data;
-    } catch (error) {
-      console.error('Tax report generation error:', error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
@@ -101,9 +94,7 @@ class ReportService {
       }
 
       return data;
-    } catch (error) {
-      console.error('Balance sheet Excel export error:', error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
@@ -122,13 +113,10 @@ class ReportService {
       }
 
       return data;
-    } catch (error) {
-      console.error('Cash flow Excel export error:', error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
-  // Helper method to download files from base64 data
   downloadFile(base64Data: string, filename: string, contentType: string) {
     try {
       const byteCharacters = atob(base64Data);
@@ -147,9 +135,7 @@ class ReportService {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download error:', error);
-    }
+    } catch (error) {    }
   }
 }
 

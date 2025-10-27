@@ -85,9 +85,7 @@ const PayrollSummary: React.FC = () => {
         setError(data.error || 'Failed to load payroll data');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load payroll data');
-      console.error('Payroll data error:', err);
-    } finally {
+      setError(err.message || 'Failed to load payroll data');    } finally {
       setLoading(false);
     }
   };
@@ -108,9 +106,6 @@ const PayrollSummary: React.FC = () => {
     fill: '#8884d8'
   })) : [];
 
-
-
-
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
       return '$0.00';
@@ -130,7 +125,6 @@ const PayrollSummary: React.FC = () => {
     }
 
     try {
-      // Prepare data for Excel export
       const excelData = [
         ['PAYROLL SUMMARY'],
         [`As of: ${new Date().toISOString().split('T')[0]}`],
@@ -151,11 +145,9 @@ const PayrollSummary: React.FC = () => {
         ])
       ];
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 20 }, // Employee Name
         { wch: 15 }, // Employee ID
@@ -165,10 +157,8 @@ const PayrollSummary: React.FC = () => {
         { wch: 12 }  // Deductions
       ];
 
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Payroll Summary');
 
-      // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
@@ -176,20 +166,14 @@ const PayrollSummary: React.FC = () => {
       saveAs(blob, fileName);
       
     } catch (err: any) {
-      setError(err.message || 'Failed to export to Excel');
-      console.error('Excel export error:', err);
-    }
+      setError(err.message || 'Failed to export to Excel');    }
   };
 
   const handleExportExcel = () => {
     try {
       exportToExcel();
-    } catch (error) {
-      console.error('Failed to export to Excel:', error);
-    }
+    } catch (error) {    }
   };
-
-
 
   const calculateTotalDeductions = (): number => {
     return payrollData?.payslips.reduce((total, payslip) => total + (payslip.total_deductions || 0), 0) || 0;

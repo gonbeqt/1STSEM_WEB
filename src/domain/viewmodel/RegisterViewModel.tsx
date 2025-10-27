@@ -64,7 +64,6 @@ export class RegisterViewModel {
     this.state.security_answer = security_answer;
   };
 
-  // Alternative method name in case of hot reload issues
   setSecurityQuestionAnswer = (security_answer: string) => {
     this.state.security_answer = security_answer;
   };
@@ -115,8 +114,6 @@ export class RegisterViewModel {
         role: this.state.userType === 'manager' ? 'Manager' : 'Employee'
       });
 
-
-      // Set email verification flag from response
       this.state.email_verification_required = response.email_verification_required || false;
       
       

@@ -23,7 +23,6 @@ export const useEnhancedTransactionHistory = () => {
       const defaultRequest = {
         limit: 10,
         offset: 0,
-        // Remove category completely - don't send any category filter
         ...request
       };
 
@@ -50,13 +49,10 @@ export const useEnhancedTransactionHistory = () => {
       const response = await fetchTransactionHistory({
         limit: pagination.limit,
         offset: pagination.offset + pagination.limit
-        // Remove category completely - get all transactions
       });
 
       setTransactions(prev => [...prev, ...response.data.transactions]);
-    } catch (err) {
-      console.error('Failed to load more transactions:', err);
-    }
+    } catch (err) {    }
   }, [pagination, isLoading, fetchTransactionHistory]);
 
   const refreshTransactions = useCallback(() => {

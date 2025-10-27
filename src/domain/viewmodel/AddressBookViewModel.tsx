@@ -57,7 +57,6 @@ export class AddressBookViewModel {
     makeAutoObservable(this);
   }
 
-  // Getters
   get entries() {
     return this.state.entries;
   }
@@ -102,7 +101,6 @@ export class AddressBookViewModel {
     );
   }
 
-  // Actions
   setSearchTerm(searchTerm: string) {
     this.state.searchTerm = searchTerm;
   }
@@ -161,7 +159,6 @@ export class AddressBookViewModel {
     this.state.successMessage = null;
   }
 
-  // Business Logic
   async loadAddressBook() {
     this.state.isLoading = true;
     this.state.error = null;
@@ -175,9 +172,7 @@ export class AddressBookViewModel {
         this.state.error = response.error || 'Failed to load address book';
       }
     } catch (error) {
-      this.state.error = 'Network error occurred';
-      console.error('Error loading address book:', error);
-    } finally {
+      this.state.error = 'Network error occurred';    } finally {
       this.state.isLoading = false;
     }
   }
@@ -207,9 +202,7 @@ export class AddressBookViewModel {
         this.state.error = response.error || 'Failed to add entry';
       }
     } catch (error) {
-      this.state.error = 'Network error occurred';
-      console.error('Error adding entry:', error);
-    } finally {
+      this.state.error = 'Network error occurred';    } finally {
       this.state.isLoading = false;
     }
   }
@@ -241,9 +234,7 @@ export class AddressBookViewModel {
         this.state.error = response.error || 'Failed to update entry';
       }
     } catch (error) {
-      this.state.error = 'Network error occurred';
-      console.error('Error updating entry:', error);
-    } finally {
+      this.state.error = 'Network error occurred';    } finally {
       this.state.isLoading = false;
     }
   }
@@ -263,9 +254,7 @@ export class AddressBookViewModel {
         this.state.error = response.error || 'Failed to delete entry';
       }
     } catch (error) {
-      this.state.error = 'Network error occurred';
-      console.error('Error deleting entry:', error);
-    } finally {
+      this.state.error = 'Network error occurred';    } finally {
       this.state.isLoading = false;
     }
   }
@@ -281,9 +270,7 @@ export class AddressBookViewModel {
         this.state.investmentData.recipientAddress = address;
         return entry;
       }
-    } catch (error) {
-      console.error('Error resolving address:', error);
-    }
+    } catch (error) {    }
     return null;
   }
 

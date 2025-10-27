@@ -12,10 +12,8 @@ export class ApiService {
             },
         });
 
-        // Optional: Add an interceptor for authentication tokens if needed
         this.api.interceptors.request.use(
             (config) => {
-                // Support both keys for compatibility
                 const token = localStorage.getItem('authToken') || localStorage.getItem('token');
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
@@ -27,10 +25,8 @@ export class ApiService {
             }
         );
 
-        // Response interceptors to show toasts globally
         this.api.interceptors.response.use(
             (response) => {
-                // If backend includes a message, surface it as a success/info toast
                 const msg = (response.data && (response.data.message || response.data.msg)) as string | undefined;
                 if (msg) {
                     dispatchAppToast({ type: 'success', description: msg });

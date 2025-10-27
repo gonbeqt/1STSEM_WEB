@@ -2,10 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { container } from '../../../../../di/container';
 import { BusinessDocument } from '../../../../../domain/entities/BusinessDocumentEntities';
-// Note: Using container directly instead of hook for simplicity
 
 const CompliancePage: React.FC = observer(() => {
-    // Business document form state
     const [businessName, setBusinessName] = useState('');
     const [businessType, setBusinessType] = useState('');
     const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState('');
@@ -16,8 +14,6 @@ const CompliancePage: React.FC = observer(() => {
     const [form2303, setForm2303] = useState<File | null>(null);
     const [managerId, setManagerId] = useState<File | null>(null);
 
-
-    // Memoize view model to keep a stable reference across renders
     const [businessDocumentViewModel] = useState(() => container.businessDocumentViewModel());
     const {
         isLoading,
@@ -27,21 +23,16 @@ const CompliancePage: React.FC = observer(() => {
         clearSuccessMessage
     } = businessDocumentViewModel;
 
-    // State for user documents
     const [userDocuments, setUserDocuments] = useState<any>(null);
 
     const loadUserDocuments = useCallback(async () => {
         try {
             const result = await businessDocumentViewModel.getUserDocuments();
             setUserDocuments(result);
-        } catch (error) {
-            console.error('Error loading user documents:', error);
-        }
+        } catch (error) {        }
     }, []);
 
-    // Load compliance status on component mount
     useEffect(() => {
-        // Load user documents to show current status
         loadUserDocuments();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -67,7 +58,6 @@ const CompliancePage: React.FC = observer(() => {
 
         try {
             await businessDocumentViewModel.uploadBusinessDocuments(documents);
-            // Clear form on success
             setBusinessName('');
             setBusinessType('');
             setBusinessRegistrationNumber('');
@@ -77,22 +67,16 @@ const CompliancePage: React.FC = observer(() => {
             setDtiDocument(null);
             setForm2303(null);
             setManagerId(null);
-            // Reload user documents to show updated status
             await loadUserDocuments();
-        } catch (error: any) {
-            console.error('Error uploading documents:', error);
-            // Error will be displayed through the view model's error state
+        } catch (error: any) {            // Error will be displayed through the view model's error state
         }
     };
 
     const handleSubmitForApproval = async () => {
         try {
             await businessDocumentViewModel.submitDocumentsForApproval();
-            // Reload user documents to show updated status
             await loadUserDocuments();
-        } catch (error: any) {
-            console.error('Error submitting documents for approval:', error);
-            // Error will be displayed through the view model's error state
+        } catch (error: any) {            // Error will be displayed through the view model's error state
         }
     };
 

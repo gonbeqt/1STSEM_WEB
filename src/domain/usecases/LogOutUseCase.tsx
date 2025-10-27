@@ -8,13 +8,11 @@ export class LogoutUseCase {
     try {
       const response = await this.userRepository.logout(request);
       
-      // Clear local storage on successful logout
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
       return response;
     } catch (error) {
-      // Even if the API call fails, clear local storage for security
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       throw error;

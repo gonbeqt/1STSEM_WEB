@@ -7,9 +7,7 @@ export class GetAuditStatisticsUseCase {
     async execute(): Promise<AuditStatisticsResponse> {
         try {
             return await this.contractRepository.getAuditStatistics();
-        } catch (error: any) {
-            console.error("Error getting audit statistics:", error);
-            return { success: false, error: "Failed to fetch audit statistics." };
+        } catch (error: any) {            return { success: false, error: "Failed to fetch audit statistics." };
         }
     }
 }

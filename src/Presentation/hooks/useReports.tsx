@@ -1,4 +1,3 @@
-// Custom hooks for Reports functionality
 import { useState, useCallback } from 'react';
 import { container } from '../../di/container';
 import {
@@ -55,7 +54,6 @@ export const useBalanceSheet = (): UseBalanceSheetReturn => {
       const request: ExportReportRequest = reportId ? { report_id: reportId } : {};
       const response = await container.exportBalanceSheetExcelUseCase.execute(request);
       if (response.success && response.excel_data) {
-        // Create and download the Excel file
         const blob = new Blob([atob(response.excel_data)], {
           type: response.content_type
         });
@@ -84,7 +82,6 @@ export const useBalanceSheet = (): UseBalanceSheetReturn => {
       const request: ExportReportRequest = reportId ? { report_id: reportId } : {};
       const response = await container.exportBalanceSheetPdfUseCase.execute(request);
       if (response.success && response.pdf_data) {
-        // Create and download the PDF file
         const blob = new Blob([atob(response.pdf_data)], {
           type: response.content_type
         });

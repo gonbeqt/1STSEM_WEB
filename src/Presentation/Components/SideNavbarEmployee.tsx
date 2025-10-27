@@ -1,4 +1,3 @@
-// src/Presentation/Components/SideNavbarEmployee.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, History, User, LogOut, X } from 'lucide-react';

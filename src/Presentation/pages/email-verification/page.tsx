@@ -11,7 +11,6 @@ const EmailVerification = observer(() => {
   
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Get email from location state or registration
   useEffect(() => {
     const emailFromState = location.state?.email;
     if (emailFromState) {
@@ -27,7 +26,6 @@ const EmailVerification = observer(() => {
   };
 
   const handleCodeChange = (value: string) => {
-    // Clear validation error
     setValidationErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors.code;
@@ -40,7 +38,6 @@ const EmailVerification = observer(() => {
   const handleVerifyEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Validate code
     const codeError = validateCode(formData.code);
     if (codeError) {
       setValidationErrors({ code: codeError });
@@ -49,7 +46,6 @@ const EmailVerification = observer(() => {
 
     const success = await verifyEmail();
     if (success) {
-      // Redirect to login with success message
       navigate('/login', {
         state: { 
           message: 'Email verified successfully! You can now log in.',
@@ -62,7 +58,6 @@ const EmailVerification = observer(() => {
   const handleResendCode = async () => {
     const success = await resendVerificationEmail();
     if (success) {
-      // Clear any existing errors
       clearError();
     }
   };

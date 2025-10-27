@@ -44,9 +44,7 @@ const ManagerNavbar: React.FC = () => {
     try {
       const stored = localStorage.getItem('user');
       return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.warn('Failed to parse user profile from localStorage', error);
-      return null;
+    } catch (error) {      return null;
     }
   }, []);
 
@@ -73,7 +71,6 @@ const ManagerNavbar: React.FC = () => {
       .map((part: string) => part.charAt(0).toUpperCase())
       .join('') || 'M';
   }, [displayName]);
-
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">

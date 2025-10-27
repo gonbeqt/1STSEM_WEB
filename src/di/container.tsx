@@ -88,7 +88,6 @@ import { InvoiceViewModel } from '../domain/viewmodel/InvoiceViewModel';
 import { GetInvestmentReportUseCase } from '../domain/usecases/GetInvestmentReportUseCase';
 import { InvestmentReportViewModel } from '../domain/viewmodel/InvestmentReportViewModel';
 
-// Audit Contract imports
 import { ContractRepository } from '../domain/repositories/ContractRepository';
 import { ContractRepositoryImpl } from '../data/repositoriesImpl/ContractRepositoryImpl';
 import { UploadContractUseCase } from '../domain/usecases/UploadContractUseCase';
@@ -135,11 +134,6 @@ import { PasswordResetRemoteDataSource } from '../data/datasources/PasswordReset
 import { EmployeeHistoryRemoteDataSource } from '../data/datasources/EmployeeHistoryRemoteDataSource';
 import { InvestmentRemoteDataSource } from '../data/datasources/InvestmentRemoteDataSource';
 
-
-
-
-
-
 export interface Container {
   forgotPasswordViewModel: () => ForgotPasswordViewModel;
   userRepository: UserRepositoryImpl;
@@ -157,7 +151,6 @@ export interface Container {
   emailVerificationRepository: EmailVerificationRepositoryImpl;
   passwordResetRepository: PasswordResetRepositoryImpl;
   employeeHistoryRepository: EmployeeHistoryRepository;
-
 
   registerUseCase: RegisterUseCase;
   loginUseCase: LoginUseCase;
@@ -191,14 +184,12 @@ export interface Container {
   getEmployeeHistoryUseCase: GetEmployeeHistoryUseCase;
   
   
-  // Audit Contract Use Cases
   uploadContractUseCase: UploadContractUseCase;
   auditContractUseCase: AuditContractUseCase;
   listAuditsUseCase: ListAuditsUseCase;
   getAuditDetailsUseCase: GetAuditDetailsUseCase;
   getAuditStatisticsUseCase: GetAuditStatisticsUseCase;
 
-  // Report Use Cases
   generateBalanceSheetUseCase: GenerateBalanceSheetUseCase;
   exportBalanceSheetExcelUseCase: ExportBalanceSheetExcelUseCase;
   exportBalanceSheetPdfUseCase: ExportBalanceSheetPdfUseCase;
@@ -247,15 +238,11 @@ export interface Container {
   cashFlowListViewModel: () => CashFlowListViewModel;
   taxSummaryViewModel: () => TaxSummaryViewModel;
 
-
 }
 
-
-// ======= Core services =======
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
 const apiService = new ApiService(apiBaseUrl);
 
-// ======= Create data source instances =======
 const userRemoteDataSource = new UserRemoteDataSource(apiService);
 const walletRemoteDataSource = new WalletRemoteDataSource(apiService);
 const transactionRemoteDataSource = new TransactionRemoteDataSource(apiService);
@@ -272,7 +259,6 @@ const passwordResetRemoteDataSource = new PasswordResetRemoteDataSource(apiServi
 const employeeHistoryRemoteDataSource = new EmployeeHistoryRemoteDataSource(apiService);
 const investmentRemoteDataSource = new InvestmentRemoteDataSource(apiService);
 
-// ======= Create repository instances =======
 const userRepository = new UserRepositoryImpl(userRemoteDataSource);
 const walletRepository = new WalletRepositoryImpl(walletRemoteDataSource);
 const transactionRepository = new TransactionRepositoryImpl(transactionRemoteDataSource);
@@ -289,7 +275,6 @@ const emailVerificationRepository = new EmailVerificationRepositoryImpl(emailVer
 const passwordResetRepository = new PasswordResetRepositoryImpl(passwordResetRemoteDataSource);
 const employeeHistoryRepository = new EmployeeHistoryRepositoryImpl(employeeHistoryRemoteDataSource);
 
-// ======= Create use case instances =======
 const registerUseCase = new RegisterUseCase(userRepository);
 const loginUseCase = new LoginUseCase(userRepository);
 const changePasswordUseCase = new ChangePasswordUseCase(userRepository);
@@ -311,13 +296,11 @@ const sendEthUseCase = new SendEthUseCase(walletRepository);
 const disconnectWalletUseCase = new DisconnectWalletUseCase(walletRepository);
 const convertCryptoToFiatUseCase = new ConvertCryptoToFiatUseCase(walletRepository);
 
-// Address Book Use Cases
 const upsertAddressBookEntryUseCase = new UpsertAddressBookEntryUseCase(addressBookRepository);
 const resolveAddressNameUseCase = new ResolveAddressNameUseCase(addressBookRepository);
 const listAddressBookUseCase = new ListAddressBookUseCase(addressBookRepository);
 const deleteAddressBookEntryUseCase = new DeleteAddressBookEntryUseCase(addressBookRepository);
 
-// Address Book ViewModel singleton
 const addressBookViewModelInstance = new AddressBookViewModel(
   upsertAddressBookEntryUseCase,
   resolveAddressNameUseCase,
@@ -337,7 +320,6 @@ const createRecurringPaymentUseCase = new CreateRecurringPaymentUseCase(payslipR
 const getPaymentScheduleUseCase = new GetPaymentScheduleUseCase(payslipRepository);
 const getEmployeeHistoryUseCase = new GetEmployeeHistoryUseCaseImpl(employeeHistoryRepository);
 
-// ======= Create report use case instances =======
 const generateBalanceSheetUseCase = new GenerateBalanceSheetUseCase(reportRepository);
 const exportBalanceSheetExcelUseCase = new ExportBalanceSheetExcelUseCase(reportRepository);
 const exportBalanceSheetPdfUseCase = new ExportBalanceSheetPdfUseCase(reportRepository);
@@ -366,14 +348,12 @@ const getLatestRiskAnalysisUseCase = new GetLatestRiskAnalysisUseCase(reportRepo
 const getTransactionHistoryUseCase = new GetTransactionHistoryUseCase(transactionRepository);
 const getUserPayslipsUseCase = new GetUserPayslipsUseCase(payslipRepository);
 
-// Audit Contract Use Cases
 const uploadContractUseCase = new UploadContractUseCase(contractRepository);
 const auditContractUseCase = new AuditContractUseCase(contractRepository);
 const listAuditsUseCase = new ListAuditsUseCase(contractRepository);
 const getAuditDetailsUseCase = new GetAuditDetailsUseCase(contractRepository);
 const getAuditStatisticsUseCase = new GetAuditStatisticsUseCase(contractRepository);
 
-// ======= Container =======
 export const container: Container = {
   userRepository,
   walletRepository,
@@ -420,14 +400,12 @@ export const container: Container = {
   getPaymentScheduleUseCase,
   getEmployeeHistoryUseCase,
 
-  // Audit Contract Use Cases
   uploadContractUseCase,
   auditContractUseCase,
   listAuditsUseCase,
   getAuditDetailsUseCase,
   getAuditStatisticsUseCase,
 
-  // Report Use Cases
   generateBalanceSheetUseCase,
   exportBalanceSheetExcelUseCase,
   exportBalanceSheetPdfUseCase,

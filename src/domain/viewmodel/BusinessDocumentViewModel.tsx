@@ -25,8 +25,6 @@ export class BusinessDocumentViewModel {
         makeAutoObservable(this);
     }
 
-    // Getters
-
     get isLoading() {
         return this.state.isLoading;
     }
@@ -39,7 +37,6 @@ export class BusinessDocumentViewModel {
         return this.state.successMessage;
     }
 
-    // Actions
     clearError() {
         this.state.error = null;
     }
@@ -70,13 +67,11 @@ export class BusinessDocumentViewModel {
         }
     }
 
-
     async getUserDocuments(): Promise<any> {
         this.state.isLoading = true;
         this.state.error = null;
 
         try {
-            // Use the existing backend endpoint to get user documents
             const result = await this.getUserBusinessDocumentsUseCase.execute();
             return result;
         } catch (error: any) {

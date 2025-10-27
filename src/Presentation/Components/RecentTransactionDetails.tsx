@@ -39,8 +39,6 @@ const InfoTile = ({ label, children }: { label: string; children: React.ReactNod
   </div>
 );
 
-// formatKey, formatValue and KeyValueList are imported from the manager home utils
-
 const RecentTransactionDetails: React.FC<Props> = ({ isOpen, transaction, onClose }) => {
   if (!isOpen || !transaction) return null;
 

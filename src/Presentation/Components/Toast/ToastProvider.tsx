@@ -52,7 +52,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode } > = ({ childr
     show({ ...opts, type: 'warning', description })
   ), [show]);
 
-  // Listen for global app toast events
   useEffect(() => {
     const handler = (e: Event) => {
       const ev = e as AppToastEvent;

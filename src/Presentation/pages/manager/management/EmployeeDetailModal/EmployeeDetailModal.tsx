@@ -14,7 +14,6 @@ interface Employee {
   phone: string;
   is_active: boolean;
   created_at: string;
-  // Optional fields for backward compatibility
   id?: string;
   fullName?: string;
   employeeId?: string;
@@ -48,7 +47,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('details');
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
 
-  // derive a consistent active status from available fields
   const isActive = Boolean(
     employee?.is_active
     || (employee?.status && String(employee.status).toLowerCase() === 'active')
@@ -99,7 +97,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
       return 'Not provided';
     }
   };
-
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

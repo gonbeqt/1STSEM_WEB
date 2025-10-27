@@ -1,4 +1,3 @@
-// src/domain/entities/SendETHEntities.tsx
 
 export interface SendETHRequest {
   from_wallet_id?: string;

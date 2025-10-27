@@ -113,7 +113,6 @@ export const mapTransactionToDisplay = (transaction: TransactionRecord): Display
 
 export default {} as const;
 
-// Modal / display helpers
 export const formatKey = (key: string): string => {
   const withSpaces = key.replace(/_/g, ' ');
   return withSpaces.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -167,14 +166,12 @@ export const ModalShell: React.FC<{
   );
 };
 
-// Simple progress bar used by multi-step modals
 export const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
   <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
     <div className="h-full transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-700" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
   </div>
 );
 
-// Small helper used in report exporters
 export const sumObjectValues = (obj: any): number => {
   if (typeof obj !== 'object' || obj === null) return 0;
   return Object.values(obj).reduce((sum: number, val: any) => {

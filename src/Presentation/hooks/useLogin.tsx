@@ -21,7 +21,6 @@ export const useLogin = () => {
       const userData = localStorage.getItem('user');
       const user = userData ? JSON.parse(userData) : null;
 
-      // Navigate based on user role from database
       const isManagerUser = isManager(user);
       
       if (isManagerUser) {

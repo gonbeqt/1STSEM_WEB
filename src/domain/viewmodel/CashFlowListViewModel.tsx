@@ -12,7 +12,6 @@ export interface CashFlowSummary {
   report_type?: 'CUMULATIVE' | 'TRANSACTION' | 'PERIODIC';
   currency?: string;
   
-  // For TRANSACTION and CUMULATIVE reports
   cash_flows?: {
     operating_activities?: {
       net_cash_from_operations?: number;
@@ -31,7 +30,6 @@ export interface CashFlowSummary {
     };
   };
   
-  // For PERIODIC reports
   operating_activities?: {
     cash_receipts?: Record<string, number>;
     cash_payments?: Record<string, number>;
@@ -48,7 +46,6 @@ export interface CashFlowSummary {
     net_cash_flow?: number;
   };
   
-  // Common cash summary
   cash_summary?: {
     net_cash_from_operations?: number;
     net_cash_from_investing?: number;
@@ -60,7 +57,6 @@ export interface CashFlowSummary {
     ending_cash?: number;
   };
   
-  // Additional fields
   transaction_details?: {
     transaction_type?: string;
     amount_usd?: number;

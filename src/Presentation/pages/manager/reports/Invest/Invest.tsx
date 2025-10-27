@@ -83,10 +83,7 @@ const Invest: React.FC = () => {
       } else {
         throw new Error('Invalid response format from portfolio API');
       }
-    } catch (err: any) {
-      console.error('Portfolio fetch error:', err);
-      
-      let errorMessage = 'Failed to load portfolio data';
+    } catch (err: any) {      let errorMessage = 'Failed to load portfolio data';
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         errorMessage = 'Network error: Unable to connect to the backend server. Please check if the server is running.';
       } else if (err.message.includes('401')) {
@@ -103,14 +100,12 @@ const Invest: React.FC = () => {
     }
   };
 
-
   const chartData = portfolio ? portfolio.holdings.map(holding => ({
     name: holding.symbol,
     value: holding.current_value,
     percentage: holding.percentage_of_portfolio,
     fill: '#8884d8'
   })) : [];
-
 
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
@@ -131,7 +126,6 @@ const Invest: React.FC = () => {
     }
 
     try {
-      // Prepare data for Excel export
       const excelData = [
         ['INVESTMENT PORTFOLIO'],
         [`As of: ${new Date().toISOString().split('T')[0]}`],
@@ -151,11 +145,9 @@ const Invest: React.FC = () => {
         ])
       ];
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 10 }, // Symbol
         { wch: 20 }, // Name
@@ -164,10 +156,8 @@ const Invest: React.FC = () => {
         { wch: 12 }  // Percentage
       ];
 
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Investment Portfolio');
 
-      // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
@@ -175,17 +165,13 @@ const Invest: React.FC = () => {
       saveAs(blob, fileName);
       
     } catch (err: any) {
-      setError(err.message || 'Failed to export to Excel');
-      console.error('Excel export error:', err);
-    }
+      setError(err.message || 'Failed to export to Excel');    }
   };
 
   const handleExportExcel = () => {
     try {
       exportToExcel();
-    } catch (error) {
-      console.error('Failed to export to Excel:', error);
-    }
+    } catch (error) {    }
   };
 
   const formatPercentage = (percentage: number): string => {

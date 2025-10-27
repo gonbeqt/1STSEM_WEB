@@ -1,4 +1,3 @@
-// src/Presentation/pages/employee/home/page.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Loader2, ChevronRight, Copy, MoreVertical, RefreshCw, ChevronDown, Plug, FileText, CalendarDays } from 'lucide-react';
@@ -26,7 +25,6 @@ const EmployeeHome = observer(() => {
   const menuRootRef = useRef<HTMLDivElement | null>(null);
   const skipNextOutsideRef = useRef(false);
 
-  // Conversion state
   const [convertedBalance, setConvertedBalance] = useState<number | null>(null);
   const [conversionCurrency, setConversionCurrency] = useState<string>('USD');
   const [isAutoConverting, setIsAutoConverting] = useState<boolean>(false);
@@ -111,7 +109,6 @@ const EmployeeHome = observer(() => {
 
   const canRefreshPayslips = Boolean(userId);
 
-  // Check wallet connection on page load (guard StrictMode double-invoke)
   const initialWalletCheckDone = useRef(false);
   useEffect(() => {
     if (initialWalletCheckDone.current) return;
@@ -125,13 +122,11 @@ const EmployeeHome = observer(() => {
     clearSuccessMessage();
   }, [successMessage, clearSuccessMessage, toastSuccess]);
 
-  // Fetch wallet balance when connected
   useEffect(() => {
     if (isWalletConnected) {
       fetchWalletBalance();
     }
   }, [isWalletConnected, fetchWalletBalance]);
-
 
   useEffect(() => {
     if (payslipsError) {
@@ -139,13 +134,11 @@ const EmployeeHome = observer(() => {
     }
   }, [payslipsError, toastError]);
 
-
   const getNextMonthFirstDay = () => {
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     return nextMonth.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
-
 
   const handleOpenWalletModal = (view: WalletModalInitialView) => {
     setWalletModalInitialView(view);
@@ -157,14 +150,12 @@ const EmployeeHome = observer(() => {
     if (!isMenuOpen) {
       skipNextOutsideRef.current = true;
       setIsMenuOpen(true);
-      // allow the opening click to complete before we start reacting to outside clicks
       setTimeout(() => { skipNextOutsideRef.current = false; }, 0);
     } else {
       setIsMenuOpen(false);
     }
   };
 
-  // Close on outside click using a document listener (more robust than overlay)
   useEffect(() => {
     if (!isMenuOpen) return;
     const handleDown = (ev: MouseEvent) => {
@@ -202,7 +193,6 @@ const EmployeeHome = observer(() => {
     }
   };
 
-  // Auto-convert balance when ETH balance or currency changes
   useEffect(() => {
     const autoConvertBalance = async () => {
       if (ethBalance && ethBalance > 0 && isWalletConnected) {
@@ -212,9 +202,7 @@ const EmployeeHome = observer(() => {
           if (success && conversionResult && conversionResult.content && conversionResult.content.length > 0) {
             setConvertedBalance(conversionResult.content[0].total_value);
           }
-        } catch (error) {
-          console.error('Auto-conversion failed:', error);
-        } finally {
+        } catch (error) {        } finally {
           setIsAutoConverting(false);
         }
       }
@@ -231,14 +219,11 @@ const EmployeeHome = observer(() => {
     <div className="min-h-screen w-full bg-gray-50">
       <EmployeeNavbar />
 
-
       <div className="w-full mx-auto px-4 sm:px-6 py-6">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
           <p className="text-sm text-gray-500">Your personal dashboard — balances, upcoming payouts, and recent activity.</p>
         </div>
-
-
 
         {/* Connected Wallet Card */}
         <div
@@ -348,7 +333,6 @@ const EmployeeHome = observer(() => {
                 </button>
               </div>
 
-
             </>
           ) : (
             <>
@@ -419,7 +403,6 @@ const EmployeeHome = observer(() => {
             </>
           )}
         </div>
-
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -547,7 +530,6 @@ const EmployeeHome = observer(() => {
           )}
         </div>
       </div>
-
 
       <WalletModal
         isOpen={isWalletModalOpen}

@@ -7,9 +7,7 @@ export class ListAuditsUseCase {
     async execute(): Promise<Audit[]> {
         try {
             return await this.contractRepository.listAudits();
-        } catch (error) {
-            console.error("Error listing audits:", error);
-            return [];
+        } catch (error) {            return [];
         }
     }
 }

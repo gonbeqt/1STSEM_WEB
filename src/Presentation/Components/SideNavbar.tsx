@@ -1,4 +1,3 @@
-// src/Presentation/Components/SideNavbar.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoginViewModel } from '../../domain/viewmodel/LoginViewModel';
@@ -6,13 +5,11 @@ import { container } from '../../di/container';
 import { Home, Users, FileText, BarChart2, LogOut, X, User } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import LogoutConfirmModal from './LogoutConfirmModal';
-// use a runtime URL for the logo to avoid TypeScript needing image module declarations
 const CryphoriaLogo = '/assets/cryphoria-logo.png';
 
 type SideNavbarProps = {
   onExpansionChange?: (isExpanded: boolean) => void;
 };
-
 
 const SideNavbarComponent: React.FC<SideNavbarProps> = ({ onExpansionChange }) => {
   const navigate = useNavigate();

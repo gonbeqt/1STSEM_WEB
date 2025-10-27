@@ -1,4 +1,3 @@
-// src/domain/models/WalletViewModel.tsx
 import { makeAutoObservable } from 'mobx';
 import { ConnectWalletUseCase } from '../usecases/ConnectWalletUseCase';
 import { DisconnectWalletResponse, ConversionRequest, ConversionResponse } from '../entities/WalletEntities';
@@ -10,35 +9,29 @@ import { SendEthRequest, SendEthResponse } from '../entities/WalletEntities';
 import { GetExchangeRatesUseCase } from '../usecases/GetExchangeRatesUseCase';
 
 interface WalletState {
-  // Connect wallet form
   privateKey: string;
   walletName: string;
   walletType: string;
   
   
-  // Loading states
   isConnecting: boolean;
   isFetchingBalance: boolean;
   isSendingEth: boolean; // New state for sending ETH
   isConverting: boolean; // New state for currency conversion
   
-  // Error states
   connectError: string | null;
   fetchBalanceError: string | null;
   sendEthError: string | null; // New state for send ETH error
   conversionError: string | null; // New state for conversion error
   
-  // Success messages
   successMessage: string | null;
   
 
-  // Wallet Balance Data
   walletAddress: string | null;
   ethBalance: number | null;
   rates: { [key: string]: number } | null;
   fiatCurrency: string | null;
   
-  // Conversion Data
   conversionResult: ConversionResponse | null;
 }
 
@@ -74,11 +67,9 @@ export class WalletViewModel {
   ) {
     makeAutoObservable(this);
     
-    // Initialize wallet state from localStorage on startup
     this.initializeWalletState();
   }
 
-  // Initialize wallet state from localStorage
   initializeWalletState = () => {
     const walletAddress = localStorage.getItem('walletAddress');
     const walletConnected = localStorage.getItem('walletConnected');
@@ -86,7 +77,6 @@ export class WalletViewModel {
     if (walletAddress && walletConnected === 'true') {
       this.state.walletAddress = walletAddress;
       
-      // Also check if we have a stored balance
       const storedBalance = localStorage.getItem('ethBalance');
       if (storedBalance) {
         this.state.ethBalance = parseFloat(storedBalance);
@@ -94,12 +84,10 @@ export class WalletViewModel {
     }
   }
 
-  // Form setters
   setPrivateKey = (privateKey: string) => {
     this.state.privateKey = privateKey;
     this.clearErrors();
   };
-
 
   setWalletName = (walletName: string) => {
     this.state.walletName = walletName;
@@ -109,12 +97,10 @@ export class WalletViewModel {
     this.state.walletType = walletType;
   };
 
-  // Clear methods
   clearErrors = () => {
     this.state.connectError = null;
     this.state.fetchBalanceError = null;
   };
-
 
   clearSuccessMessage = () => {
     this.state.successMessage = null;
@@ -128,8 +114,6 @@ export class WalletViewModel {
     this.clearSuccessMessage();
   };
 
-
-  // Validation
   validateConnectForm = (): boolean => {
     if (!this.state.privateKey.trim()) {
       this.state.connectError = 'Private key is required';
@@ -139,8 +123,6 @@ export class WalletViewModel {
     return true;
   };
 
-
-  // Actions
   connectWallet = async (walletData: { privateKey: string; walletName: string; walletType: string }): Promise<boolean> => {
     this.state.privateKey = walletData.privateKey;
     this.state.walletName = walletData.walletName;
@@ -166,13 +148,11 @@ export class WalletViewModel {
   
       this.state.successMessage = response.message;
   
-      // Store wallet info in localStorage for persistence
       localStorage.setItem('walletAddress', response.data.wallet_address);
       localStorage.setItem('privateKey', walletData.privateKey);
       localStorage.setItem('walletConnected', 'true');
   
       this.clearForm();
-      // After successful connection, fetch the balance
       await this.fetchWalletBalance(token);
       this.state.walletAddress = response.data.wallet_address; // Set walletAddress after successful balance fetch
       return true;
@@ -183,7 +163,6 @@ export class WalletViewModel {
       this.state.isConnecting = false;
     }
   };
-
 
   sendEth = async (recipientAddress: string, amount: string, company: string, category: string, description: string, isInvesting: boolean = false, investorName: string = ''): Promise<boolean> => {
     if (!this.isWalletConnected) {
@@ -310,15 +289,11 @@ export class WalletViewModel {
       if (response.success && response.rates) {
         this.state.rates = response.rates;
         this.state.fiatCurrency = response.currency;
-      } else {
-        console.error('Failed to fetch exchange rates:', response.error);
-        if (!silent) {
+      } else {        if (!silent) {
           this.state.fetchBalanceError = response.error || 'Failed to fetch exchange rates';
         }
       }
-    } catch (error) {
-      console.error('Error fetching exchange rates:', error);
-      if (!silent) {
+    } catch (error) {      if (!silent) {
         this.state.fetchBalanceError = error instanceof Error ? error.message : 'Failed to fetch exchange rates';
       }
     }
@@ -363,9 +338,7 @@ export class WalletViewModel {
           this.state.fetchBalanceError = 'No wallet data found or invalid response';
         }
       }
-    } catch (error) {
-      console.error('Error fetching wallet balance:', error);
-      this.state.walletAddress = null;
+    } catch (error) {      this.state.walletAddress = null;
       this.state.ethBalance = null;
       localStorage.removeItem('walletAddress');
       localStorage.removeItem('walletConnected');
@@ -379,7 +352,6 @@ export class WalletViewModel {
     }
   };
 
-  // Check if wallet was previously connected (from localStorage)
   checkWalletConnection = async (authToken?: string) => {
     const token = authToken || localStorage.getItem('token');
     if (!token) {
@@ -398,7 +370,6 @@ export class WalletViewModel {
     await this.fetchWalletBalance(token, { silent: true });
   };
 
-  // Getters
   get formData() {
     return {
       privateKey: this.state.privateKey,
@@ -407,11 +378,9 @@ export class WalletViewModel {
     };
   }
 
-
   get isConnecting() {
     return this.state.isConnecting;
   }
-
 
   get isFetchingBalance() {
     return this.state.isFetchingBalance;
@@ -424,7 +393,6 @@ export class WalletViewModel {
   get connectError() {
     return this.state.connectError;
   }
-
 
   get fetchBalanceError() {
     return this.state.fetchBalanceError;
@@ -450,7 +418,6 @@ export class WalletViewModel {
     return this.state.successMessage;
   }
 
-
   get walletAddress() {
     return this.state.walletAddress;
   }
@@ -458,8 +425,6 @@ export class WalletViewModel {
   get ethBalance() {
     return this.state.ethBalance || 0;
   }
-
-
 
   get usdBalance() {
     if (this.state.ethBalance !== null && this.state.rates && this.state.rates.ETH) {
@@ -476,7 +441,6 @@ export class WalletViewModel {
     return this.state.fiatCurrency;
   }
 
-
   resetWalletState = () => {
     this.state.walletAddress = null;
     this.state.ethBalance = null;
@@ -485,7 +449,6 @@ export class WalletViewModel {
     localStorage.removeItem('ethBalance');
     localStorage.removeItem('privateKey');
   };
-
 
   get isWalletConnected() {
   return !!this.state.walletAddress;

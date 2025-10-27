@@ -1,4 +1,3 @@
-// Report Entity Types for Smart Accounting System
 export interface BalanceSheetAssets {
   current_assets: {
     crypto_holdings: Record<string, CryptoHolding>;
@@ -177,7 +176,6 @@ export interface TaxReport {
   };
 }
 
-// Request/Response Types
 export interface GenerateBalanceSheetRequest {
   as_of_date?: string;
   include_all_assets?: boolean;
@@ -249,7 +247,6 @@ export interface ListBalanceSheetsParams {
   limit?: number;
 }
 
-// AI Tax Analysis Types
 export interface TaxAnalysisRequest {
   period_type: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'CUSTOM';
   date?: string;

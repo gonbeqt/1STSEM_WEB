@@ -1,5 +1,4 @@
 export const validateContractFile = async (file: File): Promise<{ success: boolean; error?: string; data?: { code: string; lines: number } }> => {
-    // Check if file is provided
     if (!file) {
         return {
             success: false,
@@ -7,7 +6,6 @@ export const validateContractFile = async (file: File): Promise<{ success: boole
         };
     }
 
-    // Validate file extension
     const validExtensions = ['.sol', '.solidity'];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
 
@@ -18,7 +16,6 @@ export const validateContractFile = async (file: File): Promise<{ success: boole
         };
     }
 
-    // Validate file size (max 1MB)
     const maxSize = 1024 * 1024; // 1MB
     if (file.size > maxSize) {
         return {
@@ -27,7 +24,6 @@ export const validateContractFile = async (file: File): Promise<{ success: boole
         };
     }
 
-    // Extract and validate contract code
     try {
         const contractCode = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
@@ -44,7 +40,6 @@ export const validateContractFile = async (file: File): Promise<{ success: boole
             reader.readAsText(file, 'UTF-8');
         });
 
-        // Check for empty file
         if (!contractCode.trim()) {
             return {
                 success: false,
@@ -52,7 +47,6 @@ export const validateContractFile = async (file: File): Promise<{ success: boole
             };
         }
 
-        // Basic Solidity syntax validation
         if (!contractCode.toLowerCase().includes('pragma solidity') && !contractCode.toLowerCase().includes('contract ')) {
             return {
                 success: false,

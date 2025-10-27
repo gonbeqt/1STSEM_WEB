@@ -59,7 +59,6 @@ const EmployeeSettings: React.FC = () => {
   const [supportFiles, setSupportFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Edit profile state
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -177,7 +176,6 @@ const EmployeeSettings: React.FC = () => {
   };
 
   const openEditProfile = async () => {
-    // Prefill from current user immediately for snappy UI
     const cu = loginViewModel.currentUser;
     if (cu) {
       setProfileData((prev) => ({
@@ -198,7 +196,6 @@ const EmployeeSettings: React.FC = () => {
     setProfileError(null);
     setProfileSuccess(null);
 
-    // Basic validation
   const fn = (profileData.first_name || '').trim();
   const ln = (profileData.last_name || '').trim();
   const rawPhone = (profileData.phone_number || '').trim();
@@ -207,7 +204,6 @@ const EmployeeSettings: React.FC = () => {
       return;
     }
 
-    // PH mobile number validation: must start with 09 and be exactly 11 digits
     if (rawPhone && !/^09\d{9}$/.test(rawPhone)) {
       setProfileError('Please enter a valid PH mobile number that starts with 09 and has 11 digits (e.g., 09XXXXXXXXX).');
       return;
@@ -216,7 +212,6 @@ const EmployeeSettings: React.FC = () => {
     try {
       setIsProfileSaving(true);
       const API_URL = process.env.REACT_APP_API_BASE_URL || '';
-      // Send only editable fields
       const payload: ProfileData = {
         first_name: fn,
         last_name: ln,
@@ -226,7 +221,6 @@ const EmployeeSettings: React.FC = () => {
       const res: any = await apiService.put(`${API_URL}/auth/profile-mongodb/`, payload);
       if (res?.success) {
         setProfileSuccess(res?.message || 'Profile updated successfully.');
-        // Update local user cache for immediate UI reflection
         try {
           const userStr = localStorage.getItem('user');
           const current = userStr ? JSON.parse(userStr) : {};

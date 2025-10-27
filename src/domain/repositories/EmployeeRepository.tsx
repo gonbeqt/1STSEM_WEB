@@ -29,7 +29,6 @@ export interface AddEmployeeResponse {
 }
 
 export interface GetEmployeesByManagerRequest {
-  // No specific request parameters for now, as manager is identified by token
 }
 
 export interface Employee {

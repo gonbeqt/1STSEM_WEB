@@ -11,7 +11,6 @@ export const formatCurrency = (amount: number, currency: string = 'USD'): string
       currency,
     }).format(amount ?? 0);
   } catch {
-    // Fallback if currency code is invalid or not supported
     return `${currency} ${Number(amount ?? 0).toFixed(2)}`;
   }
 };

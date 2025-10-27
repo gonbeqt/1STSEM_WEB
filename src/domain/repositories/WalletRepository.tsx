@@ -1,4 +1,3 @@
-// src/data/repositories/WalletRepository.tsx
 import { Wallet, ConnectWalletRequest, GetWalletsListResponse, GetWalletBalanceResponse, SendEthRequest, SendEthResponse, DisconnectWalletResponse, ConversionRequest, ConversionResponse } from "../entities/WalletEntities";
 import { WalletResponse } from "../entities/WalletEntities";
 

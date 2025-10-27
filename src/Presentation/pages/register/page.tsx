@@ -26,7 +26,6 @@ const Register = observer(() => {
     setTermsModalOpen(false);
   };
 
-  // Validation helper functions
   const validateField = (name: string, value: string): string => {
     const trimmedValue = value.trim();
     
@@ -72,14 +71,12 @@ const Register = observer(() => {
   };
 
   const handleFieldChange = (fieldName: string, value: string) => {
-    // Clear validation error for this field
     setValidationErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[fieldName];
       return newErrors;
     });
 
-    // Apply field-specific logic
     switch (fieldName) {
       case 'first_name':
         viewModel.setFirstName(value);
@@ -94,10 +91,8 @@ const Register = observer(() => {
         viewModel.setEmail(value);
         break;
       case 'password':
-        // Remove spaces from password input
         const cleanPassword = value.replace(/\s/g, '');
         viewModel.setPassword(cleanPassword);
-        // Re-validate password confirm if it exists
         if (formData.password_confirm) {
           const confirmError = validateField('password_confirm', formData.password_confirm);
           if (confirmError) {
@@ -106,7 +101,6 @@ const Register = observer(() => {
         }
         break;
       case 'password_confirm':
-        // Remove spaces from password confirm input
         const cleanPasswordConfirm = value.replace(/\s/g, '');
         viewModel.setPasswordConfirm(cleanPasswordConfirm);
         break;
@@ -119,7 +113,6 @@ const Register = observer(() => {
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
     
-    // Validate all fields
     const fields = [
       'first_name', 'last_name', 'username', 'email', 
       'password', 'password_confirm', 'security_answer'
@@ -137,13 +130,9 @@ const Register = observer(() => {
     return Object.keys(errors).length === 0;
   };
 
-
-
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Validate form before submission
     if (!validateForm()) {
       return;
     }
@@ -151,7 +140,6 @@ const Register = observer(() => {
     const success = await viewModel.register();
     
     if (success) {
-      // FORCE EMAIL VERIFICATION REDIRECT - ALWAYS GO TO EMAIL VERIFICATION
       navigate('/email-verification', { 
         state: { 
           email: formData.email,
@@ -160,7 +148,6 @@ const Register = observer(() => {
       });
     }
   };
-// ...existing code...
 
   return (
     <>

@@ -56,7 +56,6 @@ const Profile: React.FC = () => {
   const [supportFiles, setSupportFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Edit profile state
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isProfileSaving, setIsProfileSaving] = useState(false);
@@ -208,7 +207,6 @@ const Profile: React.FC = () => {
   };
 
   const openEditProfile = async () => {
-    // Prefill from current user immediately for snappy UI
     const cu = loginViewModel.currentUser;
     if (cu) {
       setProfileData((prev) => ({
@@ -229,7 +227,6 @@ const Profile: React.FC = () => {
     setProfileError(null);
     setProfileSuccess(null);
 
-    // Basic validation
     const fn = (profileData.first_name || '').trim();
     const ln = (profileData.last_name || '').trim();
     if (!fn || !ln) {
@@ -240,7 +237,6 @@ const Profile: React.FC = () => {
     try {
       setIsProfileSaving(true);
       const API_URL = process.env.REACT_APP_API_BASE_URL || '';
-      // Send only editable fields
       const payload: ProfileData = {
         first_name: fn,
         last_name: ln,
@@ -250,7 +246,6 @@ const Profile: React.FC = () => {
       const res: any = await apiService.put(`${API_URL}/auth/profile-mongodb/`, payload);
       if (res?.success) {
         setProfileSuccess(res?.message || 'Profile updated successfully.');
-        // Update local user cache for immediate UI reflection
         try {
           const userStr = localStorage.getItem('user');
           const current = userStr ? JSON.parse(userStr) : {};

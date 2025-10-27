@@ -16,7 +16,6 @@ const TaxSummary: React.FC = observer(() => {
   
   const [activeView, setActiveView] = useState<'chart' | 'table'>('table');
 
-  // Load tax reports on component mount
   useEffect(() => {
     taxSummaryViewModel.fetchAll();
   }, []);
@@ -25,7 +24,6 @@ const TaxSummary: React.FC = observer(() => {
     await taxSummaryViewModel.fetchAll();
   };
 
-  // Chart data from real tax data only
   const chartData = taxSummaryViewModel.selectedReport ? [
     { 
       name: 'Gains', 
@@ -43,7 +41,6 @@ const TaxSummary: React.FC = observer(() => {
       fill: '#3b82f6'
     }
   ] : [];
-
 
   const formatCurrency = (amount: number): string => {
     if (isNaN(amount) || amount === null || amount === undefined) {
@@ -66,7 +63,6 @@ const TaxSummary: React.FC = observer(() => {
     const selectedReport = taxSummaryViewModel.selectedReport;
 
     try {
-      // Prepare data for Excel export
       const excelData = [
         ['TAX REPORT SUMMARY'],
         ['Report Type', selectedReport.report_type],
@@ -92,11 +88,9 @@ const TaxSummary: React.FC = observer(() => {
         ['Tax Year', selectedReport.metadata?.tax_year || new Date().getFullYear()]
       ];
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Format currency columns
       for (let i = 0; i < excelData.length; i++) {
         if (typeof excelData[i][1] === 'number') {
           const cellRef = `B${i + 1}`;
@@ -107,16 +101,13 @@ const TaxSummary: React.FC = observer(() => {
         }
       }
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 30 }, // Metric column
         { wch: 20 }  // Value column
       ];
 
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Tax Report');
 
-      // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
@@ -124,19 +115,14 @@ const TaxSummary: React.FC = observer(() => {
       saveAs(blob, fileName);
       
     } catch (err: any) {
-      taxSummaryViewModel.lastError = err.message || 'Failed to export to Excel';
-      console.error('Excel export error:', err);
-    }
+      taxSummaryViewModel.lastError = err.message || 'Failed to export to Excel';    }
   };
 
   const handleExportExcel = () => {
     try {
       exportToExcel();
-    } catch (error) {
-      console.error('Failed to export to Excel:', error);
-    }
+    } catch (error) {    }
   };
-
 
   const renderChartView = () => (
     <div className="chart-view p-6 h-full overflow-y-auto">

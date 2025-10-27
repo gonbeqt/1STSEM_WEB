@@ -48,9 +48,7 @@ const BalanceSheet: React.FC = observer(() => {
   }, [balanceSheetListViewModel]);
 
   useEffect(() => {
-    if (balanceSheetViewModel.error) {
-      console.error('Balance Sheet Error:', balanceSheetViewModel.error);
-    }
+    if (balanceSheetViewModel.error) {    }
   }, [balanceSheetViewModel.error]);
 
   const getDateRange = useCallback(() => {
@@ -584,9 +582,7 @@ const BalanceSheet: React.FC = observer(() => {
       
       const fileName = `BalanceSheet_${new Date().toISOString().split('T')[0]}.xlsx`;
       saveAs(blob, fileName);
-    } catch (err: any) {
-      console.error('Excel export error:', err);
-    }
+    } catch (err: any) {    }
   }, [balanceSheet, balanceSheetData, calculateCurrentAssets, calculateNonCurrentAssets, calculateTotalAssets, calculateTotalLiabilities, calculateTotalEquity]);
 
   const renderChartView = () => {

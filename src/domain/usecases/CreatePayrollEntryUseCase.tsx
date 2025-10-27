@@ -1,4 +1,3 @@
-// src/domain/usecases/CreatePayrollEntryUseCase.tsx
 import { PayslipRepository } from '../repositories/PayslipRepository';
 import { CreatePayrollEntryRequest, CreatePayrollEntryResponse } from '../entities/PayrollEntities';
 
@@ -14,7 +13,6 @@ export class CreatePayrollEntryUseCase {
 
   async execute(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryUseCaseResponse> {
     try {
-      // Add any business logic or validation here before calling the repository
       if (!request.payroll_type || !request.pay_period_start || !request.pay_period_end || !request.pay_date) {
         return { 
           success: false, 

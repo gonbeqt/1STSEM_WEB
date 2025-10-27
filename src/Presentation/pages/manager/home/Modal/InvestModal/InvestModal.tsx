@@ -11,7 +11,6 @@ interface InvestModalProps {
 }
 
 const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
-  // Use wallet functionality for sending ETH
   const {
     isWalletConnected,
     sendEth,
@@ -22,7 +21,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     fetchWalletBalance
   } = useWallet();
 
-  // Use address book functionality
   const addressBookViewModel = useAddressBook();
   const {
     isLoading = false,
@@ -35,18 +33,15 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     filteredEntries = []
   } = addressBookViewModel || {};
 
-  // Modal view state
   const [currentView, setCurrentView] = useState<'addressbook' | 'sendeth'>('addressbook');
   const [selectedEntry, setSelectedEntry] = useState<AddressBookEntry | null>(null);
 
-  // Form state for sending ETH
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [company, setCompany] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
-  // Load address book when modal opens
   useEffect(() => {
     if (isOpen && addressBookViewModel) {
       addressBookViewModel.loadAddressBook();
@@ -55,14 +50,12 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     }
   }, [isOpen, addressBookViewModel]);
 
-  // Fetch wallet balance when modal opens and wallet is connected
   useEffect(() => {
     if (isOpen && isWalletConnected) {
       fetchWalletBalance();
     }
   }, [isOpen, isWalletConnected, fetchWalletBalance]);
 
-  // Clear form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setRecipientAddress('');
@@ -88,7 +81,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
       return;
     }
 
-    // For InvestModal, always set is_investing to true and use company as investor_name
     const success = await sendEth(
       recipientAddress, 
       amount, 
@@ -100,7 +92,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     );
     
     if (success) {
-      // Clear form on success
       setRecipientAddress('');
       setAmount('');
       setCompany('');
@@ -111,7 +102,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     }
   };
 
-  // Address book handlers
   const handleAddEntry = async () => {
     if (addressBookViewModel) {
       await addressBookViewModel.addEntry();
@@ -170,7 +160,6 @@ const InvestModal = observer(({ isOpen, onClose }: InvestModalProps) => {
     }
   };
 
-  // Handle selecting an address book entry for investment
   const handleSelectEntryForInvestment = (entry: AddressBookEntry) => {
     setSelectedEntry(entry);
     setRecipientAddress(entry.address);

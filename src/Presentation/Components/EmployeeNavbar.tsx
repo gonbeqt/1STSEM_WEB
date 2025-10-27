@@ -43,9 +43,7 @@ const [loginViewModel] = useState<LoginViewModel>(() => container.loginViewModel
     try {
       const stored = localStorage.getItem('user');
       return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.warn('Failed to parse user profile from localStorage', error);
-      return null;
+    } catch (error) {      return null;
     }
   }, []);
 

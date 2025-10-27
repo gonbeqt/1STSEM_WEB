@@ -29,7 +29,6 @@ export interface EthBalanceData {
 
 export interface WalletBalancesData {
   ETH: EthBalanceData;
-  // Add other currencies if needed
 }
 
 export interface ApiWalletData {
@@ -78,7 +77,6 @@ export interface DisconnectWalletResponse {
   success: boolean;
   message: string;
 }
-
 
 export interface WalletBalance {
   wallet_address: string;

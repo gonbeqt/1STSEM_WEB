@@ -25,7 +25,6 @@ import CompliancePage from './presentation/pages/manager/profile/compliance/page
 import EmployeeHome from './presentation/pages/employee/home/page';
 import EmployeeHistory from './presentation/pages/employee/history/page';
 
-
 import EmployeeSettings from './presentation/pages/employee/settings/page';
 import TaxSummary from './presentation/pages/manager/reports/TaxSummary/TaxSummary';
 
@@ -33,7 +32,6 @@ import { WalletViewModelProvider } from './context/WalletViewModelContext';
 import MiddlewareRoute from './middleware/AuthMiddleware';
 import { container } from './di/container'; // Import the container
 import { ToastProvider } from './presentation/components/Toast/ToastProvider';
-
 
 const ManagerLayout = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -69,8 +67,6 @@ const EmployeeLayout = () => {
 function App() {
   const walletViewModel = container.walletViewModel();
 
-  // Auto-reconnect wallet on app load (handled within hooks/viewmodels as needed)
-
   return (
     <ToastProvider>
       <WalletViewModelProvider value={walletViewModel}>
@@ -104,8 +100,6 @@ function App() {
             <Route path="/payroll_summary" element={<PayrollSummary />} />
             <Route path="/tax_summary" element={<TaxSummary />} />
             <Route path="/compliance" element={<CompliancePage />} />
-
-
 
           </Route>
 

@@ -1,4 +1,3 @@
-// src/domain/entities/PayrollEntities.tsx
 
 export interface CreatePayrollEntryRequest {
   payroll_type: string;
@@ -11,7 +10,6 @@ export interface CreatePayrollEntryRequest {
   notes?: string;
 }
 
-// Individual payroll entry request (matches backend expectations)
 export interface CreateSinglePayrollEntryRequest {
   employee_id: string; // Backend expects employee_id as the primary identifier
   employee_user_id?: string; // Employee's user_id for backend processing
@@ -74,7 +72,6 @@ export interface PayrollEntryData {
 }
 
 export interface CreatePayrollEntryResponse extends PayrollEntryData {
-  // The response IS the payroll entry data directly
 }
 
 export interface ProcessPayrollPaymentRequest {
@@ -169,7 +166,6 @@ export interface PayrollEntry {
   processed_at?: string;
   transaction_hash?: string;
   gas_fee?: number;
-  // Legacy fields for backward compatibility
   payroll_type?: string;
   period?: string;
   pay_period_start?: string;
@@ -196,7 +192,6 @@ export interface PayslipSummary {
 export interface GetEmployeePayrollDetailsResponse {
   success: boolean;
   employee_payroll?: EmployeePayrollDetails;
-  // Alternative structure that matches actual API response
   employee_details?: {
     employee_id: string;
     username: string;

@@ -1,4 +1,3 @@
-// src/domain/repositoriesImpl/UserRepositoryImpl.tsx
 import { UserRepository } from '../../domain/repositories/UserRepository';
 import { RegisterRequest } from '../../domain/entities/RegisterRequest';
 import { RegisterResponse } from '../../domain/entities/RegisterReponse';

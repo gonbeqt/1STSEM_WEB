@@ -1,4 +1,3 @@
-// Use Cases for Report Operations
 import { ReportRepository } from '../repositories/ReportRepository';
 import {
   GenerateBalanceSheetRequest,

@@ -1,4 +1,3 @@
-// Cash Flow Statement Component - v1.0
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useEffect, useState } from 'react';
 import { toJS } from 'mobx';
@@ -51,7 +50,6 @@ const CashFlow: React.FC = observer(() => {
       return raw.map((r) => ({ name: r?.name ?? String(r?.label ?? 'Item'), amount: Number(r?.amount ?? r?.value ?? 0) }));
     }
     if (typeof raw === 'object') {
-      // object shaped like { accountName: amount, ... }
       return Object.entries(raw)
         .filter(([, v]) => v !== null && v !== undefined)
         .map(([k, v]) => ({ name: displayName(k), amount: Number(v as any) ?? 0 }));
@@ -61,7 +59,6 @@ const CashFlow: React.FC = observer(() => {
     }
     return [];
   };
-  // input values (what the user types) and applied values (what is actually used by the filter)
   const [periodStartInput, setPeriodStartInput] = React.useState<string>('');
   const [periodEndInput, setPeriodEndInput] = React.useState<string>('');
   const [appliedPeriodStart, setAppliedPeriodStart] = React.useState<string>('');
@@ -82,7 +79,6 @@ const CashFlow: React.FC = observer(() => {
 
   const activeRaw = React.useMemo(() => {
     if (!plainItems || plainItems.length === 0) return null;
-    // Only filter when an applied period is present (user clicked Apply)
     if (appliedPeriodStart && appliedPeriodEnd) {
       const targetStart = normalizeDate(appliedPeriodStart);
       const targetEnd = normalizeDate(appliedPeriodEnd);
@@ -93,14 +89,12 @@ const CashFlow: React.FC = observer(() => {
       });
       if (found) return found;
     }
-    // default to first (latest)
     return plainItems[0] ?? null;
   }, [plainItems, appliedPeriodStart, appliedPeriodEnd]);
 
   const cashFlowStatement: CashFlowStatementData | null = React.useMemo(() => {
     if (!activeRaw) return null;
     
-    // Extract values based on report type
     let operating_cash_flow = 0;
     let investing_cash_flow = 0;
     let financing_cash_flow = 0;
@@ -111,14 +105,12 @@ const CashFlow: React.FC = observer(() => {
     let financing_items: CashFlowItem[] = [];
     
     if (activeRaw.report_type === 'PERIODIC') {
-      // For PERIODIC reports, use net_cash_flow from each activity
       operating_cash_flow = activeRaw.operating_activities?.net_cash_flow ?? 0;
       investing_cash_flow = activeRaw.investing_activities?.net_cash_flow ?? 0;
       financing_cash_flow = activeRaw.financing_activities?.net_cash_flow ?? 0;
       beginning_cash = activeRaw.cash_summary?.beginning_cash ?? 0;
       ending_cash = activeRaw.cash_summary?.ending_cash ?? 0;
       
-      // Extract detailed items from cash_receipts and cash_payments
       if (activeRaw.operating_activities) {
         const opReceipts = normalizeItems(activeRaw.operating_activities.cash_receipts, '');
         const opPayments = normalizeItems(activeRaw.operating_activities.cash_payments, '');
@@ -135,14 +127,12 @@ const CashFlow: React.FC = observer(() => {
         financing_items = [...finReceipts, ...finPayments];
       }
     } else {
-      // For TRANSACTION and CUMULATIVE reports, use cash_flows and cash_summary
       operating_cash_flow = activeRaw.cash_flows?.operating_activities?.net_cash_from_operations ?? activeRaw.cash_summary?.net_cash_from_operations ?? 0;
       investing_cash_flow = activeRaw.cash_flows?.investing_activities?.net_cash_from_investing ?? activeRaw.cash_summary?.net_cash_from_investing ?? 0;
       financing_cash_flow = activeRaw.cash_flows?.financing_activities?.net_cash_from_financing ?? activeRaw.cash_summary?.net_cash_from_financing ?? 0;
       beginning_cash = activeRaw.cash_summary?.cash_at_beginning ?? 0;
       ending_cash = activeRaw.cash_summary?.cash_at_end ?? 0;
       
-      // Extract line items from cash_flows object (excluding the main net_cash_from_* fields as they're shown as subtotals)
       if (activeRaw.cash_flows?.operating_activities) {
         operating_items = [
           { name: 'previous_value', amount: activeRaw.cash_flows.operating_activities.previous_value ?? 0 },
@@ -189,7 +179,6 @@ const CashFlow: React.FC = observer(() => {
     const cashFlow = (() => {
       const latest = activeRaw;
       if (!latest) return null;
-      // normalize to CashFlowStatementData shape
       const operating_items = normalizeItems(latest.operating_activities || latest.operating_cash_flow, 'Operating Activities');
       const investing_items = normalizeItems(latest.investing_activities || latest.investing_cash_flow, 'Investing Activities');
       const financing_items = normalizeItems(latest.financing_activities || latest.financing_cash_flow, 'Financing Activities');
@@ -216,12 +205,10 @@ const CashFlow: React.FC = observer(() => {
     })();
 
     if (!cashFlow) {
-      // nothing to export
       return;
     }
 
     try {
-      // Prepare data for Excel export (include selected period info)
     const periodLabel = (activeRaw && (activeRaw.period_start || activeRaw.period_end || activeRaw.period))
       ? (activeRaw.period ? String(activeRaw.period) : `${activeRaw.period_start ?? '...'} - ${activeRaw.period_end ?? '...'}`)
       : (appliedPeriodStart || appliedPeriodEnd ? `${appliedPeriodStart || '...'} - ${appliedPeriodEnd || '...'}` : 'N/A');
@@ -254,11 +241,9 @@ const CashFlow: React.FC = observer(() => {
         ['Ending Cash', cashFlow.ending_cash]
       ];
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Format cells with currency
       const rows = excelData.length;
       for (let i = 0; i < rows; i++) {
         if (excelData[i][1] && typeof excelData[i][1] === 'number') {
@@ -270,25 +255,20 @@ const CashFlow: React.FC = observer(() => {
         }
       }
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 35 }, // Account column
         { wch: 18 }  // Amount column
       ];
 
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Cash Flow Statement');
 
-      // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
       const fileName = `CashFlowStatement_${new Date().toISOString().split('T')[0]}.xlsx`;
       saveAs(blob, fileName);
       
-    } catch (err: any) {
-      console.error('Excel export error:', err);
-    }
+    } catch (err: any) {    }
   };
 
   const chartData = cashFlowStatement ? [
@@ -341,9 +321,7 @@ const CashFlow: React.FC = observer(() => {
   const handleExportExcel = () => {
     try {
       exportToExcel();
-    } catch (error) {
-      console.error('Failed to export to Excel:', error);
-    }
+    } catch (error) {    }
   };
 
   const handleRefresh = async () => {
@@ -747,7 +725,6 @@ const CashFlow: React.FC = observer(() => {
           <button
             className="ml-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
             onClick={() => {
-              // apply the input dates so activeRaw will pick them
               setAppliedPeriodStart(periodStartInput);
               setAppliedPeriodEnd(periodEndInput);
             }}

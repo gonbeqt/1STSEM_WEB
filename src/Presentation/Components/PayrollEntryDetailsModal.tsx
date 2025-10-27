@@ -16,19 +16,16 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
         const pageWidth = doc.internal.pageSize.getWidth();
         let yPosition = 20;
 
-        // Title
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         doc.text('Payroll Entry Details', pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 15;
         
-        // Add a line
         doc.setLineWidth(0.5);
         doc.line(20, yPosition, pageWidth - 20, yPosition);
         yPosition += 10;
 
-        // Entry Information Section
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
         doc.text('Entry Information', 20, yPosition);
@@ -59,7 +56,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
             yPosition += 7;
         });
 
-        // Transaction Details Section
         if (details.transaction_details) {
             yPosition += 5;
             doc.setFontSize(14);
@@ -74,7 +70,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
             const gasFee = details.transaction_details.gas_fee || 'N/A';
             const status = details.transaction_details.status || 'N/A';
 
-            // Transaction Hash
             doc.setFont('helvetica', 'bold');
             doc.text('Transaction Hash:', 20, yPosition);
             doc.setFont('helvetica', 'normal');
@@ -88,14 +83,12 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
                 yPosition += 7;
             }
 
-            // Gas Fee
             doc.setFont('helvetica', 'bold');
             doc.text('Gas Fee:', 20, yPosition);
             doc.setFont('helvetica', 'normal');
             doc.text(String(gasFee), 70, yPosition);
             yPosition += 7;
 
-            // Status
             doc.setFont('helvetica', 'bold');
             doc.text('Status:', 20, yPosition);
             doc.setFont('helvetica', 'normal');
@@ -103,7 +96,6 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
             yPosition += 7;
         }
 
-        // Payslip Section
         if (details.payslip) {
             yPosition += 5;
             doc.setFontSize(14);
@@ -120,13 +112,11 @@ const PayrollEntryDetailsModal: React.FC<PayrollEntryDetailsModalProps> = ({ det
             doc.setTextColor(0, 0, 0);
         }
 
-        // Footer
         yPosition = doc.internal.pageSize.getHeight() - 20;
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
         doc.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, yPosition, { align: 'center' });
 
-        // Save the PDF
         doc.save(`Payroll_Entry_${details.payroll_entry.entry_id}.pdf`);
     };
     

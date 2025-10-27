@@ -54,9 +54,7 @@ export const useTransactionHistory = () => {
       });
 
       setTransactions(prev => [...prev, ...response.data.transactions]);
-    } catch (err) {
-      console.error('Failed to load more transactions:', err);
-    }
+    } catch (err) {    }
   }, [pagination, isLoading, fetchTransactionHistory, currentCategory]);
 
   const refreshTransactions = useCallback(() => {

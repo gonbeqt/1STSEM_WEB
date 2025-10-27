@@ -4,11 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import ManagerNavbar from '../../../components/ManagerNavbar';
 import { FileText, BarChart3, TrendingUp, ClipboardList, ScrollText } from 'lucide-react';
 
-
 const ReportsComponent: React.FC = () => {
   const navigate = useNavigate();
-
-
 
   const financialReports = [
     {
@@ -57,7 +54,6 @@ const ReportsComponent: React.FC = () => {
   const handleReportTypeClick = (path: string) => {
     navigate(path);
   };
-
 
   return (
     <div className="min-h-screen w-full bg-gray-50">

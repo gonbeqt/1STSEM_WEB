@@ -74,7 +74,6 @@ const AuditDetailsPage = () => {
     );
 };
 
-// Helper function to map severity to Tailwind classes
 const getSeverityClass = (severity: string) => {
     switch (severity.toLowerCase()) {
         case 'critical': return 'bg-red-600';

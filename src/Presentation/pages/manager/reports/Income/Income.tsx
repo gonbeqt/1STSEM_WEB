@@ -33,7 +33,6 @@ const Income: React.FC = observer(() => {
       return raw.map((r) => ({ name: r?.name ?? String(r?.label ?? 'Item'), amount: Number(r?.amount ?? r?.value ?? 0) }));
     }
     if (typeof raw === 'object') {
-      // object shaped like { accountName: amount, ... }
       return Object.entries(raw).map(([k, v]) => ({ name: k, amount: Number((v as any) ?? 0) }));
     }
     if (typeof raw === 'number' || !isNaN(Number(raw))) {
@@ -41,7 +40,6 @@ const Income: React.FC = observer(() => {
     }
     return [{ name: fallbackLabel, amount: 0 }];
   };
-  // input values (what the user types) and applied values (what is actually used by the filter)
   const [periodStartInput, setPeriodStartInput] = React.useState<string>('');
   const [periodEndInput, setPeriodEndInput] = React.useState<string>('');
   const [appliedPeriodStart, setAppliedPeriodStart] = React.useState<string>('');
@@ -62,7 +60,6 @@ const Income: React.FC = observer(() => {
 
   const activeRaw = React.useMemo(() => {
     if (!plainItems || plainItems.length === 0) return null;
-    // Only filter when an applied period is present (user clicked Apply)
     if (appliedPeriodStart && appliedPeriodEnd) {
       const targetStart = normalizeDate(appliedPeriodStart);
       const targetEnd = normalizeDate(appliedPeriodEnd);
@@ -73,7 +70,6 @@ const Income: React.FC = observer(() => {
       });
       if (found) return found;
     }
-    // default to first (latest)
     return plainItems[0] ?? null;
   }, [plainItems, appliedPeriodStart, appliedPeriodEnd]);
 
@@ -98,7 +94,6 @@ const Income: React.FC = observer(() => {
     const incomeStatement = (() => {
       const latest = activeRaw;
       if (!latest) return null;
-      // normalize to IncomeStatementData shape
       const revenue = normalizeItems(latest.revenue, 'No revenue data available');
       const expenses = normalizeItems(latest.expenses, 'No expense data available');
       const total_revenue = latest.total_revenue ?? revenue.reduce((s: number, r: IncomeItem) => s + (Number(r.amount) || 0), 0);
@@ -108,17 +103,14 @@ const Income: React.FC = observer(() => {
     })();
 
     if (!incomeStatement) {
-      // nothing to export
       return;
     }
 
     try {
-      // Prepare data for Excel export (include selected period info)
     const periodLabel = (activeRaw && (activeRaw.period_start || activeRaw.period_end || activeRaw.period))
       ? (activeRaw.period ? String(activeRaw.period) : `${activeRaw.period_start ?? '...'} - ${activeRaw.period_end ?? '...'}`)
       : (appliedPeriodStart || appliedPeriodEnd ? `${appliedPeriodStart || '...'} - ${appliedPeriodEnd || '...'}` : 'N/A');
 
-      // apply same visibility filters as the UI to keep exported rows consistent
       const filteredRevenue = incomeStatement.revenue.filter((r) => {
         const n = (r?.name ?? '').toString().toLowerCase().replace(/\s+/g, '_');
         return !['payroll_income', 'by_cryptocurrency', 'by_crypto', 'by_month'].includes(n);
@@ -148,29 +140,23 @@ const Income: React.FC = observer(() => {
         ['NET INCOME', incomeStatement.net_income]
       ];
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 30 }, // Account column
         { wch: 15 }  // Amount column
       ];
 
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Income Statement');
 
-      // Generate Excel file and save
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
       const fileName = `IncomeStatement_${new Date().toISOString().split('T')[0]}.xlsx`;
       saveAs(blob, fileName);
       
-    } catch (err: any) {
-      console.error('Excel export error:', err);
-    }
+    } catch (err: any) {    }
   };
 
   const chartData = incomeStatement ? [
@@ -219,13 +205,9 @@ const Income: React.FC = observer(() => {
   const displayName = (raw?: any): string => {
     if (!raw && raw !== 0) return '';
     let s = String(raw);
-    // replace underscores and dashes with spaces
     s = s.replace(/[_-]+/g, ' ');
-    // insert spaces before camelCase transitions: aB -> a B
     s = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
-    // collapse multiple spaces
     s = s.replace(/\s+/g, ' ').trim();
-    // title case
     return s.split(' ').map(w => w.length ? (w[0].toUpperCase() + w.slice(1)) : '').join(' ');
   };
 
@@ -236,9 +218,7 @@ const Income: React.FC = observer(() => {
   const handleExportExcel = () => {
     try {
       exportToExcel();
-    } catch (error) {
-      console.error('Failed to export to Excel:', error);
-    }
+    } catch (error) {    }
   };
 
   const handleRefresh = async () => {
@@ -535,7 +515,6 @@ const Income: React.FC = observer(() => {
           <button
             className="ml-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
             onClick={() => {
-              // apply the input dates so activeRaw will pick them
               setAppliedPeriodStart(periodStartInput);
               setAppliedPeriodEnd(periodEndInput);
             }}

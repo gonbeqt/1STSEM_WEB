@@ -23,7 +23,6 @@ export interface PayslipRepository {
     email?: string;
   }): Promise<Payslip[]>;
   
-  // New payroll methods
   createPayrollEntry(request: CreatePayrollEntryRequest): Promise<CreatePayrollEntryResponse>;
   createSinglePayrollEntry(request: CreateSinglePayrollEntryRequest): Promise<CreatePayrollEntryResponse>;
   processPayrollPayment(request: ProcessPayrollPaymentRequest): Promise<ProcessPayrollPaymentResponse>;

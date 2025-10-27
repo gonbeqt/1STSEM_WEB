@@ -5,7 +5,6 @@ export class CreatePayslipUseCase {
   constructor(private payslipRepository: PayslipRepository) {}
 
   async execute(request: CreatePayslipRequest): Promise<CreatePayslipResponse> {
-    // Validate required fields
     if (!request.employee_name || !request.employee_name.trim()) {
       return {
         success: false,
@@ -41,7 +40,6 @@ export class CreatePayslipUseCase {
       };
     }
 
-    // Validate date format
     try {
       new Date(request.pay_period_start);
       new Date(request.pay_period_end);
@@ -52,7 +50,6 @@ export class CreatePayslipUseCase {
       };
     }
 
-    // Validate pay period logic
     const startDate = new Date(request.pay_period_start);
     const endDate = new Date(request.pay_period_end);
     
@@ -63,7 +60,6 @@ export class CreatePayslipUseCase {
       };
     }
 
-    // Set default values
     const cleanRequest: CreatePayslipRequest = {
       ...request,
       employee_name: request.employee_name.trim(),

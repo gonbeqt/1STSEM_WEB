@@ -211,9 +211,7 @@ const AuditSolidityContract: React.FC = () => {
             setCompletedStageCount(completedStages);
             setAnalysisStage('complete');
             setCurrentStep(3);
-        } catch (error: any) {
-            console.error('Error during AI analysis:', error);
-            const message = error instanceof Error ? error.message : 'Failed to complete AI analysis.';
+        } catch (error: any) {            const message = error instanceof Error ? error.message : 'Failed to complete AI analysis.';
             setAnalysisError(message);
             setAnalysisStage('failed');
         } finally {

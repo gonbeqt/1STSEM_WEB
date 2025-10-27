@@ -39,13 +39,9 @@ const EmployeeManagement: React.FC = () => {
 
         if (response.success) {
           setEmployees(response.employees);
-        } else {
-          console.error('Failed to fetch employees:', response.error);
-          setEmployees([]);
+        } else {          setEmployees([]);
         }
-      } catch (error) {
-        console.error('Error fetching employees:', error);
-        setEmployees([]);
+      } catch (error) {        setEmployees([]);
       }
     };
 
@@ -82,17 +78,12 @@ const EmployeeManagement: React.FC = () => {
       });
 
       if (response.success) {
-        // Refresh the employee list
         setRefreshTrigger(prev => prev + 1);
         handleCloseModal();
         toastSuccess('Employee removed successfully.');
-      } else {
-        console.error('Failed to remove employee:', response.message);
-        toastError(`Failed to remove employee: ${response.message}`);
+      } else {        toastError(`Failed to remove employee: ${response.message}`);
       }
-    } catch (error) {
-      console.error('Error removing employee:', error);
-      toastError('An error occurred while removing the employee. Please try again.');
+    } catch (error) {      toastError('An error occurred while removing the employee. Please try again.');
     }
   };
 

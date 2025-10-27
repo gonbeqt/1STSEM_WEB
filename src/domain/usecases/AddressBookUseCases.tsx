@@ -13,7 +13,6 @@ export class UpsertAddressBookEntryUseCase {
   constructor(private addressBookRepository: AddressBookRepository) {}
 
   async execute(request: UpsertAddressBookRequest): Promise<UpsertAddressBookResponse> {
-    // Validate request
     if (!request.address || !request.name) {
       return {
         success: false,
@@ -22,7 +21,6 @@ export class UpsertAddressBookEntryUseCase {
       };
     }
 
-    // Validate address format
     if (!request.address.startsWith('0x') || request.address.length !== 42) {
       return {
         success: false,

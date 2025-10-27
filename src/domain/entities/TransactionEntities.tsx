@@ -19,7 +19,6 @@ export interface Transaction {
   created_at: string;
   explorer_url?: string;
   
-  // Enhanced fields from new backend
   user_id: string;
   from_wallet_id?: string;
   from_wallet_name?: string;
@@ -29,7 +28,6 @@ export interface Transaction {
   counterparty_name?: string;
   counterparty_role?: string;
   
-  // AI Analysis data
   ai_analysis: {
     classification: string;
     confidence: number;

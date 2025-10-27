@@ -1,5 +1,4 @@
 
-// src/Presentation/pages/manager/home/Modal/Payroll/PayrollModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, Info, CheckCircle, Loader2 } from 'lucide-react';
 import { container } from '../../../../../../di/container';
@@ -61,7 +60,6 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     container.removeEmployeeFromTeamUseCase
   );
 
-  // Initialize dates when modal opens
   useEffect(() => {
     if (isOpen) {
       const today = new Date().toISOString().split('T')[0];
@@ -82,7 +80,6 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     }
   }, [isOpen]);
 
-  // Fetch employees when modal opens
   useEffect(() => {
     const fetchEmployees = async () => {
       if (isOpen && employees.length === 0) {
@@ -90,7 +87,6 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         try {
           const response = await getEmployeesByManager({});
           if (response.success && response.employees) {
-            // Convert API employees to PayrollEmployeeUI format
             const payrollEmployees: PayrollEmployeeUI[] = response.employees.map((emp: ApiEmployee) => ({
               id: emp.employee_id || emp.user_id,
               user_id: emp.user_id, // Store the actual user_id for backend API
@@ -104,9 +100,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
             }));
             setEmployees(payrollEmployees);
           }
-        } catch (error) {
-          console.error('Error fetching employees:', error);
-          setErrorMessage('Failed to load employees. Please try again.');
+        } catch (error) {          setErrorMessage('Failed to load employees. Please try again.');
           setProcessStatus('error');
         } finally {
           setIsLoadingEmployees(false);
@@ -245,7 +239,6 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
   };
 
   const createPayrollEntries = async (selectedEmployees: PayrollEmployeeUI[]): Promise<PayrollCreationSummary> => {
-    // Convert UI employees to PayrollEmployee entities
     const mappedEmployees = selectedEmployees.map((employee) => ({
       ui: employee,
       entity: {
@@ -306,9 +299,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
             });
             successCount++;
           } else {
-            const normalizationError = 'Failed to parse payroll entry response from server.';
-            console.error('❌ Unable to normalize payroll entry response:', creationResult);
-            results.push({
+            const normalizationError = 'Failed to parse payroll entry response from server.';            results.push({
               ui,
               entity,
               error: normalizationError
@@ -325,9 +316,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
           errorCount++;
         }
       } catch (creationError: any) {
-        const errorText = creationError instanceof Error ? creationError.message : creationError?.toString() || 'Unknown error';
-        console.error('❌ Error creating payroll for employee:', entity.employee_name, creationError);
-        results.push({
+        const errorText = creationError instanceof Error ? creationError.message : creationError?.toString() || 'Unknown error';        results.push({
           ui,
           entity,
           error: errorText
@@ -408,9 +397,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         setProcessStatus('error');
         setProcessingMessage('');
       }
-    } catch (error) {
-      console.error('Error creating payroll entries:', error);
-      setErrorMessage('An unexpected error occurred while creating payroll entries.');
+    } catch (error) {      setErrorMessage('An unexpected error occurred while creating payroll entries.');
       setProcessStatus('error');
       setProcessingMessage('');
     } finally {
@@ -438,7 +425,6 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
     setErrorMessage('');
     setSuccessMessage('');
 
-    // Prepare mutable copy to update statuses progressively
     const nextEntries: CreatedPayrollEntry[] = createdEntries.map(entry =>
       entry.selected
         ? { ...entry, status: 'processing' as const, error: undefined }
@@ -478,9 +464,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         }
       } catch (processError: any) {
         errorCount++;
-        const errorText = processError instanceof Error ? processError.message : processError?.toString() || 'Unexpected error';
-        console.error('❌ Error processing payroll payment for entry:', entryId, processError);
-        nextEntries[i] = {
+        const errorText = processError instanceof Error ? processError.message : processError?.toString() || 'Unexpected error';        nextEntries[i] = {
           ...current,
           status: 'error' as const,
           error: errorText
@@ -605,9 +589,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
         }]
       });
     } catch (error: any) {
-      const errorText = error instanceof Error ? error.message : error?.toString() || 'Unexpected error occurred.';
-      console.error('❌ Error processing payroll payment manually:', error);
-      setManualProcessingError(errorText);
+      const errorText = error instanceof Error ? error.message : error?.toString() || 'Unexpected error occurred.';      setManualProcessingError(errorText);
       setManualProcessingStatus('error');
       setErrorMessage(errorText);
       setProcessStatus('error');
@@ -633,9 +615,7 @@ const PayrollModal: React.FC<PayrollModalProps> = ({ isOpen, onClose, onProcess 
       await navigator.clipboard.writeText(entryId);
       setSuccessMessage(`Copied entry ID ${entryId} to clipboard.`);
       setProcessStatus('success');
-    } catch (error) {
-      console.error('Failed to copy entry ID:', error);
-      setErrorMessage('Failed to copy entry ID. Please copy manually.');
+    } catch (error) {      setErrorMessage('Failed to copy entry ID. Please copy manually.');
       setProcessStatus('error');
     }
   };

@@ -4,7 +4,6 @@ export class RemoveEmployeeFromTeamUseCase {
   constructor(private employeeRepository: EmployeeRepository) {}
 
   async execute(request: RemoveEmployeeFromTeamRequest): Promise<RemoveEmployeeFromTeamResponse> {
-    // Validate required fields
     if (!request.username || !request.username.trim()) {
       return {
         success: false,
@@ -13,7 +12,6 @@ export class RemoveEmployeeFromTeamUseCase {
       };
     }
 
-    // Trim the username
     const cleanRequest: RemoveEmployeeFromTeamRequest = {
       username: request.username.trim()
     };

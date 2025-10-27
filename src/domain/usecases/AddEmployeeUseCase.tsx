@@ -4,7 +4,6 @@ export class AddEmployeeUseCase {
   constructor(private employeeRepository: EmployeeRepository) {}
 
   async execute(request: AddEmployeeRequest): Promise<AddEmployeeResponse> {
-    // Validate required fields
     if (!request.email || !request.email.trim()) {
       return {
         success: false,
@@ -13,7 +12,6 @@ export class AddEmployeeUseCase {
       };
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(request.email)) {
       return {
@@ -23,7 +21,6 @@ export class AddEmployeeUseCase {
       };
     }
 
-    // Trim optional fields
     const cleanRequest: AddEmployeeRequest = {
       email: request.email.trim(),
       position: request.position?.trim() || '',

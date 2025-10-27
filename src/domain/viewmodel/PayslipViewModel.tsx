@@ -12,7 +12,6 @@ export class PayslipViewModel {
   }
 }
 
-// React Hook for Payslip Operations
 export const usePayslipViewModel = (
   createPayslipUseCase: CreatePayslipUseCase
 ) => {
@@ -48,7 +47,6 @@ export const usePayslipViewModel = (
       setIsLoading(false);
     }
   }, [viewModel]);
-
 
   const clearMessages = () => {
     setError(null);

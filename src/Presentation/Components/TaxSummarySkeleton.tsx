@@ -75,7 +75,6 @@ export const TaxSummaryChartSkeleton: React.FC = () => (
   </div>
 );
 
-// Generic Report Skeleton for Table-based Reports
 export const ReportTableSkeleton: React.FC = () => (
   <div className="space-y-4">
     {/* Header Skeleton */}
@@ -108,7 +107,6 @@ export const ReportTableSkeleton: React.FC = () => (
   </div>
 );
 
-// Generic Chart and Table Report Skeleton
 export const ReportChartSkeleton: React.FC<{ title?: string }> = ({ title = 'Report' }) => (
   <div className="space-y-6 p-6">
     {/* View Toggle Skeleton */}
@@ -139,7 +137,6 @@ export const ReportChartSkeleton: React.FC<{ title?: string }> = ({ title = 'Rep
   </div>
 );
 
-// Compact Skeleton for smaller reports
 export const CompactReportSkeleton: React.FC = () => (
   <div className="space-y-4 p-6">
     {/* Header */}

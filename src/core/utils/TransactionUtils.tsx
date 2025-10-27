@@ -28,12 +28,10 @@ export const formatTransactionDate = (dateString: string): string => {
 };
 
 export const getTransactionIcon = (transaction: Transaction) => {
-  // This function can be expanded based on transaction type detection
   return transaction.status === 'confirmed' ? 'outflow' : 'pending';
 };
 
 export const getTransactionName = (transaction: Transaction): string => {
-  // Generate transaction name based on transaction data
   if (transaction.from_wallet_name) {
     return `ETH Transfer from ${transaction.from_wallet_name}`;
   }

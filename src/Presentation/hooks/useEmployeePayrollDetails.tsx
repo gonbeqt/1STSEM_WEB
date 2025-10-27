@@ -1,4 +1,3 @@
-// src/presentation/hooks/useEmployeePayrollDetails.tsx
 import { useState, useCallback } from 'react';
 import { GetEmployeePayrollDetailsUseCase } from '../../domain/usecases/GetEmployeePayrollDetailsUseCase';
 import { EmployeePayrollDetails } from '../../domain/entities/PayrollEntities';
@@ -12,7 +11,6 @@ export const useEmployeePayrollDetails = (
   const [currentEmployeeId, setCurrentEmployeeId] = useState<string | null>(null);
 
   const fetchEmployeePayrollDetails = useCallback(async (employeeId: string) => {
-    // Prevent duplicate calls for the same employee
     if (currentEmployeeId === employeeId && (isLoading || payrollDetails)) {
       return { success: true, employee_payroll: payrollDetails };
     }
@@ -26,14 +24,11 @@ export const useEmployeePayrollDetails = (
       const response = await getEmployeePayrollDetailsUseCase.execute({ employee_id: employeeId });
       
       if (response.success) {
-        // Handle both response structures
         let payrollData: EmployeePayrollDetails | null = null;
         
         if (response.employee_payroll) {
-          // Standard structure
           payrollData = response.employee_payroll;
         } else if (response.payroll_entries || response.payslips) {
-          // Alternative structure - construct the expected format
           payrollData = {
             employee_id: response.employee_details?.employee_id || employeeId,
             employee_name: response.employee_details?.full_name || '',
@@ -57,20 +52,14 @@ export const useEmployeePayrollDetails = (
         }
         setError(null); // Clear any previous errors
       } else {
-        // API call failed
         setError(response.error || 'Failed to fetch employee payroll details');
-        setPayrollDetails(null);
-        console.error('❌ Failed to fetch employee payroll details:', response);
-      }
+        setPayrollDetails(null);      }
       
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(errorMessage);
-      setPayrollDetails(null);
-      console.error('❌ Employee payroll details error:', err);
-      
-      return {
+      setPayrollDetails(null);      return {
         success: false,
         error: errorMessage
       };

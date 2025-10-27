@@ -41,9 +41,7 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
 
     if (success) {
       setCurrentView('send');
-    } else {
-      console.error('Failed to connect wallet');
-    }
+    } else {    }
   };
 
   const handleSendEth = async () => {
@@ -54,12 +52,9 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
       setCompany('');
       setCategory('');
       setDescription('');
-      // close the modal on success and reset send step
       setSendStep('form');
       onClose();
-    } else {
-      console.error('Failed to send ETH');
-    }
+    } else {    }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -104,7 +99,6 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
         </div>
 
         {/* View Tabs (only shown when wallet is connected) */}
-
 
         {/* Content */}
         <div className="px-6 pb-6">
@@ -203,9 +197,6 @@ const WalletModal: React.FC<WalletModalProps> = observer(({ isOpen, onClose, ini
                         />
                       </div>
                     </div>
-
-
-
 
                     <div className="flex items-center gap-3 mt-2">
                       <button

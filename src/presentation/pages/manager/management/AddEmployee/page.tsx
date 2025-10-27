@@ -102,12 +102,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({
         
   onSubmit(response.employee);
   onClose();
-      } else {
-        console.error('Failed to add employee to team:', response.message);
-      }
-    } catch (err: any) {
-      console.error('Unexpected error:', err);
-    }
+      } else {      }
+    } catch (err: any) {    }
   };
 
   const handleClose = () => {

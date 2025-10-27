@@ -1,4 +1,3 @@
-// src/Presentation/pages/manager/home/page.tsx
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import WalletModal from '../../../components/WalletModal';
@@ -127,7 +126,6 @@ const Home = observer(() => {
 
   const closeTransactionsModal = async () => {
     setIsTransactionsModalOpen(false);
-    // restore recent 5 transactions on close
     try {
       await fetchTransactionHistory({ limit: 5, offset: 0 });
     } catch (err) {
@@ -148,7 +146,6 @@ const Home = observer(() => {
     setShowDisconnectConfirm(false);
     const success = await disconnectWallet();
     if (success) {
-      // Refresh transactions after disconnecting
       fetchTransactionHistory();
     }
   };
@@ -171,9 +168,7 @@ const Home = observer(() => {
         if (!success && !isCancelled) {
           setConvertedBalance(null);
         }
-      } catch (error) {
-        console.error('Auto-conversion failed:', error);
-      } finally {
+      } catch (error) {      } finally {
         if (!isCancelled) {
           setIsAutoConverting(false);
         }
@@ -289,7 +284,6 @@ const Home = observer(() => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Home</h1>
         </div>
 
-
         {/* Wallet Summary Card */}
         <WalletSummaryCard
           isWalletConnected={isWalletConnected}
@@ -331,7 +325,6 @@ const Home = observer(() => {
           transactions={transactionData}
           onClose={closeTransactionsModal}
         />
-
 
       </div>
 

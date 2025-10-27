@@ -24,7 +24,6 @@ export class EmployeeViewModel {
   }
 }
 
-// React Hook for Employee Operations
 export const useEmployeeViewModel = (
   addEmployeeUseCase: AddEmployeeUseCase,
   getEmployeesByManagerUseCase: GetEmployeesByManagerUseCase,

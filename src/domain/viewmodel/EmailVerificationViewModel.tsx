@@ -37,7 +37,6 @@ export class EmailVerificationViewModel {
   };
 
   setCode = (code: string) => {
-    // Only allow numeric input and limit to 6 digits
     const numericCode = code.replace(/\D/g, '').slice(0, 6);
     this.state.code = numericCode;
   };

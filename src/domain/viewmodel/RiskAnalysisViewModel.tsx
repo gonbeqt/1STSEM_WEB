@@ -184,9 +184,7 @@ export class RiskAnalysisViewModel {
       }
       const parsed = JSON.parse(stored);
       return parsed?.id || parsed?._id || parsed?.user_id || null;
-    } catch (error) {
-      console.warn('Failed to parse stored user:', error);
-      return null;
+    } catch (error) {      return null;
     }
   }
 }

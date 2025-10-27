@@ -7,9 +7,7 @@ export class GetAuditDetailsUseCase {
     async execute(auditId: string): Promise<AuditDetailsResponse> {
         try {
             return await this.contractRepository.getAuditDetails(auditId);
-        } catch (error: any) {
-            console.error("Error getting audit details:", error);
-            return { success: false, error: "Failed to fetch audit details." };
+        } catch (error: any) {            return { success: false, error: "Failed to fetch audit details." };
         }
     }
 }

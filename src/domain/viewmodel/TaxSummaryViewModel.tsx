@@ -2,7 +2,6 @@ import { makeObservable, observable, action, runInAction } from 'mobx';
 import { ListTaxReportsUseCase } from './../usecases/ListTaxReportsUseCase';
 import { TaxReport as BaseTaxReport } from '../entities/ReportEntities';
 
-// Extended TaxReport type that includes MongoDB _id from API response
 export type TaxReport = BaseTaxReport & {
   _id?: string;
   tax_deduction_summary?: any;
@@ -37,7 +36,6 @@ export class TaxSummaryViewModel {
       runInAction(() => {
         if (response.success && response.tax_reports) {
           this.items = response.tax_reports as TaxReport[];
-          // Auto-select the most recent report
           if (this.items.length > 0) {
             this.selectedReport = this.items[0];
           }

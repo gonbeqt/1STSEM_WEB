@@ -1,4 +1,3 @@
-// src/Presentation/pages/manager/home/Modal/AuditContractModal/AuditContractModal.tsx
 import React, { useState, useCallback, ChangeEvent } from 'react';
 import ReactDOM from 'react-dom';
 import { container } from '../../../../../../di/container';
@@ -42,9 +41,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             return true;
         });
 
-
-
-        // Sort by severity priority
         const sorted = uniqueVulns.sort((a, b) => {
             const severityOrder: { [key: string]: number } = {
                 'CRITICAL': 0,
@@ -64,7 +60,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
             return aSeverity - bSeverity;
         });
-
 
         return sorted;
     };
@@ -128,9 +123,7 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 } else {
                     setCurrentStep(1);
                 }
-            } catch (error) {
-                console.error('Error in audit process:', error);
-                setCurrentStep(1);
+            } catch (error) {                setCurrentStep(1);
             } finally {
                 setIsLoading(false);
             }
@@ -154,7 +147,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         onClose();
     }
 
-
     const handleDownloadPdf = () => {
         if (!auditResponse?.audit) return;
 
@@ -165,7 +157,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         const lineHeight = 6;
         let yPosition = margin;
 
-        // Helper function to add new page if needed
         const checkPageBreak = (requiredHeight: number) => {
             if (yPosition + requiredHeight > pageHeight - margin) {
                 pdf.addPage();
@@ -173,7 +164,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             }
         };
 
-        // Helper function to wrap text
         const addWrappedText = (text: string, x: number, fontSize: number = 10, maxWidth?: number) => {
             pdf.setFontSize(fontSize);
             const width = maxWidth || pageWidth - 2 * margin;
@@ -187,25 +177,21 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             return yPosition;
         };
 
-        // Title
         pdf.setFontSize(20);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Smart Contract Audit Report', margin, yPosition);
         yPosition += 15;
 
-        // Audit status badge (simulate with text)
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
         pdf.text(`Status: ${auditResponse.audit.status}`, pageWidth - margin - 40, yPosition - 10);
 
-        // Overview Section
         checkPageBreak(30);
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Overview', margin, yPosition);
         yPosition += 10;
 
-        // Overview details
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
 
@@ -229,7 +215,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
         yPosition += 10;
 
-        // Vulnerabilities Summary Section
         checkPageBreak(20);
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
@@ -246,7 +231,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
                 pdf.text(`${index + 1}. ${vuln.title}`, margin, yPosition);
                 pdf.setFont('helvetica', 'normal');
 
-                // Add severity with color coding (simulate with text)
                 const severityText = `[${vuln.severity.toUpperCase()}]`;
                 const severityWidth = pdf.getTextWidth(severityText);
                 pdf.text(severityText, pageWidth - margin - severityWidth, yPosition);
@@ -261,14 +245,12 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
 
         yPosition += 10;
 
-        // Detailed Assessment Section
         checkPageBreak(20);
         pdf.setFontSize(16);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Detailed Assessment', margin, yPosition);
         yPosition += 15;
 
-        // AI Analysis Overview
         checkPageBreak(15);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
@@ -279,7 +261,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         addWrappedText(aiAnalysis, margin, 10);
         yPosition += 10;
 
-        // Gas Optimization Insights
         checkPageBreak(15);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
@@ -290,7 +271,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         addWrappedText(gasOptimization, margin, 10);
         yPosition += 10;
 
-        // Recommendations
         checkPageBreak(15);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
@@ -300,7 +280,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
         const recommendations = auditResponse.audit.recommendations || 'No specific recommendations.';
         addWrappedText(recommendations, margin, 10);
 
-        // Add footer with page numbers
         const totalPages = pdf.internal.pages.length - 1; // Subtract 1 because first element is metadata
         for (let i = 1; i <= totalPages; i++) {
             pdf.setPage(i);
@@ -319,7 +298,6 @@ const AuditContractModal: React.FC<AuditContractModalProps> = ({ isOpen, onClose
             );
         }
 
-        // Save the PDF
         const fileName = `${auditResponse.audit.contract_name || 'audit'}-report.pdf`;
         pdf.save(fileName);
     };

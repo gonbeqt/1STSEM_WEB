@@ -1,4 +1,3 @@
-// Report Repository Implementation for Smart Accounting System
 import { ReportRepository } from '../../domain/repositories/ReportRepository';
 import {
   GenerateBalanceSheetRequest,
